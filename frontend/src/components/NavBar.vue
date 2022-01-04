@@ -146,6 +146,7 @@ export default {
             seasons: [
               { name: 'Kausi 2020', value: '1', id: 1},
               { name: 'Kausi 2021', value: '2', id: 2},
+	      { name: 'Kausi 2022', value: '3', id: 3},
             ]
         };
     },
