@@ -29,4 +29,4 @@ def import_matches():
                     home_team=home_team,
                     away_team=away_team
                 )
-
+        print('Matches imported')
