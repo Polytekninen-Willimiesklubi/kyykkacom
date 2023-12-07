@@ -1,6 +1,8 @@
-# NKL
+# PoWi kyykkä.com website
 
 Repository for kyykka.com 2.0
+
+
 
 # Setting up a local development environment
 
