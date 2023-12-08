@@ -11,7 +11,8 @@
 import NavBar from '@/components/NavBar';
 
 if (!sessionStorage.season_id) {
-  sessionStorage.season_id = '4';
+  // Index starts at 1 : 2000
+  sessionStorage.season_id = new Date().getFullYear() - 2000 + 1;
 }
 
 export default {
