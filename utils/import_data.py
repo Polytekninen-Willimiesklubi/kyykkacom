@@ -35,64 +35,65 @@ def makeThrow(row, player ,match, season, team, round, turn, eka, toka, kolmas, 
 
 def init_gen():
     User.objects.create_superuser('test','','test')
-    # for year in range(2000, 2024):
-    #     i = year - 2000
-    #     bra = 2 if year == 2021 or year == 2023 else 1
-    #     if Season.objects.filter(year=year).exists(): continue
-    #     season = Season.objects.create(year=year, no_brackets=bra)
-    #     if year == 2023:
-    #         CurrentSeason.objects.create(season=season)
-    # team_names = {}
-    # print(
+    for year in range(2000, 2024):
+        i = year - 2000
+        bra = 2 if year == 2021 or year == 2023 else 1
+        if Season.objects.filter(year=year).exists(): continue
+        season = Season.objects.create(year=year, no_brackets=bra)
+        if year == 2023:
+            CurrentSeason.objects.create(season=season)
+    team_names = {}
+    print(
         
-    # )
-    # df = pd.read_csv("NKL Tilastoja - Kaikki Joukkueet kausittain.csv")
-    # for index, row in df.iterrows():
-    #     if (row["Kausi"], row["lyhenne"]) not in team_names:
-    #         team_names[(row["Kausi"], row["lyhenne"])] = row["Joukkue ID"]
-    #     team = None
-    #     if not Team.objects.filter(id=row["Joukkue ID"]).exists():
-    #         print(row["lyhenne"] + " :" + str(row["Joukkue ID"]))
-    #         team = Team.objects.create(id=row["Joukkue ID"], name=row["Koko nimi"], abbreviation=row["lyhenne"])
-    #     else:
-    #         print("Updated: "+ str(row["Joukkue ID"]) + "to " + row["lyhenne"])
-    #         team = Team.objects.filter(id=row["Joukkue ID"]).first()
-    #         team.abbreviation = row["lyhenne"]
-    #         team.name = row["Koko nimi"]
-    #         team.save()
-    #     bra = row['Runkosarja Lohko ID'] if type(row['Runkosarja Lohko ID']) is int else 1
-    #     season = Season.objects.filter(year=row["Kausi"]).first()
-    #     TeamsInSeason.objects.create(season=season, team=team, 
-    #                                  current_name=row["Koko nimi"], 
-    #                                  current_abbreviation=row["lyhenne"],
-    #                                  bracket=bra)
+    )
+    df = pd.read_csv("NKL Tilastoja - Kaikki Joukkueet kausittain.csv")
+    for index, row in df.iterrows():
+        if (row["Kausi"], row["lyhenne"]) not in team_names:
+            team_names[(row["Kausi"], row["lyhenne"])] = row["Joukkue ID"]
+        team = None
+        if not Team.objects.filter(id=row["Joukkue ID"]).exists():
+            print(row["lyhenne"] + " :" + str(row["Joukkue ID"]))
+            team = Team.objects.create(id=row["Joukkue ID"], name=row["Koko nimi"], abbreviation=row["lyhenne"])
+        else:
+            print("Updated: "+ str(row["Joukkue ID"]) + "to " + row["lyhenne"])
+            team = Team.objects.filter(id=row["Joukkue ID"]).first()
+            team.abbreviation = row["lyhenne"]
+            team.name = row["Koko nimi"]
+            team.save()
+        bra = row['Runkosarja Lohko ID'] if type(row['Runkosarja Lohko ID']) is int else 1
+        season = Season.objects.filter(year=row["Kausi"]).first()
+        TeamsInSeason.objects.create(season=season, team=team, 
+                                     current_name=row["Koko nimi"], 
+                                     current_abbreviation=row["lyhenne"],
+                                     bracket=bra)
         
-    # df_players = pd.read_csv("NKL Tilastoja - Kaikki Pelaajat.csv")
-    # print("Pelaajat:")
+    df_players = pd.read_csv("NKL Tilastoja - Kaikki Pelaajat.csv")
+    print("Pelaajat:")
 
-    # print(PlayersInTeam.objects.all())
-    # for index, row in df_players.iterrows():
-    #     if index % 100 == 0:
-    #         print(f"Pelaajat: {index}")
-    #     email = row["Etunimi"] + "." + row["Sukunimi"] + "@test.fi"
-    #     if not User.objects.filter(first_name=row["Etunimi"], last_name=row["Sukunimi"]).exists():
-    #         email = row["Etunimi"] + "." + row["Sukunimi"] + "@test.fi"
-    #         user = User.objects.create_user(email, email, 'test')
-    #         user.first_name = row["Etunimi"]
-    #         user.last_name = row["Sukunimi"]
-    #         user.save()
-    #         Player.objects.create(user=user, number=random.randint(1, 99))
+    print(PlayersInTeam.objects.all())
+    for index, row in df_players.iterrows():
+        if index % 100 == 0:
+            print(f"Pelaajat: {index}")
+        email = row["Etunimi"] + "." + row["Sukunimi"] + "@test.fi"
+        if not User.objects.filter(first_name=row["Etunimi"], last_name=row["Sukunimi"]).exists():
+            email = row["Etunimi"] + "." + row["Sukunimi"] + "@test.fi"
+            user = User.objects.create_user(email, email, 'test')
+            user.first_name = row["Etunimi"]
+            user.last_name = row["Sukunimi"]
+            user.save()
+            Player.objects.create(user=user, number=random.randint(1, 99))
 
-    #     season = Season.objects.filter(year=row["Kausi"]).first()
-    #     team = Team.objects.filter(id=row["Joukkue ID"]).first()
-    #     team_season = TeamsInSeason.objects.filter(season=season, team=team).first()
-    #     user = User.objects.filter(first_name=row["Etunimi"], last_name=row["Sukunimi"]).first()
+        season = Season.objects.filter(year=row["Kausi"]).first()
+        team = Team.objects.filter(id=row["Joukkue ID"]).first()
+        team_season = TeamsInSeason.objects.filter(season=season, team=team).first()
+        user = User.objects.filter(first_name=row["Etunimi"], last_name=row["Sukunimi"]).first()
 
-    #     if PlayersInTeam.objects.filter(team_season=team_season, player=user).exists():
-    #         continue
-    #     # print(f"{user}: {team}: {season}")
-    #     PlayersInTeam.objects.create(season=season, team_season=team_season, player=user, is_captain=False)
-    print("ottelut")
+        if PlayersInTeam.objects.filter(team_season=team_season, player=user).exists():
+            continue
+        # print(f"{user}: {team}: {season}")
+        PlayersInTeam.objects.create(season=season, team_season=team_season, player=user, is_captain=False)
+    
+    print("Ottelut: ")
     df_matches = pd.read_csv("NKL Tilastoja - Kaikki Pelit.csv")
     
     for index, row in df_matches.iterrows():
