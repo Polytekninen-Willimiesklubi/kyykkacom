@@ -8,13 +8,13 @@ from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_protect
 from django.utils.decorators import method_decorator
-from kyykka.models import (CurrentSeason, Match, PlayersInTeam, Season, Team,
-                           Throw, User)
+from kyykka.models import (CurrentSeason, Match, Player, PlayersInTeam, Season, Team, 
+                           TeamsInSeason, Throw, User)
 from kyykka.serializers import (CreateUserSerializer, LoginUserSerializer,
                                 MatchDetailSerializer, MatchListSerializer,
-                                MatchScoreSerializer, PlayerDetailSerializer,
+                                MatchScoreSerializer, PlayerAllDetailSerializer, PlayerDetailSerializer,
                                 PlayerListSerializer, ReserveCreateSerializer,
-                                ReserveListSerializer, TeamDetailSerializer,
+                                ReserveListSerializer, SeasonSerializer, TeamDetailSerializer,
                                 TeamListSerializer, ThrowSerializer,
                                 UserSerializer)
 from rest_framework import generics, permissions, status, viewsets
@@ -41,10 +41,16 @@ def getSeason(request):
         season = CurrentSeason.objects.first().season
     return season
 
+def getPostseason(request):
+    try:
+        post_season = bool(int(request.query_params.get('post_season')))
+    except (ValueError):
+        post_season = None
+    return post_season
 
 def getRole(user):
     try:
-        if user.playersinteam_set.get(season=CurrentSeason.objects.first().season).is_captain:
+        if user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain:
             role = '1'
         else:
             role = '0'
@@ -126,7 +132,7 @@ class LoginAPI(generics.GenericAPIView):
         login(request, user)
         role = getRole(user)
         try:
-            team_id = user.playersinteam_set.filter(season=CurrentSeason.objects.first().season).first().team.id
+            team_id = user.playersinteam.filter(team_season__season=CurrentSeason.objects.first()).first().team_season
         except (PlayersInTeam.DoesNotExist, AttributeError) as e:
             team_id = None
         response = Response({
@@ -201,7 +207,7 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
         key = 'all_players_' + str(season.year)
         all_players = getFromCache(key)
         if all_players is None:
-            self.queryset = self.queryset.filter(playersinteam__season=season)
+            self.queryset = self.queryset.filter(playersinteam__team_season__season=season)
             serializer = PlayerListSerializer(self.queryset, many=True, context={'season': season})
             all_players = serializer.data
             setToCache(key, all_players)
@@ -210,7 +216,7 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     def retrieve(self, request, pk=None):
         season = getSeason(request)
         user = get_object_or_404(self.queryset, pk=pk)
-        serializer = PlayerDetailSerializer(user, context={'season': season})
+        serializer = PlayerAllDetailSerializer(user)
         return Response(serializer.data)
 
 
@@ -218,17 +224,30 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
     """
-    queryset = Team.objects.all()
+    queryset = TeamsInSeason.objects.all()
 
     def list(self, request):
         season = getSeason(request)
-        key = 'all_teams_' + str(season.year)
-        all_teams = getFromCache(key)
-        if all_teams is None:
-            self.queryset = self.queryset.filter(playersinteam__season=season).distinct()
-            serializer = TeamListSerializer(self.queryset, many=True, context={'season': season})
-            all_teams = serializer.data
-            setToCache(key, all_teams)
+        post_season = getPostseason(request)
+        if post_season == None:
+            key = 'all_teams_' + str(season.year)
+            all_teams = getFromCache(key)
+            if all_teams is None:
+                self.queryset = self.queryset.filter(season=season).distinct()
+                serializer = TeamListSerializer(self.queryset, many=True, context={'season': season})
+                all_teams = serializer.data
+                setToCache(key, all_teams)
+        elif post_season == False:
+            print('Jotain tapahtuu')
+            key = f'all_teams_{season.year}_regular_season'
+            all_teams = getFromCache(key)
+            if all_teams is None:
+                self.queryset = self.queryset.filter(season=season).distinct()
+                serializer = TeamListSerializer(self.queryset, many=True, context={'season': season, 'post_season': False})
+                all_teams = serializer.data
+                setToCache(key, all_teams)
+        elif post_season == True:
+            raise NotImplementedError
         return Response(all_teams)
 
     def retrieve(self, request, pk=None):
@@ -240,19 +259,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             raise Http404
         # Do these querys only once here, instead of doing them 2 times at serializer.
         throws = Throw.objects.filter(match__is_validated=True, season=season, team=team)
-        throws_total = throws.count() * 4
-        pikes_total = throws.annotate(
-            count=Count('pk', filter=Q(score_first='h')) + Count('pk', filter=Q(score_second='h')) + Count('pk', filter=Q(
-                score_third='h')) + Count('pk', filter=Q(score_fourth='h'))).aggregate(Sum('count'))['count__sum']
-        zeros_total = throws.annotate(
-            count=Count('pk', filter=Q(score_first=0)) + Count('pk', filter=Q(score_second=0)) + Count('pk', filter=Q(
-                score_third=0)) + Count('pk', filter=Q(score_fourth=0))).aggregate(Sum('count'))['count__sum']
         context = {
             'season': season,
-            'throws_total': throws_total,
-            'pikes_total': pikes_total,
-            'zeros_total': zeros_total,
-            'throw_set':  throws,
+            'throws':  throws
         }
         serializer = TeamDetailSerializer(team, context=context)
         return Response(serializer.data)
@@ -317,3 +326,23 @@ class ThrowAPI(generics.GenericAPIView, UpdateModelMixin):
     def patch(self, request, *args, **kwargs):
         cache_reset_key('all_teams')  # Updating throw score affects total score of team.
         return self.partial_update(request, *args, **kwargs)
+    
+class SeasonsAPI(generics.GenericAPIView):
+    queryset = Season.objects.all()
+    current = CurrentSeason.objects.all()
+
+    def get(self, request):
+        key = 'all_seasons'
+        all_seasons = getFromCache(key)
+        if all_seasons is None:
+            all_seasons = SeasonSerializer(self.queryset.all(), many=True).data
+            setToCache(key, all_seasons)
+       
+        key = 'current_season'
+        current_season = getFromCache(key)
+        if current_season is None:
+            print(self.current[0].season)
+            current_season = SeasonSerializer(Season(self.current[0].id)).data
+            setToCache(key, current_season)
+
+        return Response((all_seasons, current_season))
