@@ -43,19 +43,17 @@ def init_gen():
         if year == 2023:
             CurrentSeason.objects.create(season=season)
     team_names = {}
-    print(
-        
-    )
+
     df = pd.read_csv("NKL Tilastoja - Kaikki Joukkueet kausittain.csv")
     for index, row in df.iterrows():
         if (row["Kausi"], row["lyhenne"]) not in team_names:
             team_names[(row["Kausi"], row["lyhenne"])] = row["Joukkue ID"]
         team = None
         if not Team.objects.filter(id=row["Joukkue ID"]).exists():
-            print(row["lyhenne"] + " :" + str(row["Joukkue ID"]))
+            # print(row["lyhenne"] + " :" + str(row["Joukkue ID"]))
             team = Team.objects.create(id=row["Joukkue ID"], name=row["Koko nimi"], abbreviation=row["lyhenne"])
         else:
-            print("Updated: "+ str(row["Joukkue ID"]) + "to " + row["lyhenne"])
+            # print("Updated: "+ str(row["Joukkue ID"]) + "to " + row["lyhenne"])
             team = Team.objects.filter(id=row["Joukkue ID"]).first()
             team.abbreviation = row["lyhenne"]
             team.name = row["Koko nimi"]

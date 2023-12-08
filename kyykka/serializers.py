@@ -50,7 +50,6 @@ def count_negative_values(obj, season, throws=None, key="player"):
         pikes = pikes if pikes is not None else 0
         zeros = result_total['count__sum'] - pikes
         result_total = (pikes, zeros)
-        print(pikes, zeros)
         if pikes is None:
             result_total = (0,0)
         setToCache(key, result_total, season_year=season.year)
@@ -802,9 +801,6 @@ class UserMatchSerializer(serializers.ModelSerializer):
             elif score == "h" or score == "e": return_list.append(score)
             elif ord(score[0]) != 8722: return_list.append(score)
             else: return_list.append(text)
-        if h>0:
-            print(scores)
-            print(return_list)
         return return_list
 
     class Meta:
