@@ -238,7 +238,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 all_teams = serializer.data
                 setToCache(key, all_teams)
         elif post_season == False:
-            print('Jotain tapahtuu')
             key = f'all_teams_{season.year}_regular_season'
             all_teams = getFromCache(key)
             if all_teams is None:
@@ -341,7 +340,6 @@ class SeasonsAPI(generics.GenericAPIView):
         key = 'current_season'
         current_season = getFromCache(key)
         if current_season is None:
-            print(self.current[0].season)
             current_season = SeasonSerializer(Season(self.current[0].id)).data
             setToCache(key, current_season)
 
