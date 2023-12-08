@@ -48,15 +48,6 @@
         <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
       </template>
 
-      <template slot="items" slot-scope="props">
-        <td>{{props.item.player.player_number}}</td>
-        <td>{{props.item.player.player_name}}</td>
-        <td>{{props.item.score_first}}</td>
-        <td>{{props.item.score_second}}</td>
-        <td>{{props.item.score_third}}</td>
-        <td>{{props.item.score_fourth}}</td>
-        <td>{{props.item.score_total}}</td>
-      </template>
     </v-data-table>
     <v-data-table mobile-breakpoint="0" disable-pagination dense
       v-if="show_input"
@@ -298,7 +289,7 @@ export default {
           this.is_validated = this.matchData.body.is_validated;
           if (this.roundNumber == 1 && this.teamSide == 'home') {
               this.data = this.matchData.body.first_round.home;
-              this.home_team = this.matchData.body.home_team.name;
+              this.home_team = this.matchData.body.home_team.current_name;
               this.round_score = this.matchData.body.home_first_round_score;
               if (
                   this.round_score >
@@ -313,7 +304,7 @@ export default {
               this.teamSide == 'home'
           ) {
               this.data = this.matchData.body.second_round.home;
-              this.home_team = this.matchData.body.home_team.name;
+              this.home_team = this.matchData.body.home_team.current_name;
               this.round_score =
                   this.matchData.body.home_second_round_score;
               if (
@@ -329,7 +320,7 @@ export default {
               this.teamSide == 'away'
           ) {
               this.data = this.matchData.body.first_round.away;
-              this.away_team = this.matchData.body.away_team.name;
+              this.away_team = this.matchData.body.away_team.current_name;
               this.round_score = this.matchData.body.away_first_round_score;
               if (
                   this.round_score >
@@ -344,7 +335,7 @@ export default {
               this.teamSide == 'away'
           ) {
               this.data = this.matchData.body.second_round.away;
-              this.away_team = this.matchData.body.away_team.name;
+              this.away_team = this.matchData.body.away_team.current_name;
               this.round_score =
                   this.matchData.body.away_second_round_score;
               if (

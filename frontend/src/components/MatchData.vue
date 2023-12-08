@@ -2,7 +2,7 @@
       <v-card>
         <h3 class="text-md-left headline">
           Runkosarja kenttä <span v-if="this.match_field">{{this.match_field}}</span><span v-else>TBD</span>
-          <span style="float:right;">{{ this.match_time | moment('YYYY-MM-DD HH:MM') }}</span>
+          <span style="float:right;">{{ this.match_time | luxon('y-MM-dd HH:mm') }}</span>
         </h3>
         <v-row>
           <v-container fill-height>
@@ -67,8 +67,8 @@ export default {
         getMatch: function() {
           this.match_time = this.matchData.body.match_time;
           this.match_field = this.matchData.body.field;
-          this.away_team.name = this.matchData.body.away_team.name;
-          this.home_team.name = this.matchData.body.home_team.name;
+          this.away_team.name = this.matchData.body.away_team.current_name;
+          this.home_team.name = this.matchData.body.home_team.current_name;
           this.home_team.id = this.matchData.body.home_team.id;
           this.away_team.id = this.matchData.body.away_team.id;
 

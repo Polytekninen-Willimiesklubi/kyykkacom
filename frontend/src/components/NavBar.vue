@@ -20,7 +20,7 @@
       <v-btn text class="hidden-md-and-down" to="/info">Info</v-btn>
       <v-spacer class="hidden-md-and-down"></v-spacer>
       <v-spacer class="hidden-md-and-down"></v-spacer>
-      <v-select v-on:input="selectSeason(items.name)" item-color=red v-model="selectedSeason" class="mt-4" align:center item-text="name" :items="seasons"></v-select>
+      <v-select v-on:input="selectSeason" item-color=red v-model="selectedSeason" class="mt-4" align:center item-text="name" :items="seasons"></v-select>
       <v-spacer class="hidden-md-and-down"></v-spacer>
       <v-spacer class="hidden-md-and-down"></v-spacer>
       <div class="hidden-md-and-down pa-4" v-if="!loggedIn">
@@ -134,21 +134,14 @@ export default {
             loggedIn: false,
             name: '',
             team_id: '',
-            selectedSeason: {
-              value: '3'
-            },
+            selectedSeason: {},
             items: [
                 { title: 'Ottelut' },
                 { title: 'Joukkueet' },
                 { title: 'Pelaajat' },
                 { title: 'Info' }
             ],
-            seasons: [
-              { name: 'Kausi 2020', value: '1', id: 1},
-              { name: 'Kausi 2021', value: '2', id: 2},
-              { name: 'Kausi 2022', value: '3', id: 3},
-	      { name: 'Kausi 2023', value: '4', id: 4},
-            ]
+            seasons: []
         };
     },
     methods: {
@@ -170,11 +163,36 @@ export default {
           this.$router.push('/').catch(()=>{
             window.location.reload();
           });;
+        },
+        getSeasons() {
+          this.$http.get('api/seasons').then(
+            function(data) {
+              var all_seasons = []
+              data.body[0].forEach(ele => {
+                all_seasons.push(ele)
+              });
+              this.selectedSeason = {
+                'value' : data.body[1].value
+              }
+              all_seasons.sort((x,y) => {  // This makes the current year top most
+                if (x.name < y.name) {return 1}
+                else if  (x.name > y.name) {return -1}
+                else {return 0}
+              })
+              sessionStorage.setItem('all_seasons', JSON.stringify(all_seasons))
+              this.seasons = all_seasons
+            }
+          )
         }
     },
     created() {
         if (sessionStorage.season_id) {
           this.selectedSeason = sessionStorage.season_id;
+        }
+        if (!sessionStorage.all_seasons) {
+          this.getSeasons()
+        } else {
+          this.seasons = JSON.parse(sessionStorage.all_seasons)
         }
 
         eventBus.$on('loginChanged', data => {
@@ -188,7 +206,7 @@ export default {
                 this.$http
                     .get(
                         'api/players/' +
-                            localStorage.user_id
+                            localStorage.user_id +'/'
                     )
                     .then(function(response) {
                       if (response.body.team) {

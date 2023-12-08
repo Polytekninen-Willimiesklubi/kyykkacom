@@ -11,22 +11,20 @@
         <v-text-field color="red" v-model="search" label="Search" single-line hide-details></v-text-field>             
       </div>
     </v-card-title>
-    <v-data-table mobile-breakpoint="0" disable-pagination @click:row="handleRedirect" dense 
-    :headers="headers" :items="data" :search="search" :item-class="itemRowBackground" hide-default-footer>
+    <v-data-table mobile-breakpoint="0" disable-pagination
+    @click:row="handleRedirect" dense 
+    :headers="headers"
+    :item-class="itemRowBackground"
+    :items="data"
+    :search="search" hide-default-footer
+    v-if="defaultSelected != 'Jatkosarja'">
         <template slot="no-data">
           <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
         </template>
         <template slot="headers" class="text-xs-center"></template>
         <!-- [``] needed to prevent eslint error -->
         <template v-slot:[`item.match_time`]="{ item }">
-          <!--  if (item.is_validated & matchDate < currentTime & item.id !== localStorage.team_id) -->
-          <v-tooltip v-if="!item.is_validated & (parseInt(item.home_team.id) === parseInt(team_id) || parseInt(item.away_team.id) === parseInt(team_id))" bottom>
-            <template #activator="{ on }">
-              <v-icon color="gray" class="mr-3" v-on="on">info</v-icon>
-            </template>
-            <span>Ottelu on validoimatta</span>
-          </v-tooltip>
-          <span>{{ item.match_time | moment('YYYY-MM-DD HH:mm') }}</span>
+          <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
         </template>
         <v-alert
           slot="no-results"
@@ -34,14 +32,32 @@
           color="error"
         >Your search for "{{ search }}" found no results.</v-alert>
     </v-data-table>
+    <v-data-table mobile-breakpoint="0" disable-pagination 
+    @click:row="handleRedirect" dense 
+    :headers="post_headers"
+    :group-by="seriers"
+    :items="data"
+    :search="search" hide-default-footer
+    v-else>
+      <template v-slot:[`item.match_time`]="{ item }">
+          <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
+      </template>
+      <template v-slot:group.header="{items, isOpen, toggle}">
+        <th colspan="12" @click="toggle">
+          <v-icon>
+            {{ isOpen ? 'mdi-minus' : 'mdi-plus' }}
+          </v-icon>
+          {{ items[0].type_name }}
+          {{ items[0].home_team.current_abbreviation}} vs. {{ items[0].away_team.current_abbreviation }}
+        </th>
+      </template>
+    </v-data-table>
   </v-card>
 </template>
 
 <script>
-import moment from 'moment';
 
 export default {
-
     data: function() {
         return {
             search: '',
@@ -49,11 +65,26 @@ export default {
                 {
                     text: 'Aika',
                     align: 'left',
+                    width:'20%',
+                    value: 'match_time'
+                },
+                { text: 'Tyyppi', value: 'type_name', width:'10%'},
+                { text: 'Kenttä', value: 'field', width:'15%', align:'left'},
+                { text: 'Koti', value: 'home_team.current_abbreviation'},
+                { text: 'Vieras', value: 'away_team.current_abbreviation'},
+                { text: '', value: 'home_score_total', width:'3%', align: 'right'},
+                { text: 'Tulos', value: 'dash', width:'1%', sortable: false, align: 'center'},
+                { text: '', value: 'away_score_total', width:'3%', align: 'left'}
+            ],
+            post_headers: [
+                {
+                    text: 'Aika',
+                    align: 'left',
                     value: 'match_time'
                 },
                 { text: 'Kenttä', value: 'field'},
-                { text: 'Koti', value: 'home_team.abbreviation' },
-                { text: 'Vieras', value: 'away_team.abbreviation' },
+                { text: 'Koti', value: 'home_team.current_abbreviation' },
+                { text: 'Vieras', value: 'away_team.current_abbreviation' },
                 { text: '', value: 'home_score_total', width:'3%', align: 'right'},
                 { text: 'Tulos', value: 'dash', width:'1%', sortable: false, align: 'center'},
                 { text: '', value: 'away_score_total', width:'3%', align: 'left'}
@@ -62,9 +93,9 @@ export default {
             matches: [],
             post_season: [],
             regular_season: [],
-            team_id: '',
             defaultSelected: 'Kaikki ottelut',
             options: ['Kaikki ottelut','Runkosarja','Jatkosarja'],
+            seriers: ['seriers']
         };
     },
     methods: {
@@ -79,25 +110,34 @@ export default {
         },
         getMatches: function() {
           let url = 'api/matches/?season='+sessionStorage.season_id;
-          let i = 0;
+          
+          const pelit = {
+            1 : "Runkosarja",
+            2 : "Finaali",
+            3 : "Pronssi",
+            4 : "Välierä",
+            5 : "Puolivälierä",
+            6 : "Neljännesvälierä",
+            7 : "Kahdeksannesvälierä",
+            10 : "Runkosarjafinaali",
+            20 : "Jumbofinaali"
+          }
 
           this.$http.get(url).then(
               function(data) {
+                  data.body.forEach(ele => {
+                    ele.type_name = pelit[ele.match_type]
+                    ele.dash = "-"
+                    
+                    if (ele.post_season) {
+                      this.post_season.push(ele)
+                    } else {
+                      this.regular_season.push(ele)
+                    }
+                  })
                   this.data = data.body;
                   this.matches = data.body;
-
-                  for (let object in data.body) {
-                    // This is spaghetti to add a - to the column between scores.
-                    data.body[i].dash = '-';
-
-                    if (data.body[i].post_season) {
-                      this.post_season.push(data.body[i]);
-                    } else {
-                      this.regular_season.push(data.body[i]);
-                    }
-                    i++;
-                  }
-              }
+              },
           );
         },
         handleRedirect: function(value) {
