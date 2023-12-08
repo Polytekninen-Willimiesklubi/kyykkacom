@@ -14,20 +14,17 @@ class Player(models.Model):
 
 class Team(models.Model):
     name = models.CharField(max_length=128, unique=True)
-    abbreviation = models.CharField(max_length=15, unique=True)
-    players = models.ManyToManyField(User, through='PlayersInTeam')
+    abbreviation = models.CharField(max_length=15)
 
     def __str__(self):
         return '%s' % (self.abbreviation)
 
-
 class Season(models.Model):
     year = models.CharField(max_length=4, unique=True)
-    #teams = models.ManyToManyField(Team, blank=True)  # CURRENTLY NOT IN USE
+    no_brackets = models.IntegerField(default=1, blank=False)
 
     def __str__(self):
-        return 'Season %s' % (self.year)
-
+        return f'Kausi {self.year}'
 
 class CurrentSeason(models.Model):
     season = models.OneToOneField(Season, on_delete=models.CASCADE)
@@ -38,19 +35,31 @@ class CurrentSeason(models.Model):
     def __str__(self):
         return 'Season %s' % (self.season.year)
 
-
-class PlayersInTeam(models.Model):
+class TeamsInSeason(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    current_name =  models.CharField(max_length=128)
+    current_abbreviation = models.CharField(max_length=15)
+    players = models.ManyToManyField(User, through='PlayersInTeam')
+    bracket = models.IntegerField(null=True)
+    
+    class Meta:
+        unique_together = ('season', 'team')
+
+    def __str__(self):
+        return f'{self.current_abbreviation} {self.season.year}'
+
+class PlayersInTeam(models.Model):
+    team_season = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
+    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     is_captain = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('player', 'season')
+        unique_together = ('player', 'team_season')
         # Make sure are players allowed to change team during the season?
 
     def __str__(self):
-        return '%s %s %s %s' % (self.season.year, self.team.abbreviation, self.player.first_name, self.player.last_name)
+        return '%s %s %s %s' % (self.team_season.season.year, self.team_season.current_abbreviation, self.player.first_name, self.player.last_name)
 
 
 class Match(models.Model):
@@ -61,10 +70,12 @@ class Match(models.Model):
     home_second_round_score = models.IntegerField(blank=True, null=True)
     away_first_round_score = models.IntegerField(blank=True, null=True)
     away_second_round_score = models.IntegerField(blank=True, null=True)
-    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_matches')
-    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')
+    home_team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name='home_matches')
+    away_team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name='away_matches')
     is_validated = models.BooleanField(default=False)
     post_season = models.BooleanField(default=False)
+    match_type = models.IntegerField(blank=True, null=True)
+    seriers = models.IntegerField(null=True, default=1)
 
     class Meta:
         verbose_name_plural = 'Matches'
@@ -81,11 +92,10 @@ class Throw(models.Model):
     '''
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     player = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     throw_round = models.IntegerField()
     throw_turn = models.IntegerField()
-    # throw_number = models.IntegerField(null=True)
     score_first = models.CharField(max_length=2, null=True, blank=True, db_index=True)
     score_second = models.CharField(max_length=2, null=True, blank=True, db_index=True)
     score_third = models.CharField(max_length=2, null=True, blank=True, db_index=True)
@@ -111,10 +121,3 @@ def match_post_save_handler(sender, instance, created, **kwargs):
                         throw_turn=turn,
                         throw_round=r
                     )
-
-# DEPRECATED? Validating match should now take care of all cache resetting.
-# @receiver(post_save, sender=Throw)
-# def throw_post_save_handler(sender, instance, created, **kwargs):
-    # if instance and instance.player:
-        # season_year = str(CurrentSeason.objects.first().season.year)
-        # reset_player_cache(instance.player.id, season_year)
