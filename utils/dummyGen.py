@@ -13,19 +13,25 @@ def initGen():
     Generates dummy Seasons, Teams and populates teams with Users.
     Create superuser with credentials 'test test'
     '''
-    User.objects.create_superuser('test', '', 'test')
+    #User.objects.create_superuser('test', '', 'test')
     seasonGen()
-    teamGen(30)
-    matchGen()
+
 
 
 def seasonGen(amount=3):
-    year = 2019
+    year = 2023
     for _ in range(amount):
         season = Season.objects.create(year=year)
-        if year == 2019:
+        if year == 2023:
             CurrentSeason.objects.create(season=season)
-        year = year - 1
+        year -= 1
+    year = 2023
+    teamGen(amount, year)
+    year = 2023
+    for _ in range(amount):
+        season = Season.objects.filter(year=year).first()
+        matchGen(season)
+        year -= 1
 
 
 
@@ -54,7 +60,7 @@ def userGen(amount, return_users=False):
         return users
 
 
-def teamGen(amount):
+def teamGen(amount,year):
     print('Generating fake teams\n')
     teams = [
         "Alcohooligans (Alco)",
@@ -87,21 +93,21 @@ def teamGen(amount):
         abbreviation = t[t.find("(") + 1 : t.find(")")]
         team = Team.objects.create(name=name, abbreviation=abbreviation)
         print('\n Generated team', name, abbreviation, '\n')
-        populateTeam(team)
+        populateTeam(team, year, amount)
 
 
-def populateTeam(team):
+def populateTeam(team, year, amount):
     print('Generating fake users for team ', team)
     players = userGen(6, True)
-    season = CurrentSeason.objects.first().season
-    PlayersInTeam.objects.create(
-        season=season, team=team, player=players.pop(), is_captain=True)
-    for p in players:
-        PlayersInTeam.objects.create(season=season, team=team, player=p)
+    for _ in range(amount):
+        for i,p in enumerate(players):
+            season = Season.objects.filter(year=year).first()
+            captain = True if i == 0 else False
+            PlayersInTeam.objects.create(season=season, team=team, player=p, is_captain=captain)
+        year -= 1
 
 
-def matchGen():
-    season = CurrentSeason.objects.first().season
+def matchGen(season):
     exclude = []
     print('\nGenerating fake matches.')
     for home in tqdm(Team.objects.all()):
@@ -111,23 +117,23 @@ def matchGen():
                 season=season,
                 match_time=fake.date_time_between(start_date="-60y", end_date="now",
                                                   tzinfo=pytz.timezone("Europe/Helsinki")),
-                home_first_round_score=random.randint(0, 100),
-                home_second_round_score=random.randint(0, 100),
-                away_first_round_score=random.randint(0, 100),
-                away_second_round_score=random.randint(0, 100),
+                home_first_round_score=random.randint(0, 80),
+                home_second_round_score=random.randint(0, 80),
+                away_first_round_score=random.randint(0, 80),
+                away_second_round_score=random.randint(0, 80),
                 home_team=home,
                 away_team=away,
                 is_validated=random.choice([True, False])
             )
-            throwGen(match)
+            throwGen(match, season)
 
 
-def throwGen(match):
+def throwGen(match, season):
     '''
     Generate throws for both teams in the match.
     2 rounds, 4 players per round
     '''
-    season = CurrentSeason.objects.first().season
+    # season = CurrentSeason.objects.first().season
     for team in [match.home_team, match.away_team]:
         for throw_round in range(1, 3):
             players = team.players.all().order_by('?')[:4]
@@ -139,8 +145,8 @@ def throwGen(match):
                 throw.season=season
                 throw.throw_turn=i + 1
                 throw.throw_round=throw_round
-                throw.score_first=random.randint(-1, 7)
-                throw.score_second=random.randint(-1, 7)
-                throw.score_third=random.randint(-1, 7)
-                throw.score_fourth=random.randint(-1, 7)
+                throw.score_first=random.randint(0, 11)
+                throw.score_second=random.randint(0, 11)
+                throw.score_third=random.randint(0, 11)
+                throw.score_fourth=random.randint(0, 11)
                 throw.save()
