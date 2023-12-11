@@ -13,6 +13,26 @@ from utils.caching import getFromCache, setToCache
 def required(value):
     if value is None:
         raise serializers.ValidationError('This field is required')
+    
+def score_format(scores:list):
+    return_list = []
+    number_of_zeros = 0
+    h = 0
+    for score in scores:
+        if score is None: continue
+        elif score == "h" or score == "e" : continue
+        elif ord(score[0]) != 8722: continue # ascii 8722 is minus sign
+        else:
+            number_of_zeros +=1
+            tmp = int(score[1:]) * -1
+            h = abs(tmp)
+    text = f"h{h}0{number_of_zeros-h}"
+    for score in scores:
+        if score is None: return_list.append(score)
+        elif score == "h" or score == "e": return_list.append(score)
+        elif ord(score[0]) != 8722: return_list.append(score)
+        else: return_list.append(text)
+    return return_list
 
 def count_negative_values(obj, season, throws=None, key="player"):
     if int(season.year) > 2012: return (0,0)
@@ -667,7 +687,7 @@ class UserMatchSerializer(serializers.ModelSerializer):
             no_throws = (r.score_first == 'e') + (r.score_second == 'e') 
             + (r.score_third == 'e') + (r.score_fourth == 'e')
 
-            scores = self.score_format([r.score_first, r.score_second, r.score_third, r.score_fourth])
+            scores = score_format([r.score_first, r.score_second, r.score_third, r.score_fourth])
             if r.throw_round == 1:
                 self.player_first = scores[0]
                 self.player_second = scores[1]
@@ -782,27 +802,6 @@ class UserMatchSerializer(serializers.ModelSerializer):
     
     def get_score_total_two(self, obj):
         return self.round_two_total
-    
-    def score_format(self, scores:list):
-        return_list = []
-        number_of_zeros = 0
-        h = 0
-        for score in scores:
-            if score is None: continue
-            elif score == "h" or score == "e" : continue
-            elif ord(score[0]) != 8722: continue # ascii 8722 is minus sign
-            else:
-                number_of_zeros +=1
-                tmp = int(score[1:]) * -1
-                h = abs(tmp)
-        text = f"h{h}0{number_of_zeros-h}"
-        for score in scores:
-            if score is None: return_list.append(score)
-            elif score == "h" or score == "e": return_list.append(score)
-            elif ord(score[0]) != 8722: return_list.append(score)
-            else: return_list.append(text)
-        return return_list
-
     class Meta:
         model = Match
         fields = ('id', 'match_time', 'home_team', 'away_team', 'opponent_name', 'score_total', 'opponent_score_first', 'own_score_first',
@@ -1128,9 +1127,36 @@ class MatchScoreSerializer(serializers.ModelSerializer):
 class ThrowScoreSerializer(serializers.ModelSerializer):
     player = serializers.SerializerMethodField()
     score_total = serializers.SerializerMethodField()
+    score_first = serializers.SerializerMethodField()
+    score_second = serializers.SerializerMethodField()
+    score_third = serializers.SerializerMethodField()
+    score_fourth = serializers.SerializerMethodField()
 
     def get_player(self, obj):
         return UserSerializer(obj.player).data
+    
+    def get_score_first(self,obj):
+        tmp_list = []
+        if obj.score_first is not None:
+            tmp_list.append(obj.score_first)
+        if obj.score_second is not None:
+            tmp_list.append(obj.score_second)
+        if obj.score_third is not None:
+            tmp_list.append(obj.score_third)
+        if obj.score_fourth is not None:
+            tmp_list.append(obj.score_fourth)
+        scores = score_format(tmp_list)
+        self.score_first, self.score_second, self.score_third, self.score_fourth = scores
+        return self.score_first
+
+    def get_score_second(self,obj):
+        return self.score_second
+
+    def get_score_third(self,obj):
+        return self.score_third
+
+    def get_score_fourth(self,obj):
+        return self.score_fourth
 
     def get_score_total(self, obj):
         st = int(obj.score_first) if obj.score_first is not None and obj.score_first.isnumeric() else 0
@@ -1142,7 +1168,7 @@ class ThrowScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Throw
         fields = (
-            'id', 'player', 'score_total', 'score_first', 'score_second', 'score_third', 'score_fourth', 'throw_turn')
+            'id', 'player', 'score_first', 'score_second', 'score_third', 'score_fourth', 'score_total','throw_turn')
 
 
 class ThrowSerializer(serializers.ModelSerializer):
