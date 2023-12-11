@@ -48,10 +48,10 @@ def count_negative_values(obj, season, throws=None, key="player"):
         ).aggregate(Sum('h'), Sum('count'))
         pikes = result_total['h__sum']
         pikes = pikes if pikes is not None else 0
-        zeros = result_total['count__sum'] - pikes
+        zero = result_total['count__sum']
+        zero = zero if zero is not None else 0
+        zeros = zero - pikes
         result_total = (pikes, zeros)
-        if pikes is None:
-            result_total = (0,0)
         setToCache(key, result_total, season_year=season.year)
     return result_total
 
