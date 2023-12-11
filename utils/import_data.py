@@ -34,7 +34,7 @@ def makeThrow(row, player ,match, season, team, round, turn, eka, toka, kolmas, 
 
 
 def init_gen():
-    User.objects.create_superuser('test','','test')
+    # User.objects.create_superuser('test','','test')
     for year in range(2000, 2024):
         i = year - 2000
         bra = 2 if year == 2021 or year == 2023 else 1
@@ -44,7 +44,7 @@ def init_gen():
             CurrentSeason.objects.create(season=season)
     team_names = {}
 
-    df = pd.read_csv("NKL Tilastoja - Kaikki Joukkueet kausittain.csv")
+    df = pd.read_csv("./data/NKL Tilastoja - Kaikki Joukkueet kausittain.csv")
     for index, row in df.iterrows():
         if (row["Kausi"], row["lyhenne"]) not in team_names:
             team_names[(row["Kausi"], row["lyhenne"])] = row["Joukkue ID"]
@@ -58,14 +58,15 @@ def init_gen():
             team.abbreviation = row["lyhenne"]
             team.name = row["Koko nimi"]
             team.save()
-        bra = row['Runkosarja Lohko ID'] if type(row['Runkosarja Lohko ID']) is int else 1
+        print(row['Runkosarja Lohko ID'], type(row['Runkosarja Lohko ID']))
+        bra = int(row['Runkosarja Lohko ID']) if not math.isnan(row['Runkosarja Lohko ID']) else 1
         season = Season.objects.filter(year=row["Kausi"]).first()
         TeamsInSeason.objects.create(season=season, team=team, 
                                      current_name=row["Koko nimi"], 
                                      current_abbreviation=row["lyhenne"],
                                      bracket=bra)
         
-    df_players = pd.read_csv("NKL Tilastoja - Kaikki Pelaajat.csv")
+    df_players = pd.read_csv("./data/NKL Tilastoja - Kaikki Pelaajat.csv")
     print("Pelaajat:")
 
     print(PlayersInTeam.objects.all())
@@ -89,10 +90,10 @@ def init_gen():
         if PlayersInTeam.objects.filter(team_season=team_season, player=user).exists():
             continue
         # print(f"{user}: {team}: {season}")
-        PlayersInTeam.objects.create(season=season, team_season=team_season, player=user, is_captain=False)
+        PlayersInTeam.objects.create(team_season=team_season, player=user, is_captain=False)
     
     print("Ottelut: ")
-    df_matches = pd.read_csv("NKL Tilastoja - Kaikki Pelit.csv")
+    df_matches = pd.read_csv("./data/NKL Tilastoja - Kaikki Pelit.csv")
     
     for index, row in df_matches.iterrows():
         if index % 100 == 0:
