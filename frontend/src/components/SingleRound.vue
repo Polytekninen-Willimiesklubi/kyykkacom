@@ -41,6 +41,7 @@
     <v-data-table mobile-breakpoint="0" disable-pagination dense
       v-if="!show_input"
       :headers="headers"
+      @click:row="handleRedirect"
       :items="data"
       hide-default-footer
     >
@@ -152,6 +153,10 @@ export default {
         };
     },
     methods: {
+        handleRedirect: function(value) {
+            console.log(value)
+            location.href = '/pelaaja/'+value.player.id;
+        },
         isNumber: function(evt) {
           // Checks that the value is an H or a numeric value from the ASCII table.
           // not verified atm?

@@ -7,7 +7,7 @@
     </v-card-title>
     <v-data-table mobile-breakpoint="0" disable-pagination dense hide-default-footer
     :headers="headers" 
-    @click:row="handleRedirect" 
+    @click:row="handleRedirect"
     :sortDesc="sortDesc"
     :sortBy="sortBy" 
     :items="players" 
