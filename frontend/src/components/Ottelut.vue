@@ -18,19 +18,25 @@
     :items="data"
     :search="search" hide-default-footer
     v-if="defaultSelected != 'Jatkosarja'">
-        <template slot="no-data">
-          <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
+    <template slot="no-data">
+      <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
+    </template>
+    <template slot="headers" class="text-xs-center"></template>
+    <!-- [``] needed to prevent eslint error -->
+    <template v-slot:[`item.match_time`]="{ item }">
+      <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
+      <v-tooltip v-if="!item.is_validated & (parseInt(item.home_team.id) === parseInt(team_id) || parseInt(item.away_team.id) === parseInt(team_id))" bottom>
+        <template #activator="{ on }">
+          <v-icon color="gray" class="mr-3" v-on="on">info</v-icon>
         </template>
-        <template slot="headers" class="text-xs-center"></template>
-        <!-- [``] needed to prevent eslint error -->
-        <template v-slot:[`item.match_time`]="{ item }">
-          <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
-        </template>
-        <v-alert
-          slot="no-results"
-          :value="true"
-          color="error"
-        >Your search for "{{ search }}" found no results.</v-alert>
+        <span>Ottelu on validoimatta</span>
+      </v-tooltip>
+    </template>
+      <v-alert
+        slot="no-results"
+        :value="true"
+        color="error"
+      >Your search for "{{ search }}" found no results.</v-alert>
     </v-data-table>
     <v-data-table mobile-breakpoint="0" disable-pagination 
     @click:row="handleRedirect" dense 
