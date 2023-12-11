@@ -8,7 +8,7 @@
     <v-data-table mobile-breakpoint="0" disable-pagination dense hide-default-footer
     :headers="headers" 
     @click:row="handleRedirect" 
-    :sortDesc="true" 
+    :sortDesc="sortDesc"
     :sortBy="sortBy" 
     :items="players" 
     :custom-sort="custSort"
