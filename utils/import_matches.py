@@ -10,7 +10,7 @@ def import_matches():
     """
     Import matches from matches.csv
     """
-    with open('matches.csv') as csvfile:
+    with open('./matches.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         with transaction.atomic():
             for row in readCSV:
@@ -29,4 +29,3 @@ def import_matches():
                     home_team=home_team,
                     away_team=away_team
                 )
-

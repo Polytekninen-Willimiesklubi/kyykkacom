@@ -5,14 +5,35 @@
       <v-spacer></v-spacer>
       <v-text-field color="red" v-model="search" label="Search" single-line hide-details></v-text-field>
     </v-card-title>
-    <v-data-table mobile-breakpoint="0" disable-pagination dense :headers="headers" :sortDesc="true" :sortBy="sortBy" :items="players" :search="search" hide-default-footer>
+    <v-data-table mobile-breakpoint="0" disable-pagination dense hide-default-footer
+    :headers="headers" 
+    @click:row="handleRedirect"
+    :sortDesc="sortDesc"
+    :sortBy="sortBy" 
+    :items="players" 
+    :custom-sort="custSort"
+    :search="search">
       <template slot="no-data">
         <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
       </template>
       <template
         bind:key="props.item.id"
         slot="items"
+        slot-scope="props"
       >
+        <td>{{ props.item.player_name }}</td>
+        <td class="text-xs-left" v-if="props.item.team !== null">{{ props.item.team.current_abbreviation }}</td>
+        <td v-else>Ei varausta</td>
+        <td class="text-xs-left">{{ props.item.rounds_total }}</td>
+        <td class="text-xs-left">{{ props.item.score_total }}</td>
+        <td class="text-xs-left">{{ props.item.score_per_throw }}</td>
+        <td class="text-xs-left">{{ props.item.scaled_points }}</td>
+        <td class="text-xs-left">{{ props.item.scaled_points_per_throw }}</td>
+        <td class="text-xs-left">{{ props.item.avg_throw_turn }}</td>
+        <td class="text-xs-left">{{ props.item.pikes_total }}</td>
+        <td class="text-xs-left">{{ props.item.pike_percentage }}</td>
+        <td class="text-xs-left">{{ props.item.zeros_total }}</td>
+        <td class="text-xs-left">{{ props.item.gteSix_total }}</td>
       </template>
       <v-alert
         slot="no-results"
@@ -39,7 +60,7 @@ export default {
                 },
                 {
                     text: 'Joukkue',
-                    value: 'team.abbreviation',
+                    value: 'team.current_abbreviation',
                     align: 'left'
                 },
                 {
@@ -47,11 +68,21 @@ export default {
                     value: 'rounds_total',
                     align: 'left'
                 },
-                { text: 'PPO', value: 'score_total', align: 'left' },
+                { text: 'P', value: 'score_total', width: '1%', align: 'left' },
                 {
                     text: 'PPH',
                     value: 'score_per_throw',
                     align: 'left'
+                },
+                {
+                    text: 'SP',
+                    value: 'scaled_points',
+                    alignt: 'left'
+                },
+                {
+                    text: 'SPH',
+                    value: 'scaled_points_per_throw',
+                    alignt: 'left'
                 },
                 {
                     text: 'kHP',
@@ -67,14 +98,12 @@ export default {
                 {
                     text: 'VM',
                     value: 'zeros_total',
-                    align: 'left',
-                    width: '1%'
+                    align: 'left'
                 },
                 {
                     text: 'JK',
                     value: 'gteSix_total',
-                    alignt: 'left',
-                    width: '1%'
+                    alignt: 'left'
                 }
             ],
             players: [],
@@ -85,24 +114,37 @@ export default {
         getPlayers: function() {
             this.$http.get('api/players/'+'?season='+sessionStorage.season_id).then(
                 function(data) {
-                    if (data) {
-                        // TODO: This should prolly be done in django and not in frontend.
-                        let new_data = data.body.map(function(obj) {
-                            obj['score_total'] = parseFloat(obj['score_total'] / obj['rounds_total']).toFixed(2);
-                            return obj;
-                        })
-
-                        this.players = new_data;
-                    }
+                    this.players = data.body;
                 }
             );
         },
+        handleRedirect: function(value) {
+            location.href = '/pelaaja/'+value.id;
+        },
+        custSort(items, index, isDescending) {
+          function d(p1) {
+            switch (p1) {
+              case 'NaN':
+                return -2
+              default:
+                return p1
+            }
+          }
+
+          items.sort((a,b) => {
+            var a1 = d(a[index[0]])
+            var b1 = d(b[index[0]])
+            if (!isDescending[0]) {
+                return a1 < b1 ? 1 : a1 === b1 ? 0 : -1
+            } else {
+                return a1 < b1 ? -1 : a1 === b1 ? 0 : 1
+            }
+          })
+          return items
+        }
     },
     mounted: function() {
         this.getPlayers();
-        if (localStorage.user_id) {
-            this.$http.get('api/players/' +localStorage.user_id +'/?season='+sessionStorage.season_id)
-        }
     }
 };
 </script>

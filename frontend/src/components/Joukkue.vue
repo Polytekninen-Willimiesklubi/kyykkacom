@@ -50,7 +50,7 @@
                           <v-list-item-content>Nolla aloitukset:</v-list-item-content>
                           <v-list-item-content
                             class="align-end"
-                          >{{ props.item.zero_first_throw_total }}</v-list-item-content>
+                          >{{ props.item.zero_or_pike_first_throw_total }}</v-list-item-content>
                         </v-list-item>
                       </v-list>
                 </template>
@@ -67,8 +67,8 @@
                         </v-list-item>
                         <v-divider></v-divider>
                         <v-list-item>
-                          <v-list-item-content>Pistettä per heitto:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.score_per_throw }}</v-list-item-content>
+                          <v-list-item-content>Ottelu keskiarvo:</v-list-item-content>
+                          <v-list-item-content class="align-end">{{ props.item.match_average }}</v-list-item-content>
                         </v-list-item>
                         <v-divider></v-divider>
                         <v-list-item>
@@ -92,23 +92,14 @@
             </v-row>
         </v-card>
         <v-divider></v-divider>
-    <v-data-table mobile-breakpoint="0" class="mt-5" disable-pagination :headers="headers" :items="players" hide-default-footer>
+    <v-data-table mobile-breakpoint="0" class="mt-5" 
+    disable-pagination 
+    :headers="headers"
+    @click:row="handleRedirect"
+    :items="players"
+     hide-default-footer>
       <template slot="no-data">
         <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
-      </template>
-      <template slot="items" slot-scope="props">
-        <td>{{ props.item.player_number }}</td>
-        <td>{{ props.item.player_name }}</td>
-        <td>{{ props.item.rounds_total }}</td>
-        <td>{{ props.item.score_total }}</td>
-        <td>{{ props.item.score_per_throw }}</td>
-        <td>{{ props.item.scaled_points }}</td>
-        <td>{{ props.item.scaled_points_per_round }}</td>
-        <td>{{ props.item.avg_throw_turn }}</td>
-        <td>{{ props.item.pikes_total }}</td>
-        <td>{{ props.item.pike_percentage }}</td>
-        <td>{{ props.item.zeros_total }}</td>
-        <td>{{ props.item.gteSix_total }}</td>
       </template>
     </v-data-table>
     <v-spacer></v-spacer>
@@ -192,8 +183,8 @@ export default {
                     alignt: 'left'
                 },
                 {
-                    text: 'SPe',
-                    value: 'scaled_points_per_round',
+                    text: 'SPH',
+                    value: 'scaled_points_per_throw',
                     width: '1%',
                     alignt: 'left'
                 },
@@ -236,7 +227,7 @@ export default {
                     function(data) {
                         this.stats = [data.body];
                         this.players = data.body.players;
-                        this.header = data.body.name;
+                        this.header = data.body.current_name;
                     },
                 );
         },
@@ -247,7 +238,7 @@ export default {
                 function(data) {
                     var i = 0;
                     for (var player in data.body) {
-                        if (data.body[i].team == null) {
+                        if (data.body[i].team.current_name == "") {
                             this.reserve.push(data.body[i]);
                         }
                         i++;
@@ -293,6 +284,9 @@ export default {
                   }
               })
             }
+        },
+        handleRedirect: function(value) {
+          location.href = '/pelaaja/'+value.id;
         }
     },
     mounted: function() {

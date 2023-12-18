@@ -9,13 +9,21 @@
     },
     "dependencies": {
         "@babel/polyfill": "^7.12.1",
+        "ag-charts-vue": "^8.1.0",
+        "ag-grid-vue": "^30.1.0",
+        "autoprefixer": "^10.4.16",
+        "chart.js": "^4.4.0",
         "chokidar": "^3.5.3",
         "material-design-icons-iconfont": "^6.1.1",
         "moment": "^2.29.1",
         "serialize-javascript": "^4.0.0",
         "update": "^0.7.4",
+        "luxon": "^3.4.3",
+        "postcss": "^8.4.30",
+        "tailwindcss": "^3.3.3",
         "vue": "^2.6.12",
         "vue-loader": "^15.9.5",
+        "vue-luxon": "^0.10.0",
         "vue-moment": "^4.1.0",
         "vue-resource": "^1.5.1",
         "vue-router": "^3.4.8",
@@ -23,7 +31,7 @@
         "vuetify": "^2.3.16"
     },
     "devDependencies": {
-        "@vue/cli-service": "^4.5.8",
+        "@vue/cli-service": "^5.0.8",
         "vue-template-compiler": "^2.6.12"
     },
     "postcss": {

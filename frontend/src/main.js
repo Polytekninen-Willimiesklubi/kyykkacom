@@ -7,6 +7,7 @@ import router from './router';
 import VueResource from 'vue-resource';
 import VueSession from 'vue-session';
 import VueMoment from 'vue-moment';
+import VueLuxon from 'vue-luxon';
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
 Vue.config.productionTip = false;
@@ -15,11 +16,12 @@ export const eventBus = new Vue();
 
 Vue.use(VueResource);
 Vue.use(VueSession);
-Vue.use(VueMoment);
+Vue.use(VueLuxon);
+Vue.use(VueMoment)
 Vue.use(Vuetify);
 
- Vue.http.options.root = 'https://kyykka.com'
-//Vue.http.options.root = 'http://localhost:8000'
+//  Vue.http.options.root = 'https://kyykka.com'
+Vue.http.options.root = 'http://localhost:8000'
 
 Vue.mixin({
     methods: {
