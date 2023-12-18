@@ -20,8 +20,8 @@ Vue.use(VueLuxon);
 Vue.use(VueMoment)
 Vue.use(Vuetify);
 
-//  Vue.http.options.root = 'https://kyykka.com'
-Vue.http.options.root = 'http://localhost:8000'
+ Vue.http.options.root = 'https://kyykka.com'
+// Vue.http.options.root = 'http://localhost:8000'
 
 Vue.mixin({
     methods: {
