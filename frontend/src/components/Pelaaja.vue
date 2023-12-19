@@ -114,7 +114,7 @@
                 {{ item.opp_score_round }}
               </v-chip>              
             </template>
-            <template v-slot:item.score_first="{item}">
+            <!-- <template v-slot:item.score_first="{item}">
               <td class="border_left">
                 {{ item.score_first }}
               </td>
@@ -123,7 +123,7 @@
               <td class="border_left">
                 {{ item.score_total }}
               </td>
-            </template>
+            </template> -->
           </v-data-table>
           <v-data-table mobile-breakpoint="0" @click:row="handleRedirect" dense color='alert'
           :headers="headers_games"
@@ -154,7 +154,7 @@
                 {{ item.opponent_score }}
               </v-chip>              
             </template>
-            <template v-slot:item.score_first="{item}">
+            <!-- <template v-slot:item.score_first="{item}">
               <td class="border_left">
                 {{ item.score_first }}
               </td>
@@ -163,7 +163,7 @@
               <td class="border_left">
                 {{ item.score_total }}
               </td>
-            </template>
+            </template> -->
           </v-data-table>
 
 

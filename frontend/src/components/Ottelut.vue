@@ -11,8 +11,8 @@
         <v-text-field color="red" v-model="search" label="Search" single-line hide-details></v-text-field>             
       </div>
     </v-card-title>
-    <v-data-table mobile-breakpoint="0" disable-pagination
-    @click:row="handleRedirect" dense 
+    <v-data-table mobile-breakpoint="0" disable-pagination dense
+    @click:row="handleRedirect"
     :headers="headers"
     :item-class="itemRowBackground"
     :items="data"
@@ -147,7 +147,7 @@ export default {
           );
         },
         handleRedirect: function(value) {
-          location.href = '/ottelu/'+value.id
+          this.$router.push('/ottelu/'+value.id)
         },
         itemRowBackground: function(item) {
           // Handles the backround color of row items
@@ -175,10 +175,12 @@ export default {
 <style>
 .row__background__style_1 {
   background-color: rgba(195, 20, 20, 0.781) !important;
+  cursor: pointer
 }
 
 .row__background__style_2 {
   background-color: white;
+  cursor: pointer;
 }
 
 </style>
