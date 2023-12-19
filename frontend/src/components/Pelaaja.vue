@@ -465,7 +465,7 @@ export default {
                   );
         },
         handleRedirect: function(value) {
-          location.href = '/ottelu/'+value.id;
+          location.href = '/ottelu/'+value.match_id;
         },
         chanceSeason: function(value, row) {
           var year = Number(value.season)
