@@ -340,7 +340,7 @@ class SeasonsAPI(generics.GenericAPIView):
         key = 'current_season'
         current_season = getFromCache(key)
         if current_season is None:
-            current_season = SeasonSerializer(Season(self.current[0].id)).data
+            current_season = SeasonSerializer(Season(self.current[0].season_id)).data
             setToCache(key, current_season)
 
         return Response((all_seasons, current_season))
