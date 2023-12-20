@@ -1,8 +1,8 @@
 <template>
   <v-app class="app">
-    <nav-bar class="mb-5"></nav-bar>
+    <nav-bar class="mb-5" />
     <v-main transition="slide-x-transition" class="content pa-0 mx-auto">
-      <router-view></router-view>
+      <router-view />
     </v-main>
   </v-app>
 </template>

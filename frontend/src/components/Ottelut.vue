@@ -13,6 +13,7 @@
     </v-card-title>
     <v-data-table mobile-breakpoint="0" disable-pagination dense
     @click:row="handleRedirect"
+    @contextmenu:row='handleClick'
     :headers="headers"
     :item-class="itemRowBackground"
     :items="data"
@@ -32,11 +33,11 @@
         <span>Ottelu on validoimatta</span>
       </v-tooltip>
     </template>
-      <v-alert
-        slot="no-results"
-        :value="true"
-        color="error"
-      >Your search for "{{ search }}" found no results.</v-alert>
+    <v-alert
+      slot="no-results"
+      :value="true"
+      color="error"
+    >Your search for "{{ search }}" found no results.</v-alert>
     </v-data-table>
     <v-data-table mobile-breakpoint="0" disable-pagination 
     @click:row="handleRedirect" dense 
@@ -60,6 +61,7 @@
     </v-data-table>
   </v-card>
 </template>
+
 
 <script>
 import moment from 'moment'
@@ -105,6 +107,10 @@ export default {
         };
     },
     methods: {
+        handleClick : function(value,item) {
+          const routeData = this.$router.resolve({path:  `/ottelu/${item.item.id}`})
+          window.open(routeData.href, ' _blank', 'noopener', 'noreferrer').focus()
+        },
         selectChange: function() {
           if (this.defaultSelected == "Runkosarja") {
             this.data = this.regular_season

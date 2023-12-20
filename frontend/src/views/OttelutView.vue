@@ -1,12 +1,13 @@
 <template>
   <v-layout>
     <v-flex auto>
-      <ottelut></ottelut>
+      <Ottelut />
     </v-flex>
     <v-flex xs4 class="pl-3 hidden-md-and-down">
       <side-bar></side-bar>
     </v-flex>
   </v-layout>
+
 </template>
 
 <script>
@@ -16,9 +17,9 @@ import Ottelut from '@/components/Ottelut';
 export default {
     name: 'ottelutview',
     components: {
-        SideBar,
-        Ottelut
-    }
+    SideBar,
+    Ottelut
+}
 };
 </script>
 
