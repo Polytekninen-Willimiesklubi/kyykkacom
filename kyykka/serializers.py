@@ -707,7 +707,8 @@ class UserMatchSerializer(serializers.ModelSerializer):
                 round_two_no_throws = no_throws
                 self.throw_average_two = round(self.round_two_total / (4- round_two_no_throws),2)
         score_total = self.round_one_total + self.round_two_total
-        self.throw_average_match = round(score_total / (8 - round_one_no_throws - round_two_no_throws),2)
+        number_of_throws = 8 if type(self.throw_turn_one) is int and type(self.throw_turn_two) is int else 4
+        self.throw_average_match = round(score_total / (number_of_throws - round_one_no_throws - round_two_no_throws),2)
         return score_total
 
     def get_opponent_name(self, obj):
