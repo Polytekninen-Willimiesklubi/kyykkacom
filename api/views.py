@@ -328,19 +328,19 @@ class ThrowAPI(generics.GenericAPIView, UpdateModelMixin):
     
 class SeasonsAPI(generics.GenericAPIView):
     queryset = Season.objects.all()
-    current = CurrentSeason.objects.all()
 
     def get(self, request):
         key = 'all_seasons'
         all_seasons = getFromCache(key)
         if all_seasons is None:
-            all_seasons = SeasonSerializer(self.queryset.all(), many=True).data
+            all_seasons = SeasonSerializer(self.queryset, many=True).data
             setToCache(key, all_seasons)
        
         key = 'current_season'
         current_season = getFromCache(key)
         if current_season is None:
-            current_season = SeasonSerializer(Season(self.current[0].season_id)).data
+            current = CurrentSeason.objects.first().season
+            current_season = SeasonSerializer(current).data
             setToCache(key, current_season)
 
         return Response((all_seasons, current_season))
