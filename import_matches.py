@@ -44,3 +44,10 @@ def import_matches():
                     home_team=home_team,
                     away_team=away_team
                 )
+if __name__ == '__main__':
+    test_import()
+    user = input('Haluatko jatkaa [Y]/n:')
+    if user == 'Y':
+        import_matches()
+    else:
+        print('Aboting....')
