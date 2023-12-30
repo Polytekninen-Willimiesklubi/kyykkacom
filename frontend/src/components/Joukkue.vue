@@ -114,7 +114,7 @@
                 <!-- [``] needed to prevent eslint error -->
                 <template v-slot:[`item.actions`]="{ item }">
                   <v-icon
-                    v-if="!item.team"
+                    v-if="!item.team.current_name"
                     color=green
                     @click="reserveButton(item)"
                   >
@@ -123,8 +123,8 @@
                   <v-icon
                     v-else  
                     color=gray
-                    @click="deleteItem(item)"
-                  >
+                    >
+                    <!-- @click="deleteItem(item)" -->
                     mdi-lock
                   </v-icon>
                 </template>

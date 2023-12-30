@@ -205,7 +205,7 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
             season = self.context.get('season')
             t = TeamsInSeason.objects.filter(season=season, playersinteam__player=obj).first()
             team = TeamSerializer(t).data
-        except Team.DoesNotExist:
+        except TeamsInSeason.DoesNotExist:
             team = None
         return team
 
@@ -328,8 +328,8 @@ class ReserveCreateSerializer(serializers.ModelSerializer):
         add_player = validated_data['player']
         season = CurrentSeason.objects.first().season
         try:
-            team = user.team_set.get(playersinteam__season=season)  # FIXME THIS IS NOT Upto-date
-            PlayersInTeam.objects.create(team_season__season=season, team=team, player=add_player)
+            team = user.teamsinseason_set.get(season=season)
+            PlayersInTeam.objects.create(team_season=team, player=add_player)
         except IntegrityError:
             print('reserve duplicate', user.id, add_player)
             return False, "DUPLICATE"
@@ -937,7 +937,7 @@ class TeamDetailSerializer(serializers.ModelSerializer):
 
     def get_score_total(self, obj):
         throws = self.context.get('throws')
-        self.score_total =  count_score_total(obj, self.context.get('season'), throws)
+        self.score_total = count_score_total(obj, self.context.get('season'), throws)
         return self.score_total
 
     def get_match_count(self, obj):
