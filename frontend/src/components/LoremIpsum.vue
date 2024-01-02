@@ -2,7 +2,109 @@
   <v-container class="lorem-ipsum">
     <v-layout column>
       <v-flex>
-        <h2>Kyykkä sivusto on päivittynyt!</h2>
+        <h2>Kausiennakko 2024</h2>
+        <p>Mitä mitä mitä. KyykkäAasianTuntijat ovat olleet taas liikenteessä, kun heiltä löytyy jo tässä
+            vaiheessa joulukuuta tietoa ja on taitoa, ja sitä mitä muilla ei tunnu olevan, sitä näkemystä,
+            jopa Mika Aaltolaa enemmän. Luvassa siis tulevan kauden kausiennakot ja jopa katsaus
+            tulevaisuuteen. Tästä joulupöytään sitä parempaa keskustelun aihetta, kun pöydässä voi
+            keskustella tulevan NKL-kauden voimasuhteista opintojen etenemisen sijaan. TOP5
+            joukkuueet per lohko pureskeltavaksi. Disclaimer: Asiantuntijaraati on löytänyt nämä
+            totuudet useamman sumuisen illan pohdinnan jälkeen ja ei ota mitään vastuuta yhtään
+            mistään.</p>
+
+            <h2>Lohko A</h2>
+            <p><b>1. Mallinnetaan Haukia Laskimet Kuumana [MaHaLasKu]</b></p>
+            <p> Liigavastaavan kirous on viimeinkin murtunut MaHaLasKun juhlittua ensimmäistä
+                liigamestaruuttaan viime kauden päätteeksi. Samalla porukalla ja samalla sävelellä
+                latelaisten ylpeys jatkanee tänäkin kautena. Nuoriso-osasto on jatkanut kehittymistään ja
+                kokemus ja rutiini ovat joukkueessa vahvasti läsnä. Vaikka &#128525Leevi&#128525 ei ilmeisesti kentille
+                kovin usein vaivaudu niin joukkueen viimeisenä lukkona luutii Totti, joka ei anna tulosten
+                karata kovin korkeiksi. Joukkue swiippaa runkosarjan todennäköisesti puhtaalla pelillä.</p>
+
+            <p><b>2. KonjakkiMafia [VSOP]</b></p>
+            <p>Viime vuosi päättyi hienoiseen pettymykseen Mafiosojen osalta kaksoisagentti Pekosen
+                näyttäessään todellisen kantansa pronssiottelusarjassa ja Konjakinmaistelijat jäivät lopulta
+                neljänneksi. DiSKO laittoit pirulliset suunnitelmansa VSOPin pään menoksi jo kesällä
+                käyntiin kun Elmo möi Samille kartut joiden kahvoissa oli vauvaöljyä. Mies ei ole toipunut
+                tästä vieläkään ja lakaisut lipsuvat säännöllisesti oikealta ohi. Myöskin kaksikäsi-Eemil on
+                KyykkäAsianTuntijoiden kuulemien huhujen mukaan lopettanut aktiivisen pelaamisen vaikka
+                rosterin listoilla vielä kummitteleekin.Tästä huolimatta muuttumattomassa rosterissa on
+                edelleen potentiaalia ja toivottavasti myöskin suoritusvarmuutta lunastamaan paikkansa
+                lohkon piikkipaikoilla.</p>
+            <p><b>3. Alkuun Levutti Tuomas Fishingia, Farmingia, Fletchingia, Firemakingia [ALTF4]</b></p>
+            <p>Titeläisten ylpeys alkaa näillä kilometreillä olla jo varteen otettava menestyjä. Vuosi vuodelta
+                tasaisesti parantanut joukkue ylsi viime kaudella yhdeksi viidestä joukkueesta jotka kauden
+                aikana onnistuivat kentän tyhjentämään. Treenitunteja joukkueelle kertyy kuitenkin
+                enemmän tietokoneen ääressä, mutta kauden lähestyessä joukkue on havaittu myös
+                kyykkäkentillä. Peluutuksen suhteen tuttu kaava männävuosilta saattaa toistua, riviä lähtee
+                kärkiheittäjien puolesta kiitettäviä määriä, mutta huipputuloksiin oikeuttavassa
+                lakaisupelaamisessa nähdään vielä liian suurta vaihtelua aivan kärkisijojen tavoitteluun.
+                Tasaisessa runkosarjassa tämä taso riittänee kuitenkin juuri terävimmän kärjen alapuolelle.</p>
+            <p><b>4. Sisältövaroitus [SV]</b></p>
+            <p>Tämä Säteläisten miehistö paranee ikääntyessään kuin viini. Pelivuosia on takana jo
+                enemmän kuin monilla liigapelaajista opiskeluvuosia, mutta se ei menoa haittaa.
+                Asiantuntijaraati ennustaa vastustajille vaikeita pelejä tätä joukkuetta vastaan. Varsinkin jos
+                sääolot luovat ÄsVeelle ihanteelliset jääkenttäolosuhteet voivat kovimmatkin vastustajat olla
+                helisemässä. Joukkueesta löytyy tasaisesti tulivoimaa kyykkien poistamiseen, mutta kun
+                nappulat alkavat kentältä vähenemään ei tarkkuutta löydy ihan loppuun saakka.
+                Simulaatioissa joukkueen puhti riittää A lohkon nelospaikkaan.</p>
+            <p><b>5. Karttu Wiskarit [KW]</b></p>
+            <p>Viime kauteen suurin odotuksin lähteneet Artun fanit floppasivat asiantuntijoiden silmissä
+              täysin. Runkkarissa lohkon kuutospaikalle pudonneet Kartun Wiskaajat eivät lunastaneet
+              heille asetettuja odotuksia. Potentiaalia kuitenkin hyviin tuloksiin joukkueesta edelleen löytyy.
+              Nuoruuden intoakin joukkueen setien seasta löytyy erään Armatuurin fuksin toimesta.
+              Toivottavasti reenit talven mittaan maistuvat ja joukkue pystyy parantamaan edelliskaudesta.
+              Yksi asia on varmaa, joukkue menestyy jälkipeleillä kentällä nähdyistä tuloksista
+              riippumaatta. G-baarissa tavataan!</p>
+
+
+            <h2>Lohko B</h2>
+
+            <p><b>1. Sulavasti Keskelle [SulaKe]</b></p>
+            <p>Offseasonin ehdottomasti mielenkiintoisin siirtouutinen löytyy entisen Sätky Kyn jäljille
+                perustetusta SulaKkeesta. Kaiken nähnyt Sami Aalto on palaamassa NKL:ään näyttämään
+                nuorille miten karttu lentää. Joukkueesta löytyy laajuutta ja suoritusvarmuutta josta moni
+                muu joukkue olisi kateellinen. Mielenkiintoinen vedonlyönnin kohde on kuinka monta
+                mustikkashottia Irma-täti pääsee kauden aikana juomaan vai kirjataanko tulossarakkeeseen
+                aina vain viisi. Nähtäväksi jää palaako joukkueen SulaKe ennakkosuosikin paineisiin vai
+                nouseeko joukkue lohkon piikkipaikalle.</p>
+
+            <p><b>2. Diskonttaajat Sipuloi Katiska Osumia [DiSKO]</b></p>
+            <p>Ei mennyt TuTa joukkueen rahat hukkaan, kun suorittavat viime liigakauden rahakkaimman
+                pelaajasiirron tuodessaan joukkueeseen täydellisen tutalaisen, joka ei itsekkään tiennyt
+                kumpaa kättä neliössä heilutella. Joutuuko joukkue kuitenkin purjeisiin, kun Elmo on siirtynyt
+                Lahteen väistelemään puukkoja karttujen heittelyn sijasta. Viime kaudella tasaisesti
+                parantanut ja pudotuspeleissä tasoaan nostanut nippu suorittaa tälläkin kaudella varmasti
+                tasaisesti. Todellisen menestyksen mittaa tuoreiden hankintojen, nuorempien
+                käsienheiluttelijoiden sipulin kesto, koska vanha rosteri on ehtinyt omansa jo kypsyttää
+                suuren maailman stadioneilla. DiSKOssa tulee pilkku kauden jälkeen, odotamme
+                jännityksellä käykö joukkueella flaksi.</p>
+            <p><b>3. Draconis [Dra]</b></p>
+            <p>[insert vitsi ikivanhoista kyykkääjistä]</p>
+            <p><b>4. Skinnarilan Sika Klupi [SSK]</b></p>
+            <p>Kyykkä A. Sian tuntijat ovatkin päässeet ihmettelemään jälleen porsaita lätissä ja sitä mitä
+              tästä taas oikein seuraa. Todennäköisesti ääni kellossa ei ole muuttunut. Vastustajaa
+              häiritään kaikin urheilullisin ja epäurheilullisin keinoin, juodaan viinaa ja sitten SSK voittaa.
+              Kovimmat kilpailijat ovat nämä temput jo nähneet ja eivät niistä hämmenny, mutta
+              fuksijoukkueilla voi valahtaa löysät lahkeeseen. Jälleen kerran yllättävän kovan ja tasaisen
+              kauden pelaava sikalauma löytyy lohkon kärkipäästä ja jatkaa menoaan pudotuspeleihin.</p>
+            <p><b>5. Voimakkaasti Eläköitymistä Kaipaavat Tieteenharjoittajat Optimistisesti Raivaamassa
+              Ilmaan Torneja TEKOÄLY !!! [VEKTORIT]</b></p>
+            
+            <p> Järkyttävän pitkän nimen takaa löytyy joukkueellinen latelaisia jotka ovat hakeneet
+              uudelleenbrändäyksen myötä vauhtia kauteen. Kyykkä_Aasian_Tuntiat ovat
+              vakoilulaitteiltaan havainneet, että fuksianpunaiset haalarit vilkkuvat hälyttävän usein
+              Gardenilla treenaamassa. Varmasti kovaa parannusta viime vuoteen nähden on luvassa ja
+              koviakin joukkueita saattaa tämä rosteri pystyä haastamaan. Asiantuntijaraati ei kyllä
+              ymmärrä miten kyykänheittovektoreissa lasketaan voiman ja suunnan lisäksi vielä kartun
+              vaihe kohdalleen, mutta se jätetäänkin laskimennäpyttelijöiden ratkaistavaksi. Nähtäväksi
+              jää vaivaako joukkuetta liiallinen Nuori Suomi peluutus vai saadaanko rosteria tiivistettyä
+              ratkaisupeleihin.
+            </p>
+
+        <v-divider></v-divider>
+        
+        <h2>Kyykkäsivusto on päivittynyt!</h2>
         
         <p>Hei täältä kehitystyön takaa. Täällä on painettu duunia maailman parasta kyykkää pelaavan liigan iloksi ja nyt (ehkä) ensimmäiset kunnolliset muutokset meidän ihanalle nettisivullemme saapuvat kaikkien näkyville. Tulevaisuudessa näistä päivityksistä tuskin ilmoitamme näin äänekkäästi, mutta ymmärtääkseni sivustolle on tullut jotain uutta viimeksi, kun uusi sivusto luotiin (josta alkaa olemaan jo 4-5 vuotta). Listaan alla uusista asioita/muutoksista:</p>
         <p><b>1.</b> Uusi '<b>Pelaaja</b>' - sivu kaikkineen hienouksineen. Paina pelaajan nimeä missä vain päästäksesi katsomaan tämän pelaajan statseja kautta historian!</p>
@@ -14,6 +116,8 @@
         <p></p>
         <p>Terveisin sivuston (tämän hetkinen) ylläpitäjä.</p>
         
+        <v-divider></v-divider>
+
         <h2>Ohjeita kapteeneille</h2>
 
         <p>
@@ -21,6 +125,8 @@
           Ottelutulos tallentuu syötettäessä reaaliaikaisesti. Suosittelemme ottelutuloksen syöttämisen jälkeen vielä päivittämään ottelusivun, ja varmistamaan että syöttö on onnistunut.
           Ottelutuloksen syöttämisen jälkeen vierasjoukkueen kapteenin tulee vielä vahvistaa tulos ottelusivulta, jonka jälkeen pisteet päivittyvät statseihin.
         </p>
+
+        <v-divider></v-divider>
 
         <h2>Kausiennakko 2023</h2>
 

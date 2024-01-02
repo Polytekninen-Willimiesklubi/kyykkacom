@@ -130,11 +130,18 @@ class LoginAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         login(request, user)
-        role = getRole(user)
+        # role = getRole(user)
         try:
-            team_id = user.playersinteam.filter(team_season__season=CurrentSeason.objects.first()).first().team_season
+            current = CurrentSeason.objects.first().season
+            player_in_team = PlayersInTeam.objects.get(player=user, team_season__season=current)
+            team_id = player_in_team.team_season.id
+            if player_in_team.is_captain:
+                role = '1'
+            else:
+                role = '0'
         except (PlayersInTeam.DoesNotExist, AttributeError) as e:
             team_id = None
+            role = '0'
         response = Response({
             'success': True,
             'user': UserSerializer(user).data,
@@ -328,7 +335,6 @@ class ThrowAPI(generics.GenericAPIView, UpdateModelMixin):
     
 class SeasonsAPI(generics.GenericAPIView):
     queryset = Season.objects.all()
-    current = CurrentSeason.objects.all()
 
     def get(self, request):
         key = 'all_seasons'
@@ -340,7 +346,8 @@ class SeasonsAPI(generics.GenericAPIView):
         key = 'current_season'
         current_season = getFromCache(key)
         if current_season is None:
-            current_season = SeasonSerializer(Season(self.current[0].id)).data
+            current = CurrentSeason.objects.first().season
+            current_season = SeasonSerializer(current).data
             setToCache(key, current_season)
 
         return Response((all_seasons, current_season))
