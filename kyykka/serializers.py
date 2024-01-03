@@ -1097,7 +1097,6 @@ class MatchTeamSerializer(serializers.ModelSerializer):
     players = serializers.SerializerMethodField()
 
     def get_players(self, obj):
-        print(obj.players())
         return PlayerNameSerializer(obj.players.filter(playersinteam__team_season__season=self.context.get('season')),
                                     many=True).data
     class Meta:
