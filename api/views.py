@@ -76,7 +76,7 @@ class IsCaptain(permissions.BasePermission):
         try:
             if request.user.is_superuser:
                 return True
-            return request.user.playersinteam_set.get(season=CurrentSeason.objects.first().season).is_captain
+            return request.user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain
         except PlayersInTeam.DoesNotExist as e:
             return False
 
@@ -90,7 +90,7 @@ class IsCaptainForThrow(permissions.BasePermission):
             if request.user.is_superuser:
                 return True
             return request.user == obj.match.home_team.playersinteam_set.filter(
-                season=CurrentSeason.objects.first().season,
+                team_season__season=CurrentSeason.objects.first().season,
                 is_captain=True
             ).first().player
         except AttributeError as e:
@@ -107,10 +107,10 @@ class MatchDetailPermission(permissions.BasePermission):
         if request.user.is_superuser:
             return True
         if 'is_validated' in request.data and len(request.data) == 1:
-            return request.user == obj.away_team.playersinteam_set.filter(season=CurrentSeason.objects.first().season,
+            return request.user == obj.away_team.playersinteam_set.filter(team_season__season=CurrentSeason.objects.first().season,
                                                                           is_captain=True).first().player
         if 'is_validated' not in request.data:
-            return request.user == obj.home_team.playersinteam_set.filter(season=CurrentSeason.objects.first().season,
+            return request.user == obj.home_team.playersinteam_set.filter(team_season__season=CurrentSeason.objects.first().season,
                                                                           is_captain=True).first().player
 
 
