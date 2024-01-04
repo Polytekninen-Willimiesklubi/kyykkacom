@@ -90,7 +90,7 @@
           :items="filtteredItems"
           :custom-sort="throwSort"
           v-if="sort_games_switch=='Erittäin'">
-            <template slot="no-data">
+            <template slot="no-data" v-if="!data_loaded">
               <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
             </template>
             <template v-for="h in headers" v-slot:[`header.${h.value}`]="{ header }">
@@ -130,7 +130,7 @@
           :items="filtteredItems"
           :custom-sort="throwSort"
           v-else>
-            <template slot="no-data">
+            <template slot="no-data" v-if="!data_loaded">
               <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
             </template>
             <template v-for="h in headers_games" v-slot:[`header.${h.value}`]="{ header }">
@@ -217,6 +217,7 @@ export default {
             player_id: this.$route.fullPath.substr(
                 this.$route.fullPath.lastIndexOf('/') + 1
             ),
+            data_loaded: false,
             isActive: false,
             sort_games_switch :"Erittäin",
             filter_games_switch :"Kaikki kaudet",
@@ -279,6 +280,11 @@ export default {
                       var all_seasons = JSON.parse(sessionStorage.all_seasons)
                       var season_year = ''
                       
+                      if (all_seasons) {
+                        this.data_loaded = true
+                        return
+                      }
+
                       all_seasons.forEach(ele => {
                         if (ele.id == selectSeason) {
                           season_year = ele.name.split(" ")[1]

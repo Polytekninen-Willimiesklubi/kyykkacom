@@ -1141,15 +1141,7 @@ class ThrowScoreSerializer(serializers.ModelSerializer):
         return UserSerializer(obj.player).data
     
     def get_score_first(self,obj):
-        tmp_list = []
-        if obj.score_first is not None:
-            tmp_list.append(obj.score_first)
-        if obj.score_second is not None:
-            tmp_list.append(obj.score_second)
-        if obj.score_third is not None:
-            tmp_list.append(obj.score_third)
-        if obj.score_fourth is not None:
-            tmp_list.append(obj.score_fourth)
+        tmp_list = [obj.score_first, obj.score_second, obj.score_third, obj.score_fourth]
         scores = score_format(tmp_list)
         self.score_first, self.score_second, self.score_third, self.score_fourth = scores
         return self.score_first
