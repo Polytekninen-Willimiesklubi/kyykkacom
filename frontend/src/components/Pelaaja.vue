@@ -279,8 +279,7 @@ export default {
                       var selectSeason = sessionStorage.season_id
                       var all_seasons = JSON.parse(sessionStorage.all_seasons)
                       var season_year = ''
-                      
-                      if (all_seasons) {
+                      if (this.all_seasons.length === 0) {
                         this.data_loaded = true
                         return
                       }
