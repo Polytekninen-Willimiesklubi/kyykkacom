@@ -202,7 +202,17 @@ class ReservePlayerAPI(generics.GenericAPIView):
                 'message': message,
             })
 
+class AllPlayersViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
 
+    def list(self, request, format=None):
+        key = 'all_players'
+        all_players = getFromCache(key)
+        if all_players is None:
+            serializer = PlayerAllDetailSerializer(self.queryset, many=True)
+            all_players = serializer.data
+            setToCache(key, all_players)
+        return Response(all_players)
 class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     """
     List all players that are in a team for the season beingh queried. 

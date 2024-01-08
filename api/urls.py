@@ -36,10 +36,11 @@ urlpatterns = [
     path('matches/', views.MatchList.as_view(), name='matches-list'),
     path('matches/<int:pk>', views.MatchDetail.as_view(), name='matches-detail'),
     path('throws/update/<int:pk>/', views.ThrowAPI.as_view()),
-    path('seasons',  views.SeasonsAPI.as_view())
+    path('seasons',  views.SeasonsAPI.as_view()),
 ]
 
 router = SimpleRouter()
+router.register(r'tilasto_autismi', views.AllPlayersViewSet)
 router.register(r'players', views.PlayerViewSet, "player")
 router.register(r'teams', views.TeamViewSet)
 # router.register(r'matches', views.MatchViewSet)
