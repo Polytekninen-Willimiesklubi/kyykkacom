@@ -266,16 +266,15 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 "throws_total": 0,
                 "gteSix_total": 0,
                 "zero_or_pike_first_throw_total": 0,
-                "players": []
+                "players": [],
+                "matches" : []
             }}
             weighted_total = 0
             team_season = get_object_or_404(self.queryset, pk=pk)
-            print(Team.objects.filter(id=team_season.team.id))
             team = Team.objects.filter(id=team_season.team.id)
             all_team_seasons = self.queryset.filter(team=team.first())
             players = {}
             player_weighted_total = {}
-            print(f'jotain {all_team_seasons}')
             for one_season in all_team_seasons.all():
                 throws = Throw.objects.filter(match__is_validated=True, team=one_season)
                 season = one_season.season
@@ -293,7 +292,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 response_data['all_time']['gteSix_total'] += one_serializer.data['gteSix_total']
                 response_data['all_time']['zero_or_pike_first_throw_total'] += one_serializer.data['zero_or_pike_first_throw_total']
                 weighted_total += one_serializer.data['match_average'] * one_serializer.data['match_count']
-                
+                response_data['all_time']['matches'].extend(one_serializer.data['matches'])
+
                 for player in one_serializer.data['players']:
                     if player['player_name'] not in players:
                         players[player['player_name']] = {

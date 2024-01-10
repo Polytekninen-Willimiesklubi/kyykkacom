@@ -164,7 +164,37 @@
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>Ottelut</v-expansion-panel-header>
-        <v-expansion-panel-content>Tähän tulee jotain</v-expansion-panel-content>
+        <v-expansion-panel-content>
+          <v-data-table mobile-breakpoint="0" @click:row="handleRedirect" dense color='alert' 
+          :search="search" 
+          :headers="match_headers"
+          :items="matches">
+            <template slot="no-data">
+              <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
+            </template>
+            <template v-for="h in match_headers" v-slot:[`header.${h.value}`]="{ header }">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <span v-on="on">{{h.text}}</span>
+                </template>
+                <span>{{h.tooltip}}</span>
+              </v-tooltip>
+            </template>
+            <template v-slot:[`item.match_time`]="{ item }">
+              <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
+            </template>
+            <template v-slot:item.own_team_total="{ item }">
+              <v-chip :color="getColor(item.own_team_total, item.opposite_team_total)">
+                {{ item.own_team_total }}
+              </v-chip>              
+            </template>
+            <template v-slot:item.opposite_team_total="{item}">
+              <v-chip :color="getColor(item.opposite_team_total, item.own_team_total)">
+                {{ item.opposite_team_total }}
+              </v-chip>              
+            </template>
+          </v-data-table>
+        </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
   </v-card>
@@ -249,10 +279,24 @@ export default {
                     alignt: 'left'
                 }
             ],
+            match_headers: [
+            { text: 'Aika', value: 'match_time', align: 'center', tooltip:'Pelausaika'},
+            { text: 'Tyyppi', value: 'match_type', align: 'center',tooltip: 'Peli Tyyppi' },
+            { text: 'Vastustaja', value: 'opposite_team', align: 'center', tooltip: 'Vastustaja joukkue'},
+            { text: 'OJ 1', value: 'own_first', align: 'center', tooltip:'Oman Joukkueen 1. Erä', width: '2%'},
+            { text: 'OJ 2', value: 'own_second', align: 'center', tooltip: 'Oman Joukkueen 2. Erä', width: '2%'},
+            { text: 'V 1', value: 'opp_first', align: 'center', tooltip: 'Vastustaja Joukkueen 1. Erä', width: '2%'},
+            { text: 'V 2', value: 'opp_second', align: 'center', tooltip: 'Vastustaja Joukkueen 2. Erä', width: '2%'},
+            // { text: 'H+VM', value: 'jotain', align: 'center', tooltip: 'Yhteensä pelissä oman joukkueen heittämät nolla heitot'},
+            // { text: 'JK', value: 'jotain', align: 'center', tooltip: '(Joulukuusi) Yhteensä pelissä oman joukkueen heittämät "6 kyykkää tai enemmän"- heitot'},
+            { text: 'OJ pis.', value: 'own_team_total', align: 'center', tooltip:'Oman joukkueen pisteet' },
+            { text: 'V pis.', value: 'opposite_team_total', align: 'center', tooltip:'Vastustaja joukkueen pisteet' }
+            ],
             panel: [0],
             stats: [],
             players: [],
             reserve: [],
+            matches: [],
             selected_season: null,
             all_time: [],
             seasons_data: {}
@@ -276,9 +320,11 @@ export default {
                         } else {
                           this.selected_season = Math.max(...Object.keys(this.seasons_data).map(x => +x)).toString()
                         }
-                        this.players = this.seasons_data[this.selected_season].players;
-                        this.header = this.seasons_data[this.selected_season].current_name;
-                        this.stats = [this.seasons_data[this.selected_season]];
+                        const tmp = this.seasons_data[this.selected_season]
+                        this.players = tmp.players;
+                        this.header = tmp.current_name;
+                        this.stats = [tmp];
+                        this.matches = tmp.matches;
                     },
                 );
         },
@@ -344,13 +390,20 @@ export default {
           if (value == 'all_time') {
             this.stats = [this.all_time]
             this.players = this.all_time.players;
+            this.matches = this.all_time.matches
           } else {
             this.players = this.seasons_data[value].players;
             this.header = this.seasons_data[value].current_name;
             this.stats = [this.seasons_data[value]];
+            this.matches = this.seasons_data[value].matches
             console.log(this.selected_season)
           }
-        }
+        },
+        getColor: function(val1, val2) {
+          if (val1 < val2) return '#C8E6C9' // green-lighten-4
+          else if (val1 > val2) return '#EF9A9A' // red-lighten-4
+          else return '#F0F4C3' // yellow-lighten-4
+        },
     },
     mounted: function() {
         this.header = '';
