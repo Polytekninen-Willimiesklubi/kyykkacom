@@ -258,6 +258,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request, pk=None):
         try:
+            # FIXME THIS should be done in some sort of serializer rather than here
             response_data = {"all_time" : {
                 "score_total": 0,
                 "match_count": 0,
@@ -316,7 +317,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     players[player['player_name']]['scaled_points'] += player['scaled_points'] if player['scaled_points'] is not None else 0
                     players[player['player_name']]['gteSix_total'] += player['gteSix_total']
                     player_weighted_total[player['player_name']] += player['throws_total'] * player['avg_throw_turn']
-
                     
             for name, stats in players.items():
                 players[name]['score_per_throw'] = round(stats['score_total'] / stats['throws_total'],2) if stats['throws_total'] else 'NaN'

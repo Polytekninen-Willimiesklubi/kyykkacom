@@ -998,7 +998,7 @@ class TeamDetailSerializer(serializers.ModelSerializer):
 
     def get_matches(self, obj):
         matches = Match.objects.filter(Q(home_team=obj) | Q(away_team=obj), is_validated=True)
-        return Match2ListSerializer(matches, many=True, context= {'team': obj})
+        return Match2ListSerializer(matches, many=True, context= {'team': obj}).data
 
     def get_players(self, obj):
         return PlayerListSerializer(obj.players, many=True, context={'season': self.context.get('season')}).data
