@@ -3,18 +3,8 @@
     <v-card-title class="pa-0 pl-3 pt-3">Erä {{this.roundNumber}}<v-spacer/><v-progress-circular :size="20" :width="2" indeterminate color="red" v-if="loading"/></v-card-title>
     <v-row v-if="!show_input" row wrap>
       <v-card-text v-if="this.round_score || this.round_score == '0'">
-        <p v-if="this.teamSide == 'home'">
-          {{this.home_team}}
-          <v-chip
-            style="float:right;"
-            :color="`${this.color} lighten-2`"
-            label
-            small
-            class="mr-2"
-          >{{this.round_score}}</v-chip>
-        </p>
-        <p :color="this.color" v-if="this.teamSide == 'away'">
-          {{this.away_team}}
+        <p>
+          {{this.team}}
           <v-chip
             style="float:right;"
             :color="`${this.color} lighten-2`"
@@ -28,12 +18,8 @@
     <v-divider></v-divider>
     <v-row v-if="show_input" row wrap>
       <v-card-text v-if="loaded">
-        <p v-if="this.teamSide == 'home'">
-          {{this.home_team}}
-          <v-text-field @input="roundScore()" style="width:10%; float:right;" v-model="round_score" class="centered-input" label="total" maxlength="3"/>
-        </p>
-        <p :color="this.color" v-if="this.teamSide == 'away'">
-          {{this.away_team}}
+        <p>
+          {{this.team}}
           <v-text-field @input="roundScore()" style="width:10%; float:right;" v-model="round_score" class="centered-input" label="total" maxlength="3"/>
         </p>
       </v-card-text>
@@ -67,8 +53,7 @@
         <tr>
           <td :ref="'id_'+props.index">{{selected[props.index].player.id}}</td>
           <td>
-            <v-select item-color="red" color="red" v-model="selected[props.index].player.player_name" @change="loadPlayer($event, props.index)" v-if="teamSide == 'home'" class="text-center pr-1" placeholder="Select player" :items="home_players" single-line></v-select>
-            <v-select item-color="red" color="red" v-model="selected[props.index].player.player_name" @change="loadPlayer($event, props.index)" v-else-if="teamSide == 'away'" class="text-center pr-1" placeholder="Select player" :items="away_players" single-line></v-select>
+            <v-select item-color="red" color="red" v-model="selected[props.index].player.player_name" @change="loadPlayer($event, props.index)" class="text-center pr-1" placeholder="Select player" :items="home_players" single-line></v-select>
           </td>
           <td><v-text-field color="red" v-model="selected[props.index]['score_first']" :ref="'first_throw_'+props.index" class="centered-input" maxlength="2" @input="sumTotal(props.index)" v-on:keypress="isNumber($event)"/></td>
           <td><v-text-field color="red" v-model="selected[props.index]['score_second']" :ref="'second_throw_'+props.index" class="centered-input" maxlength="2" @input="sumTotal(props.index)" v-on:keypress="isNumber($event)"/></td>
@@ -119,15 +104,12 @@ export default {
             show_input: false,
             loading: false,
             loaded: false,
-            home_team: '',
-            away_team: '',
             round_score: '',
+            team: '',
+            players: [],
             color: '',
             is_validated: '',
-            home_players: [],
-            away_players: [],
             data: [],
-            plain_data: [],
             headers: [
                 {
                     text: this.teamSide,
@@ -169,7 +151,7 @@ export default {
           }
         },
         roundScore: function() {
-          let post_url = 'api/matches/'+this.plain_data.body.id
+          let post_url = 'api/matches/'+this.matchData.id
           let post_data = {}
           let key = ''
 
@@ -234,10 +216,8 @@ export default {
           array.forEach(function (item) {
             const element = this.$refs[item+'_throw_'+index].$refs.input.value;
             if(element.toLowerCase() == "h") {
-              total += 0;
               var score = "h";
             } else if (element.toLowerCase() == "e") {
-              total += 0;
               var score = "e";
             } else {
               var score = (!isNaN(parseInt(element))) ? parseInt(element) : 0;
@@ -284,94 +264,47 @@ export default {
         },
         loadPlayer: function(player, index) {
           // Finds the selected player object from the dataset and sets it's id to the id field. 
-          let obj = this.plain_data.body[this.teamSide + "_team"].players.find(o => o.player_name === player)
+          let obj = this.matchData[this.teamSide + "_team"].players.find(o => o.player_name === player)
           this.$refs['id_'+index].innerHTML=obj.id
           this.select = []
           this.sumTotal(index)
         },
         getMatch: function() {
-          this.plain_data = this.matchData
-          this.is_validated = this.matchData.body.is_validated;
-          if (this.roundNumber == 1 && this.teamSide == 'home') {
-              this.data = this.matchData.body.first_round.home;
-              this.home_team = this.matchData.body.home_team.current_name;
-              this.round_score = this.matchData.body.home_first_round_score;
-              if (
-                  this.round_score >
-                  this.matchData.body.away_first_round_score
-              ) {
-                  this.color = 'red';
-              } else {
-                  this.color = 'green';
-              }
-          } else if (
-              this.roundNumber == 2 &&
-              this.teamSide == 'home'
-          ) {
-              this.data = this.matchData.body.second_round.home;
-              this.home_team = this.matchData.body.home_team.current_name;
-              this.round_score =
-                  this.matchData.body.home_second_round_score;
-              if (
-                  this.round_score >
-                  this.matchData.body.away_second_round_score
-              ) {
-                  this.color = 'red';
-              } else {
-                  this.color = 'green';
-              }
-          } else if (
-              this.roundNumber == 1 &&
-              this.teamSide == 'away'
-          ) {
-              this.data = this.matchData.body.first_round.away;
-              this.away_team = this.matchData.body.away_team.current_name;
-              this.round_score = this.matchData.body.away_first_round_score;
-              if (
-                  this.round_score >
-                  this.matchData.body.home_first_round_score
-              ) {
-                  this.color = 'red';
-              } else {
-                  this.color = 'green';
-              }
-          } else if (
-              this.roundNumber == 2 &&
-              this.teamSide == 'away'
-          ) {
-              this.data = this.matchData.body.second_round.away;
-              this.away_team = this.matchData.body.away_team.current_name;
-              this.round_score =
-                  this.matchData.body.away_second_round_score;
-              if (
-                  this.round_score >
-                  this.matchData.body.home_second_round_score
-              ) {
-                  this.color = 'red';
-              } else {
-                  this.color = 'green';
-              }
+          this.is_validated = this.matchData.is_validated;
+          
+          const roundString = this.roundNumber == 1 ? 'first_round' : 'second_round'
+          const opponent = this.teamSide == 'home' ? 'away' : 'home' 
+          const team = this.matchData[this.teamSide + "_team"]
+          
+          this.team_name = team.current_name
+          this.data = this.matchData[roundString][this.teamSide]
+          this.opponent_score = this.matchData[opponent + "_" + roundString + "_score"]
+          this.round_score = this.matchData[this.teamSide + "_" + roundString + "_score"]
+          
+          if (this.round_score > this.opponent_score) {
+            this.color = 'red'
+          } else if ( this.round_score < this.opponent_score) {
+            this.color = 'green'
+          } else {
+            this.color = 'yellow'
           }
-          var arr_selected = [];
-          var arr_home = [];
-          var arr_away = [];
+
+          let tmp_selected = []
+          let tmp_players = []
 
           this.data.forEach(function (item) {
-            arr_selected.push(item)
+            tmp_selected.push(item)
           })
-          this.matchData.body.home_team.players.forEach(function(player) {
-            arr_home.push(player.player_name);
+
+          team.players.forEach(function(player) {
+            tmp_players.push(player.player_name);
           });
-          this.matchData.body.away_team.players.forEach(function(player) {
-            arr_away.push(player.player_name);
-          });
-          this.selected = arr_selected;
-          this.home_players = arr_home;
-          this.away_players = arr_away;
-          this.loaded = true
           
+          this.players = tmp_players
+          this.selected = tmp_selected
+          this.loaded = true
           if(!this.is_validated) {
-            if (localStorage.team_id == this.plain_data.body.home_team.id) {
+            if (localStorage.team_id == this.matchData.home_team.id) {
               this.show_input = (localStorage.role_id==1) ? true : false;
             }
           }
