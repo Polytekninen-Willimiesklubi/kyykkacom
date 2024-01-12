@@ -91,6 +91,12 @@ export default {
                 }
             );
         },
+        playoffBorder: function(val) {
+          if (sessionStorage.season_id == 23) {
+
+          }
+          return
+        },
         handleRedirect: function(value) {
           location.href = '/joukkue/'+value.id;
         }
@@ -132,6 +138,13 @@ export default {
     }
 };
 </script>
-<style>
 
+<style>
+.v-data-table__wrapper > table > tbody > tr:nth-child(5) > td {
+  border-bottom: 0.15rem dashed red !important;
+}
+
+.v-data-table__wrapper > table > tbody > tr:nth-child(11) > td {
+ border-bottom: 0.2rem double red !important;
+}
 </style>
