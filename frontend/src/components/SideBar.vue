@@ -4,7 +4,7 @@
     <v-row>
       <v-col>
         <v-card-subtitle v-if="multible_brackets"> Lohko A </v-card-subtitle>
-        <v-data-table mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
+        <v-data-table class="regular_season" mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
         @click:row="handleRedirect" dense 
         :headers="headers" 
         :items="teams" 
@@ -21,7 +21,7 @@
     <v-row v-if="multible_brackets">
       <v-col>
         <v-card-subtitle> Lohko B </v-card-subtitle>
-        <v-data-table mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
+        <v-data-table class="regular_season" mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
         @click:row="handleRedirect" dense 
         :headers="headers" 
         :items="other_teams" 
@@ -140,11 +140,11 @@ export default {
 </script>
 
 <style>
-.v-data-table__wrapper > table > tbody > tr:nth-child(5) > td {
+.regular_season > .v-data-table__wrapper > table > tbody > tr:nth-child(5) > td {
   border-bottom: 0.15rem dashed red !important;
 }
 
-.v-data-table__wrapper > table > tbody > tr:nth-child(11) > td {
+.regular_season > .v-data-table__wrapper > table > tbody > tr:nth-child(11) > td {
  border-bottom: 0.2rem double red !important;
 }
 </style>
