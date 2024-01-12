@@ -77,12 +77,12 @@ export default {
                 {
                     text: 'SP',
                     value: 'scaled_points',
-                    alignt: 'left'
+                    align: 'left'
                 },
                 {
                     text: 'SPH',
                     value: 'scaled_points_per_throw',
-                    alignt: 'left'
+                    align: 'left'
                 },
                 {
                     text: 'kHP',
@@ -103,7 +103,7 @@ export default {
                 {
                     text: 'JK',
                     value: 'gteSix_total',
-                    alignt: 'left'
+                    align: 'left'
                 }
             ],
             players: [],

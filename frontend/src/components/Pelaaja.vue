@@ -5,10 +5,11 @@
         <v-card>
           <v-toolbar-title align="center">{{header}}</v-toolbar-title>
           <v-data-table mobile-breakpoint="0" disable-pagination dense color='alert' 
-          :headers="overall_player_stats" 
-          :items="stats"
-          hide-default-header
-          hide-default-footer>
+            :headers="overall_player_stats" 
+            :items="stats"
+            hide-default-header
+            hide-default-footer
+          >
             <template v-slot:header="{ props }">
               <th v-for="h in props.headers" class="head-font"
               :class="returnHeaderColor(h.text)"
@@ -24,27 +25,54 @@
       <v-col>
         <v-card>
           <v-data-table mobile-breakpoint="0" disable-pagination dense color='alert'
-        @click:row="chanceSeason"
-        :headers="season_stats" 
-        height = "200px"
-        :items="all_seasons"
-        :item-class="returnStyle" hide-default-footer>
+            @click:row="chanceSeason"
+            :headers="season_stats" 
+            height = "200px"
+            :items="all_seasons"
+            :item-class="returnStyle" hide-default-footer>
           </v-data-table>
         </v-card>
       </v-col>
       <v-col>
         <v-card>
-          <canvas id="chart" width="300px" height="200px"></canvas>
+          <graph
+            id_name="chart"
+            width_px="300px"
+            height_px="200px"
+            title="Heittotuloksen jakauma"
+            :dataset=this.canvas1_data
+            :labels=this.canvas1_labels
+            :reversed=false
+            type="bar"
+          />
         </v-card>
       </v-col> 
       <v-col>
         <v-card>
-          <canvas id="statGraph" width="300px" height="200px"></canvas>
+          <graph
+            id_name="statGraph"
+            width_px="300px"
+            height_px="200px"
+            title="Statsin kehitys kausittain"
+            :dataset=this.canvas2_data
+            :labels=this.canvas2_labels
+            :reversed=false
+            type="line"
+          />
         </v-card>
       </v-col>
       <v-col>
         <v-card>
-          <canvas id="kHP KPH" width="300px" height="200px"></canvas>
+          <graph
+            id_name="kHP KPH"
+            width_px="300px"
+            height_px="200px"
+            title="Heittokeskiarvo heittopaikan mukaan"
+            :dataset=this.canvas3_data
+            :labels=this.canvas3_labels
+            :reversed=true
+            type="bar"
+          />
         </v-card>
       </v-col>
     </v-row>
@@ -176,8 +204,12 @@
 
 <script>
 import Chart, { _adapters } from "chart.js/auto"
+import Graph from "./Graph.vue";
 
 export default {
+    components: {
+      Graph
+    },
     data: function() {
         return {
             search: '',
@@ -222,6 +254,16 @@ export default {
             sort_games_switch :"Erittäin",
             filter_games_switch :"Kaikki kaudet",
             stats: [],
+            styles: ['blue-row', 'red-row', 'green-row', 'yellow-row', 'purple-row'],
+            all_colors: ['#B3E5FC', '#EF9A9A', '#A5D6A7', '#DCE775', '#BA68C8'],
+            canvas1_labels: ['0', '1', '2', '3', '4', '5', '≥6'],
+            canvas2_labels: [],
+            canvas3_labels: ['1', '2', '3', '4'],
+
+            canvas1_data: [],
+            canvas2_data: [],
+            canvas3_data: [],
+
             matches_periods: [],
             matches_match: [],
             all_seasons: [],
@@ -278,29 +320,18 @@ export default {
                       
                       var selectSeason = sessionStorage.season_id
                       var all_seasons = JSON.parse(sessionStorage.all_seasons)
-                      var season_year = ''
                       if (this.all_seasons.length === 0) {
                         this.data_loaded = true
                         return
                       }
-
-                      all_seasons.forEach(ele => {
-                        if (ele.id == selectSeason) {
-                          season_year = ele.name.split(" ")[1]
-                        }
-                      })
                       
-                      var i = 0
-                      var list_index = -1
-                      this.all_seasons.forEach(ele => {
-                        if (ele.season == season_year) {
-                          list_index = i
-                        }
-                        i++
-                      })
-                      if (list_index === -1) {
-                        list_index = this.all_seasons.length-1
-                        season_year = this.all_seasons[list_index].season
+                      var index = all_seasons.map(ele => ele.id).indexOf(selectSeason)
+                      if (index === -1) { // If the selected season is not in players history take the latest
+                        var list_index = this.all_seasons.length-1
+                        var season_year = this.all_seasons[list_index].season
+                      } else {
+                        var list_index = this.all_seasons.map(ele => ele.season).indexOf(season_year)
+                        var season_year = all_seasons[index].name.split(" ")[1]                        
                       }
                       this.current_selection.push(season_year)
                       this.colors[0] = season_year
@@ -358,220 +389,101 @@ export default {
                           input['id'] = match.id
                           this.matches_match.push(input)
                         }
-
                       }
-                      const jotain = document.getElementById('chart')
-                      var config = {
-                        type: 'bar',
-                        data: {
-                          labels: ['0', '1', '2', '3', '4', '5', '≥6'],
-                          datasets: [{
-                            label: "Kausi " + this.all_seasons[list_index].season,
-                            backgroundColor: '#B3E5FC',
-                            data: [
-                              this.all_seasons[list_index].zeros_total + this.all_seasons[list_index].pikes_total,
-                              this.all_seasons[list_index].ones_total,
-                              this.all_seasons[list_index].twos_total,
-                              this.all_seasons[list_index].threes_total,
-                              this.all_seasons[list_index].fours_total,
-                              this.all_seasons[list_index].fives_total,
-                              this.all_seasons[list_index].gteSix_total
-                          ],
-                            borderWidth: 1
-                          }]
-                        },
-                        options: {
-                          scales: {
-                            y: {
-                              beginAtZero: true
-                            }
-                          },
-                          plugins: {
-                            title: {
-                              text:'Heittotuloksen jakauma',
-                              display: true
-                            }
-                          }
-                        }
-                      }
-                    new Chart(jotain, config)
-                    var dat = []
-                    var labs = []
-                    for (const s of this.all_seasons) {
-                      dat.push(s.score_per_throw)
-                      labs.push(s.season)
-                    }
-                    const jotain2 = document.getElementById('statGraph')
-                    // labs.reverse()
-                    // dat.reverse()
-                    var config2 = {
-                        type: 'line',
-                        data :{
-                          labels: labs,
-                          datasets : [
-                          {
-                            backgroundColor: '#B3E5FC',
-                            borderColor : '#B3E5FC',
-                            label : 'KPH',
-                            data : dat
-                          }
+                      const init_season = this.all_seasons[list_index]
+                      const init1 = {
+                        label: "Kausi " + init_season.season,
+                        backgroundColor: '#B3E5FC',
+                        data: [
+                          init_season.zeros_total + init_season.pikes_total,
+                          init_season.ones_total,
+                          init_season.twos_total,
+                          init_season.threes_total,
+                          init_season.fours_total,
+                          init_season.fives_total,
+                          init_season.gteSix_total
                         ]
-                      },
-                        options: {
-                          scales: {
-                            y: {
-                              beginAtZero: true
-                            }
-                          },
-                          plugins: {
-                            title: {text:'Statsin kehitys kausittain',
-                            display: true
-                          
-                          }
-                          }
-                        }
                       }
-                    new Chart(jotain2, config2)
-
-                    const jotain3 = document.getElementById('kHP KPH')
-                    var config3 = {
-                      type: 'bar',
-                        data: {
-                          labels: [ '1', '2', '3', '4'],
-                          datasets: [{
-                            label: "Kausi " + this.all_seasons[list_index].season,
-                            backgroundColor: '#B3E5FC',
-                            data: [
-                              this.all_seasons[list_index].average_score_position_one,
-                              this.all_seasons[list_index].average_score_position_two,
-                              this.all_seasons[list_index].average_score_position_three,
-                              this.all_seasons[list_index].average_score_position_four,
-                          ],
-                            borderWidth: 1
-                          }]
-                        },
-                        options: {
-                          indexAxis: 'y',
-                          scales: {
-                            y: {
-                              beginAtZero: true
-                            }
-                          },
-                          plugins: {
-                            title: {text:'Heittokeskiarvo heittopaikan mukaan',
-                            display: true
-                          
-                          }
-                          }
-                        }
-                      }
-                    new Chart(jotain3, config3)
+                      let canvas2_data = []
+                      for (const s of this.all_seasons) {
+                        canvas2_data.push(s.score_per_throw)
+                      this.canvas2_labels.push(s.season)
                     }
-                  );
+                    const init2 = {
+                      label : "KPH",
+                      backgroundColor: "#B3E5FC",
+                      borderColor: "#B3E5FC",
+                      data : canvas2_data
+                    }
+
+                    const init3 = {
+                      label: "Kausi " + init_season.season,
+                      backgroundColor: '#B3E5FC',
+                      data: [
+                        init_season.average_score_position_one,
+                        init_season.average_score_position_two,
+                        init_season.average_score_position_three,
+                        init_season.average_score_position_four
+                      ]
+                    }
+                    this.canvas1_data.push(init1)
+                    this.canvas2_data.push(init2)
+                    this.canvas3_data.push(init3)
+                  });
         },
         handleRedirect: function(value) {
           location.href = '/ottelu/'+value.match_id;
         },
         chanceSeason: function(value, row) {
-          var year = Number(value.season)
-          var index = 2023 - year
-          const chart = Chart.getChart('chart')
-          const chart3 = Chart.getChart('kHP KPH')
-          row.select(true)  // For some reason this is important to make returnStyle method work onclick
-          if (this.current_selection.includes(value.season)) {
-            var j = 0
-            for (const i of chart.data.datasets) {
-              if (i.label == "Kausi " + value.season) {
-                break
-              }
-              j++
-            }
-            chart.data.datasets.splice(j,1)
-            var j = 0
-            for (const i of chart3.data.datasets) {
-              if (i.label == "Kausi " + value.season) {
-                break
-              }
-              j++
-            }
-            chart3.data.datasets.splice(j,1)
-            var j = 0
-            for (const i of this.current_selection) {
-              if (i == value.season) {
-                break
-              }
-              j++
-            }
-            this.current_selection.splice(j,1)
-            var j = 0
-            for (const i of this.colors) {
-              if (i == value.season) {
-                this.colors[j] = ''
-                break
-              }
-              j++
-            }
-          } else if (this.current_selection.length == 5 ) {
-            return
-          } else {
-            var index = 0
-            for (const i of this.all_seasons) {
-              if (i.season == value.season) {
-                break
-              }
-              index++
-            }
-            var tmp = this.all_seasons[index]
-            var color = ''
-            var index = 0
-            for (const i of this.colors) {
-              if (i == '') {break}
-              index ++
-            }
-            if (index == 0) {
-              color = '#B3E5FC'
-            } else if (index == 1) {
-              color = '#EF9A9A' 
-            } else if (index== 2) {
-              color = '#A5D6A7'
-            } else if (index == 3) {
-              color = '#DCE775'
-            } else if (index == 4) {
-              color = '#BA68C8'
-            }
-            this.colors[index] = value.season
+          row.select(true)  // <--- For some reason this is important to make returnStyle method work onclick
+          if (this.current_selection.includes(value.season)) { // Remove clicked season from datas
+            var index = this.canvas1_data.map(e => e.label).indexOf("Kausi " + value.season)
+            this.canvas1_data.splice(index,1)
+            this.canvas3_data.splice(index,1)  // Same index can be used to splice canvas3, because we always update both everywhere
 
-            chart.data.datasets.push({
-              label: "Kausi " + tmp.season,
+            index = this.current_selection.indexOf(value.season)
+            this.current_selection.splice(index,1)
+            
+            index = this.colors.indexOf(value.season)
+            this.colors[index] = ''
+
+          } else if (this.current_selection.length == 5 ) { // Not removal, but the 'memory' is full
+            return
+          } else {  // Add clicked season
+            var index = this.all_seasons.map(ele => ele.season).indexOf(value.season)
+            var selected_season = this.all_seasons[index]
+            
+            index = this.colors.indexOf('') // First valid color
+            this.colors[index] = value.season
+            var color = this.all_colors[index]
+
+            this.canvas1_data.push({
+              label: "Kausi " + selected_season.season,
               backgroundColor: color,
               data: [
-                tmp.zeros_total + tmp.pikes_total,
-                tmp.ones_total,
-                tmp.twos_total,
-                tmp.threes_total,
-                tmp.fours_total,
-                tmp.fives_total,
-                tmp.gteSix_total
-              ],
-                borderWidth: 1
-              })
+                selected_season.zeros_total + selected_season.pikes_total,
+                selected_season.ones_total,
+                selected_season.twos_total,
+                selected_season.threes_total,
+                selected_season.fours_total,
+                selected_season.fives_total,
+                selected_season.gteSix_total
+              ]
+            })
 
-              chart3.data.datasets.push({
-                label: "Kausi " + tmp.season,
-                backgroundColor: color,
-                data: [
-                tmp.average_score_position_one,
-                tmp.average_score_position_two,
-                tmp.average_score_position_three,
-                tmp.average_score_position_four,
-              ],
-                borderWidth: 1
-              })
+            this.canvas3_data.push({
+              label: "Kausi " + selected_season.season,
+              backgroundColor: color,
+              data: [
+                selected_season.average_score_position_one,
+                selected_season.average_score_position_two,
+                selected_season.average_score_position_three,
+                selected_season.average_score_position_four,
+              ]
+            })
 
             this.current_selection.push(value.season)
           }
-          chart.update()
-          chart3.update()
         },
         getColor: function(val1, val2) {
           if (val1 < val2) return '#C8E6C9' // green-lighten-4
@@ -579,176 +491,71 @@ export default {
           else return '#F0F4C3' // yellow-lighten-4
         },
         returnStyle: function(value) {
-          var index = 0
-          var found = false
-          for (const i of this.colors) {
-            if (i == value.season) {
-              found = true
-              break
-            }
-            index++
+          var index = this.colors.indexOf(value.season)
+          if (index === -1) {
+            return
           }
-          if (!found) {return}
-          if (index == 0) {
-            return 'blue-row'
-          } else if (index == 1) {
-            return 'red-row' 
-          } else if (index== 2) {
-            return 'green-row'
-          } else if (index == 3) {
-            return 'yellow-row'
-          } else if (index == 4) {
-            return 'purple-row'
-          }
+          return this.styles[index]
         },
         returnHeaderColor: function(value) {
-          var index = 0
-          var found = false 
-          for (const i of this.column_colors) {
-            if (i == value) {
-              found = true
-              break
-            }
-            index++
+          var index = this.column_colors.indexOf(value)
+          if (index === -1) {
+            return
           }
-          if (!found) {return}
-          if (index == 0) {
-            return 'blue-row'
-          } else if (index == 1) {
-            return 'red-row' 
-          } else if (index== 2) {
-            return 'green-row'
-          } else if (index == 3) {
-            return 'yellow-row'
-          } else if (index == 4) {
-            return 'purple-row'
-          }
+          return this.styles[index]
         },
         chanceHeaderStat: function(val) {
-          var the_list = val.target.classList
+          var header_class_list = val.target.classList
           var head = val.target.innerText
-          var tmp = ["Erät", "Poistetut kyykät","Heitot","KPH","kHP", "Hauet", "H%", 
+          var headers = ["Erät", "Poistetut kyykät","Heitot","KPH","kHP", "Hauet", "H%", 
           "Virkamiehet", "VM%", "JK"]
+          var header_binds = ['rounds_total', 'score_total', 'throws_total', 'score_per_throw',
+          'avg_throw_turn', 'pikes_total', 'pike_percentage', 'zeros_total', 'zero_percentage', 'gteSix_total']
 
-          if (!tmp.includes(head)) {return}
-          const chart2 = Chart.getChart('statGraph')
+          if (!headers.includes(head)) {return}
           
           if (this.column_current_selection.includes(head)) {
-            var j = 0
-            for (const i of chart2.data.datasets) {
-              if (i.label == head) {
-                break
-              }
-              j++
-            }
-            chart2.data.datasets.splice(j,1)
+            var index = this.canvas2_data.map(ele => ele.label).indexOf(head)
+            this.canvas2_data.splice(index, 1)
 
-            j = 0
-            for (const i of this.column_current_selection) {
-              if (i == head) {
-                break
-              }
-              j++
-            }
-            this.column_current_selection.splice(j,1)
-            j = 0
-            for (const i of this.column_colors) {
-              if (i == head) {
-                this.column_colors[j] = ''
-                break
-              }
-              j++
-            }
-            if (j == 0) {
-              the_list.remove('blue-row')
-            } else if (j == 1) {
-              the_list.remove('red-row')
-            } else if (j== 2) {
-              the_list.remove('green-row')
-            } else if (j == 3) {
-              the_list.remove('yellow-row')
-            } else if (j == 4) {
-              the_list.remove('purple-row')
-            }
+            index = this.column_current_selection.indexOf(head)
+            this.column_current_selection.splice(index, 1)
+
+            index = this.column_colors.indexOf(head)
+            this.column_colors[index] = ''
+            header_class_list.remove(this.styles[index])
+
           } else if (this.column_current_selection.length == 5 ) {
             return
           } else {
-            var color = ''
-            var index = 0
-            for (const i of this.column_colors) {
-              if (i == '') {break}
-              index ++
-            }
-            if (index == 0) {
-              the_list.add('blue-row')
-              color = '#B3E5FC'
-            } else if (index == 1) {
-              the_list.add('red-row')
-              color = '#EF9A9A'
-            } else if (index== 2) {
-              the_list.add('green-row')
-              color = '#A5D6A7'
-            } else if (index == 3) {
-              the_list.add('yellow-row')
-              color = '#DCE775'
-            } else if (index == 4) {
-              the_list.add('purple-row')
-              color = '#BA68C8'
-            }
+            var index = this.column_colors.indexOf('')
+            var color = this.all_colors[index]
+            header_class_list.add(this.styles[index])
+
             this.column_colors[index] = head
 
             var dat = []
+            index = headers.indexOf(head)
             this.all_seasons.forEach(s => {
-              switch (head) {
-                case "Erät":
-                  dat.push(s.rounds_total)
-                  break
-                case "Poistetut kyykät":
-                  dat.push(s.score_total)
-                  break
-                case "Heitot":
-                  dat.push(s.throws_total)
-                  break
-                case "KPH":
-                  dat.push(s.score_per_throw)
-                  break
-                case "kHP":
-                  dat.push(s.avg_throw_turn)
-                  break
-                case "Hauet":
-                  dat.push(s.pikes_total)
-                  break
-                case "H%":
-                  dat.push(s.pike_percentage)
-                  break
-                case "Virkamiehet":
-                  dat.push(s.zeros_total)
-                  break
-                case "VM%":
-                  dat.push(s.zero_percentage)
-                  break
-                case "JK":
-                  dat.push(s.gteSix_total)
-                  break
-                default:
-                  // This shouldn't be possible
-                  console.log("Something went wrong: " + head)
-                  return
-              }
+              dat.push(s[header_binds[index]])
             })
-            chart2.data.datasets.push({
+            this.canvas2_data.push({
               label: head,
+              data: dat,
               backgroundColor: color,
               borderColor: color,
+              borderColor: color,
               data: dat,
-              })
+              borderColor: color,            
+              data: dat,
+            })
 
             this.column_current_selection.push(head)
           }
-          chart2.update()
         },
         throwSort(items, index, isDescending) {
-          const custom_columns = ['score_first','score_second', 'score_third', 'score_fourth', 'score_fifth', 'score_sixth', 'score_seventh', 'score_eighth']
+          const custom_columns = ['score_first','score_second', 'score_third', 'score_fourth',
+           'score_fifth', 'score_sixth', 'score_seventh', 'score_eighth']
 
           function d(p1) {
             switch (p1) {
@@ -834,14 +641,12 @@ tbody tr :hover {
   font-size: 0.75rem;
 }
 
-
 .purple-row {
   background-color: #BA68C8 !important;
 }
 
 .yellow-row {
   background-color: #DCE775 !important;
-
 }
 
 .green-row {
@@ -854,10 +659,6 @@ tbody tr :hover {
 
 .red-row {
   background-color: #EF9A9A !important;
-}
-
-.blue {
-  background-color: #B3E5FC !important;
 }
 
 </style>
