@@ -4,7 +4,7 @@
     <v-row>
       <v-col>
         <v-card-subtitle v-if="multible_brackets"> Lohko A </v-card-subtitle>
-        <v-data-table class="regular_season" mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
+        <v-data-table :class="{regular_season : isClass}" mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
         @click:row="handleRedirect" dense 
         :headers="headers" 
         :items="teams" 
@@ -21,7 +21,7 @@
     <v-row v-if="multible_brackets">
       <v-col>
         <v-card-subtitle> Lohko B </v-card-subtitle>
-        <v-data-table class="regular_season" mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
+        <v-data-table :class="{regular_season : isClass}" mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
         @click:row="handleRedirect" dense 
         :headers="headers" 
         :items="other_teams" 
@@ -41,6 +41,7 @@ export default {
             season: false,
             sortBy: 'points_total',
             sortDesc: true,
+            isClass: false,
             multible_brackets: false,
             headers: [
                 { text: 'Joukkue', value: 'current_abbreviation', sortable: false},
@@ -134,6 +135,9 @@ export default {
         sessionStorage.setItem("loaded_season", sessionStorage.season_id)
       } else {
         this.teams = JSON.parse(sessionStorage.teams)
+      }
+      if (sessionStorage.season_id == 24 || sessionStorage.season_id == 25) {
+        this.isClass = true
       }
     }
 };
