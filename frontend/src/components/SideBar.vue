@@ -1,16 +1,18 @@
 <template>
   <v-card>
     <v-card-title> Runkosarja </v-card-title>
-    <v-row>
+    <v-row v-for="(listItem, index) in teams" :key="index">
       <v-col>
-        <v-card-subtitle v-if="multible_brackets"> Lohko A </v-card-subtitle>
-        <v-data-table :class="{regular_season : isClass}" mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
-        @click:row="handleRedirect" dense 
-        :headers="headers" 
-        :items="teams" 
-        :sort-by.sync="sortBy" 
-        :sort-desc.sync="sortDesc" 
-        hide-default-footer>
+        <v-card-subtitle v-if="multible_brackets"> Lohko {{ String.fromCharCode(65+index) }}</v-card-subtitle>
+        <v-data-table mobile-breakpoint="0" disable-pagination dense
+          :class="{regular_season : isClass}"
+          :header-props="{ sortIcon: null }"
+          @click:row="handleRedirect"
+          :headers="headers" 
+          :items="[...listItem]"
+          :sort-by.sync="sortBy" 
+          :sort-desc.sync="sortDesc" 
+          hide-default-footer>
           <template slot="no-data">
             <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
           </template>
@@ -18,19 +20,6 @@
       </v-col>
     </v-row>
     <v-divider v-if="multible_brackets"></v-divider>
-    <v-row v-if="multible_brackets">
-      <v-col>
-        <v-card-subtitle> Lohko B </v-card-subtitle>
-        <v-data-table :class="{regular_season : isClass}" mobile-breakpoint="0" :header-props="{ sortIcon: null }" disable-pagination 
-        @click:row="handleRedirect" dense 
-        :headers="headers" 
-        :items="other_teams" 
-        :sort-by.sync="sortBy" 
-        :sort-desc.sync="sortDesc" 
-        hide-default-footer>
-      </v-data-table>
-      </v-col>
-    </v-row>
   </v-card>
 </template>
 
@@ -54,7 +43,6 @@ export default {
                 { text: 'OKA', value: 'match_average', sortable: false},
             ],
             teams: [],
-            other_teams: []
         };
     },
     methods: {
@@ -81,9 +69,9 @@ export default {
                       this.teams.forEach(ele => {
                         tmp_teams[ele.bracket -1].push(ele)
                       })
-                      this.teams = tmp_teams[0]
-                      this.other_teams = tmp_teams[1]
+                      this.teams = tmp_teams
                     } else {
+                      this.teams = [this.teams]
                       this.multible_brackets = false
                     }
                 },
@@ -122,9 +110,9 @@ export default {
           this.teams.forEach(ele => {
             tmp_teams[ele.bracket -1].push(ele)
           })
-          this.teams = tmp_teams[0]
-          this.other_teams = tmp_teams[1]
+          this.teams = tmp_teams
         } else {
+          this.teams = [this.teams]
           this.multible_brackets = false
         }
       }
