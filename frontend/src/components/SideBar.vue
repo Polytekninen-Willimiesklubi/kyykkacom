@@ -1,9 +1,10 @@
 <template>
   <v-card>
-    <v-card-title> Runkosarja </v-card-title>
+    <v-card-title>{{ this.title }}</v-card-title>
     <v-row v-for="(listItem, index) in teams" :key="index">
       <v-col>
-        <v-card-subtitle v-if="multible_brackets"> Lohko {{ String.fromCharCode(65+index) }}</v-card-subtitle>
+        <v-card-subtitle v-if="multible_brackets"><b> Lohko {{ String.fromCharCode(65+index) }} </b></v-card-subtitle>
+        <v-divider></v-divider>
         <!-- note on :items="[...listItem]" here we make reduntant array just unpack it immediately, 
           because otherwise returns an 'expected an array' error. This might be caused by listItem 
           not being defined before the mouting happens (?) -->
@@ -28,6 +29,26 @@
 
 <script>
 export default {
+    props: {
+      title: {
+        type: String,
+        default: 'Runkosarja'
+      },
+      headers: {
+        type: Array,
+        default: function() { 
+          return [
+            { text: 'Joukkue', value: 'current_abbreviation', sortable: false},
+            { text: 'O', value: 'matches_played', sortable: false},
+            { text: 'V', value: 'matches_won', sortable: false},
+            { text: 'T', value: 'matches_tie', sortable: false},
+            { text: 'H', value: 'matches_lost', sortable: false},
+            { text: 'P', value: 'points_total'},
+            { text: 'P/O', value: 'points_average', sortable: false},
+            { text: 'OKA', value: 'match_average', sortable: false},
+          ]}
+      }
+    },
     data: function() {
         return {
             season: false,
@@ -36,16 +57,6 @@ export default {
             isClass: false,
             multible_brackets: false,
             data: [],
-            headers: [
-                { text: 'Joukkue', value: 'current_abbreviation', sortable: false},
-                { text: 'O', value: 'matches_played', sortable: false},
-                { text: 'V', value: 'matches_won', sortable: false},
-                { text: 'H', value: 'matches_lost', sortable: false},
-                { text: 'T', value: 'matches_tie', sortable: false},
-                { text: 'P', value: 'points_total'},
-                { text: 'P/O', value: 'points_average', sortable: false},
-                { text: 'OKA', value: 'match_average', sortable: false},
-            ],
             teams: [],
         };
     },
