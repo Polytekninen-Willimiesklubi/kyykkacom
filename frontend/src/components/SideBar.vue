@@ -4,6 +4,9 @@
     <v-row v-for="(listItem, index) in teams" :key="index">
       <v-col>
         <v-card-subtitle v-if="multible_brackets"> Lohko {{ String.fromCharCode(65+index) }}</v-card-subtitle>
+        <!-- note on :items="[...listItem]" here we make reduntant array just unpack it immediately, 
+          because otherwise returns an 'expected an array' error. This might be caused by listItem 
+          not being defined before the mouting happens (?) -->
         <v-data-table mobile-breakpoint="0" disable-pagination dense
           :class="{regular_season : isClass}"
           :header-props="{ sortIcon: null }"
@@ -32,6 +35,7 @@ export default {
             sortDesc: true,
             isClass: false,
             multible_brackets: false,
+            data: [],
             headers: [
                 { text: 'Joukkue', value: 'current_abbreviation', sortable: false},
                 { text: 'O', value: 'matches_played', sortable: false},
@@ -49,83 +53,56 @@ export default {
         getTeams: function() {
             this.$http.get('api/teams/'+'?season='+sessionStorage.season_id+'&post_season=0').then(
                 function(data) {
-                    this.teams = data.body;
                     sessionStorage.teams = JSON.stringify(data.body)
-                    var all_seasons = JSON.parse(sessionStorage.all_seasons)
-                    var this_season = ''
-                    for (let i = 0; i < all_seasons.length; i++) {
-                     var s = all_seasons[i]
-                     if (s.id == sessionStorage.season_id) {
-                      this_season = s
-                      break
-                     }
-                    }
-                    if (this_season.no_brackets > 1) {
-                      this.multible_brackets = true
-                      var tmp_teams = []
-                      for (let i = 0; i < this_season.no_brackets; i++) {
-                        tmp_teams.push([])
-                      }
-                      this.teams.forEach(ele => {
-                        tmp_teams[ele.bracket -1].push(ele)
-                      })
-                      this.teams = tmp_teams
-                    } else {
-                      this.teams = [this.teams]
-                      this.multible_brackets = false
-                    }
                 },
                 function(error) {
                     console.log(error.statusText);
                 }
+            ).then(
+              function() {
+                this.splitToBrackets()
+              }
             );
         },
-        playoffBorder: function(val) {
-          if (sessionStorage.season_id == 23) {
+        splitToBrackets: function() {
+          this.data = JSON.parse(sessionStorage.teams)
+          this.isClass = (sessionStorage.season_id == 24 || sessionStorage.season_id == 25)
+      
+          if (sessionStorage.all_seasons) {
+            var all_seasons = JSON.parse(sessionStorage.all_seasons)
+            
+            var index = all_seasons.map(ele => String(ele.id)).indexOf(sessionStorage.season_id)
+            var this_season = all_seasons[index]
 
+            if (this_season.no_brackets > 1) {
+              this.multible_brackets = true
+              for (let i = 0; i < this_season.no_brackets; i++) {
+                this.teams.push([])
+              }
+              this.data.forEach(ele => {
+                this.teams[ele.bracket -1].push(ele)
+              }, this)
+
+            } else {
+
+              this.teams = [this.data]
+              this.multible_brackets = false
+            }
           }
-          return
         },
         handleRedirect: function(value) {
           location.href = '/joukkue/'+value.id;
         }
     },
     mounted: function() {
-      if (sessionStorage.all_seasons) {
-        var all_seasons = JSON.parse(sessionStorage.all_seasons)
-        var this_season = ''
-        for (let i = 0; i < all_seasons.length; i++) {
-          var s = all_seasons[i]
-          if (s.id == sessionStorage.season_id) {
-            this_season = s
-            break
-          }
-        }
-        if (this_season.no_brackets > 1) {
-          this.multible_brackets = true
-          var tmp_teams = []
-          for (let i = 0; i < this_season.no_brackets; i++) {
-            tmp_teams.push([])
-          }
-          this.teams.forEach(ele => {
-            tmp_teams[ele.bracket -1].push(ele)
-          })
-          this.teams = tmp_teams
-        } else {
-          this.teams = [this.teams]
-          this.multible_brackets = false
-        }
-      }
+
     },
     created: function() {
       if (sessionStorage.loaded_season != sessionStorage.season_id) {
         this.getTeams()
         sessionStorage.setItem("loaded_season", sessionStorage.season_id)
       } else {
-        this.teams = JSON.parse(sessionStorage.teams)
-      }
-      if (sessionStorage.season_id == 24 || sessionStorage.season_id == 25) {
-        this.isClass = true
+        this.splitToBrackets()
       }
     }
 };
