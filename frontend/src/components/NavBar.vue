@@ -12,6 +12,7 @@
       <v-btn text class="hidden-md-and-down" to="/joukkueet">Joukkueet</v-btn>
       <v-btn text class="hidden-md-and-down" to="/pelaajat">Pelaajat</v-btn>
       <v-btn text class="hidden-md-and-down" to="/superweekend">SuperWeekend</v-btn>
+      <v-btn text class="hidden-md-and-down" to="/jatkosarja">Jatkosarja</v-btn>
 
       <v-btn
         v-if="loggedIn && team_id != 'null' && team_id"
@@ -89,6 +90,13 @@
                 <v-icon>mdi-nuke</v-icon>
               </v-list-item-icon>
               <v-list-item-title>SuperWeekend</v-list-item-title>
+            </v-list-item>
+
+            <v-list-item :to="'/jatkosarja'">
+              <v-list-item-icon>
+                <v-icon>mdi-armflex</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Jatkosarja</v-list-item-title>
             </v-list-item>
 
             <v-list-item to="/info">

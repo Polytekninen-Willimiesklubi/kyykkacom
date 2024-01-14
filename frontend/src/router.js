@@ -93,5 +93,15 @@ export default new Router({
                 return import(/* webpackChunkName: "superweekend" */ './views/SuperWeekendView.vue');
             }
         },
+        {
+            path: '/jatkosarja',
+            name: 'jatkosarja',
+            // route level code-splitting
+            // this generates a separate chunk (about.[hash].js) for this route
+            // which is lazy-loaded when the route is visited.
+            component: function () {
+                return import(/* webpackChunkName: "jatkosarja" */ './views/JatkosarjaView.vue');
+            }
+        },
     ]
 });
