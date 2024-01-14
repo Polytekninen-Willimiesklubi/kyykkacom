@@ -4,7 +4,7 @@
       <joukkue></joukkue>
     </v-flex>
     <v-flex pl-2 class="hidden-md-and-down">
-      <side-bar></side-bar>
+      <side-bar />
     </v-flex>
   </v-layout>
 </template>
