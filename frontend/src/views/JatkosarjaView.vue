@@ -1,6 +1,6 @@
 <template>
-    <v-layout class="pt-5 mr-2">
-        <div width="100px">
+    <v-layout class="pt-5">
+        <div width="100px" class="pr-10">
             <side-bar 
                 title="Runkosarja"
                 :headers="headers"
