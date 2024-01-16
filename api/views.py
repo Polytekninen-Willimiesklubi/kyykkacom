@@ -44,7 +44,7 @@ def getSeason(request):
 def getPostseason(request):
     try:
         post_season = bool(int(request.query_params.get('post_season')))
-    except (ValueError):
+    except (ValueError, TypeError):
         post_season = None
     return post_season
 
@@ -283,10 +283,16 @@ class MatchList(APIView):
 
     def get(self, request):
         season = getSeason(request)
+        post_season = getPostseason(request)
         key = 'all_matches_' + str(season.year)
+        if post_season is not None:
+            key += '_post_season' if post_season else '_regular_season'
         all_matches = getFromCache(key)
         if all_matches is None:
-            self.queryset = self.queryset.filter(season=season)
+            if post_season is None:
+                self.queryset = self.queryset.filter(season=season)
+            else:
+                self.queryset = self.queryset.filter(season=season, post_season=post_season)
             serializer = MatchListSerializer(self.queryset, many=True, context={'season': season})
             all_matches = serializer.data
             setToCache(key, all_matches)

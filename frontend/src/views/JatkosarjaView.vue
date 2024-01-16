@@ -22,7 +22,7 @@ export default {
         Tournament,
         SideBar
     },
-    data: function () {
+    data() {
         return {
             headers: [
             { text: 'Joukkue', value: 'current_abbreviation', sortable: false, width:"10%"},
@@ -32,9 +32,18 @@ export default {
             { text: 'H', value: 'matches_lost', sortable: false, width:"3%"},
             { text: 'P', value: 'points_total', width:"3%"},
             { text: 'OKA', value: 'match_average', sortable: false, width:"5%"},
-            ]
+            ],
+            games: []
         }
+    },
+    created() {
+        this.$http.get('api/matches/'+ '?season=' + sessionStorage.season_id + '&post_season=1').then(
+            function(data) {
+            this.games = data.body
+            console.log(this.games)
+        })
     }
+
 };
 </script>
 
