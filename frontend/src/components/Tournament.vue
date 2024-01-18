@@ -194,6 +194,7 @@ export default {
                 {
                     other_info:"Kolmeen voittoon",
                     name: "F1",
+                    loser_name:'P1',
                     type: 4,
                     id: 19,
                     next: 21,
@@ -203,6 +204,7 @@ export default {
                 {
                     other_info:"Kolmeen voittoon",
                     name: "F2",
+                    loser_name: "P2",
                     type: 4,
                     id: 20,
                     next: 21,
@@ -339,21 +341,41 @@ export default {
                     } else {
                         match = match[0]
                         let winner = ''
+                        let loser = ''
                         if (el[match.player1.name] > el[match.player2.name]) {
                             winner = structuredClone(match.player1)
+                            loser = structuredClone(match.player2)
                             match.player1['winner'] = true
                             match.player2['winner'] = false
                         } else {
                             winner = structuredClone(match.player2)
+                            loser = structuredClone(match.player1)
                             match.player1['winner'] = false
                             match.player2['winner'] = true
                         }
                         match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
-                        let new_match = this.rounds.filter(ele => ele.id === match.next)[0]
-                        if (new_match.player1.name.includes(match.name)) {
-                            new_match.player1 = winner
-                        } else {
-                            new_match.player2 = winner
+                        if (7-i >= 4) {
+                            if (7-i == 4) { // SemiFinals -> Loser needs to be assigned to Bronze match
+                                let bronze_match = this.rounds.filter(ele => ele.type === 3)[0]
+                                if (bronze_match.player1.name.includes(match.loser_name)) {
+                                    bronze_match.player1 = loser
+                                } else {
+                                    bronze_match.player2 = loser
+                                }
+                                let finals = this.rounds.filter(ele => ele.type === 2)[0]
+                                if (finals.player1.name.includes(match.name)) {
+                                    finals.player1 = winner
+                                } else {
+                                    finals.player2 = winner
+                                }
+                            } else {
+                                let new_match = this.rounds.filter(ele => ele.id === match.next)[0]
+                                if (new_match.player1.name.includes(match.name)) {
+                                    new_match.player1 = winner
+                                } else {
+                                    new_match.player2 = winner
+                                }
+                            }
                         }
                     }
                 }
@@ -380,13 +402,10 @@ export default {
                     }
                 }
             })
-            console.log(this.bracket_matches)
-            console.log(this.tmp_rounds)
             if (this.teams.length == 0) {
                 this.splitToBrackets()
             }
             this.sortTeams()
-            console.log(this.teams[1][7].current_abbreviation)
             this.putTeamsPlayoffBracket()
             this.resolvePlayoffs()
         }
