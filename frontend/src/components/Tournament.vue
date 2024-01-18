@@ -1,10 +1,12 @@
 <template>
-    <bracket :flat-tree="rounds">
-        <template slot="player" slot-scope="{player}">
+    <bracket :flat-tree="rounds" class="jotain">
+        <template slot="player" slot-scope="{player}" class="jotain">
             {{player.name}}
         </template>
         <template #player-extension-bottom="{ match }">
-            {{ match.other_info }}
+            <div align="center">
+                {{ match.other_info }}
+            </div>
         </template>
     </bracket>
 </template>
@@ -29,13 +31,17 @@ export default {
                 // 1/16 finals
                 {
                     other_info:"Kahteen voittoon",
+                    name: 'C3',
+                    type: 7,
                     id: 1,
                     next: 7,
                     player1: { id: "19", name: "B8"},
-                    player2: { id: "9", name: "A9"},
+                    player2: { id: "9", name: "A9"}
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: 'D2',
+                    type: 7,
                     id: 2,
                     next: 9,
                     player1: { id: "7", name: "A7"},
@@ -43,6 +49,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: 'C1',
+                    type: 7,
                     id: 3,
                     next: 10,
                     player1: { id: "17", name: "B6"},
@@ -50,6 +58,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name:"D3",
+                    type: 7,
                     id: 4,
                     next: 11,
                     player1: { id: "8", name: "A8"},
@@ -57,6 +67,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "C2",
+                    type: 7,
                     id: 5,
                     next: 13,
                     player1: { id: "18", name: "B7"},
@@ -64,6 +76,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "D1",
+                    type: 7,
                     id: 6,
                     next: 14,
                     player1: { id: "6", name: "A6"},
@@ -71,6 +85,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "Q1",
+                    type: 6,
                     id: 7,
                     next: 15,
                     player1: { id: "1", name: "A1"},
@@ -78,6 +94,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "Q8",
+                    type: 6,
                     id: 8,
                     next: 15,
                     player1: { id: "15", name: "B4"},
@@ -85,6 +103,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "Q4",
+                    type: 6,
                     id: 9,
                     next: 16,
                     player1: { id: "13", name: "B2"},
@@ -92,6 +112,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "Q5",
+                    type: 6,
                     id: 10,
                     next: 16,
                     player1: { id: "3", name: "A3"},
@@ -99,6 +121,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "Q2",
+                    type: 6,
                     id: 11,
                     next: 17,
                     player1: { id: "12", name: "B1"},
@@ -106,6 +130,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "Q7",
+                    type: 6,
                     id: 12,
                     next: 17,
                     player1: { id: "4", name: "A4"},
@@ -113,6 +139,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "Q3",
+                    type: 6,
                     id: 13,
                     next: 18,
                     player1: { id: "2", name: "A2"},
@@ -120,6 +148,8 @@ export default {
                 },
                 {
                     other_info:"Kahteen voittoon",
+                    name: "Q6",
+                    type: 6,
                     id: 14,
                     next: 18,
                     player1: { id: "14", name: "B3"},
@@ -127,6 +157,8 @@ export default {
                 },
                 {
                     other_info:"Kolmeen voittoon",
+                    name: "S1",
+                    type: 5,
                     id: 15,
                     next: 19,
                     player1: { id: "-8", name: "Q1 (A1 - C3)"},
@@ -134,6 +166,8 @@ export default {
                 },
                 {
                     other_info:"Kolmeen voittoon",
+                    name: "S4",
+                    type: 5,
                     id: 16,
                     next: 19,
                     player1: { id: "-10", name: "Q4 (B2 - D2)"},
@@ -141,6 +175,8 @@ export default {
                 }, 
                 {
                     other_info:"Kolmeen voittoon",
+                    name: "S2",
+                    type: 5,
                     id: 17,
                     next: 20,
                     player1: { id: "-12", name: "Q2 (B1 - D3)"},
@@ -148,6 +184,8 @@ export default {
                 }, 
                 {
                     other_info:"Kolmeen voittoon",
+                    name: "S3",
+                    type: 5,
                     id: 18,
                     next: 20,
                     player1: { id: "-14", name: "Q3 (A2 - C2)"},
@@ -155,6 +193,8 @@ export default {
                 }, 
                 {
                     other_info:"Kolmeen voittoon",
+                    name: "F1",
+                    type: 4,
                     id: 19,
                     next: 21,
                     player1: { id: "-16", name: "S1 (Q1 - Q8)"},
@@ -162,6 +202,8 @@ export default {
                 },
                 {
                     other_info:"Kolmeen voittoon",
+                    name: "F2",
+                    type: 4,
                     id: 20,
                     next: 21,
                     player1: { id: "-18", name: "S2 (Q2 - Q7)"},
@@ -169,6 +211,7 @@ export default {
                 },
                 {
                     other_info:"Kolmeen voittoon",
+                    type: 3,
                     id: 21,
                     next: 22,
                     player1: { id: "-20", name: "P1 (L S1 - S4)"},
@@ -176,6 +219,7 @@ export default {
                 },
                 {
                     other_info:"Kolmeen voittoon",
+                    type: 2,
                     id: 22,
                     player1: { id: "-22", name: "F1 (W S1 - S4)"},
                     player2: { id: "-23", name: "F2 (W S2 - S3)"},
@@ -184,42 +228,14 @@ export default {
             tmp_rounds: [{}, {}, {}, {}, {}, {}],
             multible_brackets: false,
             data: [],
-            teams: []
+            teams: [],
+            bracket_matches: []
         }
     },
     mounted() {
         if (this.teams.length == 0) {
             this.splitToBrackets()
         }
-
-        this.teams.forEach(ele => {
-            ele.sort((a,b) => {
-                let total = b.points_total - a.points_total
-                if (total < 0) {
-                    return -1
-                } else if (total > 0) {
-                    return 1 
-                }
-
-
-            }) 
-        })
-
-        this.teams.forEach((ele, idx) => {
-            for (let i = 0; i < 11; i++) {
-                for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
-                    let placementString = String.fromCharCode(65+idx) + (i+1).toString()
-                    let match = this.rounds[matchIdx] 
-                    if (match.player1.name === placementString) {
-                        match.player1.name = ele[i].current_abbreviation
-                        break
-                    } else if (match.player2.name === placementString) {
-                        match.player2.name = ele[i].current_abbreviation
-                        break
-                    }
-                }
-            }
-        })
     },
     methods: {
         splitToBrackets: function() {
@@ -246,10 +262,108 @@ export default {
             }
           }
         },
+        sortTeams: function() {
+            console.log(this.teams)
+            this.teams.forEach(ele => {
+                ele.sort((a,b) => {
+                    let total = b.points_total - a.points_total
+                    // Order sort: bracket points
+                    if (total < 0) {
+                        return -1
+                    } else if (total > 0) {
+                        return 1 
+                    }
+                    // First Tiebreaker: Match result between the teams
+                    let bracket_match = this.bracket_matches.filter(ele =>
+                        (ele.home_team.current_abbreviation == a.current_abbreviation || ele.home_team.current_abbreviation == b.current_abbreviation) &&
+                        (ele.away_team.current_abbreviation == a.current_abbreviation || ele.away_team.current_abbreviation == b.current_abbreviation)
+                    )
+                    if (!bracket_match.length) {
+                        console.log('Too many matches found: ' + bracket_match.length)
+                        return 0
+                    }
+                    bracket_match = bracket_match[0]
+                    if (a.current_abbreviation == bracket_match.home_team.current_abbreviation) {
+                        console.log(a.current_abbreviation, b.current_abbreviation)
+                        let match_result = bracket_match.away_score_total - bracket_match.home_score_total
+                        if (match_result < 0) {
+                            return 1
+                        } else if (match_result > 0) {
+                            return -1
+                        }
+                    } else {
+                        let match_result = bracket_match.home_score_total - bracket_match.away_score_total
+                        if (match_result < 0) {
+                            return 1
+                        } else if (match_result > 0) {
+                            return -1
+                        }
+                    }
+                    // Second Tiebreaker: Match average
+                    let average_total = b.match_average - a.match_average
+                    if (average_total < 0) {
+                        return 1
+                    } else if (average_total > 0) {
+                        return -1
+                    }
+                    // Third Tiebreaker: Chance, not implemented here
+                    return 0
+                })
+            })
+        },
+        putTeamsPlayoffBracket: function () {
+            this.teams.forEach((ele, idx) => {
+            for (let i = 0; i < 11; i++) {
+                for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
+                    let placementString = String.fromCharCode(65+idx) + (i+1).toString()
+                    let match = this.rounds[matchIdx] 
+                    if (match.player1.name === placementString) {
+                        match.player1.name = ele[i].current_abbreviation
+                        break
+                    } else if (match.player2.name === placementString) {
+                        match.player2.name = ele[i].current_abbreviation
+                        break
+                    }
+                }
+            }
+        })
+        },
+        resolvePlayoffs: function() {
+            let reversed_list = this.tmp_rounds.reverse()
+            reversed_list.forEach((ele, i) => {
+                for (const [key, el] of Object.entries(ele)) {
+                    console.log(el)
+                    let match = this.rounds.filter(e => e.type == 7-i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el, i)
+                    if (match.length != 1) {
+                        console.log('Matches length not right: '+ match.length.toString())
+                    } else {
+                        match = match[0]
+                        let winner = ''
+                        if (el[match.player1.name] > el[match.player2.name]) {
+                            winner = structuredClone(match.player1)
+                            match.player1['winner'] = true
+                            match.player2['winner'] = false
+                        } else {
+                            winner = structuredClone(match.player2)
+                            match.player1['winner'] = false
+                            match.player2['winner'] = true
+                        }
+                        match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
+                        let new_match = this.rounds.filter(ele => ele.id === match.next)[0]
+                        if (new_match.player1.name.includes(match.name)) {
+                            new_match.player1 = winner
+                        } else {
+                            new_match.player2 = winner
+                        }
+                    }
+                }
+            })
+        }
     },
     watch: {
         played_games() {
             console.log(this.played_games)
+            this.bracket_matches = this.played_games.filter(ele => !ele.post_season)
             let playoff_games = this.played_games.filter(ele => ele.post_season)
             playoff_games.forEach(ele => {
                 if (ele.match_type >= 2 & ele.match_type < 10) {
@@ -266,7 +380,15 @@ export default {
                     }
                 }
             })
+            console.log(this.bracket_matches)
             console.log(this.tmp_rounds)
+            if (this.teams.length == 0) {
+                this.splitToBrackets()
+            }
+            this.sortTeams()
+            console.log(this.teams[1][7].current_abbreviation)
+            this.putTeamsPlayoffBracket()
+            this.resolvePlayoffs()
         }
     }
 }
@@ -283,7 +405,10 @@ export default {
     .vtb-item-players .winner {
         color: white;
     }
-    .vtb-item-players .winner {
+    .vtb-item-players .defeated {
         color: white;
+    }
+    .vtb-item-players > div {
+        width: 125px;
     }
 </style>
