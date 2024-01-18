@@ -17,7 +17,8 @@ export default {
     name: 'Tournament',
     props: {
         type: Number,
-        played_games: Array
+        played_games: Array,
+        bracket_results: Array
     },
     components: {
     Bracket
@@ -30,7 +31,7 @@ export default {
                     other_info:"Kahteen voittoon",
                     id: 1,
                     next: 7,
-                    player1: { id: "19", name: "B8", winner: true},
+                    player1: { id: "19", name: "B8"},
                     player2: { id: "9", name: "A9"},
                 },
                 {
@@ -179,13 +180,94 @@ export default {
                     player1: { id: "-22", name: "F1 (W S1 - S4)"},
                     player2: { id: "-23", name: "F2 (W S2 - S3)"},
                 },
-            ]
+            ],
+            tmp_rounds: [{}, {}, {}, {}, {}, {}],
+            multible_brackets: false,
+            data: [],
+            teams: []
         }
     },
     mounted() {
-        // if (this.type == 1) {
-        //     rounds = defaul
-        // }
+        if (this.teams.length == 0) {
+            this.splitToBrackets()
+        }
+
+        this.teams.forEach(ele => {
+            ele.sort((a,b) => {
+                let total = b.points_total - a.points_total
+                if (total < 0) {
+                    return -1
+                } else if (total > 0) {
+                    return 1 
+                }
+
+
+            }) 
+        })
+
+        this.teams.forEach((ele, idx) => {
+            for (let i = 0; i < 11; i++) {
+                for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
+                    let placementString = String.fromCharCode(65+idx) + (i+1).toString()
+                    let match = this.rounds[matchIdx] 
+                    if (match.player1.name === placementString) {
+                        match.player1.name = ele[i].current_abbreviation
+                        break
+                    } else if (match.player2.name === placementString) {
+                        match.player2.name = ele[i].current_abbreviation
+                        break
+                    }
+                }
+            }
+        })
+    },
+    methods: {
+        splitToBrackets: function() {
+          this.data = JSON.parse(sessionStorage.teams)
+      
+          if (sessionStorage.all_seasons) {
+            var all_seasons = JSON.parse(sessionStorage.all_seasons)
+            
+            var index = all_seasons.map(ele => String(ele.id)).indexOf(sessionStorage.season_id)
+            var this_season = all_seasons[index]
+
+            if (this_season.no_brackets > 1) {
+              this.multible_brackets = true
+              for (let i = 0; i < this_season.no_brackets; i++) {
+                this.teams.push([])
+              }
+              this.data.forEach(ele => {
+                this.teams[ele.bracket -1].push(ele)
+              }, this)
+
+            } else {
+              this.teams = [this.data]
+              this.multible_brackets = false
+            }
+          }
+        },
+    },
+    watch: {
+        played_games() {
+            console.log(this.played_games)
+            let playoff_games = this.played_games.filter(ele => ele.post_season)
+            playoff_games.forEach(ele => {
+                if (ele.match_type >= 2 & ele.match_type < 10) {
+                    var round = this.tmp_rounds[ele.match_type - 2]
+                    if (ele.seriers in round === false) {
+                        round[ele.seriers] = {}
+                        round[ele.seriers][ele.home_team.current_abbreviation] = 0
+                        round[ele.seriers][ele.away_team.current_abbreviation] = 0
+                    }
+                    if (ele.home_score_total < ele.away_score_total) {
+                        ++round[ele.seriers][ele.home_team.current_abbreviation]
+                    } else if (ele.home_score_total > ele.away_score_total) {
+                        ++round[ele.seriers][ele.away_team.current_abbreviation]
+                    }
+                }
+            })
+            console.log(this.tmp_rounds)
+        }
     }
 }
 </script>

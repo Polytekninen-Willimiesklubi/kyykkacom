@@ -7,7 +7,9 @@
             />
         </div>
         <v-flex width="100px">
-            <tournament />
+            <tournament 
+                :played_games="games"
+            />
         </v-flex>
     </v-layout>
 </template>
@@ -37,10 +39,9 @@ export default {
         }
     },
     created() {
-        this.$http.get('api/matches/'+ '?season=' + sessionStorage.season_id + '&post_season=1').then(
+        this.$http.get('api/matches/'+ '?season=' + sessionStorage.season_id).then(
             function(data) {
             this.games = data.body
-            console.log(this.games)
         })
     }
 
