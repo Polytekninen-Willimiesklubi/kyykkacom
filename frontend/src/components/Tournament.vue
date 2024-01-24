@@ -1,14 +1,32 @@
 <template>
-    <bracket :flat-tree="rounds" class="jotain">
-        <template slot="player" slot-scope="{player}" class="jotain">
-            {{player.name}}
-        </template>
-        <template #player-extension-bottom="{ match }">
-            <div align="center">
-                {{ match.other_info }}
+    <v-layout>
+        <div v-if="st_round.length" class="pr-10">
+            <div v-for="listItem in st_round" :key="listItem.name" class="pt-10">
+                <bracket :flat-tree="[listItem]">
+                    <template slot="player" slot-scope="{player}">
+                        {{player.name}}
+                    </template>
+                    <template #player-extension-bottom="{ match }">
+                        <div align="center">
+                            {{ match.other_info }}
+                        </div>
+                    </template>
+                </bracket>
             </div>
-        </template>
-    </bracket>
+        </div>
+        <v-flex>
+            <bracket :flat-tree="data">
+                <template slot="player" slot-scope="{player}">
+                    {{player.name}}
+                </template>
+                <template #player-extension-bottom="{ match }">
+                    <div align="center">
+                        {{ match.other_info }}
+                    </div>
+                </template>
+            </bracket>
+        </v-flex>
+    </v-layout>
 </template>
 
 
@@ -20,218 +38,22 @@ export default {
     props: {
         type: Number,
         played_games: Array,
-        bracket_results: Array
+        rounds: Array,
+        first_round: Boolean,
+        first: Number
     },
     components: {
     Bracket
 },
     data() {
         return {
-            rounds: [
-                // 1/16 finals
-                {
-                    other_info:"Kahteen voittoon",
-                    name: 'C3',
-                    type: 7,
-                    id: 1,
-                    next: 7,
-                    player1: { id: "19", name: "B8"},
-                    player2: { id: "9", name: "A9"}
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: 'D2',
-                    type: 7,
-                    id: 2,
-                    next: 9,
-                    player1: { id: "7", name: "A7"},
-                    player2: { id: "21", name: "B10"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: 'C1',
-                    type: 7,
-                    id: 3,
-                    next: 10,
-                    player1: { id: "17", name: "B6"},
-                    player2: { id: "11", name: "A11"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name:"D3",
-                    type: 7,
-                    id: 4,
-                    next: 11,
-                    player1: { id: "8", name: "A8"},
-                    player2: { id: "20", name: "B9"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "C2",
-                    type: 7,
-                    id: 5,
-                    next: 13,
-                    player1: { id: "18", name: "B7"},
-                    player2: { id: "10", name: "A10"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "D1",
-                    type: 7,
-                    id: 6,
-                    next: 14,
-                    player1: { id: "6", name: "A6"},
-                    player2: { id: "22", name: "B11"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "Q1",
-                    type: 6,
-                    id: 7,
-                    next: 15,
-                    player1: { id: "1", name: "A1"},
-                    player2: { id: "-1", name: "B8 / A9"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "Q8",
-                    type: 6,
-                    id: 8,
-                    next: 15,
-                    player1: { id: "15", name: "B4"},
-                    player2: { id: "8", name: "A5"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "Q4",
-                    type: 6,
-                    id: 9,
-                    next: 16,
-                    player1: { id: "13", name: "B2"},
-                    player2: { id: "-2", name: "A7 / B10"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "Q5",
-                    type: 6,
-                    id: 10,
-                    next: 16,
-                    player1: { id: "3", name: "A3"},
-                    player2: { id: "-3", name: "B6 / A11"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "Q2",
-                    type: 6,
-                    id: 11,
-                    next: 17,
-                    player1: { id: "12", name: "B1"},
-                    player2: { id: "-4", name: "A8 / B9"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "Q7",
-                    type: 6,
-                    id: 12,
-                    next: 17,
-                    player1: { id: "4", name: "A4"},
-                    player2: { id: "16", name: "B5"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "Q3",
-                    type: 6,
-                    id: 13,
-                    next: 18,
-                    player1: { id: "2", name: "A2"},
-                    player2: { id: "-6", name: "B7 / A10"},
-                },
-                {
-                    other_info:"Kahteen voittoon",
-                    name: "Q6",
-                    type: 6,
-                    id: 14,
-                    next: 18,
-                    player1: { id: "14", name: "B3"},
-                    player2: { id: "-7", name: "A6 / B11"},
-                },
-                {
-                    other_info:"Kolmeen voittoon",
-                    name: "S1",
-                    type: 5,
-                    id: 15,
-                    next: 19,
-                    player1: { id: "-8", name: "Q1 (A1 - C3)"},
-                    player2: { id: "-9", name: "Q8 (B4 - A5)"},
-                },
-                {
-                    other_info:"Kolmeen voittoon",
-                    name: "S4",
-                    type: 5,
-                    id: 16,
-                    next: 19,
-                    player1: { id: "-10", name: "Q4 (B2 - D2)"},
-                    player2: { id: "-11", name: "Q5 (A3 - C1)"},
-                }, 
-                {
-                    other_info:"Kolmeen voittoon",
-                    name: "S2",
-                    type: 5,
-                    id: 17,
-                    next: 20,
-                    player1: { id: "-12", name: "Q2 (B1 - D3)"},
-                    player2: { id: "-13", name: "Q7 (A4 - B5)"},
-                }, 
-                {
-                    other_info:"Kolmeen voittoon",
-                    name: "S3",
-                    type: 5,
-                    id: 18,
-                    next: 20,
-                    player1: { id: "-14", name: "Q3 (A2 - C2)"},
-                    player2: { id: "-15", name: "Q6 (B3 - D1)"},
-                }, 
-                {
-                    other_info:"Kolmeen voittoon",
-                    name: "F1",
-                    loser_name:'P1',
-                    type: 4,
-                    id: 19,
-                    next: 21,
-                    player1: { id: "-16", name: "S1 (Q1 - Q8)"},
-                    player2: { id: "-17", name: "S4 (Q4 - Q5)"},
-                },
-                {
-                    other_info:"Kolmeen voittoon",
-                    name: "F2",
-                    loser_name: "P2",
-                    type: 4,
-                    id: 20,
-                    next: 21,
-                    player1: { id: "-18", name: "S2 (Q2 - Q7)"},
-                    player2: { id: "-19", name: "S3 (Q3 - Q6)"},
-                },
-                {
-                    other_info:"Kolmeen voittoon",
-                    type: 3,
-                    id: 21,
-                    next: 22,
-                    player1: { id: "-20", name: "P1 (L S1 - S4)"},
-                    player2: { id: "-21", name: "P2 (L S2 - S3)"},
-                },
-                {
-                    other_info:"Kolmeen voittoon",
-                    type: 2,
-                    id: 22,
-                    player1: { id: "-22", name: "F1 (W S1 - S4)"},
-                    player2: { id: "-23", name: "F2 (W S2 - S3)"},
-                },
-            ],
             tmp_rounds: [{}, {}, {}, {}, {}, {}],
             multible_brackets: false,
             data: [],
             teams: [],
-            bracket_matches: []
+            bracket_matches: [],
+            st_round: [],
+            data: [],
         }
     },
     mounted() {
@@ -312,12 +134,148 @@ export default {
                     return 0
                 })
             })
+            function innerFunction(array, bracket_matches, big_arr) {
+                let games = bracket_matches.filter( e => 
+                (e.home_team.current_abbreviation in array) &&
+                (e.away_team.current_abbreviation in array) 
+                )
+                games.forEach(e => {
+                    console.log(e.home_team.current_abbreviation, e.away_team.current_abbreviation)
+                    if (e.home_score_total > e.away_score_total) {
+                        array[e.away_team.current_abbreviation] += 2
+                    } else if (e.home_score_total < e.away_score_total) {
+                        array[e.home_team.current_abbreviation] += 2
+                    } else {
+                        ++array[e.away_team.current_abbreviation]
+                        ++array[e.home_team.current_abbreviation]
+                    }
+                })
+                let sortable = []
+                for (var tmp in array) {
+                    sortable.push([tmp, array[tmp]])
+                }
+                sortable.sort((a,b) => b[1]-a[1])
+                var i = 0
+                while (i < sortable.length) {
+                    console.log('hei' + sortable)
+                    let points = sortable[i][1]
+                    let j = i + 1
+                    while (j < sortable.length) {
+                        if (sortable[j][1] != points) {
+                            break
+                        }
+                        j++
+                    }
+                    if (j-i <= 1) {
+                        i++
+                        continue
+                    } else if (j-i === 2) {
+                        let match = bracket_matches.filter(e => 
+                            (e.home_team.current_abbreviation == sortable[i][0] || e.home_team.current_abbreviation == sortable[j-1][0]) &&
+                            (e.away_team.current_abbreviation == sortable[i][0] || e.away_team.current_abbreviation == sortable[j-1][0])
+                        )
+                        match = match[0]
+                        console.log(match)
+                        console.log(match.home_team.current_abbreviation, match.away_team.current_abbreviation)
+                        if (match.home_score_total > match.away_score_total) {
+                            if(match.home_team.current_abbreviation == sortable[i][0]) {
+                                sortable[j-1][1] += 0.5
+                            } else {
+                                sortable[i][1] += 0.5
+                            }
+                        } else if (match.home_score_total < match.away_score_total) {
+                            if(match.home_team.current_abbreviation == sortable[i][0]) {
+                                sortable[i][1] += 0.5
+                            } else {
+                                sortable[j-1][1] += 0.5
+                            }
+                        } else {
+                            let team_i = big_arr.filter(e => e.current_abbreviation == sortable[i][0])[0]
+                            let team_j = big_arr.filter(e => e.current_abbreviation == sortable[j-1][0])[0]
+                            if (team_i.match_average > team_j.match_average) {
+                                sortable[i][1] += 0.5
+                            } else { // We ignore == conditional. There is no way this can be same between two teams 
+                                sortable[j-1][1] += 0.5
+                            }
+                        }
+                        i = j
+                    } else {
+                        if (j-i == sortable.length) {
+                            let tmp_sortable = []
+                            sortable.forEach(e => {
+                                let team = big_arr.filter(tmp_e => tmp_e.current_abbreviation == e[0])[0]
+                                tmp_sortable.push([e[0], team.match_average])
+                            }, tmp_sortable)
+                            
+
+                            tmp_sortable.sort((a,b) => b[1] - a[1])
+                            let inc = 1 / sortable.length
+                            for(let k = 0; k < tmp_sortable.length; k++) {
+                                let tmp = tmp_sortable[k]
+                                let team_index = sortable.map(e => e[0]).indexOf(tmp[0])
+                                sortable[team_index][1] += inc*k
+                            }
+
+                        } else {
+                            console.log('Dont come here') // Here sould come recursive call that call 'innerFunction'
+                        }
+                        i = j
+                    }    
+                    console.log(sortable)
+                }
+                sortable.sort((a,b) => b[1]-a[1])
+                return sortable.map(ele => ele[0])
+            }
+
+            // Resolve "3 or more"- way ties
+            this.teams.forEach(ele => {
+                let i = 0
+                let j = 0
+                let points = 0
+                while(i < ele.length) {
+                    points = ele[i].points_total
+                    j = i + 1
+                    while (j < ele.length) {
+                        if (ele[j].points_total != points) {
+                            break
+                        }
+                        j++
+                    }
+                    if (j-i <= 2) {
+                        i = j
+                        continue
+                    }
+                    // Initialize match results with names
+                    let match_results = {}
+                    for (let k=i; k < j; k++) {
+                        match_results[ele[k].current_abbreviation] = 0
+                    }
+                    let correct_order = innerFunction(match_results, this.bracket_matches, ele)
+                    console.log(correct_order)
+                    let datas = []
+                    correct_order.forEach(name => {
+                        datas.push(structuredClone(ele.filter(e => e.current_abbreviation == name)[0]))
+                    })
+                    console.log(datas)
+                    let k = i
+                    datas.forEach(data => {
+                        ele[k] = data,
+                        k++
+                    }, k)
+
+                    console.log(ele)
+                    console.log(match_results)
+                    i = j
+                }
+            })
         },
         putTeamsPlayoffBracket: function () {
+            const bracket_limit = sessionStorage.season_id in [24, 25] ? 11 : 16
             this.teams.forEach((ele, idx) => {
-            for (let i = 0; i < 11; i++) {
+            for (let i = 0; i < bracket_limit; i++) {
                 for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
-                    let placementString = String.fromCharCode(65+idx) + (i+1).toString()
+                    let placementString = this.teams.length >= 2 ? String.fromCharCode(65+idx) + (i+1).toString()
+                                                                 : (i+1).toString() + '. Seed'
                     let match = this.rounds[matchIdx] 
                     if (match.player1.name === placementString) {
                         match.player1.name = ele[i].current_abbreviation
@@ -330,13 +288,55 @@ export default {
             }
         })
         },
+        splitFirstRound: function() {
+            let first_round_matches = this.rounds.filter(e => e.type == this.first)
+            this.st_round = structuredClone(first_round_matches)
+            console.log(this.st_round)
+            this.data = this.rounds.filter(e => e.type != this.first)
+            let games = this.tmp_rounds[this.first - 2]
+            let winners = []
+            for (const [key, el] of Object.entries(games)) {
+
+                console.log(el)
+                let match = this.st_round.filter(e => (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el)
+                if (match.length != 1) {
+                    console.log('moi' + match)
+                    console.log('Matches length not right: '+ match.length.toString())
+                } else {
+                    match = match[0]
+                    if (el[match.player1.name] > el[match.player2.name]) {
+                        winners.push(structuredClone(match.player1))
+                        match.player1['winner'] = true
+                        match.player2['winner'] = false
+                    } else {
+                        winners.push(structuredClone(match.player2))
+                        match.player1['winner'] = false
+                        match.player2['winner'] = true
+                    }
+                    match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
+                }
+            }
+            winners.sort((a,b) =>  Number(b.id) - Number(a.id))
+
+            winners.forEach((ele, i) => {
+                let placementString = (i+1).toString() + ". Low Seed"
+                let new_match = this.rounds.filter(el => el.player1.name == placementString || el.player2.name == placementString)[0]
+                if (new_match.player1.name.includes(placementString)) {
+                    new_match.player1 = ele
+                } else {
+                    new_match.player2 = ele
+                }
+                
+            })
+        },
         resolvePlayoffs: function() {
             let reversed_list = this.tmp_rounds.reverse()
             reversed_list.forEach((ele, i) => {
                 for (const [key, el] of Object.entries(ele)) {
                     console.log(el)
-                    let match = this.rounds.filter(e => e.type == 7-i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el, i)
+                    let match = this.data.filter(e => e.type == 7-i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el, i)
                     if (match.length != 1) {
+                        console.log('moi' + match)
                         console.log('Matches length not right: '+ match.length.toString())
                     } else {
                         match = match[0]
@@ -407,6 +407,13 @@ export default {
             }
             this.sortTeams()
             this.putTeamsPlayoffBracket()
+            if (this.first_round) {
+                this.splitFirstRound()
+                console.log(this.data)
+            } else {
+                this.data = this.rounds
+                console.log(this.data)
+            }
             this.resolvePlayoffs()
         }
     }

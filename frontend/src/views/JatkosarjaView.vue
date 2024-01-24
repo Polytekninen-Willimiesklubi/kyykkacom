@@ -7,8 +7,11 @@
             />
         </div>
         <v-flex width="100px">
-            <tournament 
+            <tournament
                 :played_games="games"
+                :rounds="rounds"
+                :first_round="first_round"
+                :first="first"
             />
         </v-flex>
     </v-layout>
@@ -17,6 +20,9 @@
 <script>
 import Tournament from '@/components/Tournament.vue';
 import SideBar from '../components/SideBar.vue';
+import two_22 from '../tournament_templates/two_bracket_22.json'
+import one_16 from '../tournament_templates/one_bracket_16.json'
+import one_12 from '../tournament_templates/one_bracket_12.json'
 
 export default {
     name: 'JatkosarjaView',
@@ -35,7 +41,27 @@ export default {
             { text: 'P', value: 'points_total', width:"3%"},
             { text: 'OKA', value: 'match_average', sortable: false, width:"5%"},
             ],
-            games: []
+            games: [],
+            rounds: [],
+            json: [],
+            first_round: false,
+            first: 7,
+            // TODO -> this could be binded to Seasons datamodel 
+            seasons_mapping: {
+                25 : two_22,
+                24 : two_22,
+                23 : one_16,
+                22 : false,
+                21 : one_16,
+                20 : one_16,
+                19 : one_16,
+                18 : one_12,
+                17 : one_12,
+                16 : one_12,
+                15 : one_12,
+                14 : one_12,
+                13 : one_12,
+            }
         }
     },
     created() {
@@ -43,6 +69,10 @@ export default {
             function(data) {
             this.games = data.body
         })
+        this.json = this.seasons_mapping[sessionStorage.season_id]
+        this.rounds = this.json['default']
+        this.first_round = this.json['first_round']
+        this.first = this.first_round ? 6 : 0
     }
 
 };

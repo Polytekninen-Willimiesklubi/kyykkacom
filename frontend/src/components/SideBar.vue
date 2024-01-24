@@ -9,7 +9,7 @@
           because otherwise returns an 'expected an array' error. This might be caused by listItem 
           not being defined before the mouting happens (?) -->
         <v-data-table mobile-breakpoint="0" disable-pagination dense
-          :class="{regular_season : isClass}"
+          :class="{regular_season : isClass, regular_season16 : is16Class}"
           :header-props="{ sortIcon: null }"
           @click:row="handleRedirect"
           :headers="headers" 
@@ -55,6 +55,7 @@ export default {
             sortBy: 'points_total',
             sortDesc: true,
             isClass: false,
+            is16Class: false,
             multible_brackets: false,
             data: [],
             teams: [],
@@ -78,6 +79,8 @@ export default {
         splitToBrackets: function() {
           this.data = JSON.parse(sessionStorage.teams)
           this.isClass = (sessionStorage.season_id == 24 || sessionStorage.season_id == 25)
+          this.is16Class = (sessionStorage.season_id == 23)
+
       
           if (sessionStorage.all_seasons) {
             var all_seasons = JSON.parse(sessionStorage.all_seasons)
@@ -127,4 +130,9 @@ export default {
 .regular_season > .v-data-table__wrapper > table > tbody > tr:nth-child(11) > td {
  border-bottom: 0.2rem double red !important;
 }
+
+.regular_season16 > .v-data-table__wrapper > table > tbody > tr:nth-child(16) > td {
+ border-bottom: 0.2rem double red !important;
+}
+
 </style>
