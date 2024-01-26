@@ -849,7 +849,6 @@ class TeamListSerializer(serializers.ModelSerializer):
     match_average = serializers.SerializerMethodField()
     points_average = serializers.SerializerMethodField()
 
-
     def count_match_results(self, obj):
         if self.context.get('post_season') is not None:
             results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season'),
@@ -918,7 +917,7 @@ class TeamListSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamsInSeason
         fields = ('id', 'current_name', 'current_abbreviation', 'matches_won', 'matches_lost', 'matches_tie',
-                  'matches_played', 'match_average', 'points_total', 'points_average', 'score_total', 'bracket')
+                  'matches_played', 'match_average', 'points_total', 'points_average', 'score_total', 'bracket', 'bracket_placement')
 
 
 class TeamDetailSerializer(serializers.ModelSerializer):
@@ -1172,3 +1171,8 @@ class ThrowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Throw
         fields = ('score_first', 'score_second', 'score_third', 'score_fourth', 'player')
+
+class TeamsInSeasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeamsInSeason
+        fields = ('id', 'bracket_placement')

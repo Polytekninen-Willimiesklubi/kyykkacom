@@ -42,7 +42,8 @@ class TeamsInSeason(models.Model):
     current_abbreviation = models.CharField(max_length=15)
     players = models.ManyToManyField(User, through='PlayersInTeam')
     bracket = models.IntegerField(null=True)
-    
+    bracket_placement = models.IntegerField(blank=True, null=True)  # Winner of the Bracket_satge is marked with 0 
+
     class Meta:
         unique_together = ('season', 'team')
 
