@@ -133,12 +133,9 @@ class LoginAPI(generics.GenericAPIView):
         # role = getRole(user)
         try:
             current = CurrentSeason.objects.first().season
-            player_in_team = PlayersInTeam.objects.get(player=user, team_season__season=current)
+            player_in_team = PlayersInTeam.objects.filter(player=user, team_season__season=current).first()
             team_id = player_in_team.team_season.id
-            if player_in_team.is_captain:
-                role = '1'
-            else:
-                role = '0'
+            role = '1' if player_in_team.is_captain else '0'
         except (PlayersInTeam.DoesNotExist, AttributeError) as e:
             team_id = None
             role = '0'
