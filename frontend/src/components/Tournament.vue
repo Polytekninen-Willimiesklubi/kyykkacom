@@ -92,10 +92,8 @@ export default {
                 ele.sort((a,b) => {
                     let total = b.points_total - a.points_total
                     // Order sort: bracket points
-                    if (total < 0) {
-                        return -1
-                    } else if (total > 0) {
-                        return 1 
+                    if (total != 0) {
+                        return total < 0 ? -1 : 1
                     }
                     // First Tiebreaker: Match result between the teams
                     let bracket_match = this.bracket_matches.filter(ele =>
@@ -107,28 +105,18 @@ export default {
                         return 0
                     }
                     bracket_match = bracket_match[0]
+                    let match_result = bracket_match.away_score_total - bracket_match.home_score_total
                     if (a.current_abbreviation == bracket_match.home_team.current_abbreviation) {
-                        console.log(a.current_abbreviation, b.current_abbreviation)
-                        let match_result = bracket_match.away_score_total - bracket_match.home_score_total
-                        if (match_result < 0) {
-                            return 1
-                        } else if (match_result > 0) {
-                            return -1
-                        }
-                    } else {
-                        let match_result = bracket_match.home_score_total - bracket_match.away_score_total
-                        if (match_result < 0) {
-                            return 1
-                        } else if (match_result > 0) {
-                            return -1
-                        }
+                        match_result *= -1
                     }
+                    if (match_result != 0) {
+                        return match_result < 0 ? 1 : -1 
+                    }
+
                     // Second Tiebreaker: Match average
                     let average_total = b.match_average - a.match_average
-                    if (average_total < 0) {
-                        return 1
-                    } else if (average_total > 0) {
-                        return -1
+                    if (average_total != 0) {
+                        return match_result < 0 ? 1 : -1 
                     }
                     // Third Tiebreaker: Chance, not implemented here
                     return 0
