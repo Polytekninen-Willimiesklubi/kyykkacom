@@ -32,14 +32,17 @@
                 <v-card class="pl-2 ml-10">
                     <h3 class="pl-2">Runkosarja Voittaja</h3>
                     <v-select class="ma-2" width="300px"
+                        label="Valitse"
+                        v-model="selectValue"
                         :items="all_teams"
                         :item-text="item => item.current_abbreviation"
+                        return-object
                     />
                 </v-card>
             </v-col>
         </v-row>
         <v-btn class="ma-4 ml-10" v-on:click="validateResult" x-large color="error">Vahvista Runkosarjan tulos</v-btn>
-        <v-btn class="ma-4 ml-10" :click="validateWinner" x-large color="error">Vahvista Runkosarjan Voittaja</v-btn>
+        <v-btn class="ma-4 ml-10" v-on:click="validateWinner" x-large color="error">Vahvista Runkosarjan Voittaja</v-btn>
 
     </v-card>
   </template>
@@ -53,7 +56,8 @@
         data() {
         return {
             all_teams: [],
-            teams: []
+            teams: [],
+            selectValue: {}
         };
       },
       methods: {
@@ -110,7 +114,6 @@
             location.href = '/joukkue/'+value.id;
         },
         validateResult() {
-            console.log('moi')
             if (confirm('Oletko tyytyväinen runkosarjan tuloksiin?')) {
                 this.teams.forEach(ele => {
                     ele.forEach(e => {
@@ -140,6 +143,30 @@
             }
         },
         validateWinner() {
+            if (this.selectValue.id === undefined) {
+                return
+            }
+            if (confirm('Oletko tyytyväinen runkosarjan voittajaan?')) {
+                let post_url = 'api/kyykka_admin/team/update/' + this.selectValue.id
+                let post_data = {'bracket_placement' : 0}
+                this.$http.patch(post_url, post_data, {
+                    headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+                    'withCredentials': true,
+                }).catch(function(response) {
+                    if (response.status == 403) {
+                    this.$http
+                        .get('api/csrf', {'withCredentials': true})
+                        .then(function(response) {
+                            if (response.status === 200) {
+                                this.$http.patch(post_url, post_data, {
+                                    headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+                                    'withCredentials': true,
+                                })
+                            }
+                        });
+                    }
+                })
+            }
         },
         get_post_data() {
             let post_data = {}
