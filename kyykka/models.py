@@ -6,11 +6,30 @@ from django.core.cache import cache
 
 from utils.caching import reset_player_cache
 
+MATCH_TYPES = {    
+    1: "Runkosarja",
+    2: "Finaali",
+    3: "Pronssi",
+    4: "Välierä",
+    5: "Puolivälierä",
+    6: "Neljännesvälierä",
+    7: "Kahdeksannesvälierä",
+    10: "Runkosarjafinaali",
+    20: "Jumbofinaali",
+    31: "SuperWeekend: Alkulohko",
+    32: "SuperWeekend: Finaali",
+    33: "SuperWeekend: Pronssi",
+    34: "SuperWeekend: Välierä",
+    35: "SuperWeekend: Puolivälierä",
+    36: "SuperWeekend: Neljännesvälierä",
+    37: "SuperWeekend: Kahdeksannesvälierä",
+}
+
+MATCH_TYPES_TUPLES = [(key, val) for key, val in MATCH_TYPES.items()]
 
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player')
     number = models.CharField(max_length=2, default=99)
-
 
 class Team(models.Model):
     name = models.CharField(max_length=128, unique=True)
@@ -61,7 +80,6 @@ class PlayersInTeam(models.Model):
     def __str__(self):
         return '%s %s %s %s' % (self.team_season.season.year, self.team_season.current_abbreviation, self.player.first_name, self.player.last_name)
 
-
 class Match(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     match_time = models.DateTimeField()
@@ -83,6 +101,24 @@ class Match(models.Model):
     def __str__(self):
         return '%s | %s - %s' % (self.match_time.strftime("%m/%d/%Y, %H:%M"), self.home_team, self.away_team,)
 
+
+class Seriers(models.Model):
+    match_type = models.IntegerField(choices=MATCH_TYPES_TUPLES, blank=True, null=True)
+    winner = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True, blank=True)
+    team1 = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name='team1_seriers')
+    team2 = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name='team2_seriers')
+    matches_to_win = models.IntegerField(default=1, null=True)
+    matches = models.ManyToManyField(Match, through='MatchesInSeriers', related_name='seriers_matches')
+
+    def __str__(self):
+        return f'{self.team1.season} {MATCH_TYPES[self.match_type]} : {self.team1} vs. {self.team2}'
+
+class MatchesInSeriers(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    seriers = models.ForeignKey(Seriers, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = 'Matches in Seriers'
 
 class Throw(models.Model):
     '''
