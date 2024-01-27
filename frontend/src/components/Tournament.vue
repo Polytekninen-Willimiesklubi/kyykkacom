@@ -48,18 +48,41 @@ export default {
     data() {
         return {
             tmp_rounds: [{}, {}, {}, {}, {}, {}],
+            bracket_placements : [],
             multible_brackets: false,
             data: [],
             teams: [],
             bracket_matches: [],
             st_round: [],
-            data: [],
         }
     },
     mounted() {
         if (this.teams.length == 0) {
             this.splitToBrackets()
         }
+
+        
+    },
+    created() {
+        if (type(this.rounds) !== Object)
+        this.$http
+            .get('api/teams/?season=' + sessionStorage.season_id)
+            .then( 
+                function(data) {
+                    const max_bracket = Math.max(...data.body.map(ele => ele.bracket))
+                    let tmp = []
+                    for (var i = 0 ; i < max_bracket; i++) {
+                        tmp.push([])
+                    }
+                    for (let i=0; i < data.body.length; i++) {
+                        let team = data.body[i]
+                        tmp[team.bracket-1].push([team.current_abbreviation, team.bracket_placement])
+                    }
+                    tmp.forEach(ele => ele.sort((a, b) => a[1] - b[1]))
+                    this.bracket_placements = tmp
+                }
+            )
+
     },
     methods: {
         splitToBrackets: function() {
@@ -87,7 +110,6 @@ export default {
           }
         },
         sortTeams: function() {
-            console.log(this.teams)
             this.teams.forEach(ele => {
                 ele.sort((a,b) => {
                     let total = b.points_total - a.points_total
@@ -124,8 +146,8 @@ export default {
             })
             function innerFunction(array, bracket_matches, big_arr) {
                 let games = bracket_matches.filter( e => 
-                (e.home_team.current_abbreviation in array) &&
-                (e.away_team.current_abbreviation in array) 
+                    (e.home_team.current_abbreviation in array) &&
+                    (e.away_team.current_abbreviation in array) 
                 )
                 games.forEach(e => {
                     console.log(e.home_team.current_abbreviation, e.away_team.current_abbreviation)
@@ -145,7 +167,6 @@ export default {
                 sortable.sort((a,b) => b[1]-a[1])
                 var i = 0
                 while (i < sortable.length) {
-                    console.log('hei' + sortable)
                     let points = sortable[i][1]
                     let j = i + 1
                     while (j < sortable.length) {
@@ -163,8 +184,6 @@ export default {
                             (e.away_team.current_abbreviation == sortable[i][0] || e.away_team.current_abbreviation == sortable[j-1][0])
                         )
                         match = match[0]
-                        console.log(match)
-                        console.log(match.home_team.current_abbreviation, match.away_team.current_abbreviation)
                         if (match.home_score_total > match.away_score_total) {
                             if(match.home_team.current_abbreviation == sortable[i][0]) {
                                 sortable[j-1][1] += 0.5
@@ -239,53 +258,45 @@ export default {
                         match_results[ele[k].current_abbreviation] = 0
                     }
                     let correct_order = innerFunction(match_results, this.bracket_matches, ele)
-                    console.log(correct_order)
                     let datas = []
                     correct_order.forEach(name => {
                         datas.push(structuredClone(ele.filter(e => e.current_abbreviation == name)[0]))
                     })
-                    console.log(datas)
                     let k = i
                     datas.forEach(data => {
                         ele[k] = data,
                         k++
                     }, k)
-
-                    console.log(ele)
-                    console.log(match_results)
                     i = j
                 }
             })
         },
         putTeamsPlayoffBracket: function () {
             const bracket_limit = sessionStorage.season_id in [24, 25] ? 11 : 16
-            this.teams.forEach((ele, idx) => {
-            for (let i = 0; i < bracket_limit; i++) {
-                for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
-                    let placementString = this.teams.length >= 2 ? String.fromCharCode(65+idx) + (i+1).toString()
-                                                                 : (i+1).toString() + '. Seed'
-                    let match = this.rounds[matchIdx] 
-                    if (match.player1.name === placementString) {
-                        match.player1.name = ele[i].current_abbreviation
-                        break
-                    } else if (match.player2.name === placementString) {
-                        match.player2.name = ele[i].current_abbreviation
-                        break
+            this.bracket_placements.forEach((bracket, idx) => {
+                for (let i = 0; i < bracket_limit; i++) {
+                    for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
+                        let placementString = this.bracket_placements.length >= 2 ? String.fromCharCode(65+idx) + (i+1).toString()
+                                                                    : (i+1).toString() + '. Seed'
+                        let match = this.rounds[matchIdx] 
+                        if (match.player1.name === placementString) {
+                            match.player1.name = bracket[i][0]
+                            break
+                        } else if (match.player2.name === placementString) {
+                            match.player2.name = bracket[i][0]
+                            break
+                        }
                     }
                 }
-            }
-        })
+            })
         },
         splitFirstRound: function() {
             let first_round_matches = this.rounds.filter(e => e.type == this.first)
             this.st_round = structuredClone(first_round_matches)
-            console.log(this.st_round)
             this.data = this.rounds.filter(e => e.type != this.first)
             let games = this.tmp_rounds[this.first - 2]
             let winners = []
             for (const [key, el] of Object.entries(games)) {
-
-                console.log(el)
                 let match = this.st_round.filter(e => (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el)
                 if (match.length != 1) {
                     console.log('moi' + match)
@@ -321,7 +332,6 @@ export default {
             let reversed_list = this.tmp_rounds.reverse()
             reversed_list.forEach((ele, i) => {
                 for (const [key, el] of Object.entries(ele)) {
-                    console.log(el)
                     let match = this.data.filter(e => e.type == 7-i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el, i)
                     if (match.length != 1) {
                         console.log('moi' + match)
@@ -372,7 +382,6 @@ export default {
     },
     watch: {
         played_games() {
-            console.log(this.played_games)
             this.bracket_matches = this.played_games.filter(ele => !ele.post_season)
             let playoff_games = this.played_games.filter(ele => ele.post_season)
             playoff_games.forEach(ele => {
@@ -390,17 +399,11 @@ export default {
                     }
                 }
             })
-            if (this.teams.length == 0) {
-                this.splitToBrackets()
-            }
-            this.sortTeams()
             this.putTeamsPlayoffBracket()
             if (this.first_round) {
                 this.splitFirstRound()
-                console.log(this.data)
             } else {
                 this.data = this.rounds
-                console.log(this.data)
             }
             this.resolvePlayoffs()
         }
