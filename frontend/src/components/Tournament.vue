@@ -64,7 +64,7 @@ export default {
         
     },
     created() {
-        if (type(this.rounds) !== Object)
+        // if (typeof(this.rounds) !== Object) TODO: If tournament format alias 'rounds' undefined: show something else
         this.$http
             .get('api/teams/?season=' + sessionStorage.season_id)
             .then( 
@@ -80,6 +80,7 @@ export default {
                     }
                     tmp.forEach(ele => ele.sort((a, b) => a[1] - b[1]))
                     this.bracket_placements = tmp
+                    this.putTeamsPlayoffBracket()
                 }
             )
 
@@ -399,7 +400,6 @@ export default {
                     }
                 }
             })
-            this.putTeamsPlayoffBracket()
             if (this.first_round) {
                 this.splitFirstRound()
             } else {
