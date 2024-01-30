@@ -8,34 +8,40 @@
       >
         <img src="../../public/kyykkalogo120px.png">
       </router-link>
-      <v-btn text class="hidden-md-and-down" to="/ottelut">Ottelut</v-btn>
-      <v-btn text class="hidden-md-and-down" to="/joukkueet">Joukkueet</v-btn>
-      <v-btn text class="hidden-md-and-down" to="/pelaajat">Pelaajat</v-btn>
-      <!-- <v-btn text class="hidden-md-and-down" to="/superweekend">SuperWeekend</v-btn> -->
-      <v-btn text class="hidden-md-and-down" to="/jatkosarja">Jatkosarja</v-btn>
 
-      <v-btn
-        v-if="loggedIn && team_id != 'null' && team_id"
-        text
-        class="hidden-md-and-down"
-        :to="'/joukkue/'+this.team_id"
-      >oma joukkue</v-btn>
-      <v-btn text class="hidden-md-and-down" to="/info">Info</v-btn>
+      <div v-for="item in items">
+        <v-btn text class="hidden-md-and-down" :to=item.route 
+              v-if="item.if_clause === undefined && item.title != 'Koti' || item.if_clause">
+          {{ item.title }}
+        </v-btn>
+      </div>
+      
       <v-spacer class="hidden-md-and-down"></v-spacer>
       <v-spacer class="hidden-md-and-down"></v-spacer>
-      <v-select v-on:input="selectSeason" item-color=red v-model="selectedSeason" class="mt-4" align:center item-text="name" :items="seasons"></v-select>
+      <v-select 
+        v-on:input="selectSeason" 
+        item-color=red 
+        v-model="selectedSeason" 
+        class="mt-4" align:center 
+        item-text="name"
+        :items="seasons">
+      </v-select>
       <v-spacer class="hidden-md-and-down"></v-spacer>
       <v-spacer class="hidden-md-and-down"></v-spacer>
+
       <div class="hidden-md-and-down pa-4" v-if="!loggedIn">
         <log-in></log-in>
       </div>
+      
       <div class="hidden-md-and-down" v-if="!loggedIn">
         <register></register>
       </div>
+
       <div class="hidden-md-and-down" v-if="loggedIn">
         <span class="mr-5">{{ name }}</span>
         <v-btn class="hidden-md-and-down" v-on:click.native="logout()" :to="'/'">Kirjaudu ulos</v-btn>
       </div>
+
       <v-spacer></v-spacer>
       <v-app-bar-nav-icon class="hidden-lg-and-up mr-4" @click.stop="drawer = !drawer"/>
     </v-app-bar>
@@ -50,61 +56,15 @@
           <v-list-item-group
             active-class="text--accent-4"
           >
-            <v-list-item to="/">
-              <v-list-item-icon>
-                <v-icon>mdi-home</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Koti</v-list-item-title>
-            </v-list-item>
 
-            <v-list-item to="/ottelut">
-              <v-list-item-icon>
-                <v-icon>mdi-space-invaders</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Ottelut</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item to="/joukkueet">
-              <v-list-item-icon>
-                <v-icon>mdi-emoticon-poop</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Joukkueet</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item to="/pelaajat">
-              <v-list-item-icon>
-                <v-icon>mdi-account-group</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Pelaajat</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item v-if="loggedIn && team_id" :to="'/joukkue/'+this.team_id">
-              <v-list-item-icon>
-                <v-icon>mdi-account</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Oma joukkue</v-list-item-title>
-            </v-list-item>
-
-            <!-- <v-list-item :to="'/superweekend'">
-              <v-list-item-icon>
-                <v-icon>mdi-nuke</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>SuperWeekend</v-list-item-title>
-            </v-list-item> -->
-
-            <v-list-item :to="'/jatkosarja'">
-              <v-list-item-icon>
-                <v-icon>mdi-armflex</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Jatkosarja</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item to="/info">
-              <v-list-item-icon>
-                <v-icon>mdi-information-outline</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Info</v-list-item-title>
-            </v-list-item>
+            <div v-for="item in items">
+              <v-list-item :to=item.route v-if=item.if_clause>
+                <v-list-item-icon>
+                  <v-icon>{{ item.icon }}</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
+              </v-list-item>
+            </div>
 
             <v-list-item>
               <div class="pa-2">
@@ -146,20 +106,27 @@ export default {
     },
     data() {
         return {
-            appTitle: 'NKL',
             drawer: false,
             loggedIn: false,
             name: '',
             team_id: '',
             selectedSeason: {},
-            items: [
-                { title: 'Ottelut' },
-                { title: 'Joukkueet' },
-                { title: 'Pelaajat' },
-                { title: 'Info' }
-            ],
             seasons: []
         };
+    },
+    computed: {
+      items() {
+        return [
+                { title: 'Koti', route: '/', icon: 'mdi-home'},
+                { title: 'Ottelut', route: '/ottelut', icon: 'mdi-space-invaders'},
+                { title: 'Joukkueet', route: '/joukkueet', icon: 'mdi-emoticon-poop' },
+                { title: 'Pelaajat', route: '/pelaajat', icon: 'mdi-account-group' },
+                { title: 'Oma Joukkue', route: '/joukkue/' + this.team_id, if_clause: this.loggedIn && this.team_id != 'null' && this.team_id, icon: 'mdi-account' },
+                { title: 'Jatkosarja', route: '/jatkosarja', icon: 'mdi-bank' },
+                // { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
+                { title: 'Info', route: '/info', icon: 'mdi-information-outline' },
+              ]
+      }
     },
     methods: {
         logout() {
