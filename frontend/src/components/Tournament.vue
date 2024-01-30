@@ -185,18 +185,11 @@ export default {
                             (e.away_team.current_abbreviation == sortable[i][0] || e.away_team.current_abbreviation == sortable[j-1][0])
                         )
                         match = match[0]
-                        if (match.home_score_total > match.away_score_total) {
-                            if(match.home_team.current_abbreviation == sortable[i][0]) {
-                                sortable[j-1][1] += 0.5
-                            } else {
-                                sortable[i][1] += 0.5
-                            }
-                        } else if (match.home_score_total < match.away_score_total) {
-                            if(match.home_team.current_abbreviation == sortable[i][0]) {
-                                sortable[i][1] += 0.5
-                            } else {
-                                sortable[j-1][1] += 0.5
-                            }
+                        if (match.home_score_total != match.away_score_total) {
+                            let home_team = match.home_team.current_abbreviation == sortable[i][0] ? sortable[i] : sortable[j-1]
+                            let away_team = match.home_team.current_abbreviation == sortable[i][0] ? sortable[j-1] : sortable[i] 
+                            let winner = match.home_score_total < match.away_score_total ? home_team : away_team
+                            winner[1] += 0.5
                         } else {
                             let team_i = big_arr.filter(e => e.current_abbreviation == sortable[i][0])[0]
                             let team_j = big_arr.filter(e => e.current_abbreviation == sortable[j-1][0])[0]
