@@ -14,6 +14,9 @@ PLAYOFF_FORMAT = {
     4: "Kiinteä 22 joukkueen Cup",
     5: "1.Kierroksen Seedaus 12 joukkueen Cup"
 }
+
+PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
+
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player')
     number = models.CharField(max_length=2, default=99)
@@ -29,7 +32,7 @@ class Team(models.Model):
 class Season(models.Model):
     year = models.CharField(max_length=4, unique=True)
     no_brackets = models.IntegerField(default=1, blank=False)
-    playoff_format = models.IntegerField(default=1, blank=False, choices=PLAYOFF_FORMAT)
+    playoff_format = models.IntegerField(default=1, blank=False, choices=PLAYOFF_FORMAT_TUPLES)
 
     def __str__(self):
         return f'Kausi {self.year}'
