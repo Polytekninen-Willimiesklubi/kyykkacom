@@ -7,6 +7,7 @@ from django.core.cache import cache
 from utils.caching import reset_player_cache
 
 
+playoff_formats = []
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player')
     number = models.CharField(max_length=2, default=99)
@@ -22,6 +23,7 @@ class Team(models.Model):
 class Season(models.Model):
     year = models.CharField(max_length=4, unique=True)
     no_brackets = models.IntegerField(default=1, blank=False)
+    playoff_format = models.IntegerField(default=1, blank=False, choices=playoff_formats)
 
     def __str__(self):
         return f'Kausi {self.year}'
