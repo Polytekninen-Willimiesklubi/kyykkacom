@@ -23,6 +23,8 @@ import SideBar from '../components/SideBar.vue';
 import two_22 from '../tournament_templates/two_bracket_22.json'
 import one_16 from '../tournament_templates/one_bracket_16.json'
 import one_12 from '../tournament_templates/one_bracket_12.json'
+import one_8 from '../tournament_templates/one_bracket_8.json'
+import one_4 from '../tournament_templates/one_bracket_4.json'
 
 export default {
     name: 'JatkosarjaView',
@@ -43,24 +45,15 @@ export default {
             ],
             games: [],
             rounds: [],
-            json: [],
             first_round: false,
             first: 7,
-            // TODO -> this could be binded to Seasons datamodel 
             seasons_mapping: {
-                25 : two_22,
-                24 : two_22,
-                23 : one_16,
-                22 : false,
-                21 : one_16,
-                20 : one_16,
-                19 : one_16,
-                18 : one_12,
-                17 : one_12,
-                16 : one_12,
-                15 : one_12,
-                14 : one_12,
-                13 : one_12,
+                101 : one_16,
+                102 : one_8,
+                103 : one_4,
+                // 104 : one_22,  <-- Not yet needed or templated
+                105 : one_12,
+                204 : two_22,
             }
         }
     },
@@ -69,9 +62,14 @@ export default {
             function(data) {
             this.games = data.body
         })
-        this.json = this.seasons_mapping[sessionStorage.season_id]
-        this.rounds = this.json['default']
-        this.first_round = this.json['first_round']
+        let this_season = sessionStorage.all_seasons.filter(
+            ele => ele.id === sessionStorage.season_id
+            )[0]
+        let no_brackets = this_season.no_brackets
+                
+        let json = this.seasons_mapping[this_season.playoff_format + 100*no_brackets]
+        this.rounds = json['default']
+        this.first_round = json['first_round']
         this.first = this.first_round ? 6 : 0
     }
 
