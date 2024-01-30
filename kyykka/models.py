@@ -7,7 +7,13 @@ from django.core.cache import cache
 from utils.caching import reset_player_cache
 
 
-playoff_formats = []
+PLAYOFF_FORMAT = {
+    1: "Kiinteä 16 joukkueen Cup",
+    2: "Kiinteä 8 joukkueen Cup",
+    3: "Kiinteä 4 joukkueen Cup",
+    4: "Kiinteä 22 joukkueen Cup",
+    5: "1.Kierroksen Seedaus 12 joukkueen Cup"
+}
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player')
     number = models.CharField(max_length=2, default=99)
@@ -23,7 +29,7 @@ class Team(models.Model):
 class Season(models.Model):
     year = models.CharField(max_length=4, unique=True)
     no_brackets = models.IntegerField(default=1, blank=False)
-    playoff_format = models.IntegerField(default=1, blank=False, choices=playoff_formats)
+    playoff_format = models.IntegerField(default=1, blank=False, choices=PLAYOFF_FORMAT)
 
     def __str__(self):
         return f'Kausi {self.year}'
