@@ -123,36 +123,26 @@ export default {
             let games = this.tmp_rounds[this.first - 2]
             let winners = []
             for (const [key, el] of Object.entries(games)) {
-                let match = this.st_round.filter(e =>
-                    e.player1.name == Object.keys(el)[0] || e.player2.name == Object.keys(el)[0]
-                )
-                if (match.length != 1) {
-                    console.log('Matches length not right: '+ match.length.toString())
-                    console.log(el)
-                } else {
-                    match = match[0]
-                    if (el[match.player1.name] > el[match.player2.name]) {
-                        winners.push(structuredClone(match.player1))
-                        match.player1['winner'] = true
-                        match.player2['winner'] = false
-                    } else {
-                        winners.push(structuredClone(match.player2))
-                        match.player1['winner'] = false
-                        match.player2['winner'] = true
-                    }
-                    match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
+                let match = this.st_round.find(e => e.player1.name == Object.keys(el)[0] || e.player2.name == Object.keys(el))
+                if (match === undefined) {
+                    console.log("Didn't find correct match. First round +  element: " + el)
+                    return
                 }
+                let winner_team = el[match.player1.name] > el[match.player2.name] ? match.player1 : match.player2
+                let loser_team = el[match.player1.name] > el[match.player2.name] ? match.player2 : match.player1
+                let new_winner_team = structuredClone(winner_team)
+                new_winner_team['winner'] = null
+                winners.push(new_winner_team)
+                winner_team['winner'] = true
+                loser_team['winner'] = false
+                match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
             }
             winners.sort((a,b) =>  Number(b.id) - Number(a.id))
-            winners.forEach((ele, i) => {
+            winners.forEach((winner, i) => {
                 let placementString = (i+1).toString() + ". Low Seed"
-                let new_match = this.rounds.filter(el => el.player1.name == placementString || el.player2.name == placementString)[0]
-                if (new_match.player1.name.includes(placementString)) {
-                    new_match.player1 = ele
-                } else {
-                    new_match.player2 = ele
-                }
-                
+                let new_match = this.rounds.find(el => el.player1.name == placementString || el.player2.name == placementString)
+                let correct_column = new_match.player1.name.includes(placementString) ? 'player1' : 'player2'
+                new_match[correct_column] = winner
             })
             this.data = this.rounds.filter(e => e.type != this.first)
         },
@@ -160,52 +150,34 @@ export default {
             let reversed_list = this.tmp_rounds.reverse()
             reversed_list.forEach((ele, i) => {
                 for (const [key, el] of Object.entries(ele)) {
-                    let match = this.data.filter(e => e.type == 7-i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el, i)
-                    if (match.length != 1) {
-                        console.log('Matches length not right: '+ match.length.toString())
-                        console.log(el, this.data)
-                    } else {
-                        match = match[0]
-                        let winner = ''
-                        let loser = ''
-                        if (el[match.player1.name] > el[match.player2.name]) {
-                            winner = structuredClone(match.player1)
-                            loser = structuredClone(match.player2)
-                            match.player1['winner'] = true
-                            match.player2['winner'] = false
-                        } else {
-                            winner = structuredClone(match.player2)
-                            loser = structuredClone(match.player1)
-                            match.player1['winner'] = false
-                            match.player2['winner'] = true
+                    if (this.first_round && this.first == 7-i) { continue }
+                    let match = this.data.find(e => e.type == 7-i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name))
+                    if (match === undefined) {
+                        console.log("Didn't find correct match. type: " + 7-i + " element: " + Object.keys(el))
+                        return
+                    }
+                    let winner = el[match.player1.name] > el[match.player2.name] ? match.player1 : match.player2
+                    let loser = el[match.player1.name] > el[match.player2.name] ? match.player2 : match.player1
+                    let new_winner = structuredClone(winner)
+                    let new_loser = structuredClone(loser)
+                    new_winner['winner'] = null
+                    new_loser['winner'] = null
+                    winner['winner'] = true
+                    loser['winner'] = false
+                    match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
+                    if (7-i >= 4) { // Ignore Bronze and Finals
+                        if (7-i == 4) { // SemiFinals -> Winner needs to be assigned to Finals
+                            let finals = this.rounds.find(ele => ele.type === 2)
+                            let correct_column = finals.player1.name.includes(match.name) ? 'player1' : 'player2'
+                            finals[correct_column] = new_winner
                         }
-                        match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
-                        if (7-i >= 4) {
-                            if (7-i == 4) { // SemiFinals -> Loser needs to be assigned to Bronze match
-                                let bronze_match = this.rounds.filter(ele => ele.type === 3)[0]
-                                if (bronze_match.player1.name.includes(match.loser_name)) {
-                                    bronze_match.player1 = loser
-                                } else {
-                                    bronze_match.player2 = loser
-                                }
-                                let finals = this.rounds.filter(ele => ele.type === 2)[0]
-                                if (finals.player1.name.includes(match.name)) {
-                                    finals.player1 = winner
-                                } else {
-                                    finals.player2 = winner
-                                }
-                            } else {
-                                let new_match = this.rounds.filter(ele => ele.id === match.next)[0]
-                                if (new_match.player1.name.includes(match.name)) {
-                                    new_match.player1 = winner
-                                } else {
-                                    new_match.player2 = winner
-                                }
-                            }
-                        }
+                        let new_match = this.rounds.find(ele => ele.id === match.next)
+                        let n = (7-i != 4) ? 'name' : 'loser_name'
+                        let correct_column = new_match.player1.name.includes(match[n]) ? 'player1' : 'player2'
+                        new_match[correct_column] = (7-i != 4) ? new_winner : new_loser // SemiFinals -> Loser needs to be assigned to Bronze match
                     }
                 }
-            })
+            }, this)
         }
     },
     watch: {
