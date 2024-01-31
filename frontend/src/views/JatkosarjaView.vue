@@ -9,7 +9,7 @@
         <v-flex width="100px">
             <tournament
                 :played_games="games"
-                :rounds="rounds"
+                :rounds_parrent="rounds"
                 :first_round="first_round"
                 :first="first"
             />
@@ -62,11 +62,11 @@ export default {
             function(data) {
             this.games = data.body
         })
-        let this_season = sessionStorage.all_seasons.filter(
-            ele => ele.id === sessionStorage.season_id
-            )[0]
+        let this_season = JSON.parse(sessionStorage.all_seasons)
+        this_season = this_season.filter(
+            ele => ele.id == sessionStorage.season_id
+        )[0]
         let no_brackets = this_season.no_brackets
-                
         let json = this.seasons_mapping[this_season.playoff_format + 100*no_brackets]
         this.rounds = json['default']
         this.first_round = json['first_round']

@@ -38,7 +38,7 @@ export default {
     props: {
         type: Number,
         played_games: Array,
-        rounds: Array,
+        rounds_parrent: Array,
         first_round: Boolean,
         first: Number
     },
@@ -49,26 +49,23 @@ export default {
         return {
             tmp_rounds: [{}, {}, {}, {}, {}, {}],
             bracket_placements : [],
-            multible_brackets: false,
+            rounds: [],
             data: [],
-            teams: [],
             bracket_matches: [],
             st_round: [],
+            loaded_brackets: false,
+            loaded_rounds: false,
+            loaded_all: false
         }
-    },
-    mounted() {
-        if (this.teams.length == 0) {
-            this.splitToBrackets()
-        }
-
-        
     },
     created() {
         // if (typeof(this.rounds) !== Object) TODO: If tournament format alias 'rounds' undefined: show something else
+        this.rounds = structuredClone(this.rounds_parrent)
         this.$http
             .get('api/teams/?season=' + sessionStorage.season_id)
             .then( 
                 function(data) {
+                    this.season = sessionStorage.season_id
                     const max_bracket = Math.max(...data.body.map(ele => ele.bracket))
                     let tmp = []
                     for (var i = 0 ; i < max_bracket; i++) {
@@ -80,191 +77,20 @@ export default {
                     }
                     tmp.forEach(ele => ele.sort((a, b) => a[1] - b[1]))
                     this.bracket_placements = tmp
+                    this.loaded_brackets = true
                     this.putTeamsPlayoffBracket()
+                    if (this.loaded_rounds) {
+                        if (this.first_round) {
+                            this.splitFirstRound()
+                        } else {
+                            this.data = this.rounds
+                        }   
+                    }
                 }
             )
 
     },
     methods: {
-        splitToBrackets: function() {
-          this.data = JSON.parse(sessionStorage.teams)
-      
-          if (sessionStorage.all_seasons) {
-            var all_seasons = JSON.parse(sessionStorage.all_seasons)
-            
-            var index = all_seasons.map(ele => String(ele.id)).indexOf(sessionStorage.season_id)
-            var this_season = all_seasons[index]
-
-            if (this_season.no_brackets > 1) {
-              this.multible_brackets = true
-              for (let i = 0; i < this_season.no_brackets; i++) {
-                this.teams.push([])
-              }
-              this.data.forEach(ele => {
-                this.teams[ele.bracket -1].push(ele)
-              }, this)
-
-            } else {
-              this.teams = [this.data]
-              this.multible_brackets = false
-            }
-          }
-        },
-        sortTeams: function() {
-            this.teams.forEach(ele => {
-                ele.sort((a,b) => {
-                    let total = b.points_total - a.points_total
-                    // Order sort: bracket points
-                    if (total != 0) {
-                        return total < 0 ? -1 : 1
-                    }
-                    // First Tiebreaker: Match result between the teams
-                    let bracket_match = this.bracket_matches.filter(ele =>
-                        (ele.home_team.current_abbreviation == a.current_abbreviation || ele.home_team.current_abbreviation == b.current_abbreviation) &&
-                        (ele.away_team.current_abbreviation == a.current_abbreviation || ele.away_team.current_abbreviation == b.current_abbreviation)
-                    )
-                    if (!bracket_match.length) {
-                        console.log('Too many matches found: ' + bracket_match.length)
-                        return 0
-                    }
-                    bracket_match = bracket_match[0]
-                    let match_result = bracket_match.away_score_total - bracket_match.home_score_total
-                    if (a.current_abbreviation == bracket_match.home_team.current_abbreviation) {
-                        match_result *= -1
-                    }
-                    if (match_result != 0) {
-                        return match_result < 0 ? 1 : -1 
-                    }
-
-                    // Second Tiebreaker: Match average
-                    let average_total = b.match_average - a.match_average
-                    if (average_total != 0) {
-                        return match_result < 0 ? 1 : -1 
-                    }
-                    // Third Tiebreaker: Chance, not implemented here
-                    return 0
-                })
-            })
-            function innerFunction(array, bracket_matches, big_arr) {
-                let games = bracket_matches.filter( e => 
-                    (e.home_team.current_abbreviation in array) &&
-                    (e.away_team.current_abbreviation in array) 
-                )
-                games.forEach(e => {
-                    console.log(e.home_team.current_abbreviation, e.away_team.current_abbreviation)
-                    if (e.home_score_total > e.away_score_total) {
-                        array[e.away_team.current_abbreviation] += 2
-                    } else if (e.home_score_total < e.away_score_total) {
-                        array[e.home_team.current_abbreviation] += 2
-                    } else {
-                        ++array[e.away_team.current_abbreviation]
-                        ++array[e.home_team.current_abbreviation]
-                    }
-                })
-                let sortable = []
-                for (var tmp in array) {
-                    sortable.push([tmp, array[tmp]])
-                }
-                sortable.sort((a,b) => b[1]-a[1])
-                var i = 0
-                while (i < sortable.length) {
-                    let points = sortable[i][1]
-                    let j = i + 1
-                    while (j < sortable.length) {
-                        if (sortable[j][1] != points) {
-                            break
-                        }
-                        j++
-                    }
-                    if (j-i <= 1) {
-                        i++
-                        continue
-                    } else if (j-i === 2) {
-                        let match = bracket_matches.filter(e => 
-                            (e.home_team.current_abbreviation == sortable[i][0] || e.home_team.current_abbreviation == sortable[j-1][0]) &&
-                            (e.away_team.current_abbreviation == sortable[i][0] || e.away_team.current_abbreviation == sortable[j-1][0])
-                        )
-                        match = match[0]
-                        if (match.home_score_total != match.away_score_total) {
-                            let home_team = match.home_team.current_abbreviation == sortable[i][0] ? sortable[i] : sortable[j-1]
-                            let away_team = match.home_team.current_abbreviation == sortable[i][0] ? sortable[j-1] : sortable[i] 
-                            let winner = match.home_score_total < match.away_score_total ? home_team : away_team
-                            winner[1] += 0.5
-                        } else {
-                            let team_i = big_arr.filter(e => e.current_abbreviation == sortable[i][0])[0]
-                            let team_j = big_arr.filter(e => e.current_abbreviation == sortable[j-1][0])[0]
-                            if (team_i.match_average > team_j.match_average) {
-                                sortable[i][1] += 0.5
-                            } else { // We ignore == conditional. There is no way this can be same between two teams 
-                                sortable[j-1][1] += 0.5
-                            }
-                        }
-                        i = j
-                    } else {
-                        if (j-i == sortable.length) {
-                            let tmp_sortable = []
-                            sortable.forEach(e => {
-                                let team = big_arr.filter(tmp_e => tmp_e.current_abbreviation == e[0])[0]
-                                tmp_sortable.push([e[0], team.match_average])
-                            }, tmp_sortable)
-                            
-
-                            tmp_sortable.sort((a,b) => b[1] - a[1])
-                            let inc = 1 / sortable.length
-                            for(let k = 0; k < tmp_sortable.length; k++) {
-                                let tmp = tmp_sortable[k]
-                                let team_index = sortable.map(e => e[0]).indexOf(tmp[0])
-                                sortable[team_index][1] += inc*k
-                            }
-
-                        } else {
-                            console.log('Dont come here') // Here sould come recursive call that call 'innerFunction'
-                        }
-                        i = j
-                    }    
-                    console.log(sortable)
-                }
-                sortable.sort((a,b) => b[1]-a[1])
-                return sortable.map(ele => ele[0])
-            }
-
-            // Resolve "3 or more"- way ties
-            this.teams.forEach(ele => {
-                let i = 0
-                let j = 0
-                let points = 0
-                while(i < ele.length) {
-                    points = ele[i].points_total
-                    j = i + 1
-                    while (j < ele.length) {
-                        if (ele[j].points_total != points) {
-                            break
-                        }
-                        j++
-                    }
-                    if (j-i <= 2) {
-                        i = j
-                        continue
-                    }
-                    // Initialize match results with names
-                    let match_results = {}
-                    for (let k=i; k < j; k++) {
-                        match_results[ele[k].current_abbreviation] = 0
-                    }
-                    let correct_order = innerFunction(match_results, this.bracket_matches, ele)
-                    let datas = []
-                    correct_order.forEach(name => {
-                        datas.push(structuredClone(ele.filter(e => e.current_abbreviation == name)[0]))
-                    })
-                    let k = i
-                    datas.forEach(data => {
-                        ele[k] = data,
-                        k++
-                    }, k)
-                    i = j
-                }
-            })
-        },
         putTeamsPlayoffBracket: function () {
             const bracket_limit = sessionStorage.season_id in [24, 25] ? 11 : 16
             this.bracket_placements.forEach((bracket, idx) => {
@@ -286,15 +112,16 @@ export default {
         },
         splitFirstRound: function() {
             let first_round_matches = this.rounds.filter(e => e.type == this.first)
-            this.st_round = structuredClone(first_round_matches)
-            this.data = this.rounds.filter(e => e.type != this.first)
+            this.st_round = first_round_matches
             let games = this.tmp_rounds[this.first - 2]
             let winners = []
             for (const [key, el] of Object.entries(games)) {
-                let match = this.st_round.filter(e => (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el)
+                let match = this.st_round.filter(e =>
+                    e.player1.name == Object.keys(el)[0] || e.player2.name == Object.keys(el)[0]
+                )
                 if (match.length != 1) {
-                    console.log('moi' + match)
                     console.log('Matches length not right: '+ match.length.toString())
+                    console.log(el)
                 } else {
                     match = match[0]
                     if (el[match.player1.name] > el[match.player2.name]) {
@@ -310,7 +137,6 @@ export default {
                 }
             }
             winners.sort((a,b) =>  Number(b.id) - Number(a.id))
-
             winners.forEach((ele, i) => {
                 let placementString = (i+1).toString() + ". Low Seed"
                 let new_match = this.rounds.filter(el => el.player1.name == placementString || el.player2.name == placementString)[0]
@@ -321,6 +147,7 @@ export default {
                 }
                 
             })
+            this.data = this.rounds.filter(e => e.type != this.first)
         },
         resolvePlayoffs: function() {
             let reversed_list = this.tmp_rounds.reverse()
@@ -328,8 +155,8 @@ export default {
                 for (const [key, el] of Object.entries(ele)) {
                     let match = this.data.filter(e => e.type == 7-i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name), el, i)
                     if (match.length != 1) {
-                        console.log('moi' + match)
                         console.log('Matches length not right: '+ match.length.toString())
+                        console.log(el, this.data)
                     } else {
                         match = match[0]
                         let winner = ''
@@ -393,11 +220,16 @@ export default {
                     }
                 }
             })
-            if (this.first_round) {
-                this.splitFirstRound()
-            } else {
-                this.data = this.rounds
+            this.loaded_rounds = true
+            if (this.loaded_brackets) {
+                if (this.first_round) {
+                    this.splitFirstRound()
+                } else {
+                    this.data = this.rounds
+                }
             }
+        },
+        data() {
             this.resolvePlayoffs()
         }
     }
