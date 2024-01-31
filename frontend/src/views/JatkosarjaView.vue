@@ -67,9 +67,11 @@ export default {
             ele => ele.id == sessionStorage.season_id
         )[0]
         let no_brackets = this_season.no_brackets
-        let json = this.seasons_mapping[this_season.playoff_format + 100*no_brackets]
-        this.rounds = json['default']
-        this.first_round = json['first_round']
+        if (this_season.playoff_format != 0) {
+            let json = this.seasons_mapping[this_season.playoff_format + 100*no_brackets]
+            this.rounds = json['default']
+            this.first_round = json['first_round']
+        }
         this.first = this.first_round ? 6 : 0
     }
 

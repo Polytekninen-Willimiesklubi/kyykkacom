@@ -8,6 +8,7 @@ from utils.caching import reset_player_cache
 
 
 PLAYOFF_FORMAT = {
+    0: 'Ei vielä päätetty / Undefined',
     1: "Kiinteä 16 joukkueen Cup",
     2: "Kiinteä 8 joukkueen Cup",
     3: "Kiinteä 4 joukkueen Cup",
@@ -32,7 +33,7 @@ class Team(models.Model):
 class Season(models.Model):
     year = models.CharField(max_length=4, unique=True)
     no_brackets = models.IntegerField(default=1, blank=False)
-    playoff_format = models.IntegerField(default=1, blank=False, choices=PLAYOFF_FORMAT_TUPLES)
+    playoff_format = models.IntegerField(default=0, blank=False, choices=PLAYOFF_FORMAT_TUPLES)
 
     def __str__(self):
         return f'Kausi {self.year}'

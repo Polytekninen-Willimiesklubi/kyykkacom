@@ -1,6 +1,11 @@
 <template>
-    <v-layout>
-        <div v-if="st_round.length" class="pr-10">
+    <v-flex v-if="loaded_undefined">
+        <div align="center">
+            <h1>TBD</h1>
+        </div>
+    </v-flex>
+    <v-layout v-else>
+        <div v-if="st_round.length && !loaded_undefined" class="pr-10">
             <div v-for="listItem in st_round" :key="listItem.name" class="pt-10">
                 <bracket :flat-tree="[listItem]">
                     <template slot="player" slot-scope="{player}">
@@ -14,7 +19,7 @@
                 </bracket>
             </div>
         </div>
-        <v-flex>
+        <v-flex v-if="!loaded_undefined">
             <bracket :flat-tree="data">
                 <template slot="player" slot-scope="{player}">
                     {{player.name}}
@@ -55,11 +60,14 @@ export default {
             st_round: [],
             loaded_brackets: false,
             loaded_rounds: false,
-            loaded_all: false
+            loaded_undefined: false
         }
     },
     created() {
-        // if (typeof(this.rounds) !== Object) TODO: If tournament format alias 'rounds' undefined: show something else
+        if (this.rounds_parrent.length == 0) {
+            this.loaded_undefined = true
+            return
+        }
         this.rounds = structuredClone(this.rounds_parrent)
         this.$http
             .get('api/teams/?season=' + sessionStorage.season_id)
@@ -203,6 +211,10 @@ export default {
     },
     watch: {
         played_games() {
+            if (this.rounds_parrent.length == 0) {
+                this.loaded_undefined = true
+                return
+            }
             this.bracket_matches = this.played_games.filter(ele => !ele.post_season)
             let playoff_games = this.played_games.filter(ele => ele.post_season)
             playoff_games.forEach(ele => {
@@ -230,6 +242,10 @@ export default {
             }
         },
         data() {
+            if (this.rounds_parrent.length == 0) {
+                this.loaded_undefined = true
+                return
+            }
             this.resolvePlayoffs()
         }
     }
