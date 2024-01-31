@@ -100,9 +100,8 @@ export default {
     },
     methods: {
         putTeamsPlayoffBracket: function () {
-            const bracket_limit = sessionStorage.season_id in [24, 25] ? 11 : 16
             this.bracket_placements.forEach((bracket, idx) => {
-                for (let i = 0; i < bracket_limit; i++) {
+                for (let i = 0; i < bracket.length; i++) {
                     for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
                         let placementString = this.bracket_placements.length >= 2 ? String.fromCharCode(65+idx) + (i+1).toString()
                                                                     : (i+1).toString() + '. Seed'
