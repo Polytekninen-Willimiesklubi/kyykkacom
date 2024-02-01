@@ -20,11 +20,11 @@
 <script>
 import Tournament from '@/components/Tournament.vue';
 import SideBar from '../components/SideBar.vue';
-import two_22 from '../tournament_templates/two_bracket_22.json'
-import one_16 from '../tournament_templates/one_bracket_16.json'
-import one_12 from '../tournament_templates/one_bracket_12.json'
-import one_8 from '../tournament_templates/one_bracket_8.json'
-import one_4 from '../tournament_templates/one_bracket_4.json'
+import cup_22 from '../tournament_templates/cup_template_22_teams.json'
+import cup_16 from '../tournament_templates/cup_template_16_teams.json'
+import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json'
+import cup_8 from '../tournament_templates/cup_template_8_teams.json'
+import cup_4 from '../tournament_templates/cup_template_4_teams.json'
 
 export default {
     name: 'JatkosarjaView',
@@ -48,12 +48,11 @@ export default {
             first_round: false,
             first: 7,
             seasons_mapping: {
-                101 : one_16,
-                102 : one_8,
-                103 : one_4,
-                // 104 : one_22,  <-- Not yet needed or templated
-                105 : one_12,
-                204 : two_22,
+                1 : cup_16,
+                2 : cup_8,
+                3 : cup_4,
+                4 : cup_22,
+                5 : cup_12,
             }
         }
     },
@@ -68,8 +67,8 @@ export default {
         )[0]
         let no_brackets = this_season.no_brackets
         if (this_season.playoff_format != 0) {
-            let json = this.seasons_mapping[this_season.playoff_format + 100*no_brackets]
-            this.rounds = json['default']
+            let json = this.seasons_mapping[this_season.playoff_format]
+            this.rounds = no_brackets == 1 ? json['one_bracket'] : json['two_bracket']
             this.first_round = json['first_round']
         }
         this.first = this.first_round ? 6 : 0
