@@ -123,9 +123,9 @@ export default {
             let games = this.tmp_rounds[this.first - 2]
             let winners = []
             for (const [key, el] of Object.entries(games)) {
-                let match = this.st_round.find(e => e.player1.name == Object.keys(el)[0] || e.player2.name == Object.keys(el))
+                let match = this.st_round.find(e => e.player1.name == Object.keys(el)[0] || e.player2.name == Object.keys(el)[0])
                 if (match === undefined) {
-                    console.log("Didn't find correct match. First round +  element: " + el)
+                    console.log("Didn't find correct match. First round +  element: " + Object.keys(el))
                     return
                 }
                 let winner_team = el[match.player1.name] > el[match.player2.name] ? match.player1 : match.player2
