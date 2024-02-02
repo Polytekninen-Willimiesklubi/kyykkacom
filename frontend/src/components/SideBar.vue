@@ -9,7 +9,8 @@
           because otherwise returns an 'expected an array' error. This might be caused by listItem 
           not being defined before the mouting happens (?) -->
         <v-data-table mobile-breakpoint="0" disable-pagination dense
-          :class="{regular_season : isClass, regular_season16 : is16Class, regular_season12: is12Class}"
+          :class="{regular_season : isClass, regular_season16 : is16Class, regular_season12: is12Class, regular_season8: is8Class,
+             regular_season16_2 : is16_2Class, regular_season4_2: is4_2Class, regular_season4: is4Class , regular_season6: is6Class}"
           :header-props="{ sortIcon: null }"
           @click:row="handleRedirect"
           :headers="headers" 
@@ -63,6 +64,12 @@ export default {
             isClass: false,
             is12Class: false,
             is16Class: false,
+            is16_2Class: false,
+            is4Class: false,
+            is4_2Class: false,
+            is6Class: false,
+            is8Class: false,
+
             multible_brackets: false,
             data: [],
             teams: [],
@@ -86,10 +93,15 @@ export default {
         splitToBrackets: function() {
           this.data = JSON.parse(sessionStorage.teams)
           this.isClass = (sessionStorage.season_id == 24 || sessionStorage.season_id == 25)
-          this.is16Class = (sessionStorage.season_id == 23)
+          this.is16Class = (sessionStorage.season_id == 23 || sessionStorage.season_id == 21 || sessionStorage.season_id == 20)
+          this.is16_2Class = (sessionStorage.season_id == 22)
           this.is12Class = (11 <= sessionStorage.season_id && sessionStorage.season_id <= 19)
+          this.is4_2Class = (sessionStorage.season_id == 1)
+          this.is4Class = (sessionStorage.season_id == 8 || sessionStorage.season_id == 9)
+          this.is6Class = (2 <= sessionStorage.season_id && sessionStorage.season_id <= 7)
+          this.is8Class = (sessionStorage.season_id == 10)
 
-      
+
           if (sessionStorage.all_seasons) {
             var all_seasons = JSON.parse(sessionStorage.all_seasons)
             
@@ -149,6 +161,30 @@ export default {
 }
 
 .regular_season16 > .v-data-table__wrapper > table > tbody > tr:nth-child(16) > td {
+ border-bottom: 0.2rem double red !important;
+}
+
+.regular_season16_2 > .v-data-table__wrapper > table > tbody > tr:nth-child(8) > td {
+ border-bottom: 0.2rem double red !important;
+}
+
+.regular_season4_2 > .v-data-table__wrapper > table > tbody > tr:nth-child(2) > td {
+ border-bottom: 0.2rem double red !important;
+}
+
+.regular_season4 > .v-data-table__wrapper > table > tbody > tr:nth-child(4) > td {
+ border-bottom: 0.2rem double red !important;
+}
+
+.regular_season6 > .v-data-table__wrapper > table > tbody > tr:nth-child(6) > td {
+  border-bottom: 0.15rem dashed red !important;
+}
+
+.regular_season6 > .v-data-table__wrapper > table > tbody > tr:nth-child(2) > td {
+ border-bottom: 0.2rem double red !important;
+}
+
+.regular_season8 > .v-data-table__wrapper > table > tbody > tr:nth-child(8) > td {
  border-bottom: 0.2rem double red !important;
 }
 
