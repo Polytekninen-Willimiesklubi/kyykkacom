@@ -47,13 +47,19 @@ export default {
             { text: 'P/O', value: 'points_average', sortable: false},
             { text: 'OKA', value: 'match_average', sortable: false},
           ]}
+      },
+      sortBy: {
+        type: String,
+        default: 'points_total'
+      },
+      sortDesc: {
+        type: Boolean,
+        default: true
       }
     },
     data: function() {
         return {
             season: false,
-            sortBy: 'points_total',
-            sortDesc: true,
             isClass: false,
             is12Class: false,
             is16Class: false,

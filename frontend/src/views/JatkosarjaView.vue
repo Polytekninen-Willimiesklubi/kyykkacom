@@ -4,6 +4,8 @@
             <side-bar 
                 title="Runkosarja"
                 :headers="headers"
+                sort-by="bracket_placement"
+                :sort-desc=false
             />
         </div>
         <v-flex width="100px">
@@ -36,12 +38,13 @@ export default {
     data() {
         return {
             headers: [
+            { text: 'Sij.', value: 'bracket_placement'},
             { text: 'Joukkue', value: 'current_abbreviation', sortable: false, width:"10%"},
             { text: 'O', value: 'matches_played', sortable: false, width:"3%" },
             { text: 'V', value: 'matches_won', sortable: false, width:"3%"},
             { text: 'T', value: 'matches_tie', sortable: false, width:"3%"},
             { text: 'H', value: 'matches_lost', sortable: false, width:"3%"},
-            { text: 'P', value: 'points_total', width:"3%"},
+            { text: 'P', value: 'points_total', sortable: false, width:"3%"},
             { text: 'OKA', value: 'match_average', sortable: false, width:"5%"},
             ],
             games: [],
