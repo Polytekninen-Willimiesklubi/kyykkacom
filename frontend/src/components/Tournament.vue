@@ -19,8 +19,20 @@
                 </bracket>
             </div>
         </div>
-        <v-flex v-if="!loaded_undefined">
+        <v-flex v-if="!loaded_undefined && !showTemplate">
             <bracket :flat-tree="data">
+                <template slot="player" slot-scope="{player}">
+                    {{player.name}}
+                </template>
+                <template #player-extension-bottom="{ match }">
+                    <div align="center">
+                        {{ match.other_info }}
+                    </div>
+                </template>
+            </bracket>
+        </v-flex>
+        <v-flex v-else>
+            <bracket :flat-tree="tmp_data">
                 <template slot="player" slot-scope="{player}">
                     {{player.name}}
                 </template>
@@ -55,12 +67,14 @@ export default {
             tmp_rounds: [{}, {}, {}, {}, {}, {}],
             bracket_placements : [],
             rounds: [],
+            tmp_data: [],
             data: [],
             bracket_matches: [],
             st_round: [],
             loaded_brackets: false,
             loaded_rounds: false,
-            loaded_undefined: false
+            loaded_undefined: false,
+            showTemplate: true
         }
     },
     created() {
@@ -91,6 +105,7 @@ export default {
                         if (this.first_round) {
                             this.splitFirstRound()
                         } else {
+                            this.tmp_data = this.rounds_parrent
                             this.data = this.rounds
                         }   
                     }
