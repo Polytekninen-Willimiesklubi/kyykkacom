@@ -1,5 +1,5 @@
 { 
-    "first_round": false,
+    "first_round": 0,
     "one_bracket" : [
         {
             "other_info":"Kahteen voittoon",
@@ -45,8 +45,8 @@
             "type": 4,
             "id": 1,
             "next": 3,
-            "player1": { "id": "1", "name": "A1 Seed"},
-            "player2": { "id": "4", "name": "B2 Seed"}
+            "player1": { "id": "1", "name": "A1"},
+            "player2": { "id": "4", "name": "B2"}
         },
         {
             "other_info":"Kahteen voittoon",
@@ -55,8 +55,8 @@
             "type": 4,
             "id": 2,
             "next": 3,
-            "player1": { "id": "3", "name": "B1 Seed"},
-            "player2": { "id": "2", "name": "A2 Seed"}
+            "player1": { "id": "3", "name": "B1"},
+            "player2": { "id": "2", "name": "A2"}
         },
         {
             "other_info":"Kahteen voittoon",

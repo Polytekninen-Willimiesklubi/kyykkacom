@@ -1,58 +1,56 @@
 { 
-    "first_round": false,
+    "first_round": 5,
     "one_bracket" : [
         {
             "other_info":"Kahteen voittoon",
             "name": "S1",
             "type": 5,
             "id": 1,
-            "next": 3,
-            "player1": { "id": "1", "name": "1. Seed"},
-            "player2": { "id": "4", "name": "4. Seed"}
+            "player1": { "id": "4", "name": "4. Seed"},
+            "player2": { "id": "5", "name": "5. Seed"}
         },
         {
             "other_info":"Kahteen voittoon",
             "name": "S2",
             "type": 5,
             "id": 2,
-            "next": 3,
-            "player1": { "id": "2", "name": "2. Seed"},
-            "player2": { "id": "3", "name": "3. Seed"}
+            "player1": { "id": "3", "name": "3. Seed"},
+            "player2": { "id": "6", "name": "6. Seed"}
         },
         {
             "other_info":"Kahteen voittoon",
             "name": "F1",
             "loser_name":"P1",
             "type": 4,
-            "id": 1,
-            "next": 3,
+            "id": 3,
+            "next": 5,
             "player1": { "id": "1", "name": "1. Seed"},
-            "player2": { "id": "4", "name": "4. Seed"}
+            "player2": { "id": "-1", "name": "1. Low Seed"}
         },
         {
             "other_info":"Kahteen voittoon",
             "name": "F2",
             "loser_name": "P2",
             "type": 4,
-            "id": 2,
-            "next": 3,
+            "id": 4,
+            "next": 5,
             "player1": { "id": "2", "name": "2. Seed"},
-            "player2": { "id": "3", "name": "3. Seed"}
+            "player2": { "id": "-2", "name": "2. Low Seed"}
         },
         {
             "other_info":"Kahteen voittoon",
             "type": 3,
-            "id": 3,
-            "next": 4,
-            "player1": { "id": "-1", "name": "P1 (L 1. - 4.)"},
-            "player2": { "id": "-2", "name": "P2 (L 2. - 3.)"}
+            "id": 5,
+            "next": 6,
+            "player1": { "id": "-3", "name": "P1 (L 1. - 4.)"},
+            "player2": { "id": "-4", "name": "P2 (L 2. - 3.)"}
         },
         {
             "other_info":"Kahteen voittoon",
             "type": 2,
-            "id": 4,
-            "player1": { "id": "-3", "name": "F1 (W 1. - 4.)"},
-            "player2": { "id": "-4", "name": "F2 (W 2. - 3.)"}
+            "id": 6,
+            "player1": { "id": "-5", "name": "F1 (W 1. - 4.)"},
+            "player2": { "id": "-6", "name": "F2 (W 2. - 3.)"}
         }
     ],
     "two_bracket" : []

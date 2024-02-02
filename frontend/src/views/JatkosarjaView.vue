@@ -24,6 +24,7 @@ import cup_22 from '../tournament_templates/cup_template_22_teams.json'
 import cup_16 from '../tournament_templates/cup_template_16_teams.json'
 import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json'
 import cup_8 from '../tournament_templates/cup_template_8_teams.json'
+import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json'
 import cup_4 from '../tournament_templates/cup_template_4_teams.json'
 
 export default {
@@ -46,13 +47,14 @@ export default {
             games: [],
             rounds: [],
             first_round: false,
-            first: 7,
+            first: 0,
             seasons_mapping: {
                 1 : cup_16,
                 2 : cup_8,
                 3 : cup_4,
                 4 : cup_22,
-                5 : cup_12,
+                5 : cup_6,
+                6 : cup_12,
             }
         }
     },
@@ -69,9 +71,9 @@ export default {
         if (this_season.playoff_format != 0) {
             let json = this.seasons_mapping[this_season.playoff_format]
             this.rounds = no_brackets == 1 ? json['one_bracket'] : json['two_bracket']
-            this.first_round = json['first_round']
+            this.first = json['first_round']
         }
-        this.first = this.first_round ? 6 : 0
+        this.first_round = !!this.first
     }
 
 };

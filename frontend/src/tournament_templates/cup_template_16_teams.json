@@ -1,5 +1,5 @@
 { 
-    "first_round": false,
+    "first_round": 0,
     "one_bracket" : [
         {
             "other_info":"Kahteen voittoon",
