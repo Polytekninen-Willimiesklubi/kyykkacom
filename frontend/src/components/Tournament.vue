@@ -5,11 +5,11 @@
         </div>
     </v-flex>
     <v-layout v-else>
-        <div v-if="st_round.length && !loaded_undefined" class="pr-10">
+        <div v-if="st_round.length" class="pr-10">
             <div v-for="listItem in st_round" :key="listItem.name" class="pt-10">
                 <bracket :flat-tree="[listItem]">
                     <template slot="player" slot-scope="{player}">
-                        {{player.name}}
+                        {{ !only_format ? player.name : player.template_name }}
                     </template>
                     <template #player-extension-bottom="{ match }">
                         <div align="center">
@@ -19,22 +19,10 @@
                 </bracket>
             </div>
         </div>
-        <v-flex v-if="!loaded_undefined && !showTemplate">
+        <v-flex>
             <bracket :flat-tree="data">
                 <template slot="player" slot-scope="{player}">
-                    {{player.name}}
-                </template>
-                <template #player-extension-bottom="{ match }">
-                    <div align="center">
-                        {{ match.other_info }}
-                    </div>
-                </template>
-            </bracket>
-        </v-flex>
-        <v-flex v-else>
-            <bracket :flat-tree="tmp_data">
-                <template slot="player" slot-scope="{player}">
-                    {{player.name}}
+                    {{ !only_format ? player.name : player.template_name }}
                 </template>
                 <template #player-extension-bottom="{ match }">
                     <div align="center">
@@ -57,7 +45,8 @@ export default {
         played_games: Array,
         rounds_parrent: Array,
         first_round: Boolean,
-        first: Number
+        first: Number,
+        only_format: Boolean
     },
     components: {
     Bracket
@@ -67,14 +56,12 @@ export default {
             tmp_rounds: [{}, {}, {}, {}, {}, {}],
             bracket_placements : [],
             rounds: [],
-            tmp_data: [],
             data: [],
             bracket_matches: [],
             st_round: [],
             loaded_brackets: false,
             loaded_rounds: false,
-            loaded_undefined: false,
-            showTemplate: true
+            loaded_undefined: false
         }
     },
     created() {
@@ -83,6 +70,11 @@ export default {
             return
         }
         this.rounds = structuredClone(this.rounds_parrent)
+        this.rounds.forEach(ele => {
+            ele.player1['template_name'] = ele.player1['name']
+            ele.player2['template_name'] = ele.player2['name']
+            console.log(ele.player2['name'])
+        })
         this.$http
             .get('api/teams/?season=' + sessionStorage.season_id)
             .then( 
@@ -105,7 +97,6 @@ export default {
                         if (this.first_round) {
                             this.splitFirstRound()
                         } else {
-                            this.tmp_data = this.rounds_parrent
                             this.data = this.rounds
                         }   
                     }
@@ -157,6 +148,8 @@ export default {
                 let placementString = (i+1).toString() + ". Low Seed"
                 let new_match = this.rounds.find(el => el.player1.name == placementString || el.player2.name == placementString)
                 let correct_column = new_match.player1.name.includes(placementString) ? 'player1' : 'player2'
+                let template = new_match[correct_column].template_name 
+                winner.template_name = template
                 new_match[correct_column] = winner
             })
             this.data = this.rounds.filter(e => e.type != this.first)
@@ -184,12 +177,17 @@ export default {
                         if (7-i == 4) { // SemiFinals -> Winner needs to be assigned to Finals
                             let finals = this.rounds.find(ele => ele.type === 2)
                             let correct_column = finals.player1.name.includes(match.name) ? 'player1' : 'player2'
+                            let template = finals[correct_column].template_name
+                            new_winner.template_name = template
                             finals[correct_column] = new_winner
                         }
                         let new_match = this.rounds.find(ele => ele.id === match.next)
                         let n = (7-i != 4) ? 'name' : 'loser_name'
                         let correct_column = new_match.player1.name.includes(match[n]) ? 'player1' : 'player2'
+                        let template = new_match[correct_column].template_name
+                        
                         new_match[correct_column] = (7-i != 4) ? new_winner : new_loser // SemiFinals -> Loser needs to be assigned to Bronze match
+                        new_match[correct_column].template_name = template
                     }
                 }
             }, this)

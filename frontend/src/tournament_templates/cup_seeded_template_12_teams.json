@@ -76,8 +76,8 @@
             "type": 4,
             "id": 9,
             "next": 11,
-            "player1": { "id": "-5", "name": "S1 (1. - 1.Lowest)"},
-            "player2": { "id": "-6", "name": "S4 (4. - 4.Lowest)"}
+            "player1": { "id": "-5", "name": "S1 (1. - 1.Low)"},
+            "player2": { "id": "-6", "name": "S4 (4. - 4.Low)"}
         },
         {
             "other_info":"Kolmeen voittoon",
@@ -86,8 +86,8 @@
             "type": 4,
             "id": 10,
             "next": 11,
-            "player1": { "id": "-7", "name": "S2 (2. - 2.Lowest)"},
-            "player2": { "id": "-8", "name": "S3 (3. - 3.Lowest)"}
+            "player1": { "id": "-7", "name": "S2 (2. - 2.Low)"},
+            "player2": { "id": "-8", "name": "S3 (3. - 3.Low)"}
         },
         {
             "other_info":"Kolmeen voittoon",

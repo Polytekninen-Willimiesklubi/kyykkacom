@@ -1,6 +1,13 @@
 <template>
     <v-layout class="pt-5">
+        
         <div width="100px" class="pr-10">
+            <v-btn class="mb-5"
+                @click="showFormat = !showFormat"
+                width="150px"
+            >
+                {{!showFormat ? "Vain Formaatti" : "Tulokset"}}
+            </v-btn>
             <side-bar 
                 title="Runkosarja"
                 :headers="headers"
@@ -14,6 +21,7 @@
                 :rounds_parrent="rounds"
                 :first_round="first_round"
                 :first="first"
+                :only_format="showFormat"
             />
         </v-flex>
     </v-layout>
@@ -58,7 +66,8 @@ export default {
                 4 : cup_22,
                 5 : cup_6,
                 6 : cup_12,
-            }
+            },
+            showFormat: false
         }
     },
     created() {
