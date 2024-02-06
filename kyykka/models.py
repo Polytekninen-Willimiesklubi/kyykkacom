@@ -6,6 +6,26 @@ from django.core.cache import cache
 
 from utils.caching import reset_player_cache
 
+MATCH_TYPES = {    
+    1: "Runkosarja",
+    2: "Finaali",
+    3: "Pronssi",
+    4: "Välierä",
+    5: "Puolivälierä",
+    6: "Neljännesvälierä",
+    7: "Kahdeksannesvälierä",
+    10: "Runkosarjafinaali",
+    20: "Jumbofinaali",
+    31: "SuperWeekend: Alkulohko",
+    32: "SuperWeekend: Finaali",
+    33: "SuperWeekend: Pronssi",
+    34: "SuperWeekend: Välierä",
+    35: "SuperWeekend: Puolivälierä",
+    36: "SuperWeekend: Neljännesvälierä",
+    37: "SuperWeekend: Kahdeksannesvälierä",
+}
+
+MATCH_TYPES_TUPLES = [(key, val) for key, val in MATCH_TYPES.items()]
 
 PLAYOFF_FORMAT = {
     0: 'Ei vielä päätetty / Undefined',
@@ -22,7 +42,6 @@ PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player')
     number = models.CharField(max_length=2, default=99)
-
 
 class Team(models.Model):
     name = models.CharField(max_length=128, unique=True)
@@ -88,7 +107,7 @@ class Match(models.Model):
     away_team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name='away_matches')
     is_validated = models.BooleanField(default=False)
     post_season = models.BooleanField(default=False)
-    match_type = models.IntegerField(blank=True, null=True)
+    match_type = models.IntegerField(blank=True, null=True, choices=MATCH_TYPES_TUPLES)
     seriers = models.IntegerField(null=True, default=1)
 
     class Meta:
