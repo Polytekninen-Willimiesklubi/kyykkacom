@@ -384,6 +384,35 @@ class SeasonsAPI(generics.GenericAPIView):
             setToCache(key, current_season)
 
         return Response((all_seasons, current_season))
+    
+class SuperWeekendAPI(generics.GenericAPIView):
+    queryset = SuperWeekend.objects.all()
+
+    def get(self, request):
+        try:
+            season_id = request.query_params.get('season')
+            if season_id:
+                season = Season.objects.get(id=season_id)
+            else:
+                raise Season.DoesNotExist
+        except (Season.DoesNotExist, ValueError):
+            season = None
+        if season is None:
+            key = 'all_superweekends'
+            super_weekends = getFromCache(key)
+
+            if super_weekends is None:
+                super_weekends = SuperWeekendSerializer(self.queryset.all(), many=True).data
+                setToCache(key, super_weekends)
+        else:
+            key = f'superweekend {str(season.year)}'
+            super_weekends = getFromCache(key)
+
+            if super_weekends is None:
+                self.queryset = self.queryset.filter(season=season)
+                super_weekends = SuperWeekendSerializer(self.queryset).data
+                setToCache(key, super_weekends)
+        return super_weekends
 
 class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
     serializer_class = TeamsInSeasonSerializer

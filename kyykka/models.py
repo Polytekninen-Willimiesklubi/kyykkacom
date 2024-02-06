@@ -88,7 +88,7 @@ class SuperWeekend(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE, null=False)
     winner = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
     super_weekend_no_brackets = models.IntegerField(default=0, blank=True, null=True)
-    super_weekend_playoff_format = models.IntegerField(default=0, blank=True, null=True, choises=PLAYOFF_FORMAT_TUPLES)
+    super_weekend_playoff_format = models.IntegerField(default=0, blank=True, null=True, choices=PLAYOFF_FORMAT_TUPLES)
 
     def __str__(self):
         return f'SuperWeekend {self.season.year}'

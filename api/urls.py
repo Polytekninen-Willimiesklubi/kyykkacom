@@ -37,6 +37,7 @@ urlpatterns = [
     path('matches/<int:pk>', views.MatchDetail.as_view(), name='matches-detail'),
     path('throws/update/<int:pk>/', views.ThrowAPI.as_view()),
     path('seasons',  views.SeasonsAPI.as_view()),
+    path('superweekend/', views.SuperWeekendAPI.as_view(), name='superweekend'),
     path('kyykka_admin', views.KyykkaAdminViewSet.as_view(), name='teams-in-season')
 ]
 
