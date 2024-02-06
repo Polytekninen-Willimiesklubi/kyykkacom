@@ -52,6 +52,13 @@ def getRole(user):
         role = '0'
     return role
 
+def getSuper(request):
+    try:
+        super_weekend = bool(int(request.query_params.get('super_weekend')))
+    except (ValueError, TypeError):
+        super_weekend = None
+    return super_weekend
+
 
 @ensure_csrf_cookie
 def csrf(request):
@@ -234,14 +241,25 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     def list(self, request):
         season = getSeason(request)
         post_season = getPostseason(request)
+        super_weekend = getSuper(request)
         if post_season == None:
-            key = 'all_teams_' + str(season.year)
-            all_teams = getFromCache(key)
-            if all_teams is None:
-                self.queryset = self.queryset.filter(season=season).distinct()
-                serializer = TeamListSerializer(self.queryset, many=True, context={'season': season})
-                all_teams = serializer.data
-                setToCache(key, all_teams)
+            if super_weekend == None:
+                key = 'all_teams_' + str(season.year)
+                all_teams = getFromCache(key)
+                if all_teams is None:
+                    self.queryset = self.queryset.filter(season=season).distinct()
+                    serializer = TeamListSerializer(self.queryset, many=True, context={'season': season})
+                    all_teams = serializer.data
+                    setToCache(key, all_teams)
+            else:
+                key = 'all_teams_super_weekend' + str(season.year)
+                all_teams = getFromCache(key)
+                if all_teams is None:
+                    self.queryset = self.queryset.filter(season=season, super_weekend_gte=1).distinct()
+                    serializer = TeamListSerializer(self.queryset, many=True, context={'season': season})
+                    all_teams = serializer.data
+                    setToCache(key, all_teams)
+    
         elif post_season == False:
             key = f'all_teams_{season.year}_regular_season'
             all_teams = getFromCache(key)
@@ -281,19 +299,30 @@ class MatchList(APIView):
 
     def get(self, request):
         season = getSeason(request)
-        post_season = getPostseason(request)
-        key = 'all_matches_' + str(season.year)
-        if post_season is not None:
-            key += '_post_season' if post_season else '_regular_season'
-        all_matches = getFromCache(key)
-        if all_matches is None:
-            if post_season is None:
-                self.queryset = self.queryset.filter(season=season)
-            else:
-                self.queryset = self.queryset.filter(season=season, post_season=post_season)
-            serializer = MatchListSerializer(self.queryset, many=True, context={'season': season})
-            all_matches = serializer.data
-            setToCache(key, all_matches)
+        super_weekend = getSuper(request)
+        if not super_weekend: 
+            post_season = getPostseason(request)
+            key = 'all_matches_' + str(season.year)
+            if post_season is not None:
+                key += '_post_season' if post_season else '_regular_season'
+            all_matches = getFromCache(key)
+            if all_matches is None:
+                if post_season is None:
+                    self.queryset = self.queryset.filter(season=season)
+                else:
+                    self.queryset = self.queryset.filter(season=season, post_season=post_season, match_type__lte=29)
+                serializer = MatchListSerializer(self.queryset, many=True, context={'season': season})
+                all_matches = serializer.data
+                setToCache(key, all_matches)
+        else:
+            key = "all_matches_super_weekend" + str(season.year)
+            all_matches = getFromCache(key)
+            if all_matches is None:
+                self.queryset = self.queryset.filter(season=season, match_type__gte=30).filter(match_type__lte=39)
+                serializer = MatchListSerializer(self.queryset, many=True, context={'season': season})
+                all_matches = serializer.data
+                setToCache(key, all_matches)
+            
         return Response(all_matches)
 
 
