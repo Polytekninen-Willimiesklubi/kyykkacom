@@ -74,13 +74,25 @@ class TeamsInSeason(models.Model):
     current_abbreviation = models.CharField(max_length=15)
     players = models.ManyToManyField(User, through='PlayersInTeam')
     bracket = models.IntegerField(null=True)
-    bracket_placement = models.IntegerField(blank=True, null=True)  # Winner of the Bracket_satge is marked with 0 
+    bracket_placement = models.IntegerField(blank=True, null=True)  # Winner of the Bracket stage is marked with 0 
+    super_weekend_bracket = models.IntegerField(null=True)
+    super_weekend_bracket_placement = models.IntegerField(blank=True, null=True)
 
     class Meta:
         unique_together = ('season', 'team')
 
     def __str__(self):
         return f'{self.current_abbreviation} {self.season.year}'
+    
+class SuperWeekend(models.Model):
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, null=False)
+    winner = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
+    super_weekend_no_brackets = models.IntegerField(default=0, blank=True, null=True)
+    super_weekend_playoff_format = models.IntegerField(default=0, blank=True, null=True, choises=PLAYOFF_FORMAT_TUPLES)
+
+    def __str__(self):
+        return f'SuperWeekend {self.season.year}'
+    
 
 class PlayersInTeam(models.Model):
     team_season = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
