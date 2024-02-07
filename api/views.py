@@ -255,8 +255,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 key = 'all_teams_super_weekend' + str(season.year)
                 all_teams = getFromCache(key)
                 if all_teams is None:
-                    self.queryset = self.queryset.filter(season=season, super_weekend_gte=1).distinct()
-                    serializer = TeamListSerializer(self.queryset, many=True, context={'season': season})
+                    self.queryset = self.queryset.filter(season=season, super_weekend_bracket__gte=1).distinct()
+                    serializer = TeamListSuperWeekendSerializer(self.queryset, many=True, context={'season': season})
                     all_teams = serializer.data
                     setToCache(key, all_teams)
     
@@ -405,14 +405,14 @@ class SuperWeekendAPI(generics.GenericAPIView):
                 super_weekends = SuperWeekendSerializer(self.queryset.all(), many=True).data
                 setToCache(key, super_weekends)
         else:
-            key = f'superweekend {str(season.year)}'
+            key = f'superweekend_{str(season.year)}'
             super_weekends = getFromCache(key)
 
             if super_weekends is None:
-                self.queryset = self.queryset.filter(season=season)
+                self.queryset = self.queryset.get(season=season)
                 super_weekends = SuperWeekendSerializer(self.queryset).data
                 setToCache(key, super_weekends)
-        return super_weekends
+        return Response(super_weekends)
 
 class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
     serializer_class = TeamsInSeasonSerializer

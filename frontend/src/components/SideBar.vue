@@ -56,7 +56,15 @@ export default {
       sortDesc: {
         type: Boolean,
         default: true
-      }
+      },
+      defaultData: {
+        type: Boolean,
+        default: true
+      },
+      no_brackets: { // This is expected if defaultData is False 
+        type: Number,
+        default: 1
+      },
     },
     data: function() {
         return {
@@ -90,37 +98,69 @@ export default {
               }
             );
         },
-        splitToBrackets: function() {
-          this.data = JSON.parse(sessionStorage.teams)
-          this.isClass = (sessionStorage.season_id == 24 || sessionStorage.season_id == 25)
-          this.is16Class = (sessionStorage.season_id == 23 || sessionStorage.season_id == 21 || sessionStorage.season_id == 20)
-          this.is16_2Class = (sessionStorage.season_id == 22)
-          this.is12Class = (11 <= sessionStorage.season_id && sessionStorage.season_id <= 19)
-          this.is4_2Class = (sessionStorage.season_id == 1)
-          this.is4Class = (sessionStorage.season_id == 8 || sessionStorage.season_id == 9)
-          this.is6Class = (2 <= sessionStorage.season_id && sessionStorage.season_id <= 7)
-          this.is8Class = (sessionStorage.season_id == 10)
-
-
-          if (sessionStorage.all_seasons) {
-            var all_seasons = JSON.parse(sessionStorage.all_seasons)
-            
-            var index = all_seasons.map(ele => String(ele.id)).indexOf(sessionStorage.season_id)
-            var this_season = all_seasons[index]
-
-            if (this_season.no_brackets > 1) {
-              this.multible_brackets = true
-              for (let i = 0; i < this_season.no_brackets; i++) {
-                this.teams.push([])
+        getSuperTeams: function() {
+            this.$http.get('api/teams/'+'?season='+sessionStorage.season_id+'&super_weekend=1').then(
+                function(data) {
+                    sessionStorage.super_teams = JSON.stringify(data.body)
+                },
+                function(error) {
+                    console.log(error.statusText);
+                }
+            ).then(
+              function() {
+                this.splitToBrackets()
               }
-              this.data.forEach(ele => {
-                this.teams[ele.bracket -1].push(ele)
-              }, this)
-
-            } else {
-
-              this.teams = [this.data]
-              this.multible_brackets = false
+            );
+        },
+        splitToBrackets: function() {
+          if (this.defaultData) {
+            this.data = JSON.parse(sessionStorage.teams)
+            this.isClass = (sessionStorage.season_id == 24 || sessionStorage.season_id == 25)
+            this.is16Class = (sessionStorage.season_id == 23 || sessionStorage.season_id == 21 || sessionStorage.season_id == 20)
+            this.is16_2Class = (sessionStorage.season_id == 22)
+            this.is12Class = (11 <= sessionStorage.season_id && sessionStorage.season_id <= 19)
+            this.is4_2Class = (sessionStorage.season_id == 1)
+            this.is4Class = (sessionStorage.season_id == 8 || sessionStorage.season_id == 9)
+            this.is6Class = (2 <= sessionStorage.season_id && sessionStorage.season_id <= 7)
+            this.is8Class = (sessionStorage.season_id == 10)
+  
+  
+            if (sessionStorage.all_seasons) {
+              var all_seasons = JSON.parse(sessionStorage.all_seasons)
+              
+              var index = all_seasons.map(ele => String(ele.id)).indexOf(sessionStorage.season_id)
+              var this_season = all_seasons[index]
+  
+              if (this_season.no_brackets > 1) {
+                this.multible_brackets = true
+                for (let i = 0; i < this_season.no_brackets; i++) {
+                  this.teams.push([])
+                }
+                this.data.forEach(ele => {
+                  this.teams[ele.bracket -1].push(ele)
+                }, this)
+  
+              } else {
+                this.teams = [this.data]
+                this.multible_brackets = false
+              }
+            }
+          } else {
+            if(sessionStorage.super_teams) {
+              console.log('moi')
+              this.data = JSON.parse(sessionStorage.super_teams)
+              if (this.no_brackets > 1) {
+                this.multible_brackets = true
+                for (let i = 0; i < this.no_brackets; i++) {
+                    this.teams.push([])
+                  }
+                this.data.forEach(ele => {
+                  this.teams[ele.super_weekend_bracket -1].push(ele)
+                }, this)
+              } else {
+                this.teams = [this.data]
+                this.multible_brackets = false
+              }
             }
           }
         },
@@ -128,15 +168,19 @@ export default {
           location.href = '/joukkue/'+value.id;
         }
     },
-    mounted: function() {
-
-    },
     created: function() {
-      if (sessionStorage.loaded_season != sessionStorage.season_id) {
-        this.getTeams()
+      if (!this.defaultData) {
+        this.getSuperTeams()
         sessionStorage.setItem("loaded_season", sessionStorage.season_id)
-      } else {
         this.splitToBrackets()
+
+      } else {
+        if (sessionStorage.loaded_season != sessionStorage.season_id) {
+          this.getTeams()
+          sessionStorage.setItem("loaded_season", sessionStorage.season_id)
+        } else {
+          this.splitToBrackets()
+        }
       }
     }
 };

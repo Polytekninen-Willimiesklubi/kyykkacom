@@ -1181,3 +1181,73 @@ class SuperWeekendSerializer(serializers.ModelSerializer):
     class Meta:
         model = SuperWeekend
         fields = ('season', 'winner', 'super_weekend_no_brackets', 'super_weekend_playoff_format')
+
+class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
+    matches_won = serializers.SerializerMethodField()
+    matches_lost = serializers.SerializerMethodField()
+    matches_tie = serializers.SerializerMethodField()
+    matches_played = serializers.SerializerMethodField()
+    score_total = serializers.SerializerMethodField()
+    points_total = serializers.SerializerMethodField()
+    match_average = serializers.SerializerMethodField()
+
+    def count_match_results(self, obj):
+        results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season'), match_type__gte=30).filter(match_type__lte=30).annotate(
+            home=F('home_first_round_score') + F('home_second_round_score'),
+            away=F('away_first_round_score') + F('away_second_round_score'))
+        results_away = obj.away_matches.filter(is_validated=True, season=self.context.get('season'), match_type__gte=30).filter(match_type__lte=30).annotate(
+            home=F('home_first_round_score') + F('home_second_round_score'),
+            away=F('away_first_round_score') + F('away_second_round_score'))
+
+        self.matches_won = results_home.filter(home__lt=F('away')).count() + results_away.filter(away__lt=F('home')).count()
+        self.matches_lost = results_home.filter(away__lt=F('home')).count() + results_away.filter(home__lt=F('away')).count()
+        self.matches_tie = results_home.filter(home__exact=F('away')).count() + results_away.filter(home__exact=F('away')).count()
+        self.matches_played = self.matches_lost + self.matches_tie + self.matches_won
+
+        match_score_home = results_home.aggregate(Sum('home'))['home__sum']
+        match_score_away = results_away.aggregate(Sum('away'))['away__sum']
+        if match_score_home is None and match_score_away is None:
+            self.match_average = 'NaN'
+            return
+        elif match_score_home is None:
+            match_score_home = 0
+        elif match_score_away is None:
+            match_score_away = 0
+        match_score_total = match_score_home + match_score_away 
+        self.match_average = round(match_score_total / self.matches_played , 2) if self.matches_played else 'NaN'
+
+    def get_matches_played(self, obj):
+        return self.matches_played
+    
+    def get_matches_won(self, obj):
+        self.count_match_results(obj)
+        return self.matches_won
+
+    def get_matches_lost(self, obj):
+        # Should be initialized in 'get_matches_won' - function
+        return self.matches_lost
+
+    def get_matches_tie(self, obj):
+        # Should be initialized in 'get_matches_won' - function
+        return self.matches_tie
+    
+    def get_points_total(self, obj):
+        self.points_total = (self.matches_won * 2) + (self.matches_tie)
+        return self.points_total
+    
+    def get_match_average(self, obj):
+        return self.match_average
+    
+    def get_points_average(self, obj):
+        return round(self.points_total / self.matches_played,2) if self.matches_played else "NaN"
+
+    def get_score_total(self, obj):
+        season = self.context.get('season')
+        throws = Throw.objects.filter(match__is_validated=True, team=obj, season=season) 
+        return count_score_total(obj, season, throws, key='team')
+
+    class Meta:
+        model = TeamsInSeason
+        fields = ('id', 'current_name', 'current_abbreviation', 'matches_won', 'matches_lost', 
+                  'matches_tie', 'matches_played','score_total', 'points_total', 'match_average', 
+                  'super_weekend_bracket', 'super_weekend_bracket_placement')
