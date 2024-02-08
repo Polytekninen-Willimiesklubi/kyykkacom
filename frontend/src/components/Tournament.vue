@@ -46,7 +46,9 @@ export default {
         rounds_parrent: Array,
         first_round: Boolean,
         first: Number,
-        only_format: Boolean
+        only_format: Boolean,
+        bracket_placements: Array,
+        load_ended: Boolean,
     },
     components: {
     Bracket
@@ -54,55 +56,12 @@ export default {
     data() {
         return {
             tmp_rounds: [{}, {}, {}, {}, {}, {}],
-            bracket_placements : [],
             rounds: [],
             data: [],
             bracket_matches: [],
             st_round: [],
-            loaded_brackets: false,
-            loaded_rounds: false,
             loaded_undefined: false
         }
-    },
-    created() {
-        if (this.rounds_parrent.length == 0) {
-            this.loaded_undefined = true
-            return
-        }
-        this.rounds = structuredClone(this.rounds_parrent)
-        this.rounds.forEach(ele => {
-            ele.player1['template_name'] = ele.player1['name']
-            ele.player2['template_name'] = ele.player2['name']
-            console.log(ele.player2['name'])
-        })
-        this.$http
-            .get('api/teams/?season=' + sessionStorage.season_id)
-            .then( 
-                function(data) {
-                    this.season = sessionStorage.season_id
-                    const max_bracket = Math.max(...data.body.map(ele => ele.bracket))
-                    let tmp = []
-                    for (var i = 0 ; i < max_bracket; i++) {
-                        tmp.push([])
-                    }
-                    for (let i=0; i < data.body.length; i++) {
-                        let team = data.body[i]
-                        tmp[team.bracket-1].push([team.current_abbreviation, team.bracket_placement])
-                    }
-                    tmp.forEach(ele => ele.sort((a, b) => a[1] - b[1]))
-                    this.bracket_placements = tmp
-                    this.loaded_brackets = true
-                    this.putTeamsPlayoffBracket()
-                    if (this.loaded_rounds) {
-                        if (this.first_round) {
-                            this.splitFirstRound()
-                        } else {
-                            this.data = this.rounds
-                        }   
-                    }
-                }
-            )
-
     },
     methods: {
         putTeamsPlayoffBracket: function () {
@@ -123,7 +82,42 @@ export default {
                 }
             })
         },
+        resolveGames: function() {
+            this.bracket_matches = this.played_games.filter(ele => !ele.post_season)
+            let playoff_games = this.played_games.filter(ele => ele.post_season)
+            playoff_games.forEach(ele => {
+                if (ele.match_type >= 2 & ele.match_type < 10) {
+                    var round = this.tmp_rounds[ele.match_type - 2]
+                    if (ele.seriers in round === false) {
+                        round[ele.seriers] = {}
+                        round[ele.seriers][ele.home_team.current_abbreviation] = 0
+                        round[ele.seriers][ele.away_team.current_abbreviation] = 0
+                    }
+                    if (ele.home_score_total < ele.away_score_total) {
+                        ++round[ele.seriers][ele.home_team.current_abbreviation]
+                    } else if (ele.home_score_total > ele.away_score_total) {
+                        ++round[ele.seriers][ele.away_team.current_abbreviation]
+                    }
+                }
+            })
+        },
+        loadRounds: function() {
+            if (this.rounds_parrent.length == 0) {
+                this.loaded_undefined = true
+                return
+            }
+            this.rounds = structuredClone(this.rounds_parrent)
+            this.rounds.forEach(ele => {
+                ele.player1['template_name'] = ele.player1['name']
+                ele.player2['template_name'] = ele.player2['name']
+            })
+            this.loaded_undefined = false
+        },
         splitFirstRound: function() {
+            if (!this.first_round) {
+                this.data = this.rounds
+                return
+            }
             let first_round_matches = this.rounds.filter(e => e.type == this.first)
             this.st_round = first_round_matches
             let games = this.tmp_rounds[this.first - 2]
@@ -194,43 +188,14 @@ export default {
         }
     },
     watch: {
-        played_games() {
-            if (this.rounds_parrent.length == 0) {
-                this.loaded_undefined = true
-                return
+        load_ended() {
+            this.loadRounds()
+            if (!this.loaded_undefined) {
+                this.resolveGames()
+                this.putTeamsPlayoffBracket()
+                this.splitFirstRound()
+                this.resolvePlayoffs()
             }
-            this.bracket_matches = this.played_games.filter(ele => !ele.post_season)
-            let playoff_games = this.played_games.filter(ele => ele.post_season)
-            playoff_games.forEach(ele => {
-                if (ele.match_type >= 2 & ele.match_type < 10) {
-                    var round = this.tmp_rounds[ele.match_type - 2]
-                    if (ele.seriers in round === false) {
-                        round[ele.seriers] = {}
-                        round[ele.seriers][ele.home_team.current_abbreviation] = 0
-                        round[ele.seriers][ele.away_team.current_abbreviation] = 0
-                    }
-                    if (ele.home_score_total < ele.away_score_total) {
-                        ++round[ele.seriers][ele.home_team.current_abbreviation]
-                    } else if (ele.home_score_total > ele.away_score_total) {
-                        ++round[ele.seriers][ele.away_team.current_abbreviation]
-                    }
-                }
-            })
-            this.loaded_rounds = true
-            if (this.loaded_brackets) {
-                if (this.first_round) {
-                    this.splitFirstRound()
-                } else {
-                    this.data = this.rounds
-                }
-            }
-        },
-        data() {
-            if (this.rounds_parrent.length == 0) {
-                this.loaded_undefined = true
-                return
-            }
-            this.resolvePlayoffs()
         }
     }
 }
