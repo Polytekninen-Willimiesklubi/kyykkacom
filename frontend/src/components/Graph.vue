@@ -9,7 +9,7 @@ import Chart, { _adapters } from "chart.js/auto"
 
 export default {
     name: 'graph',
-    data: function () {
+    data() {
         return {
             old: []
         }
@@ -24,7 +24,7 @@ export default {
         type: String,
         dataset: Array
     },
-    mounted: function() {
+    mounted() {
         const canvas = document.getElementById(this.id_name)
         var config = {
             type: this.type,
@@ -50,7 +50,7 @@ export default {
         new Chart(canvas, config)
     },
     watch: {
-        dataset: function(new_val) {
+        dataset() {
             const chart = Chart.getChart(this.id_name)
             chart.data.datasets = this.dataset
             chart.update()

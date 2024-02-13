@@ -98,7 +98,7 @@ export default {
             this.is8Class = (sessionStorage.season_id == 10)
           }
         },
-        handleRedirect: function(value) {
+        handleRedirect(value) {
           location.href = '/joukkue/'+value.id;
         }
     },

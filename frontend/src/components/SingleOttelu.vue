@@ -47,7 +47,7 @@ export default {
         Round,
         Match
     },
-    data: function() {
+    data() {
         return {
           data: {},
           data_ready: false,
@@ -55,7 +55,7 @@ export default {
         };
     },
     methods: {
-      getData: function() {
+      getData() {
         this.$http
         .get(
             'api/matches/' +
@@ -71,7 +71,7 @@ export default {
           }
         })
       },
-      validateClick: function() {
+      validateClick() {
         let post_url = 'api/matches/'+this.data.body.id
         let post_data = {"is_validated": true}
 
@@ -103,7 +103,7 @@ export default {
         }
       }
     },
-    created: function() {
+    created() {
       this.getData()
     },
 };

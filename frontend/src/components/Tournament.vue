@@ -64,7 +64,7 @@ export default {
         }
     },
     methods: {
-        putTeamsPlayoffBracket: function () {
+        putTeamsPlayoffBracket() {
             this.bracket_placements.forEach((bracket, idx) => {
                 for (let i = 0; i < bracket.length; i++) {
                     for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
@@ -82,7 +82,7 @@ export default {
                 }
             })
         },
-        resolveGames: function() {
+        resolveGames() {
             this.bracket_matches = this.played_games.filter(ele => !ele.post_season)
             let playoff_games = this.played_games.filter(ele => ele.post_season)
             playoff_games.forEach(ele => {
@@ -101,7 +101,7 @@ export default {
                 }
             })
         },
-        loadRounds: function() {
+        loadRounds() {
             if (this.rounds_parrent.length == 0) {
                 this.loaded_undefined = true
                 return
@@ -113,7 +113,7 @@ export default {
             })
             this.loaded_undefined = false
         },
-        splitFirstRound: function() {
+        splitFirstRound() {
             if (!this.first_round) {
                 this.data = this.rounds
                 return
@@ -148,7 +148,7 @@ export default {
             })
             this.data = this.rounds.filter(e => e.type != this.first)
         },
-        resolvePlayoffs: function() {
+        resolvePlayoffs() {
             let reversed_list = this.tmp_rounds.reverse()
             reversed_list.forEach((ele, i) => {
                 for (const [key, el] of Object.entries(ele)) {

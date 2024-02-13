@@ -135,11 +135,11 @@ export default {
         };
     },
     methods: {
-        handleRedirect: function(value) {
+        handleRedirect(value) {
             console.log(value)
             location.href = '/pelaaja/'+value.player.id;
         },
-        isNumber: function(evt) {
+        isNumber(evt) {
           // Checks that the value is an H or a numeric value from the ASCII table.
           // not verified atm?
           evt = (evt) ? evt : window.event;
@@ -150,7 +150,7 @@ export default {
             return true;
           }
         },
-        roundScore: function() {
+        roundScore() {
           let post_url = 'api/matches/'+this.matchData.id
           let post_data = {}
           let key = ''
@@ -183,7 +183,7 @@ export default {
               }
             })
         },
-        sumTotal: function(index) {
+        sumTotal(index) {
           /* The function loops through all the column elements of the corresponding row
           and adds them up as total to the last column. The function also updates the database
           accordingly on each runthrough. */
@@ -262,14 +262,14 @@ export default {
               }
             })
         },
-        loadPlayer: function(player, index) {
+        loadPlayer(player, index) {
           // Finds the selected player object from the dataset and sets it's id to the id field. 
           let obj = this.matchData[this.teamSide + "_team"].players.find(o => o.player_name === player)
           this.$refs['id_'+index].innerHTML=obj.id
           this.select = []
           this.sumTotal(index)
         },
-        getMatch: function() {
+        getMatch() {
           this.is_validated = this.matchData.is_validated;
           
           const roundString = this.roundNumber == 1 ? 'first_round' : 'second_round'
@@ -310,7 +310,7 @@ export default {
           }
         }
     },
-    mounted: function() {
+    mounted() {
       this.getMatch();
     }
 };

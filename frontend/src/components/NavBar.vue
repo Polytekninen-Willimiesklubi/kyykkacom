@@ -142,7 +142,7 @@ export default {
               'withCredentials': true,
             })
         },
-        selectSeason () {
+        selectSeason() {
           sessionStorage.season_id = this.selectedSeason;
           this.$router.push('/').catch(()=>{
             window.location.reload();

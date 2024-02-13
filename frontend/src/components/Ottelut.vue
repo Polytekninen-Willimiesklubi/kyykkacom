@@ -64,7 +64,7 @@
 <script>
 import moment from 'moment'
 export default {
-    data: function() {
+    data() {
         return {
             search: '',
             headers: [
@@ -105,7 +105,7 @@ export default {
         };
     },
     methods: {
-        selectChange: function() {
+        selectChange() {
           if (this.defaultSelected == "Runkosarja") {
             this.data = this.regular_season
           } else if (this.defaultSelected == "Jatkosarja") {
@@ -114,7 +114,7 @@ export default {
             this.data = this.matches
           }
         },
-        getMatches: function() {
+        getMatches() {
           let url = 'api/matches/?season='+sessionStorage.season_id;
           
           const pelit = {
@@ -146,10 +146,10 @@ export default {
               },
           );
         },
-        handleRedirect: function(value) {
+        handleRedirect(value) {
           location.href = '/ottelu/'+value.id
         },
-        itemRowBackground: function(item) {
+        itemRowBackground(item) {
           // Handles the backround color of row items
           var matchDate = moment(item.match_time).format("YYYY-MM-DD HH:MM")
           var currentTime = moment(Date.now()).format("YYYY-MM-DD HH:MM")
@@ -161,7 +161,7 @@ export default {
           return 'row__background__style_2'
         }
     },
-    mounted: function() {
+    mounted() {
         if (localStorage.team_id) {
           this.team_id = localStorage.team_id;
         } else {

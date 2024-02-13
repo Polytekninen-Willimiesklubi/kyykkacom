@@ -137,7 +137,7 @@
 
 <script>
 export default {
-    data: function() {
+    data() {
         return {
             search: '',
             header: '',
@@ -220,7 +220,7 @@ export default {
         };
     },
     methods: {
-        getPlayers: function() {
+        getPlayers() {
             this.$http
                 .get('api/teams/' + this.team_id +'/?season='+sessionStorage.season_id)
                 .then(
@@ -231,7 +231,7 @@ export default {
                     },
                 );
         },
-        getReserve: function() {
+        getReserve() {
             this.$http.get('api/reserve/', {
                   'withCredentials': true,
                 }).then(
@@ -249,7 +249,7 @@ export default {
                 }
             );
         },
-        reserveButton: function(item) {
+        reserveButton(item) {
             let post_data = {'player': item.id}
             let post_url = 'api/reserve/'+'?season='+sessionStorage.season_id;
             var index = this.reserve.findIndex(player => player.id === item.id);
@@ -285,11 +285,11 @@ export default {
               })
             }
         },
-        handleRedirect: function(value) {
+        handleRedirect(value) {
           location.href = '/pelaaja/'+value.id;
         }
     },
-    mounted: function() {
+    mounted() {
         this.header = '';
         this.getPlayers();
         if (this.$session.get('user_id') && this.$session.get('role_id') == 1) {

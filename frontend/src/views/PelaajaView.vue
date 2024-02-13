@@ -23,14 +23,14 @@ export default {
       Pelaaja,
       SideBar
   },
-  data: function() {
+  data() {
     return {
       teams: [],
       no_brackets: 1
     };
   },
   methods: {
-    getTeams: function() {
+    getTeams() {
       this.$http.get('api/teams/'+'?season='+sessionStorage.season_id+'&post_season=0').then(
           function(data) {
               sessionStorage.teams = JSON.stringify(data.body)
@@ -44,7 +44,7 @@ export default {
         }
       );
     },
-    splitToBrackets: function() {
+    splitToBrackets() {
       let data = JSON.parse(sessionStorage.teams)
 
       if (sessionStorage.all_seasons) {

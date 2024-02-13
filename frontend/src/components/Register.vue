@@ -115,7 +115,7 @@ export default {
                     }
                 });
         },
-        checkForm: function() {
+        checkForm() {
             this.errors = []
 
             if (!this.alert) {
@@ -152,18 +152,18 @@ export default {
                 this.register();
             }
         },
-        changeLogin: function(username) {
+        changeLogin(username) {
             eventBus.$emit(
                 'loginChanged',
                 this.credentials.first_name + ' ' + this.credentials.last_name
             );
         },
-        validEmail: function(email) {
+        validEmail(email) {
             var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return re.test(email);
         }
     },
-    mounted: function() {
+    mounted() {
         this.numbers = Array.from(Array(100).keys());
     }
 };
