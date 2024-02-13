@@ -1,7 +1,7 @@
 <template>
     <v-layout>
       <v-flex auto>
-        <admin></admin>
+        <admin />
       </v-flex>
     </v-layout>
   </template>

@@ -61,7 +61,7 @@
         };
       },
       methods: {
-        getTeams: function() {
+        getTeams() {
             this.$http.get('api/teams/'+'?season='+sessionStorage.season_id+'&post_season=0').then(
                 function(data) {
                     sessionStorage.teams = JSON.stringify(data.body)
@@ -75,12 +75,9 @@
               }
             );
         },
-          splitToBrackets: function() {
+          splitToBrackets() {
             this.data = JSON.parse(sessionStorage.teams)
-            this.isClass = (sessionStorage.season_id == 24 || sessionStorage.season_id == 25)
-            this.is16Class = (sessionStorage.season_id == 23)
 
-        
             if (sessionStorage.all_seasons) {
                 var all_seasons = JSON.parse(sessionStorage.all_seasons)
                 
@@ -88,20 +85,19 @@
                 var this_season = all_seasons[index]
 
                 if (this_season.no_brackets > 1) {
-                this.multible_brackets = true
-                for (let i = 0; i < this_season.no_brackets; i++) {
-                    this.teams.push([])
-                }
-                this.data.forEach(ele => {
-                    this.teams[ele.bracket -1].push(ele)
-                    this.all_teams.push(ele)
-                }, this)
+                    this.multible_brackets = true
+                    for (let i = 0; i < this_season.no_brackets; i++) {
+                        this.teams.push([])
+                    }
+                    this.data.forEach(ele => {
+                        this.teams[ele.bracket -1].push(ele)
+                        this.all_teams.push(ele)
+                    }, this)
 
                 } else {
                     this.teams = [this.data]
                     this.all_teams = this.data
                 }
-                console.log(this.teams)
                 this.teams.forEach(ele => {
                     ele.forEach((e, i) => {
                         e.order = i + 1
@@ -110,7 +106,7 @@
             }
             this.all_teams.sort((a,b) => (a.current_abbreviation > b.current_abbreviation) ? 1 : ((b.current_abbreviation > a.current_abbreviation) ? -1 : 0))
         },
-        handleRedirect: function(value) {
+        handleRedirect(value) {
             location.href = '/joukkue/'+value.id;
         },
         validateResult() {
@@ -177,8 +173,7 @@
         }
     },
     mounted() {
-        console.log(sessionStorage.loaded_season)
-        if (!sessionStorage.loaded_season && sessionStorage.loaded_season != sessionStorage.season_id) {
+        if (!sessionStorage.loaded_season || sessionStorage.loaded_season != sessionStorage.season_id) {
             this.getTeams();
             sessionStorage.loaded_season = sessionStorage.season_id
         } else {

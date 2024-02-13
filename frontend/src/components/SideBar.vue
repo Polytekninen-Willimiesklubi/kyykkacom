@@ -37,7 +37,7 @@ export default {
       },
       headers: {
         type: Array,
-        default: function() { 
+        default() { 
           return [
             { text: 'Joukkue', value: 'current_abbreviation', sortable: false},
             { text: 'O', value: 'matches_played', sortable: false},
@@ -68,7 +68,7 @@ export default {
       nonDefaultTeams: Array
     
     },
-    data: function() {
+    data() {
         return {
             season: false,
             isClass: false,
@@ -86,7 +86,7 @@ export default {
         };
     },
     methods: {
-        setClass: function() {
+        setClass() {
           if (!this.super) {
             this.isClass = (sessionStorage.season_id == 24 || sessionStorage.season_id == 25)
             this.is16Class = (sessionStorage.season_id == 23 || sessionStorage.season_id == 21 || sessionStorage.season_id == 20)
@@ -103,7 +103,7 @@ export default {
         }
     },
     watch: {
-      nonDefaultTeams: function() {
+      nonDefaultTeams() {
 
         if (this.no_brackets > 1) {
           this.multible_brackets = true
@@ -111,11 +111,13 @@ export default {
               this.teams.push([])
           }
           const attr_string = this.super ? 'super_weekend_bracket' : 'bracket' 
+          console.log(this.teams)
           this.nonDefaultTeams.forEach(ele => {
             this.teams[ele[attr_string] -1].push(ele)
           }, this)
         } else {
-          this.teams = [this.data]
+          console.log('mo')
+          this.teams = [this.nonDefaultTeams]
           this.multible_brackets = false
         }
         this.setClass()

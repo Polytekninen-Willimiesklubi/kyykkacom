@@ -45,7 +45,7 @@ export default {
     },
     mounted: function() {
       console.log(sessionStorage.loaded_season)
-      if (!sessionStorage.loaded_season && sessionStorage.loaded_season != sessionStorage.season_id) {
+      if (!sessionStorage.loaded_season || sessionStorage.loaded_season != sessionStorage.season_id) {
         this.getTeams();
         sessionStorage.loaded_season = sessionStorage.season_id
       } else {
