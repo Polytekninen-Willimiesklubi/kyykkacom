@@ -84,11 +84,6 @@ export default {
         let games = []
         let tmp = []
         let teams = []
-        this.$http.get('api/matches/'+ '?season=' + sessionStorage.season_id).then(
-            function(data) {
-            games = data.body
-        })
-
         if (sessionStorage.all_seasons) {
             this_season = JSON.parse(sessionStorage.all_seasons)
             this_season = this_season.filter(
@@ -96,7 +91,12 @@ export default {
             )[0]
             no_brackets = this_season.no_brackets
         }
-        this.$http.get('api/teams/?season=' + sessionStorage.season_id + '&post_season=0').then(
+        let promise1 = this.$http.get('api/matches/'+ '?season=' + sessionStorage.season_id).then(
+            function(data) {
+            games = data.body
+        })
+
+        let promise2 = this.$http.get('api/teams/?season=' + sessionStorage.season_id + '&post_season=0').then(
             function(data) {
                 for (var i = 0 ; i < no_brackets; i++) {
                     tmp.push([])
@@ -109,7 +109,8 @@ export default {
                 sessionStorage.teams = JSON.stringify(data.body)
                 teams = data.body
             }
-        ).finally(() => {
+        )
+        Promise.allSettled([promise1, promise2]).then( () => {
             if (this_season !== undefined && this_season.playoff_format != 0) {
                 let json = this.seasons_mapping[this_season.playoff_format]
                 this.rounds = no_brackets == 1 ? json['one_bracket'] : json['two_bracket']

@@ -111,12 +111,10 @@ export default {
               this.teams.push([])
           }
           const attr_string = this.super ? 'super_weekend_bracket' : 'bracket' 
-          console.log(this.teams)
           this.nonDefaultTeams.forEach(ele => {
             this.teams[ele[attr_string] -1].push(ele)
           }, this)
         } else {
-          console.log('mo')
           this.teams = [this.nonDefaultTeams]
           this.multible_brackets = false
         }
