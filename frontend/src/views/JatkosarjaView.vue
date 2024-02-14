@@ -91,10 +91,9 @@ export default {
             )[0]
             no_brackets = this_season.no_brackets
         }
-        let promise1 = this.$http.get('api/matches/'+ '?season=' + sessionStorage.season_id).then(
-            function(data) {
-            games = data.body
-        })
+        let promise1 = this.$http.get('api/matches/?season=' + sessionStorage.season_id).then(
+            data => games = data.body
+        )
 
         let promise2 = this.$http.get('api/teams/?season=' + sessionStorage.season_id + '&post_season=0').then(
             function(data) {
