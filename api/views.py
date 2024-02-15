@@ -422,3 +422,23 @@ class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
     def patch(self, request, *args, **kwargs):
         cache_reset_key('all_teams')
         return self.partial_update(request, *args, **kwargs)
+    
+class KyykkaAdminMatchViewSet(generics.GenericAPIView):
+    serializer_class = AdminMatchSerializer
+    permission_classes = [IsSuperUserOrAdmin]
+
+    def post(self, request, *args, **kwargs):
+        try:
+
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                'success': True,
+                'message': ''
+            })
+        except Exception as e:
+            return Response({
+            'success': False,
+            'message': f'Something failed: {e}',
+            }, status=400)

@@ -48,7 +48,7 @@
                         </v-card>
                     </v-col>
                 </v-row>
-                <v-btn class="ma-4 ml-10" v-on:click="validateResult" x-large color="error">Vahvista Runkosarjan tulos</v-btn>
+                <v-btn class="ma-4 ml-10" v-on:click="validateResult(true)" x-large color="error">Vahvista Runkosarjan tulos</v-btn>
                 <v-btn class="ma-4 ml-10" v-on:click="validateWinner" x-large color="error">Vahvista Runkosarjan Voittaja</v-btn>
             
             </v-window-item>
@@ -58,9 +58,10 @@
             >
                 <v-tabs fixed-tabs color="black" v-model='sub_tab'>
                     <v-tab :value="0">Joukkueet Lohkoihin</v-tab>
-                    <v-tab :value="1">Ratkaise Lohkot</v-tab>
-                    <v-tab :value="2">Seedaa Joukkueet</v-tab>
-                    <v-tab :value="3">Ratkaise Voittaja</v-tab>
+                    <v-tab :value="1">Syötä Otteluita</v-tab>
+                    <v-tab :value="2">Ratkaise Lohkot</v-tab>
+                    <v-tab :value="3">Seedaa Joukkueet</v-tab>
+                    <v-tab :value="4">Ratkaise Voittaja</v-tab>
                 </v-tabs>
                 <v-divider class="mb-2"/>
                 <v-window v-model="sub_tab">
@@ -73,7 +74,6 @@
                             <v-col cols="3">
                                 <v-card class="ml-10" elevated width="300px">
                                     <v-card-title>Ei lohkoissa</v-card-title>
-                                    <!-- <v-card-title>{{this.not_in_super}}</v-card-title> -->
                                     <v-divider />
                                     <draggable
                                         class="v-item-group"
@@ -119,10 +119,150 @@
                                 </v-row>
                             </v-col>
                         </v-row>
+                        <v-btn class="ma-4 ml-10" v-on:click="validateBrackets()" x-large color="error">Vahvista Superin lohkot</v-btn>
                     </v-window-item>
                     <v-window-item
                         :key="1"
                         :value="1"
+                    >
+                        <h2 class="pl-10 pb-2">Syötä Superin otteluita</h2>
+                        <v-form ref='matchSubmit' v-model="submitValid" @submit.prevent="submit" lazy-validation>
+                            <v-row>
+                                <v-col cols="3">
+                                    <v-select class="ma-2" width="300px"
+                                        label="Valitse pelityyppi"
+                                        v-model="selectGametype"
+                                        :rules="[v => !!v || 'Valitse pelityyppi!']"
+                                        :items="game_types"
+                                        :item-text="item => item.name"
+                                        return-object
+                                        outlined
+                                    />
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-select class="ma-2" 
+                                        :items="Array.from(Array(10).keys())"
+                                        v-model="field" label="Kenttä"
+                                    />
+
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="2">
+                                    <v-menu
+                                        ref="menu"
+                                        v-model="menu"
+                                        :close-on-content-click="false"
+                                        :return-value.sync="selectDate"
+                                        transition="scale-transition"
+                                        offset-y
+                                        min-width="auto"
+                                        outlined
+                                    >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-combobox 
+                                                v-model="selectDate"
+                                                label="Pelipäivä"
+                                                prepend-icon="mdi-calendar"
+                                                readonly
+                                                v-bind="attrs"
+                                                v-on="on"
+                                            />
+                                        </template>
+                                        <v-date-picker 
+                                            v-model="selectDate"
+                                            no-title
+                                            scrollable
+                                            @click:date="$refs.menu.save(selectDate)"
+                                        />
+                                    </v-menu>
+                                </v-col>
+                                <v-col cols="2">
+                                    <v-menu
+                                        ref="menu_time"
+                                        v-model="menu_time"
+                                        :close-on-content-click="false"
+                                        :return-value.sync="selectTime"
+                                        transition="scale-transition"
+                                        offset-y
+                                        min-width="auto"
+                                        outlined
+                                    >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-combobox 
+                                                v-model="selectTime"
+                                                label="Peliaika"
+                                                prepend-icon="mdi-clock"
+                                                readonly
+                                                v-bind="attrs"
+                                                v-on="on"
+                                            />
+                                        </template>
+                                        <v-time-picker
+                                            v-model="selectTime"
+                                            no-title
+                                            format="24hr"
+                                            scrollable
+                                            color="red"
+                                            :allowedMinutes="v => !(v % 5)"
+                                            @click:minute="$refs.menu_time.save(selectTime)"
+                                        />
+                                    </v-menu>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="2">
+                                    <v-select class="ma-2" width="300px"
+                                        label="Valitse kotijoukkue"
+                                        v-model="selectHome"
+                                        :rules="[v => !!v || 'Valitse Joukkue!']"
+                                        :items="seedable_super_teams"
+                                        :item-text="item => item.current_abbreviation"
+                                        return-object
+                                        outlined
+                                    />
+                                </v-col>
+    
+                                <v-col cols="2">
+                                    <v-select class="ma-2" width="300px"
+                                        label="Valitse vierasjoukkue"
+                                        v-model="selectAway"
+                                        :rules="[v => !!v || 'Valitse Joukkue!']"
+                                        :items="seedable_super_teams"
+                                        :item-text="item => item.current_abbreviation"
+                                        return-object
+                                        outlined
+                                    />
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="2">
+                                    <v-text-field class="ma-2"
+                                        v-model='homeScore'
+                                        :rules="scoreRules"
+                                        label="Koti joukkueen tulos"
+                                        required
+                                        outlined
+                                    />
+                                </v-col>
+                                <v-col cols="2">
+                                    <v-text-field class="ma-2"
+                                        v-model='awayScore'
+                                        :rules="scoreRules"
+                                        label="Vieras joukkueen tulos"
+                                        required
+                                        outlined
+                                    />
+                                </v-col>
+                            </v-row>
+                            <v-btn type="submit" class="ma-2" color="error">Syötä tulos</v-btn>
+                        </v-form>
+
+
+                    </v-window-item>
+                    <v-window-item
+                        :key="2"
+                        :value="2"
                     >
                         <h2 class="pl-10">Ratkaise Superin Lohkot</h2>
                         <v-row>
@@ -151,6 +291,8 @@
                                 </v-card>
                             </v-col>
                         </v-row>
+                        <v-btn class="ma-4 ml-10" v-on:click="validateResult(false)" x-large color="error">Vahvista Superin lohko sijoitukset</v-btn>
+
                     </v-window-item>
                 </v-window>
 
@@ -173,12 +315,62 @@
                 all_teams: [],
                 teams: [],
                 selectValue: {},
+                selectHome: null,
+                selectAway: null,
                 tab: null,
+                menu: false,
+                menu_time: false,
+                field: null,
+                submitValid: true,
                 super_teams: [],
                 sub_tab: null,
                 no_brackets: 1,
                 not_in_super: [],
+                seedable_super_teams: [],
+                game_types: [
+                    {"name" : "Alkulohko", "value" : 31},
+                    {"name": "Finaali", "value": 32},
+                    {"name": "Pronssi", "value": 33},
+                    {"name": "Välierä", "value": 34},
+                    {"name": "Puolivälierä", "value": 35},
+                    {"name": "Neljännesvälierä", "value": 36},
+                    {"name": "Kahdeksannesvälierä", "value": 37}
+                ],
+                homeScore: null,
+                awayScore: null,
+                selectGametype: null,
+                selectDate: null,
+                selectTime: null,
+                scoreRules: [
+                    value => {
+                        return !isNaN(parseInt(value)) || value === '' ? true : "Pitää olla numero!";
+                    },
+                    value => {
+                        return parseInt(value) <= 160 || value === '' ? true : "Liian iso ottelutulos!" 
+                    },
+                    value => {
+                        return parseInt(value) >= -13 || value === '' ? true : "Liian pieni ottelutulos!"
+                    },
+                ],
         };
+      },
+      created() {
+        const date = new Date()
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        month =  Number(month) >= 10 ? month : '0' + month 
+        let year = Number(date.getFullYear());
+
+        // This arrangement can be altered based on how we want the date's format to appear.
+        let currentDate = `${year}-${month}-${day}`;
+
+        let hour = date.getHours()
+        let minute = Number(date.getMinutes()) % 30 ? '30' : '00'
+
+        let currentTime = `${hour}:${minute}`
+
+        this.selectDate = currentDate
+        this.selectTime = currentTime
       },
       methods: {
         getTeams() {
@@ -199,12 +391,6 @@
             this.$http.get('api/superweekend/?season=' + sessionStorage.season_id).then(
                 function(data) {
                     this.no_brackets = data.body.super_weekend_no_brackets
-                    // if (data.body.super_weekend_playoff_format != 0) {
-                    //     tmp_rounds = this.seasons_mapping[data.body.super_weekend_playoff_format].one_bracket
-                    // } else {
-                    //     tmp_rounds = []
-                    // }
-                    
                     this.$http.get('api/teams/?season=' + sessionStorage.season_id + '&super_weekend=1').then(
                         function(data) {
                             for (var i = 0 ; i < this.no_brackets; i++) {
@@ -221,8 +407,8 @@
                                 e.order = i + 1
                             })
                         })
-                        let all_super_teams = this.super_teams.flat()
-                        this.not_in_super = this.all_teams.filter(ele => !all_super_teams.find(team => ele.id === team.id ))
+                        this.seedable_super_teams = this.super_teams.flat()
+                        this.not_in_super = this.all_teams.filter(ele => !this.seedable_super_teams.find(team => ele.id === team.id ))
                     })
                 }
             )
@@ -258,12 +444,18 @@
             }
             this.all_teams.sort((a,b) => (a.current_abbreviation > b.current_abbreviation) ? 1 : ((b.current_abbreviation > a.current_abbreviation) ? -1 : 0))
         },
-        validateResult() {
-            if (confirm('Oletko tyytyväinen runkosarjan tuloksiin?')) {
-                this.teams.forEach(ele => {
+        validateResult(type) {
+            let post_data_key = type ? 'bracket_placement' : 'super_weekend_bracket_placement'
+            let team_set = type ? this.teams : this.super_teams
+            
+            if (confirm('Oletko tyytyväinen tuloksiin?')) {
+                team_set.forEach(ele => {
                     ele.forEach(e => {
+                        console.log(post_data_key)
                         let post_url = 'api/kyykka_admin/team/update/' + e.id
-                        let post_data = {'bracket_placement' : e.order}
+                        let post_data = {}
+                        post_data[post_data_key] = e.order
+                        console.log(post_data)
                         this.$http.patch(post_url, post_data, {
                             headers: {
                             'X-CSRFToken': this.getCookie('csrftoken')
@@ -312,6 +504,101 @@
                     }
                 })
             }
+        },
+        validateBrackets() {
+            if (confirm('Oletko tyytyväinen Superin lohkoihin?')) {
+                this.super_teams.forEach((ele, index) => {
+                    ele.forEach((e) => {
+                        let post_url = 'api/kyykka_admin/team/update/' + e.id
+                        let post_data = {'super_weekend_bracket' : index+1}
+                        this.$http.patch(post_url, post_data, {
+                            headers: {
+                            'X-CSRFToken': this.getCookie('csrftoken')
+                            },
+                            'withCredentials': true,
+                        }).catch(function(response) {
+                            if (response.status == 403) {
+                            this.$http
+                                .get('api/csrf', {'withCredentials': true})
+                                .then(function(response) {
+                                    if (response.status === 200) {
+                                        this.$http.patch(post_url, post_data, {
+                                            headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+                                            'withCredentials': true,
+                                        })
+                                    }
+                                });
+                            }
+                        })
+                    }, index)
+                })
+                this.not_in_super.forEach(ele => {
+                    let post_url = 'api/kyykka_admin/team/update/' + ele.id
+                    let post_data = {'super_weekend_bracket' : null}
+                    this.$http.patch(post_url, post_data, {
+                        headers: {
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                        },
+                        'withCredentials': true,
+                    }).catch(function(response) {
+                        if (response.status == 403) {
+                        this.$http
+                            .get('api/csrf', {'withCredentials': true})
+                            .then(function(response) {
+                                if (response.status === 200) {
+                                    this.$http.patch(post_url, post_data, {
+                                        headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+                                        'withCredentials': true,
+                                    })
+                                }
+                            });
+                        }
+                    })
+                })
+            }
+        },
+        async submit() {
+            await this.$refs.matchSubmit.validate()
+            console.log(this.submitValid)
+            if (!this.submitValid) {return}
+            let postData = {}
+            postData['season'] = sessionStorage.season_id
+            postData['field'] = this.field
+            let match_time = this.selectDate + ' ' + this.selectTime + ':00'
+            console.log(match_time)
+            postData['match_time'] = match_time
+            postData['home_first_round_score'] = this.homeScore
+            postData['home_second_round_score'] = 0
+            postData['away_first_round_score'] = this.awayScore
+            postData['away_second_round_score'] = 0
+            postData['home_team'] = this.selectHome.id
+            postData['away_team'] = this.selectAway.id
+            postData['is_validated'] = this.is_validated
+            postData['match_type'] = this.selectGametype.value
+            postData['post_season'] = 0
+            postData['seriers'] = 0
+            console.log(postData)
+
+
+            this.$http.post('api/kyykka_admin/match', postData, {
+                headers: {
+                'X-CSRFToken': this.getCookie('csrftoken')
+                },
+                'withCredentials': true,
+            }).catch(function(response) {
+                if (response.status == 403) {
+                this.$http
+                    .get('api/csrf', {'withCredentials': true})
+                    .then(function(response) {
+                        if (response.status === 200) {
+                            this.$http.patch(post_url, post_data, {
+                                headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+                                'withCredentials': true,
+                            })
+                        }
+                    });
+                }
+            })
         }
     },
     mounted() {
