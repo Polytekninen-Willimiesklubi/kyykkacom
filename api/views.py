@@ -318,7 +318,7 @@ class MatchList(APIView):
             key = "all_matches_super_weekend" + str(season.year)
             all_matches = getFromCache(key)
             if all_matches is None:
-                self.queryset = self.queryset.filter(season=season, match_type__gte=30).filter(match_type__lte=39)
+                self.queryset = self.queryset.filter(season=season, match_type__gte=32).filter(match_type__lte=39)
                 serializer = MatchListSerializer(self.queryset, many=True, context={'season': season})
                 all_matches = serializer.data
                 setToCache(key, all_matches)

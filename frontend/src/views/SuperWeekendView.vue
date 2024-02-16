@@ -10,6 +10,8 @@
             <side-bar 
                 title="Alkulohko"
                 :headers="headers"
+                sortBy="super_weekend_bracket_placement"
+                :sortDesc="false"
                 :no_brackets="no_brackets"
                 :super="true"
                 :nonDefaultTeams="teams"
@@ -23,6 +25,7 @@
                 :first="first"
                 :only_format="showFormat"
                 :bracket_placements="bracket_placements"
+                :non_default_seeds="seeded_teams"
                 :load_ended="load_ended"
             />
         </v-flex>
@@ -38,6 +41,7 @@ import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json'
 import cup_8 from '../tournament_templates/cup_template_8_teams.json'
 import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json'
 import cup_4 from '../tournament_templates/cup_template_4_teams.json'
+import super_cup_14 from '../tournament_templates/super_cup_template_14_teams.json'
 
 export default {
     name: 'SuperWeekendView',
@@ -69,9 +73,11 @@ export default {
                 4 : cup_22,
                 5 : cup_6,
                 6 : cup_12,
+                7 : super_cup_14
             },
             showFormat: false,
-            teams: []
+            teams: [],
+            seeded_teams: []
         }
     },
     created() {
@@ -79,6 +85,7 @@ export default {
         this.$http.get('api/matches/?season=' + sessionStorage.season_id + '&super_weekend=1').then(
             function(data) {
                 games = data.body
+                console.log(games)
             }
         )
             
@@ -86,6 +93,7 @@ export default {
         let tmp_rounds = []
         let no_brackets = 1
         let teams = []
+        let tmp_seeded = []
         this.$http.get('api/superweekend/?season=' + sessionStorage.season_id).then(
             function(data) {
                 console.log(data)
@@ -104,6 +112,7 @@ export default {
                         for (let i=0; i < data.body.length; i++) {
                             let team = data.body[i]
                             tmp[team.super_weekend_bracket-1].push([team.current_abbreviation, team.super_weekend_bracket_placement])
+                            tmp_seeded.push([team.current_abbreviation, team.super_weekend_playoff_seed])
                         }
                         tmp.forEach(ele => ele.sort((a, b) => a[1] - b[1]))
                         teams = data.body
@@ -114,6 +123,7 @@ export default {
                     this.bracket_placements = tmp
                     this.games = games
                     this.teams = teams
+                    this.seeded_teams = tmp_seeded
                     this.load_ended = true
                 })
             }
@@ -121,8 +131,9 @@ export default {
             this.rounds = tmp_rounds
             this.no_brackets = no_brackets
             this.bracket_placements = tmp
-            this.load_ended = true
             this.teams = []
+            this.seeded_teams = []
+            this.load_ended = true
         })
     }
 };

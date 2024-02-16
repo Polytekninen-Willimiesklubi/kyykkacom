@@ -49,6 +49,7 @@ export default {
         only_format: Boolean,
         bracket_placements: Array,
         load_ended: Boolean,
+        non_default_seeds: Array
     },
     components: {
     Bracket
@@ -65,26 +66,49 @@ export default {
     },
     methods: {
         putTeamsPlayoffBracket() {
-            this.bracket_placements.forEach((bracket, idx) => {
-                for (let i = 0; i < bracket.length; i++) {
-                    for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
-                        let placementString = this.bracket_placements.length >= 2 ? String.fromCharCode(65+idx) + (i+1).toString()
-                                                                    : (i+1).toString() + '. Seed'
-                        let match = this.rounds[matchIdx] 
-                        if (match.player1.name === placementString) {
-                            match.player1.name = bracket[i][0]
-                            break
-                        } else if (match.player2.name === placementString) {
-                            match.player2.name = bracket[i][0]
-                            break
+            console.log(this.rounds)
+            if (this.non_default_seeds.length) {
+                this.non_default_seeds.forEach(ele => {
+                    console.log(ele)
+                    if (ele[1] !== undefined) {
+                        for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
+                            let placementString = (ele[1]).toString() + '. Seed'
+                            let match = this.rounds[matchIdx] 
+                            if (match.player1.name.startsWith(placementString)) {
+                                match.player1.name = ele[0]
+                                break
+                            } else if (match.player2.name.startsWith(placementString)) {
+                                match.player2.name = ele[0]
+                                break
+                            }
                         }
                     }
-                }
-            })
+                })
+            } else {
+                this.bracket_placements.forEach((bracket, idx) => {
+                    for (let i = 0; i < bracket.length; i++) {
+                        for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
+                            let placementString = this.bracket_placements.length >= 2 ? String.fromCharCode(65+idx) + (i+1).toString()
+                                                                        : (i+1).toString() + '. Seed'
+                            let match = this.rounds[matchIdx] 
+                            if (match.player1.name === placementString) {
+                                match.player1.name = bracket[i][0]
+                                break
+                            } else if (match.player2.name === placementString) {
+                                match.player2.name = bracket[i][0]
+                                break
+                            }
+                        }
+                    }
+                })
+            }
         },
         resolveGames() {
             this.bracket_matches = this.played_games.filter(ele => !ele.post_season)
-            let playoff_games = this.played_games.filter(ele => ele.post_season)
+            let playoff_games = this.played_games.filter(ele => ele.post_season || ele.match_type >= 32)
+            playoff_games.forEach(ele => {
+                ele.match_type =  ele.match_type >= 32 ? ele.match_type - 30 : ele.match_type
+            })
             playoff_games.forEach(ele => {
                 if (ele.match_type >= 2 & ele.match_type < 10) {
                     var round = this.tmp_rounds[ele.match_type - 2]
@@ -216,6 +240,6 @@ export default {
         color: white;
     }
     .vtb-item-players > div {
-        width: 125px;
+        width: 135px;
     }
 </style>

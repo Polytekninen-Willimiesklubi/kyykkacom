@@ -1192,10 +1192,10 @@ class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
     match_average = serializers.SerializerMethodField()
 
     def count_match_results(self, obj):
-        results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season'), match_type__gte=30).filter(match_type__lte=30).annotate(
+        results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season'), match_type=31).annotate(
             home=F('home_first_round_score') + F('home_second_round_score'),
             away=F('away_first_round_score') + F('away_second_round_score'))
-        results_away = obj.away_matches.filter(is_validated=True, season=self.context.get('season'), match_type__gte=30).filter(match_type__lte=30).annotate(
+        results_away = obj.away_matches.filter(is_validated=True, season=self.context.get('season'), match_type=31).annotate(
             home=F('home_first_round_score') + F('home_second_round_score'),
             away=F('away_first_round_score') + F('away_second_round_score'))
 
@@ -1250,7 +1250,7 @@ class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
         model = TeamsInSeason
         fields = ('id', 'current_name', 'current_abbreviation', 'matches_won', 'matches_lost', 
                   'matches_tie', 'matches_played','score_total', 'points_total', 'match_average', 
-                  'super_weekend_bracket', 'super_weekend_bracket_placement')
+                  'super_weekend_bracket', 'super_weekend_bracket_placement', 'super_weekend_playoff_seed')
         
 class AdminMatchSerializer(serializers.ModelSerializer):
     class Meta:

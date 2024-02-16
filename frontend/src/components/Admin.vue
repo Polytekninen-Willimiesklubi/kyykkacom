@@ -316,14 +316,14 @@
                                     style="border: solid; margin-bottom: 2px; border-width: 2px;"
                                 >
                                     <v-row>
-                                            <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col> 
-                                            <v-col align="right" cols="6"> (Sij. {{ element.super_weekend_bracket_placement }}) (OKa: {{ element.match_average }})</v-col>
+                                        <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col> 
+                                        <v-col align="right" cols="6"> (Sij. {{ element.super_weekend_bracket_placement }}) (OKa: {{ element.match_average }})</v-col>
                                     </v-row>
                                 </div>
                             </draggable>
-                            <v-btn class="ma-4 ml-10" v-on:click="validateSeeds()" x-large color="error">Vahvista Superin Seedit</v-btn>
-
+                            
                         </v-card>
+                        <v-btn class="ma-4 ml-10" v-on:click="validateSeeds()" x-large color="error">Vahvista Superin Seedit</v-btn>
                     </v-window-item>
                     <v-window-item
                         :key="4"
@@ -541,8 +541,8 @@
         validateSeeds() {
             if (confirm('Oletko tyytyväinen tuloksiin?')) {
                 this.seedable_super_teams.forEach(ele => {
-                    let post_url = 'api/kyykka_admin/team/update/' + e.id
-                    let post_data = {'super_weekend_playoff_seed' : e.order}
+                    let post_url = 'api/kyykka_admin/team/update/' + ele.id
+                    let post_data = {'super_weekend_playoff_seed' : ele.order}
                     this.$http.patch(post_url, post_data, {
                         headers: {
                         'X-CSRFToken': this.getCookie('csrftoken')
@@ -686,7 +686,7 @@
             postData['away_second_round_score'] = 0
             postData['home_team'] = this.selectHome.id
             postData['away_team'] = this.selectAway.id
-            postData['is_validated'] = this.is_validated
+            postData['is_validated'] = true
             postData['match_type'] = this.selectGametype.value
             postData['post_season'] = 0
             postData['seriers'] = 0
