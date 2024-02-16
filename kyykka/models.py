@@ -77,6 +77,7 @@ class TeamsInSeason(models.Model):
     bracket_placement = models.IntegerField(blank=True, null=True)  # Winner of the Bracket stage is marked with 0 
     super_weekend_bracket = models.IntegerField(null=True)
     super_weekend_bracket_placement = models.IntegerField(blank=True, null=True)
+    super_weekend_playoff_seed = models.IntegerField(blank=True, null=True)
 
     class Meta:
         unique_together = ('season', 'team')

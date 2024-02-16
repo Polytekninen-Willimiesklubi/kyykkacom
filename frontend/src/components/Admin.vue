@@ -294,6 +294,60 @@
                         <v-btn class="ma-4 ml-10" v-on:click="validateResult(false)" x-large color="error">Vahvista Superin lohko sijoitukset</v-btn>
 
                     </v-window-item>
+                    <v-window-item
+                        :key="3"
+                        :value="3"
+                    >
+                        <h2 class="pl-10">Seedaa Superin jatkosarja</h2>
+                        <h3 class="pl-10 pt-3">HUOM! Tarkista seedaus numero formaatista (Kysy Totilta :D)</h3>
+                        <h3 class="pl-10 pt-1">Vain playoff seedauksella on väliä, eli ne jotka jää ulkopuolella voi olla miten lystää.</h3>
+
+
+                        <v-card class="ml-10" elevated width="400px">
+                            <draggable
+                                class="v-item-group"
+                                :list="seedable_super_teams"
+                                style="padding: 1em;"
+                            >
+                                <div
+                                    class="v-item"
+                                    v-for="element in seedable_super_teams"
+                                    :key="element.current_abbreviation"
+                                    style="border: solid; margin-bottom: 2px; border-width: 2px;"
+                                >
+                                    <v-row>
+                                            <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col> 
+                                            <v-col align="right" cols="6"> (Sij. {{ element.super_weekend_bracket_placement }}) (OKa: {{ element.match_average }})</v-col>
+                                    </v-row>
+                                </div>
+                            </draggable>
+                            <v-btn class="ma-4 ml-10" v-on:click="validateSeeds()" x-large color="error">Vahvista Superin Seedit</v-btn>
+
+                        </v-card>
+                    </v-window-item>
+                    <v-window-item
+                        :key="4"
+                        :value="4"
+                    >
+                        <h2 class="pl-10">Valitse SuperWeekend voittaja</h2>
+                        <h3 class="pl-10 pt-3">Toistaiseksi automatiikka ei toimi, että finaalin tuloksen laitettua Superin tulisi tallennettua. Näin voittaja erikseen merkataan muistiin, vaikka superweekend turnaustaulussa voittaja näkyisikin</h3>
+                        <v-form v-model="submitValid" ref='superwinnerValid' @submit.prevent="validateSuperWinner" lazy-validation>
+                            <v-row>
+                                <v-col cols="3">
+                                    <v-select class="ma-4"
+                                        label="Valitse Superin voittaja"
+                                        v-model="superWinnerSelected"
+                                        :items="seedable_super_teams"
+                                        :item-text="item => item.current_abbreviation"
+                                        required
+                                        return-object
+                                        outlined
+                                    />
+                                </v-col>
+                            </v-row>
+                            <v-btn class="ma-8" type="submit" x-large color="error">Vahvista Superin Voittaja</v-btn>
+                        </v-form>
+                    </v-window-item>
                 </v-window>
 
             </v-window-item>
@@ -322,6 +376,9 @@
                 menu_time: false,
                 field: null,
                 submitValid: true,
+                superWinnerValid: true,
+                superWinnerSelected: null,
+                super_weekend_id: null,
                 super_teams: [],
                 sub_tab: null,
                 no_brackets: 1,
@@ -391,6 +448,7 @@
             this.$http.get('api/superweekend/?season=' + sessionStorage.season_id).then(
                 function(data) {
                     this.no_brackets = data.body.super_weekend_no_brackets
+                    this.super_weekend_id = data.body.id
                     this.$http.get('api/teams/?season=' + sessionStorage.season_id + '&super_weekend=1').then(
                         function(data) {
                             for (var i = 0 ; i < this.no_brackets; i++) {
@@ -407,8 +465,9 @@
                                 e.order = i + 1
                             })
                         })
-                        this.seedable_super_teams = this.super_teams.flat()
+                        this.seedable_super_teams = structuredClone(this.super_teams.flat())
                         this.not_in_super = this.all_teams.filter(ele => !this.seedable_super_teams.find(team => ele.id === team.id ))
+                        this.seedable_super_teams.forEach((ele, index) => ele.order = index + 1)
                     })
                 }
             )
@@ -479,6 +538,33 @@
                 })
             }
         },
+        validateSeeds() {
+            if (confirm('Oletko tyytyväinen tuloksiin?')) {
+                this.seedable_super_teams.forEach(ele => {
+                    let post_url = 'api/kyykka_admin/team/update/' + e.id
+                    let post_data = {'super_weekend_playoff_seed' : e.order}
+                    this.$http.patch(post_url, post_data, {
+                        headers: {
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                        },
+                        'withCredentials': true,
+                    }).catch(function(response) {
+                        if (response.status == 403) {
+                        this.$http
+                            .get('api/csrf', {'withCredentials': true})
+                            .then(function(response) {
+                                if (response.status === 200) {
+                                    this.$http.patch(post_url, post_data, {
+                                        headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+                                        'withCredentials': true,
+                                    })
+                                }
+                            });
+                        }
+                    })
+                })
+            }
+        },
         validateWinner() {
             if (this.selectValue.id === undefined) {
                 return
@@ -486,6 +572,35 @@
             if (confirm('Oletko tyytyväinen runkosarjan voittajaan?')) {
                 let post_url = 'api/kyykka_admin/team/update/' + this.selectValue.id
                 let post_data = {'bracket_placement' : 0}
+                this.$http.patch(post_url, post_data, {
+                    headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+                    'withCredentials': true,
+                }).catch(function(response) {
+                    if (response.status == 403) {
+                    this.$http
+                        .get('api/csrf', {'withCredentials': true})
+                        .then(function(response) {
+                            if (response.status === 200) {
+                                this.$http.patch(post_url, post_data, {
+                                    headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+                                    'withCredentials': true,
+                                })
+                            }
+                        });
+                    }
+                })
+            }
+        },
+        async validateSuperWinner() {
+            await this.$refs.superwinnerValid.validate()
+            console.log('mpoi')
+            console.log(this.superWinnerValid, this.super_weekend_id)
+            if (!this.superWinnerValid || !this.super_weekend_id) {
+                return
+            }
+            if (confirm('Oletko tyytyväinen Superin voittajaan?')) {
+                let post_url = 'api/kyykka_admin/superweekend/' + this.super_weekend_id
+                let post_data = {'winner' : this.superWinnerSelected.id}
                 this.$http.patch(post_url, post_data, {
                     headers: {'X-CSRFToken': this.getCookie('csrftoken')},
                     'withCredentials': true,
@@ -559,13 +674,11 @@
         },
         async submit() {
             await this.$refs.matchSubmit.validate()
-            console.log(this.submitValid)
             if (!this.submitValid) {return}
             let postData = {}
             postData['season'] = sessionStorage.season_id
             postData['field'] = this.field
             let match_time = this.selectDate + ' ' + this.selectTime + ':00'
-            console.log(match_time)
             postData['match_time'] = match_time
             postData['home_first_round_score'] = this.homeScore
             postData['home_second_round_score'] = 0
@@ -577,8 +690,6 @@
             postData['match_type'] = this.selectGametype.value
             postData['post_season'] = 0
             postData['seriers'] = 0
-            console.log(postData)
-
 
             this.$http.post('api/kyykka_admin/match', postData, {
                 headers: {
@@ -616,6 +727,9 @@
         },
         super_teams() {
             this.super_teams.forEach((element) => element.forEach((ele, index) => ele.order = index +1))
+        },
+        seedable_super_teams() {
+            this.seedable_super_teams.forEach((element, index) => element.order = index +1)
         }
     }
   };

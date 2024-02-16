@@ -442,3 +442,11 @@ class KyykkaAdminMatchViewSet(generics.GenericAPIView):
             'success': False,
             'message': f'Something failed: {e}',
             }, status=400)
+        
+class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
+    serializer_class = SuperWeekendSerializer
+    queryset = SuperWeekend.objects.all()
+    permission_classes = [IsSuperUserOrAdmin]
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)

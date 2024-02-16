@@ -1175,12 +1175,12 @@ class ThrowSerializer(serializers.ModelSerializer):
 class TeamsInSeasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamsInSeason
-        fields = ('id', 'bracket_placement', 'super_weekend_bracket', 'super_weekend_bracket_placement')
+        fields = ('id', 'bracket_placement', 'super_weekend_bracket', 'super_weekend_bracket_placement', 'super_weekend_playoff_seed')
 
 class SuperWeekendSerializer(serializers.ModelSerializer):
     class Meta:
         model = SuperWeekend
-        fields = ('season', 'winner', 'super_weekend_no_brackets', 'super_weekend_playoff_format')
+        fields = ('id', 'season', 'winner', 'super_weekend_no_brackets', 'super_weekend_playoff_format')
 
 class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
     matches_won = serializers.SerializerMethodField()
