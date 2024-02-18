@@ -54,10 +54,10 @@ export default {
         credentials: {}
     }),
     methods: {
-        changeLogin: function(username) {
+        changeLogin(username) {
             eventBus.$emit('loginChanged', username);
         },
-        login: function() {
+        login() {
             this.$session.start();
             this.$http
                 .post('api/login/', this.credentials, {

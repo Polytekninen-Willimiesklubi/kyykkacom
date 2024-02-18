@@ -64,7 +64,7 @@
 <script>
 import moment from 'moment'
 export default {
-    data: function() {
+    data() {
         return {
             search: '',
             headers: [
@@ -98,23 +98,26 @@ export default {
             data: [],
             matches: [],
             post_season: [],
+            super_weekend: [],
             regular_season: [],
             defaultSelected: 'Kaikki ottelut',
-            options: ['Kaikki ottelut','Runkosarja','Jatkosarja'],
+            options: ['Kaikki ottelut','Runkosarja','Jatkosarja', 'SuperWeekend'],
             seriers: ['seriers']
         };
     },
     methods: {
-        selectChange: function() {
+        selectChange() {
           if (this.defaultSelected == "Runkosarja") {
             this.data = this.regular_season
           } else if (this.defaultSelected == "Jatkosarja") {
             this.data = this.post_season
+          } else if (this.defaultSelected == "SuperWeekend") {
+            this.data = this.super_weekend
           } else {
             this.data = this.matches
           }
         },
-        getMatches: function() {
+        getMatches() {
           let url = 'api/matches/?season='+sessionStorage.season_id;
           
           const pelit = {
@@ -126,7 +129,14 @@ export default {
             6 : "Neljännesvälierä",
             7 : "Kahdeksannesvälierä",
             10 : "Runkosarjafinaali",
-            20 : "Jumbofinaali"
+            20 : "Jumbofinaali",
+            31: "SuperWeekend: Alkulohko",
+            32: "SuperWeekend: Finaali",
+            33: "SuperWeekend: Pronssi",
+            34: "SuperWeekend: Välierä",
+            35: "SuperWeekend: Puolivälierä",
+            36: "SuperWeekend: Neljännesvälierä",
+            37: "SuperWeekend: Kahdeksannesvälierä",
           }
 
           this.$http.get(url).then(
@@ -134,9 +144,10 @@ export default {
                   data.body.forEach(ele => {
                     ele.type_name = pelit[ele.match_type]
                     ele.dash = "-"
-                    
                     if (ele.post_season) {
                       this.post_season.push(ele)
+                    } else if (ele.match_type >= 31) {
+                      this.super_weekend.push(ele)
                     } else {
                       this.regular_season.push(ele)
                     }
@@ -146,10 +157,10 @@ export default {
               },
           );
         },
-        handleRedirect: function(value) {
+        handleRedirect(value) {
           location.href = '/ottelu/'+value.id
         },
-        itemRowBackground: function(item) {
+        itemRowBackground(item) {
           // Handles the backround color of row items
           var matchDate = moment(item.match_time).format("YYYY-MM-DD HH:MM")
           var currentTime = moment(Date.now()).format("YYYY-MM-DD HH:MM")
@@ -161,7 +172,7 @@ export default {
           return 'row__background__style_2'
         }
     },
-    mounted: function() {
+    mounted() {
         if (localStorage.team_id) {
           this.team_id = localStorage.team_id;
         } else {

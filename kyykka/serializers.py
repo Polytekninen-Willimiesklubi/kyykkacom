@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from kyykka.models import Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, Player, TeamsInSeason
+from kyykka.models import SuperWeekend, Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, Player, TeamsInSeason
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.db.models import Count, Sum, F, Q, Case, Value, When, IntegerField
@@ -849,24 +849,29 @@ class TeamListSerializer(serializers.ModelSerializer):
     match_average = serializers.SerializerMethodField()
     points_average = serializers.SerializerMethodField()
 
-
     def count_match_results(self, obj):
+        results_home =  obj.home_matches.filter(
+            is_validated=True, 
+            season=self.context.get('season'),
+            match_type__lt=30                                        
+        )
+        results_away = obj.away_matches.filter(
+            is_validated=True, 
+            season=self.context.get('season'),
+            match_type__lt=30
+        )
         if self.context.get('post_season') is not None:
-            results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season'),
-                                                    post_season=self.context.get('post_season')).annotate(
+            results_home =  results_home.filter(post_season=self.context.get('post_season'))
+            results_away = results_away.filter(post_season=self.context.get('post_season'))
+
+        results_home = results_home.annotate(
                 home=F('home_first_round_score') + F('home_second_round_score'),
-                away=F('away_first_round_score') + F('away_second_round_score'))
-            results_away = obj.away_matches.filter(is_validated=True, season=self.context.get('season'),
-                                                   post_season=self.context.get('post_season')).annotate(
+                away=F('away_first_round_score') + F('away_second_round_score')
+        )
+        results_away = results_away.annotate(
                 home=F('home_first_round_score') + F('home_second_round_score'),
-                away=F('away_first_round_score') + F('away_second_round_score'))
-        else:
-            results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season')).annotate(
-                home=F('home_first_round_score') + F('home_second_round_score'),
-                away=F('away_first_round_score') + F('away_second_round_score'))
-            results_away = obj.away_matches.filter(is_validated=True, season=self.context.get('season')).annotate(
-                home=F('home_first_round_score') + F('home_second_round_score'),
-                away=F('away_first_round_score') + F('away_second_round_score'))
+                away=F('away_first_round_score') + F('away_second_round_score')
+        )
 
         self.matches_won = results_home.filter(home__lt=F('away')).count() + results_away.filter(away__lt=F('home')).count()
         self.matches_lost = results_home.filter(away__lt=F('home')).count() + results_away.filter(home__lt=F('away')).count()
@@ -918,7 +923,7 @@ class TeamListSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamsInSeason
         fields = ('id', 'current_name', 'current_abbreviation', 'matches_won', 'matches_lost', 'matches_tie',
-                  'matches_played', 'match_average', 'points_total', 'points_average', 'score_total', 'bracket')
+                  'matches_played', 'match_average', 'points_total', 'points_average', 'score_total', 'bracket', 'bracket_placement')
 
 
 class TeamDetailSerializer(serializers.ModelSerializer):
@@ -997,7 +1002,8 @@ class TeamDetailSerializer(serializers.ModelSerializer):
         return match_average
 
     def get_matches(self, obj):
-        return None
+        matches = Match.objects.filter(Q(home_team=obj) | Q(away_team=obj), is_validated=True)
+        return Match2ListSerializer(matches, many=True, context= {'team': obj}).data
 
     def get_players(self, obj):
         return PlayerListSerializer(obj.players, many=True, context={'season': self.context.get('season')}).data
@@ -1060,7 +1066,85 @@ class MatchListSerializer(SharedMatchSerializer):
         model = Match
         fields = ('id', 'match_time', 'field', 'home_team', 'away_team', 'home_score_total', 'away_score_total',
                   'post_season',  'is_validated', 'match_type', 'seriers')
+        
+class Match2ListSerializer(serializers.ModelSerializer):
+    own_first = serializers.SerializerMethodField()
+    own_second = serializers.SerializerMethodField()
+    opp_first = serializers.SerializerMethodField()
+    opp_second = serializers.SerializerMethodField()
+    own_team_total = serializers.SerializerMethodField()
+    opposite_team_total = serializers.SerializerMethodField()
+    opposite_team = serializers.SerializerMethodField()
+    match_type = serializers.SerializerMethodField()
 
+    def get_opposite_team(self, obj):
+        self.own_team = (obj.home_team == self.context.get('team')) # Home Team = 1, Away Team = 0
+        key = 'team_' + str(obj.away_team.id) if self.own_team else 'team_' + str(obj.home_team.id)
+        team = getFromCache(key)
+        if team is None:
+            team = TeamSerializer(obj.away_team).data if self.own_team else TeamSerializer(obj.home_team).data
+            setToCache(key, team, 3600)
+        return team['current_abbreviation']
+    
+    def get_own_team_total(self, obj):
+        key = 'match_' + str(obj.id) + '_own_score_total'
+        own_score_total = getFromCache(key)
+        if own_score_total is None:
+            try:
+                if self.own_team:
+                    own_score_total = obj.home_first_round_score + obj.home_second_round_score
+                else:
+                    own_score_total = obj.away_first_round_score + obj.away_second_round_score
+            except TypeError:
+                own_score_total = None
+            setToCache(key, own_score_total)
+        return own_score_total
+
+    def get_opposite_team_total(self, obj):
+        key = 'match_' + str(obj.id) + '_opposite_score_total'
+        opp_score_total = getFromCache(key)
+        if opp_score_total is None:
+            try:
+                if self.own_team:
+                    opp_score_total = obj.away_first_round_score + obj.away_second_round_score
+                else:
+                    opp_score_total = obj.home_first_round_score + obj.home_second_round_score
+            except TypeError:
+                opp_score_total = None
+            setToCache(key, opp_score_total)
+        return opp_score_total
+    
+    def get_match_type(self, obj):
+        game = {
+            1 : "Runkosarja",
+            2 : "Finaali",
+            3 : "Pronssi",
+            4 : "Välierä",
+            5 : "Puolivälierä",
+            6 : "Neljännesvälierä",
+            7 : "Kahdeksannesvälierä",
+            10 : "Runkosarjafinaali",
+            20 : "Jumbofinaali"
+        }
+        try:
+            return game[obj.match_type] if obj.match_type is not None else ''
+        except:
+            print(obj.match_type)
+    
+    def get_own_first(self, obj):
+        return obj.home_first_round_score if self.own_team else obj.away_first_round_score
+    def get_own_second(self, obj):
+        return obj.home_second_round_score if self.own_team else obj.away_second_round_score
+    def get_opp_first(self, obj):
+        return obj.home_first_round_score if not self.own_team else obj.away_first_round_score
+    def get_opp_second(self, obj):
+        return obj.home_second_round_score if not self.own_team else obj.away_second_round_score
+    
+    class Meta:
+        model = Match
+        fields = ('id', 'match_time', 'opposite_team', 'away_team', 'opposite_team_total', 'own_team_total',
+                  'post_season',  'is_validated', 'match_type', 'seriers', 'own_first', 'own_second', 
+                  'opp_first', 'opp_second')
 
 class MatchDetailSerializer(SharedMatchSerializer):
     home_score_total = serializers.SerializerMethodField()
@@ -1172,3 +1256,88 @@ class ThrowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Throw
         fields = ('score_first', 'score_second', 'score_third', 'score_fourth', 'player')
+
+class TeamsInSeasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeamsInSeason
+        fields = ('id', 'bracket_placement', 'super_weekend_bracket', 'super_weekend_bracket_placement', 'super_weekend_playoff_seed')
+
+class SuperWeekendSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SuperWeekend
+        fields = ('id', 'season', 'winner', 'super_weekend_no_brackets', 'super_weekend_playoff_format')
+
+class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
+    matches_won = serializers.SerializerMethodField()
+    matches_lost = serializers.SerializerMethodField()
+    matches_tie = serializers.SerializerMethodField()
+    matches_played = serializers.SerializerMethodField()
+    score_total = serializers.SerializerMethodField()
+    points_total = serializers.SerializerMethodField()
+    match_average = serializers.SerializerMethodField()
+
+    def count_match_results(self, obj):
+        results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season'), match_type=31).annotate(
+            home=F('home_first_round_score') + F('home_second_round_score'),
+            away=F('away_first_round_score') + F('away_second_round_score'))
+        results_away = obj.away_matches.filter(is_validated=True, season=self.context.get('season'), match_type=31).annotate(
+            home=F('home_first_round_score') + F('home_second_round_score'),
+            away=F('away_first_round_score') + F('away_second_round_score'))
+
+        self.matches_won = results_home.filter(home__lt=F('away')).count() + results_away.filter(away__lt=F('home')).count()
+        self.matches_lost = results_home.filter(away__lt=F('home')).count() + results_away.filter(home__lt=F('away')).count()
+        self.matches_tie = results_home.filter(home__exact=F('away')).count() + results_away.filter(home__exact=F('away')).count()
+        self.matches_played = self.matches_lost + self.matches_tie + self.matches_won
+
+        match_score_home = results_home.aggregate(Sum('home'))['home__sum']
+        match_score_away = results_away.aggregate(Sum('away'))['away__sum']
+        if match_score_home is None and match_score_away is None:
+            self.match_average = 'NaN'
+            return
+        elif match_score_home is None:
+            match_score_home = 0
+        elif match_score_away is None:
+            match_score_away = 0
+        match_score_total = match_score_home + match_score_away 
+        self.match_average = round(match_score_total / self.matches_played , 2) if self.matches_played else 'NaN'
+
+    def get_matches_played(self, obj):
+        return self.matches_played
+    
+    def get_matches_won(self, obj):
+        self.count_match_results(obj)
+        return self.matches_won
+
+    def get_matches_lost(self, obj):
+        # Should be initialized in 'get_matches_won' - function
+        return self.matches_lost
+
+    def get_matches_tie(self, obj):
+        # Should be initialized in 'get_matches_won' - function
+        return self.matches_tie
+    
+    def get_points_total(self, obj):
+        self.points_total = (self.matches_won * 2) + (self.matches_tie)
+        return self.points_total
+    
+    def get_match_average(self, obj):
+        return self.match_average
+    
+    def get_points_average(self, obj):
+        return round(self.points_total / self.matches_played,2) if self.matches_played else "NaN"
+
+    def get_score_total(self, obj):
+        season = self.context.get('season')
+        throws = Throw.objects.filter(match__is_validated=True, team=obj, season=season) 
+        return count_score_total(obj, season, throws, key='team')
+
+    class Meta:
+        model = TeamsInSeason
+        fields = ('id', 'current_name', 'current_abbreviation', 'matches_won', 'matches_lost', 
+                  'matches_tie', 'matches_played','score_total', 'points_total', 'match_average', 
+                  'super_weekend_bracket', 'super_weekend_bracket_placement', 'super_weekend_playoff_seed')
+        
+class AdminMatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Match
+        fields = '__all__'

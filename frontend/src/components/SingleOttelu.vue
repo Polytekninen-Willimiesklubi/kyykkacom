@@ -47,7 +47,7 @@ export default {
         Round,
         Match
     },
-    data: function() {
+    data() {
         return {
           data: {},
           data_ready: false,
@@ -55,7 +55,7 @@ export default {
         };
     },
     methods: {
-      getData: function() {
+      getData() {
         this.$http
         .get(
             'api/matches/' +
@@ -64,14 +64,14 @@ export default {
                 )
         )
         .then(function(data) {
-          this.data = data
+          this.data = data.body
           this.data_ready = true
           if(!data.body.is_validated && localStorage.role_id == 1 && localStorage.team_id == this.data.body.away_team.id) {
             this.away_captain = true
           }
         })
       },
-      validateClick: function() {
+      validateClick() {
         let post_url = 'api/matches/'+this.data.body.id
         let post_data = {"is_validated": true}
 
@@ -103,7 +103,7 @@ export default {
         }
       }
     },
-    created: function() {
+    created() {
       this.getData()
     },
 };

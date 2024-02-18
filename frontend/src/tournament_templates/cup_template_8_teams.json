@@ -1,0 +1,149 @@
+{
+    "first_round": 0,
+    "one_bracket" : [
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "S1",
+            "type": 5,
+            "id": 1,
+            "next": 5,
+            "player1": { "id": "1", "name": "1. Seed"},
+            "player2": { "id": "8", "name": "8. Seed"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "S4",
+            "type": 5,
+            "id": 2,
+            "next": 5,
+            "player1": { "id": "4", "name": "4. Seed"},
+            "player2": { "id": "5", "name": "5. Seed"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "S2",
+            "type": 5,
+            "id": 3,
+            "next": 6,
+            "player1": { "id": "2", "name": "2. Seed"},
+            "player2": { "id": "7", "name": "7. Seed"}
+        }, 
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "S3",
+            "type": 5,
+            "id": 4,
+            "next": 6,
+            "player1": { "id": "3", "name": "3. Seed"},
+            "player2": { "id": "6", "name": "6. Seed"}
+        }, 
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "F1",
+            "loser_name":"P1",
+            "type": 4,
+            "id": 5,
+            "next": 7,
+            "player1": { "id": "-1", "name": "S1 (1. - 8.)"},
+            "player2": { "id": "-2", "name": "S4 (4. - 5.)"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "F2",
+            "loser_name": "P2",
+            "type": 4,
+            "id": 6,
+            "next": 7,
+            "player1": { "id": "-3", "name": "S2 (2. - 7.)"},
+            "player2": { "id": "-4", "name": "S3 (3. - 6.)"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "type": 3,
+            "id": 7,
+            "next": 8,
+            "player1": { "id": "-5", "name": "P1 (L S1 - S4)"},
+            "player2": { "id": "-6", "name": "P2 (L S2 - S3)"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "type": 2,
+            "id": 8,
+            "player1": { "id": "-7", "name": "F1 (W S1 - S4)"},
+            "player2": { "id": "-8", "name": "F2 (W S2 - S3)"}
+        }
+    ],
+    "two_bracket" : [
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "S1",
+            "type": 5,
+            "id": 1,
+            "next": 5,
+            "player1": { "id": "1", "name": "A1"},
+            "player2": { "id": "8", "name": "B4"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "S4",
+            "type": 5,
+            "id": 2,
+            "next": 5,
+            "player1": { "id": "6", "name": "B2"},
+            "player2": { "id": "3", "name": "A3"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "S3",
+            "type": 5,
+            "id": 4,
+            "next": 6,
+            "player1": { "id": "2", "name": "A2"},
+            "player2": { "id": "7", "name": "B3"}
+        }, 
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "S2",
+            "type": 5,
+            "id": 3,
+            "next": 6,
+            "player1": { "id": "5", "name": "B1"},
+            "player2": { "id": "4", "name": "A4"}
+        }, 
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "F1",
+            "loser_name":"P1",
+            "type": 4,
+            "id": 5,
+            "next": 7,
+            "player1": { "id": "-1", "name": "S1 (A1 - B4)"},
+            "player2": { "id": "-2", "name": "S4 (B2 - A3)"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "name": "F2",
+            "loser_name": "P2",
+            "type": 4,
+            "id": 6,
+            "next": 7,
+            "player1": { "id": "-3", "name": "S2 (A2 - B3)"},
+            "player2": { "id": "-4", "name": "S3 (B1 - A4)"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "type": 3,
+            "id": 7,
+            "next": 8,
+            "player1": { "id": "-5", "name": "P1 (L S1 - S4)"},
+            "player2": { "id": "-6", "name": "P2 (L S2 - S3)"}
+        },
+        {
+            "other_info":"Kahteen voittoon",
+            "type": 2,
+            "id": 8,
+            "player1": { "id": "-7", "name": "F1 (W S1 - S4)"},
+            "player2": { "id": "-8", "name": "F2 (W S2 - S3)"}
+        }
+    ]
+}

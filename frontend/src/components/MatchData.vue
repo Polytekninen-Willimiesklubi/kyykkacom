@@ -9,31 +9,31 @@
             <v-col justify="center" align="center" class="ml-5">
               <figure>
                 <img src="../../public/kyykkalogo120px.png">
-                <figcaption v-if="this.home_team.score_total">
+                <figcaption v-if="this.home.score_total">
                   <br>
                   <v-chip
-                    :color="`${this.home_team.color} lighten-2`"
-                  >{{this.home_team.score_total}}</v-chip>
+                    :color="`${this.home.color} lighten-2`"
+                  >{{this.home.score_total}}</v-chip>
                 </figcaption>
               </figure>
             </v-col>
             <v-col justify="center" align="center">
-              <a :href="'/joukkue/'+this.home_team.id">{{this.home_team.name}}</a>
+              <a :href="'/joukkue/'+this.home.id">{{this.home.name}}</a>
             </v-col>
             <v-col justify="center" align="center">
               vs.
             </v-col>
             <v-col justify="center" align="center">
-              <a :href="'/joukkue/'+this.away_team.id">{{this.away_team.name}}</a>
+              <a :href="'/joukkue/'+this.away.id">{{this.away.name}}</a>
             </v-col>            
             <v-col justify="center" align="center" class="mr-5">
               <figure style="float:right;">
                 <img src="../../public/kyykkalogo120px.png">
-                <figcaption v-if="this.home_team.score_total">
+                <figcaption v-if="this.home.score_total">
                   <br>
                   <v-chip
-                    :color="`${this.away_team.color} lighten-2`"
-                  >{{this.away_team.score_total}}</v-chip>
+                    :color="`${this.away.color} lighten-2`"
+                  >{{this.away.score_total}}</v-chip>
                 </figcaption>
               </figure>
             </v-col>
@@ -47,16 +47,16 @@ export default {
     props: {
       matchData: Object,
     },
-    data: function() {
+    data() {
         return {
             match_time: '',
             match_field: '',
-            home_team: {
+            home: {
                 name: '',
                 score_total: '',
                 color: ''
             },
-            away_team: {
+            away: {
                 name: '',
                 score_total: '',
                 color: ''
@@ -64,29 +64,34 @@ export default {
         };
     },
     methods: {
-        getMatch: function() {
-          this.match_time = this.matchData.body.match_time;
-          this.match_field = this.matchData.body.field;
-          this.away_team.name = this.matchData.body.away_team.current_name;
-          this.home_team.name = this.matchData.body.home_team.current_name;
-          this.home_team.id = this.matchData.body.home_team.id;
-          this.away_team.id = this.matchData.body.away_team.id;
+        getMatch() {
+          this.match_time = this.matchData.match_time;
+          this.match_field = this.matchData.field;
+          this.away.name = this.matchData.away_team.current_name;
+          this.home.name = this.matchData.home_team.current_name;
+          this.home.id = this.matchData.home_team.id;
+          this.away.id = this.matchData.away_team.id;
 
-          this.home_team.score_total = this.matchData.body.home_score_total;
-          this.away_team.score_total = this.matchData.body.away_score_total;
+          this.home.score_total = this.matchData.home_score_total;
+          this.away.score_total = this.matchData.away_score_total;
 
           if (
-              this.home_team.score_total > this.away_team.score_total
+              this.home.score_total > this.away.score_total
           ) {
-              this.home_team.color = 'red';
-              this.away_team.color = 'green';
+              this.home.color = 'red';
+              this.away.color = 'green';
+          } else if (
+            this.home.score_total < this.away.score_total
+          ) {
+              this.home.color = 'green';
+              this.away.color = 'red';
           } else {
-              this.home_team.color = 'green';
-              this.away_team.color = 'red';
+              this.home.color = 'yellow'
+              this.away.color = 'yellow'
           }
         }
     },
-    mounted: function() {
+    mounted() {
         this.getMatch();
     }
 };
