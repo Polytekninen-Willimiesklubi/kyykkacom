@@ -110,7 +110,7 @@ export default {
             }
         )
         Promise.allSettled([promise1, promise2]).then( () => {
-            if (this_season !== undefined && this_season.playoff_format != 0) {
+            if (this_season !== undefined && this.season.playoff_format && this_season.playoff_format != 0) {
                 let json = this.seasons_mapping[this_season.playoff_format]
                 this.rounds = no_brackets == 1 ? json['one_bracket'] : json['two_bracket']
                 this.first = json['first_round']
