@@ -34,7 +34,8 @@ PLAYOFF_FORMAT = {
     3: "Kiinteä 4 joukkueen Cup",
     4: "Kiinteä 22 joukkueen Cup",
     5: "1.Kierroksen Seedaus 6 joukkueen Cup",
-    6: "1.Kierroksen Seedaus 12 joukkueen Cup"
+    6: "1.Kierroksen Seedaus 12 joukkueen Cup",
+    7: "SuperWeekend OKA seedaus 15 joukkueen Cup"
 }
 
 PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]

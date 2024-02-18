@@ -41,7 +41,7 @@ import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json'
 import cup_8 from '../tournament_templates/cup_template_8_teams.json'
 import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json'
 import cup_4 from '../tournament_templates/cup_template_4_teams.json'
-import super_cup_14 from '../tournament_templates/super_cup_template_14_teams.json'
+import super_cup_15 from '../tournament_templates/super_cup_template_15_teams.json'
 
 export default {
     name: 'SuperWeekendView',
@@ -73,7 +73,7 @@ export default {
                 4 : cup_22,
                 5 : cup_6,
                 6 : cup_12,
-                7 : super_cup_14
+                7 : super_cup_15
             },
             showFormat: false,
             teams: [],

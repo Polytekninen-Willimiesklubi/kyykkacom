@@ -850,22 +850,28 @@ class TeamListSerializer(serializers.ModelSerializer):
     points_average = serializers.SerializerMethodField()
 
     def count_match_results(self, obj):
+        results_home =  obj.home_matches.filter(
+            is_validated=True, 
+            season=self.context.get('season'),
+            match_type__lt=30                                        
+        )
+        results_away = obj.away_matches.filter(
+            is_validated=True, 
+            season=self.context.get('season'),
+            match_type__lt=30
+        )
         if self.context.get('post_season') is not None:
-            results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season'),
-                                                    post_season=self.context.get('post_season')).annotate(
+            results_home =  results_home.filter(post_season=self.context.get('post_season'))
+            results_away = results_away.filter(post_season=self.context.get('post_season'))
+
+        results_home = results_home.annotate(
                 home=F('home_first_round_score') + F('home_second_round_score'),
-                away=F('away_first_round_score') + F('away_second_round_score'))
-            results_away = obj.away_matches.filter(is_validated=True, season=self.context.get('season'),
-                                                   post_season=self.context.get('post_season')).annotate(
+                away=F('away_first_round_score') + F('away_second_round_score')
+        )
+        results_away = results_away.annotate(
                 home=F('home_first_round_score') + F('home_second_round_score'),
-                away=F('away_first_round_score') + F('away_second_round_score'))
-        else:
-            results_home =  obj.home_matches.filter(is_validated=True, season=self.context.get('season')).annotate(
-                home=F('home_first_round_score') + F('home_second_round_score'),
-                away=F('away_first_round_score') + F('away_second_round_score'))
-            results_away = obj.away_matches.filter(is_validated=True, season=self.context.get('season')).annotate(
-                home=F('home_first_round_score') + F('home_second_round_score'),
-                away=F('away_first_round_score') + F('away_second_round_score'))
+                away=F('away_first_round_score') + F('away_second_round_score')
+        )
 
         self.matches_won = results_home.filter(home__lt=F('away')).count() + results_away.filter(away__lt=F('home')).count()
         self.matches_lost = results_home.filter(away__lt=F('home')).count() + results_away.filter(home__lt=F('away')).count()
