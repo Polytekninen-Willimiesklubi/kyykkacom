@@ -46,7 +46,7 @@
 
 <script>
 export default {
-    data: function() {
+    data() {
         return {
             search: '',
             sortBy: 'rounds_total',
@@ -111,14 +111,14 @@ export default {
         };
     },
     methods: {
-        getPlayers: function() {
+        getPlayers() {
             this.$http.get('api/players/'+'?season='+sessionStorage.season_id).then(
                 function(data) {
                     this.players = data.body;
                 }
             );
         },
-        handleRedirect: function(value) {
+        handleRedirect(value) {
             location.href = '/pelaaja/'+value.id;
         },
         custSort(items, index, isDescending) {
@@ -143,7 +143,7 @@ export default {
           return items
         }
     },
-    mounted: function() {
+    mounted() {
         this.getPlayers();
     }
 };

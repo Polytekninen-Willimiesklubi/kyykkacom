@@ -47,7 +47,7 @@ export default {
     props: {
       matchData: Object,
     },
-    data: function() {
+    data() {
         return {
             match_time: '',
             match_field: '',
@@ -64,7 +64,7 @@ export default {
         };
     },
     methods: {
-        getMatch: function() {
+        getMatch() {
           this.match_time = this.matchData.match_time;
           this.match_field = this.matchData.field;
           this.away.name = this.matchData.away_team.current_name;
@@ -91,7 +91,7 @@ export default {
           }
         }
     },
-    mounted: function() {
+    mounted() {
         this.getMatch();
     }
 };

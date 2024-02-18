@@ -37,7 +37,10 @@ urlpatterns = [
     path('matches/<int:pk>', views.MatchDetail.as_view(), name='matches-detail'),
     path('throws/update/<int:pk>/', views.ThrowAPI.as_view()),
     path('seasons',  views.SeasonsAPI.as_view()),
-    path('kyykka_admin/team/update/<int:pk>', views.KyykkaAdminViewSet.as_view(), name='teams-in-season')
+    path('superweekend/', views.SuperWeekendAPI.as_view(), name='superweekend'),
+    path('kyykka_admin/team/update/<int:pk>', views.KyykkaAdminViewSet.as_view(), name='teams-in-season'),
+    path('kyykka_admin/match', views.KyykkaAdminMatchViewSet.as_view(), name='match-admin'),
+    path('kyykka_admin/superweekend/<int:pk>', views.KyykkaAdminSuperViewSet.as_view(), name='admin-super'),
 ]
 
 router = SimpleRouter()

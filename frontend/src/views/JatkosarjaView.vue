@@ -13,6 +13,8 @@
                 :headers="headers"
                 sort-by="bracket_placement"
                 :sort-desc=false
+                :no_brackets="no_brackets"
+                :non-default-teams="teams"
             />
         </div>
         <v-flex width="100px">
@@ -22,6 +24,8 @@
                 :first_round="first_round"
                 :first="first"
                 :only_format="showFormat"
+                :bracket_placements="bracket_placements"
+                :load_ended="load_ended"
             />
         </v-flex>
     </v-layout>
@@ -57,6 +61,7 @@ export default {
             ],
             games: [],
             rounds: [],
+            no_brackets: 1,
             first_round: false,
             first: 0,
             seasons_mapping: {
@@ -67,25 +72,56 @@ export default {
                 5 : cup_6,
                 6 : cup_12,
             },
-            showFormat: false
+            showFormat: false,
+            teams: [],
+            load_ended: false,
+            bracket_placements: []
         }
     },
     created() {
-        this.$http.get('api/matches/'+ '?season=' + sessionStorage.season_id).then(
-            function(data) {
-            this.games = data.body
-        })
-        let this_season = JSON.parse(sessionStorage.all_seasons)
-        this_season = this_season.filter(
-            ele => ele.id == sessionStorage.season_id
-        )[0]
-        let no_brackets = this_season.no_brackets
-        if (this_season.playoff_format != 0) {
-            let json = this.seasons_mapping[this_season.playoff_format]
-            this.rounds = no_brackets == 1 ? json['one_bracket'] : json['two_bracket']
-            this.first = json['first_round']
+        let no_brackets = 1
+        let this_season = undefined
+        let games = []
+        let tmp = []
+        let teams = []
+        if (sessionStorage.all_seasons) {
+            this_season = JSON.parse(sessionStorage.all_seasons)
+            this_season = this_season.filter(
+                ele => ele.id == sessionStorage.season_id
+            )[0]
+            no_brackets = this_season.no_brackets
         }
-        this.first_round = !!this.first
+        let promise1 = this.$http.get('api/matches/?season=' + sessionStorage.season_id).then(
+            data => games = data.body
+        )
+
+        let promise2 = this.$http.get('api/teams/?season=' + sessionStorage.season_id + '&post_season=0').then(
+            function(data) {
+                for (var i = 0 ; i < no_brackets; i++) {
+                    tmp.push([])
+                }
+                for (let i=0; i < data.body.length; i++) {
+                    let team = data.body[i]
+                    tmp[team.bracket-1].push([team.current_abbreviation, team.bracket_placement])
+                }
+                tmp.forEach(ele => ele.sort((a, b) => a[1] - b[1]))
+                sessionStorage.teams = JSON.stringify(data.body)
+                teams = data.body
+            }
+        )
+        Promise.allSettled([promise1, promise2]).then( () => {
+            if (this_season !== undefined && this_season.playoff_format != 0) {
+                let json = this.seasons_mapping[this_season.playoff_format]
+                this.rounds = no_brackets == 1 ? json['one_bracket'] : json['two_bracket']
+                this.first = json['first_round']
+            }
+            this.first_round = !!this.first
+            this.bracket_placements = tmp
+            this.no_brackets = no_brackets
+            this.teams = teams
+            this.games = games
+            this.load_ended = true
+        })
     }
 
 };

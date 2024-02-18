@@ -15,7 +15,7 @@
 
 <script>
 export default {
-    data: function() {
+    data() {
         return {
             search: '',
             headers: [
@@ -31,7 +31,7 @@ export default {
         };
     },
     methods: {
-        getTeams: function() {
+        getTeams() {
             this.$http.get('api/teams/'+'?season='+sessionStorage.season_id).then(
                 function(data) {
                     this.teams = data.body;
@@ -39,13 +39,13 @@ export default {
                 }
             );
         },
-        handleRedirect: function(value) {
+        handleRedirect(value) {
           location.href = '/joukkue/'+value.id;
         }
     },
-    mounted: function() {
+    mounted() {
       console.log(sessionStorage.loaded_season)
-      if (!sessionStorage.loaded_season && sessionStorage.loaded_season != sessionStorage.season_id) {
+      if (!sessionStorage.loaded_season || sessionStorage.loaded_season != sessionStorage.season_id) {
         this.getTeams();
         sessionStorage.loaded_season = sessionStorage.season_id
       } else {

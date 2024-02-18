@@ -6,6 +6,26 @@ from django.core.cache import cache
 
 from utils.caching import reset_player_cache
 
+MATCH_TYPES = {    
+    1: "Runkosarja",
+    2: "Finaali",
+    3: "Pronssi",
+    4: "Välierä",
+    5: "Puolivälierä",
+    6: "Neljännesvälierä",
+    7: "Kahdeksannesvälierä",
+    10: "Runkosarjafinaali",
+    20: "Jumbofinaali",
+    31: "SuperWeekend: Alkulohko",
+    32: "SuperWeekend: Finaali",
+    33: "SuperWeekend: Pronssi",
+    34: "SuperWeekend: Välierä",
+    35: "SuperWeekend: Puolivälierä",
+    36: "SuperWeekend: Neljännesvälierä",
+    37: "SuperWeekend: Kahdeksannesvälierä",
+}
+
+MATCH_TYPES_TUPLES = [(key, val) for key, val in MATCH_TYPES.items()]
 
 PLAYOFF_FORMAT = {
     0: 'Ei vielä päätetty / Undefined',
@@ -14,7 +34,8 @@ PLAYOFF_FORMAT = {
     3: "Kiinteä 4 joukkueen Cup",
     4: "Kiinteä 22 joukkueen Cup",
     5: "1.Kierroksen Seedaus 6 joukkueen Cup",
-    6: "1.Kierroksen Seedaus 12 joukkueen Cup"
+    6: "1.Kierroksen Seedaus 12 joukkueen Cup",
+    7: "SuperWeekend OKA seedaus 15 joukkueen Cup"
 }
 
 PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
@@ -22,7 +43,6 @@ PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player')
     number = models.CharField(max_length=2, default=99)
-
 
 class Team(models.Model):
     name = models.CharField(max_length=128, unique=True)
@@ -55,13 +75,26 @@ class TeamsInSeason(models.Model):
     current_abbreviation = models.CharField(max_length=15)
     players = models.ManyToManyField(User, through='PlayersInTeam')
     bracket = models.IntegerField(null=True)
-    bracket_placement = models.IntegerField(blank=True, null=True)  # Winner of the Bracket_satge is marked with 0 
+    bracket_placement = models.IntegerField(blank=True, null=True)  # Winner of the Bracket stage is marked with 0 
+    super_weekend_bracket = models.IntegerField(null=True)
+    super_weekend_bracket_placement = models.IntegerField(blank=True, null=True)
+    super_weekend_playoff_seed = models.IntegerField(blank=True, null=True)
 
     class Meta:
         unique_together = ('season', 'team')
 
     def __str__(self):
         return f'{self.current_abbreviation} {self.season.year}'
+    
+class SuperWeekend(models.Model):
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, null=False)
+    winner = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
+    super_weekend_no_brackets = models.IntegerField(default=0, blank=True, null=True)
+    super_weekend_playoff_format = models.IntegerField(default=0, blank=True, null=True, choices=PLAYOFF_FORMAT_TUPLES)
+
+    def __str__(self):
+        return f'SuperWeekend {self.season.year}'
+    
 
 class PlayersInTeam(models.Model):
     team_season = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
@@ -88,7 +121,7 @@ class Match(models.Model):
     away_team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name='away_matches')
     is_validated = models.BooleanField(default=False)
     post_season = models.BooleanField(default=False)
-    match_type = models.IntegerField(blank=True, null=True)
+    match_type = models.IntegerField(blank=True, null=True, choices=MATCH_TYPES_TUPLES)
     seriers = models.IntegerField(null=True, default=1)
 
     class Meta:

@@ -210,7 +210,7 @@ export default {
     components: {
       Graph
     },
-    data: function() {
+    data() {
         return {
             search: '',
             header: '',
@@ -303,13 +303,13 @@ export default {
         };
     },
     computed: {
-      filtteredItems: function() {
+      filtteredItems() {
         var arr = this.sort_games_switch == "Erittäin" ? this.matches_periods : this.matches_match
         return this.filtterItems(arr, this.filter_games_switch, this.search)
       }
     },
     methods: {
-        getPlayer: function() {
+        getPlayer() {
             this.$http
                 .get('api/players/' + this.player_id +'/?season='+sessionStorage.season_id)
                 .then(
@@ -431,10 +431,10 @@ export default {
                     this.canvas3_data.push(init3)
                   });
         },
-        handleRedirect: function(value) {
+        handleRedirect(value) {
           location.href = '/ottelu/'+value.match_id;
         },
-        chanceSeason: function(value, row) {
+        chanceSeason(value, row) {
           row.select(true)  // <--- For some reason this is important to make returnStyle method work onclick
           if (this.current_selection.includes(value.season)) { // Remove clicked season from datas
             var index = this.canvas1_data.map(e => e.label).indexOf("Kausi " + value.season)
@@ -485,26 +485,26 @@ export default {
             this.current_selection.push(value.season)
           }
         },
-        getColor: function(val1, val2) {
+        getColor(val1, val2) {
           if (val1 < val2) return '#C8E6C9' // green-lighten-4
           else if (val1 > val2) return '#EF9A9A' // red-lighten-4
           else return '#F0F4C3' // yellow-lighten-4
         },
-        returnStyle: function(value) {
+        returnStyle(value) {
           var index = this.colors.indexOf(value.season)
           if (index === -1) {
             return
           }
           return this.styles[index]
         },
-        returnHeaderColor: function(value) {
+        returnHeaderColor(value) {
           var index = this.column_colors.indexOf(value)
           if (index === -1) {
             return
           }
           return this.styles[index]
         },
-        chanceHeaderStat: function(val) {
+        chanceHeaderStat(val) {
           var header_class_list = val.target.classList
           var head = val.target.innerText
           var headers = ["Erät", "Poistetut kyykät","Heitot","KPH","kHP", "Hauet", "H%", 
@@ -611,7 +611,7 @@ export default {
         }
 
     },
-    mounted: function() {
+    mounted() {
         this.getPlayer();
     }
 
