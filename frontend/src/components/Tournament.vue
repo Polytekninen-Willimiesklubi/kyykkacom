@@ -67,7 +67,7 @@ export default {
     methods: {
         putTeamsPlayoffBracket() {
             console.log(this.rounds)
-            if (this.non_default_seeds.length) {
+            if (this.non_default_seeds !== undefined) {
                 this.non_default_seeds.forEach(ele => {
                     console.log(ele)
                     if (ele[1] !== undefined) {
