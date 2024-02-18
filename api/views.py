@@ -1,4 +1,3 @@
-import datetime
 import json
 
 from django.contrib.auth import authenticate, login, logout
@@ -272,21 +271,88 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             raise NotImplementedError
         return Response(all_teams)
 
+
     def retrieve(self, request, pk=None):
-        season = getSeason(request)
         try:
-            team = get_object_or_404(self.queryset, pk=pk)
+            # FIXME THIS should be done in some sort of serializer rather than here
+            response_data = {"all_time" : {
+                "score_total": 0,
+                "match_count": 0,
+                "pikes_total": 0,
+                "zeros_total": 0,
+                "throws_total": 0,
+                "gteSix_total": 0,
+                "zero_or_pike_first_throw_total": 0,
+                "players": [],
+                "matches" : []
+            }}
+            weighted_total = 0
+            team_season = get_object_or_404(self.queryset, pk=pk)
+            team = Team.objects.filter(id=team_season.team.id)
+            all_team_seasons = self.queryset.filter(team=team.first())
+            players = {}
+            player_weighted_total = {}
+            for one_season in all_team_seasons.all():
+                throws = Throw.objects.filter(match__is_validated=True, team=one_season)
+                season = one_season.season
+                context = {
+                    'season': season,
+                    'throws':  throws
+                }
+                one_serializer = TeamDetailSerializer(one_season, context=context)
+                response_data[season.year] = one_serializer.data
+                response_data['all_time']['score_total'] += one_serializer.data['score_total']
+                response_data['all_time']['match_count'] += one_serializer.data['match_count']
+                response_data['all_time']['pikes_total'] += one_serializer.data['pikes_total']
+                response_data['all_time']['zeros_total'] += one_serializer.data['zeros_total']
+                response_data['all_time']['throws_total'] += one_serializer.data['throws_total']
+                response_data['all_time']['gteSix_total'] += one_serializer.data['gteSix_total']
+                response_data['all_time']['zero_or_pike_first_throw_total'] += one_serializer.data['zero_or_pike_first_throw_total']
+                weighted_total += one_serializer.data['match_average'] * one_serializer.data['match_count']
+                response_data['all_time']['matches'].extend(one_serializer.data['matches'])
+
+                for player in one_serializer.data['players']:
+                    if player['player_name'] not in players:
+                        players[player['player_name']] = {
+                            "id": player['id'],
+                            "player_number" : player['player_number'],
+                            "score_total": 0,
+                            "rounds_total": 0,
+                            "pikes_total": 0,
+                            "zeros_total": 0,
+                            "throws_total": 0,
+                            "scaled_points": 0,
+                            "gteSix_total": 0,
+                        }
+                        player_weighted_total[player['player_name']] = 0
+                    players[player['player_name']]['score_total'] += player['score_total']
+                    players[player['player_name']]['rounds_total'] += player['rounds_total']
+                    players[player['player_name']]['pikes_total'] += player['pikes_total']
+                    players[player['player_name']]['zeros_total'] += player['zeros_total']
+                    players[player['player_name']]['throws_total'] += player['throws_total']
+                    players[player['player_name']]['scaled_points'] += player['scaled_points'] if player['scaled_points'] is not None else 0
+                    players[player['player_name']]['gteSix_total'] += player['gteSix_total']
+                    player_weighted_total[player['player_name']] += player['throws_total'] * player['avg_throw_turn']
+                    
+            for name, stats in players.items():
+                players[name]['score_per_throw'] = round(stats['score_total'] / stats['throws_total'],2) if stats['throws_total'] else 'NaN'
+                players[name]['avg_throw_turn'] = round(player_weighted_total[name]/ stats['throws_total'],2) if stats['throws_total'] else 'NaN'
+                players[name]['scaled_points_per_throw'] = round(stats['scaled_points']/ stats['throws_total'],2) if stats['throws_total'] else 'NaN'
+                players[name]['pike_percentage'] = round(stats['pikes_total']/ stats['throws_total']*100,2) if stats['throws_total'] else 'NaN'
+
+            for name, stats in players.items():
+                response_data['all_time']['players'].append({
+                    'player_name': name,
+                    **stats
+                })
+            response_data['all_time']['match_average'] = round(weighted_total / response_data['all_time']['match_count'],2) if response_data['all_time']['match_count'] else 'NaN'
+            response_data['all_time']['pike_percentage'] = round(response_data['all_time']['pikes_total']/ response_data['all_time']['throws_total']*100,2) if response_data['all_time']['throws_total'] else 'NaN'
+            response_data['all_time']['zero_percentage'] = round(response_data['all_time']['zeros_total']/ response_data['all_time']['throws_total']*100,2) if response_data['all_time']['throws_total'] else 'NaN'
         except ValueError:
             # pk probably not integer?
             raise Http404
         # Do these querys only once here, instead of doing them 2 times at serializer.
-        throws = Throw.objects.filter(match__is_validated=True, season=season, team=team)
-        context = {
-            'season': season,
-            'throws':  throws
-        }
-        serializer = TeamDetailSerializer(team, context=context)
-        return Response(serializer.data)
+        return Response(response_data)
 
 
 class MatchList(APIView):

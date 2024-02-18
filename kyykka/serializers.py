@@ -1002,7 +1002,8 @@ class TeamDetailSerializer(serializers.ModelSerializer):
         return match_average
 
     def get_matches(self, obj):
-        return None
+        matches = Match.objects.filter(Q(home_team=obj) | Q(away_team=obj), is_validated=True)
+        return Match2ListSerializer(matches, many=True, context= {'team': obj}).data
 
     def get_players(self, obj):
         return PlayerListSerializer(obj.players, many=True, context={'season': self.context.get('season')}).data
@@ -1065,7 +1066,85 @@ class MatchListSerializer(SharedMatchSerializer):
         model = Match
         fields = ('id', 'match_time', 'field', 'home_team', 'away_team', 'home_score_total', 'away_score_total',
                   'post_season',  'is_validated', 'match_type', 'seriers')
+        
+class Match2ListSerializer(serializers.ModelSerializer):
+    own_first = serializers.SerializerMethodField()
+    own_second = serializers.SerializerMethodField()
+    opp_first = serializers.SerializerMethodField()
+    opp_second = serializers.SerializerMethodField()
+    own_team_total = serializers.SerializerMethodField()
+    opposite_team_total = serializers.SerializerMethodField()
+    opposite_team = serializers.SerializerMethodField()
+    match_type = serializers.SerializerMethodField()
 
+    def get_opposite_team(self, obj):
+        self.own_team = (obj.home_team == self.context.get('team')) # Home Team = 1, Away Team = 0
+        key = 'team_' + str(obj.away_team.id) if self.own_team else 'team_' + str(obj.home_team.id)
+        team = getFromCache(key)
+        if team is None:
+            team = TeamSerializer(obj.away_team).data if self.own_team else TeamSerializer(obj.home_team).data
+            setToCache(key, team, 3600)
+        return team['current_abbreviation']
+    
+    def get_own_team_total(self, obj):
+        key = 'match_' + str(obj.id) + '_own_score_total'
+        own_score_total = getFromCache(key)
+        if own_score_total is None:
+            try:
+                if self.own_team:
+                    own_score_total = obj.home_first_round_score + obj.home_second_round_score
+                else:
+                    own_score_total = obj.away_first_round_score + obj.away_second_round_score
+            except TypeError:
+                own_score_total = None
+            setToCache(key, own_score_total)
+        return own_score_total
+
+    def get_opposite_team_total(self, obj):
+        key = 'match_' + str(obj.id) + '_opposite_score_total'
+        opp_score_total = getFromCache(key)
+        if opp_score_total is None:
+            try:
+                if self.own_team:
+                    opp_score_total = obj.away_first_round_score + obj.away_second_round_score
+                else:
+                    opp_score_total = obj.home_first_round_score + obj.home_second_round_score
+            except TypeError:
+                opp_score_total = None
+            setToCache(key, opp_score_total)
+        return opp_score_total
+    
+    def get_match_type(self, obj):
+        game = {
+            1 : "Runkosarja",
+            2 : "Finaali",
+            3 : "Pronssi",
+            4 : "Välierä",
+            5 : "Puolivälierä",
+            6 : "Neljännesvälierä",
+            7 : "Kahdeksannesvälierä",
+            10 : "Runkosarjafinaali",
+            20 : "Jumbofinaali"
+        }
+        try:
+            return game[obj.match_type] if obj.match_type is not None else ''
+        except:
+            print(obj.match_type)
+    
+    def get_own_first(self, obj):
+        return obj.home_first_round_score if self.own_team else obj.away_first_round_score
+    def get_own_second(self, obj):
+        return obj.home_second_round_score if self.own_team else obj.away_second_round_score
+    def get_opp_first(self, obj):
+        return obj.home_first_round_score if not self.own_team else obj.away_first_round_score
+    def get_opp_second(self, obj):
+        return obj.home_second_round_score if not self.own_team else obj.away_second_round_score
+    
+    class Meta:
+        model = Match
+        fields = ('id', 'match_time', 'opposite_team', 'away_team', 'opposite_team_total', 'own_team_total',
+                  'post_season',  'is_validated', 'match_type', 'seriers', 'own_first', 'own_second', 
+                  'opp_first', 'opp_second')
 
 class MatchDetailSerializer(SharedMatchSerializer):
     home_score_total = serializers.SerializerMethodField()
