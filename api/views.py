@@ -9,13 +9,7 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_p
 from django.utils.decorators import method_decorator
 from kyykka.models import (CurrentSeason, Match, Player, PlayersInTeam, Season, Team, 
                            TeamsInSeason, Throw, User)
-from kyykka.serializers import (CreateUserSerializer, LoginUserSerializer,
-                                MatchDetailSerializer, MatchListSerializer,
-                                MatchScoreSerializer, PlayerAllDetailSerializer, PlayerDetailSerializer,
-                                PlayerListSerializer, ReserveCreateSerializer,
-                                ReserveListSerializer, SeasonSerializer, TeamDetailSerializer,
-                                TeamListSerializer, ThrowSerializer,
-                                UserSerializer)
+from kyykka.serializers import *
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -43,7 +37,7 @@ def getSeason(request):
 def getPostseason(request):
     try:
         post_season = bool(int(request.query_params.get('post_season')))
-    except (ValueError):
+    except (ValueError, TypeError):
         post_season = None
     return post_season
 
@@ -112,6 +106,10 @@ class MatchDetailPermission(permissions.BasePermission):
             return request.user == obj.home_team.playersinteam_set.filter(team_season__season=CurrentSeason.objects.first().season,
                                                                           is_captain=True).first().player
 
+class IsSuperUserOrAdmin(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_superuser or request.user.is_staff
 
 # @method_decorator(ensure_csrf_cookie, name='dispatch')
 # @method_decorator(csrf_protect, name='dispatch')
@@ -349,10 +347,16 @@ class MatchList(APIView):
 
     def get(self, request):
         season = getSeason(request)
+        post_season = getPostseason(request)
         key = 'all_matches_' + str(season.year)
+        if post_season is not None:
+            key += '_post_season' if post_season else '_regular_season'
         all_matches = getFromCache(key)
         if all_matches is None:
-            self.queryset = self.queryset.filter(season=season)
+            if post_season is None:
+                self.queryset = self.queryset.filter(season=season)
+            else:
+                self.queryset = self.queryset.filter(season=season, post_season=post_season)
             serializer = MatchListSerializer(self.queryset, many=True, context={'season': season})
             all_matches = serializer.data
             setToCache(key, all_matches)
@@ -417,3 +421,12 @@ class SeasonsAPI(generics.GenericAPIView):
             setToCache(key, current_season)
 
         return Response((all_seasons, current_season))
+
+class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
+    serializer_class = TeamsInSeasonSerializer
+    queryset = TeamsInSeason.objects.all()
+    permission_classes = [IsSuperUserOrAdmin]
+
+    def patch(self, request, *args, **kwargs):
+        cache_reset_key('all_teams')
+        return self.partial_update(request, *args, **kwargs)

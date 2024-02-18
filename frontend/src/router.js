@@ -70,7 +70,7 @@ export default new Router({
             // this generates a separate chunk (about.[hash].js) for this route
             // which is lazy-loaded when the route is visited.
             component: function () {
-                return import(/* webpackChunkName: "pelaajat" */ './views/JoukkueView.vue');
+                return import(/* webpackChunkName: "joukkue" */ './views/JoukkueView.vue');
             }
         },
         {
@@ -80,8 +80,38 @@ export default new Router({
             // this generates a separate chunk (about.[hash].js) for this route
             // which is lazy-loaded when the route is visited.
             component: function () {
-                return import(/* webpackChunkName: "pelaajat" */ './views/PelaajaView.vue');
+                return import(/* webpackChunkName: "pelaaja" */ './views/PelaajaView.vue');
             }
-        }
+        },
+        {
+            path: '/kyykka_admin',
+            name: 'kyykka_admin',
+            // route level code-splitting
+            // this generates a separate chunk (about.[hash].js) for this route
+            // which is lazy-loaded when the route is visited.
+            component: function () {
+                return import(/* webpackChunkName: "kyykka_admin" */ './views/AdminView.vue');
+            }
+        },
+        {
+            path: '/superweekend',
+            name: 'superweekend',
+            // route level code-splitting
+            // this generates a separate chunk (about.[hash].js) for this route
+            // which is lazy-loaded when the route is visited.
+            component: function () {
+                return import(/* webpackChunkName: "superweekend" */ './views/SuperWeekendView.vue');
+            }
+        },
+        {
+            path: '/jatkosarja',
+            name: 'jatkosarja',
+            // route level code-splitting
+            // this generates a separate chunk (about.[hash].js) for this route
+            // which is lazy-loaded when the route is visited.
+            component: function () {
+                return import(/* webpackChunkName: "jatkosarja" */ './views/JatkosarjaView.vue');
+            }
+        },
     ]
 });

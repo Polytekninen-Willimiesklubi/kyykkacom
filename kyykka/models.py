@@ -7,6 +7,18 @@ from django.core.cache import cache
 from utils.caching import reset_player_cache
 
 
+PLAYOFF_FORMAT = {
+    0: 'Ei vielä päätetty / Undefined',
+    1: "Kiinteä 16 joukkueen Cup",
+    2: "Kiinteä 8 joukkueen Cup",
+    3: "Kiinteä 4 joukkueen Cup",
+    4: "Kiinteä 22 joukkueen Cup",
+    5: "1.Kierroksen Seedaus 6 joukkueen Cup",
+    6: "1.Kierroksen Seedaus 12 joukkueen Cup"
+}
+
+PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
+
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player')
     number = models.CharField(max_length=2, default=99)
@@ -22,6 +34,7 @@ class Team(models.Model):
 class Season(models.Model):
     year = models.CharField(max_length=4, unique=True)
     no_brackets = models.IntegerField(default=1, blank=False)
+    playoff_format = models.IntegerField(default=0, blank=False, choices=PLAYOFF_FORMAT_TUPLES)
 
     def __str__(self):
         return f'Kausi {self.year}'
@@ -42,7 +55,8 @@ class TeamsInSeason(models.Model):
     current_abbreviation = models.CharField(max_length=15)
     players = models.ManyToManyField(User, through='PlayersInTeam')
     bracket = models.IntegerField(null=True)
-    
+    bracket_placement = models.IntegerField(blank=True, null=True)  # Winner of the Bracket_satge is marked with 0 
+
     class Meta:
         unique_together = ('season', 'team')
 
