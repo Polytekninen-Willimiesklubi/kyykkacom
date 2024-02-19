@@ -836,7 +836,7 @@ class SeasonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Season
-        fields = ('id', 'name', 'value', 'no_brackets')
+        fields = ('id', 'name', 'value', 'no_brackets', 'playoff_format')
 
 
 class TeamListSerializer(serializers.ModelSerializer):
