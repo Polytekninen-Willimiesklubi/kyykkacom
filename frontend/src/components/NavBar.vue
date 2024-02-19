@@ -58,7 +58,7 @@
           >
 
             <div v-for="item in items">
-              <v-list-item :to=item.route v-if=item.if_clause>
+              <v-list-item :to=item.route v-if="item.if_clause == undefined || item.if_clause">
                 <v-list-item-icon>
                   <v-icon>{{ item.icon }}</v-icon>
                 </v-list-item-icon>
