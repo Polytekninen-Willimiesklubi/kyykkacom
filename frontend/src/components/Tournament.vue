@@ -182,30 +182,32 @@ export default {
                         console.log("Didn't find correct match. type: " + 7-i + " element: " + Object.keys(el))
                         return
                     }
-                    let winner = el[match.player1.name] > el[match.player2.name] ? match.player1 : match.player2
-                    let loser = el[match.player1.name] > el[match.player2.name] ? match.player2 : match.player1
-                    let new_winner = structuredClone(winner)
-                    let new_loser = structuredClone(loser)
-                    new_winner['winner'] = null
-                    new_loser['winner'] = null
-                    winner['winner'] = true
-                    loser['winner'] = false
-                    match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
-                    if (7-i >= 4) { // Ignore Bronze and Finals
-                        if (7-i == 4) { // SemiFinals -> Winner needs to be assigned to Finals
-                            let finals = this.rounds.find(ele => ele.type === 2)
-                            let correct_column = finals.player1.name.includes(match.name) ? 'player1' : 'player2'
-                            let template = finals[correct_column].template_name
-                            new_winner.template_name = template
-                            finals[correct_column] = new_winner
+                    if (el[match.player1.name] !== el[match.player2.name]) { // Not a tie
+                        let winner = el[match.player1.name] > el[match.player2.name] ? match.player1 : match.player2
+                        let loser = el[match.player1.name] > el[match.player2.name] ? match.player2 : match.player1
+                        let new_winner = structuredClone(winner)
+                        let new_loser = structuredClone(loser)
+                        new_winner['winner'] = null
+                        new_loser['winner'] = null
+                        winner['winner'] = true
+                        loser['winner'] = false
+                        match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
+                        if (7-i >= 4) { // Ignore Bronze and Finals
+                            if (7-i == 4) { // SemiFinals -> Winner needs to be assigned to Finals
+                                let finals = this.rounds.find(ele => ele.type === 2)
+                                let correct_column = finals.player1.name.includes(match.name) ? 'player1' : 'player2'
+                                let template = finals[correct_column].template_name
+                                new_winner.template_name = template
+                                finals[correct_column] = new_winner
+                            }
+                            let new_match = this.rounds.find(ele => ele.id === match.next)
+                            let n = (7-i != 4) ? 'name' : 'loser_name'
+                            let correct_column = new_match.player1.name.includes(match[n]) ? 'player1' : 'player2'
+                            let template = new_match[correct_column].template_name
+                            
+                            new_match[correct_column] = (7-i != 4) ? new_winner : new_loser // SemiFinals -> Loser needs to be assigned to Bronze match
+                            new_match[correct_column].template_name = template
                         }
-                        let new_match = this.rounds.find(ele => ele.id === match.next)
-                        let n = (7-i != 4) ? 'name' : 'loser_name'
-                        let correct_column = new_match.player1.name.includes(match[n]) ? 'player1' : 'player2'
-                        let template = new_match[correct_column].template_name
-                        
-                        new_match[correct_column] = (7-i != 4) ? new_winner : new_loser // SemiFinals -> Loser needs to be assigned to Bronze match
-                        new_match[correct_column].template_name = template
                     }
                 }
             }, this)
