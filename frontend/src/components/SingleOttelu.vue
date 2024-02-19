@@ -66,7 +66,7 @@ export default {
         .then(function(data) {
           this.data = data.body
           this.data_ready = true
-          if(!data.body.is_validated && localStorage.role_id == 1 && localStorage.team_id == this.data.body.away_team.id) {
+          if(!data.body.is_validated && localStorage.role_id == 1 && localStorage.team_id == data.body.away_team.id) {
             this.away_captain = true
           }
         })

@@ -53,7 +53,7 @@
         <tr>
           <td :ref="'id_'+props.index">{{selected[props.index].player.id}}</td>
           <td>
-            <v-select item-color="red" color="red" v-model="selected[props.index].player.player_name" @change="loadPlayer($event, props.index)" class="text-center pr-1" placeholder="Select player" :items="home_players" single-line></v-select>
+            <v-select item-color="red" color="red" v-model="selected[props.index].player.player_name" @change="loadPlayer($event, props.index)" class="text-center pr-1" placeholder="Select player" :items="players" single-line></v-select>
           </td>
           <td><v-text-field color="red" v-model="selected[props.index]['score_first']" :ref="'first_throw_'+props.index" class="centered-input" maxlength="2" @input="sumTotal(props.index)" v-on:keypress="isNumber($event)"/></td>
           <td><v-text-field color="red" v-model="selected[props.index]['score_second']" :ref="'second_throw_'+props.index" class="centered-input" maxlength="2" @input="sumTotal(props.index)" v-on:keypress="isNumber($event)"/></td>
