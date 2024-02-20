@@ -165,7 +165,7 @@
       <v-expansion-panel>
         <v-expansion-panel-header>Ottelut</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-data-table mobile-breakpoint="0" @click:row="handleRedirect" dense color='alert' 
+          <v-data-table mobile-breakpoint="0" @click:row="handleRedirectMatches" dense color='alert' 
           :search="search" 
           :headers="match_headers"
           :items="matches">
@@ -384,6 +384,9 @@ export default {
         },
         handleRedirect(value) {
           location.href = '/pelaaja/'+value.id;
+        },
+        handleRedirectMatches(value) {
+          location.href = '/ottelu/'+value.id;
         },
         jotain: function(value) {
           this.selected_season = value
