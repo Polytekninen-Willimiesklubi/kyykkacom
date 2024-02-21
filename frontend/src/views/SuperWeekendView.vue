@@ -26,6 +26,7 @@
                 :only_format="showFormat"
                 :bracket_placements="bracket_placements"
                 :non_default_seeds="seeded_teams"
+                :bronze="bronze"
                 :load_ended="load_ended"
             />
         </v-flex>
@@ -77,7 +78,8 @@ export default {
             },
             showFormat: false,
             teams: [],
-            seeded_teams: []
+            seeded_teams: [],
+            bronze: true,
         }
     },
     created() {
@@ -94,12 +96,14 @@ export default {
         let no_brackets = 1
         let teams = []
         let tmp_seeded = []
+        let tmp_bronze = false
         this.$http.get('api/superweekend/?season=' + sessionStorage.season_id).then(
             function(data) {
                 console.log(data)
                 no_brackets = data.body.super_weekend_no_brackets
                 if (data.body.super_weekend_playoff_format != 0) {
                     tmp_rounds = this.seasons_mapping[data.body.super_weekend_playoff_format].one_bracket
+                    tmp_bronze = this.seasons_mapping[data.body.super_weekend_playoff_format].bronze
                 } else {
                     tmp_rounds = []
                 }
@@ -124,6 +128,7 @@ export default {
                     this.games = games
                     this.teams = teams
                     this.seeded_teams = tmp_seeded
+                    this.bronze = tmp_bronze
                     this.load_ended = true
                 })
             }
@@ -133,6 +138,7 @@ export default {
             this.bracket_placements = tmp
             this.teams = []
             this.seeded_teams = []
+            this.bronze = true
             this.load_ended = true
         })
     }

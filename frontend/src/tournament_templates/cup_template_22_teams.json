@@ -1,5 +1,6 @@
 { 
     "first_round": 0,
+    "bronze": true,
     "one_bracket" : [],
     "two_bracket" : [
         {
@@ -129,7 +130,7 @@
             "player2": { "id": "-7", "name": "A6 / B11"}
         },
         {
-            "other_info":"Kolmeen voittoon",
+            "other_info":"Kahteen voittoon",
             "name": "S1",
             "type": 5,
             "id": 15,
@@ -138,7 +139,7 @@
             "player2": { "id": "-9", "name": "Q8 (B4 - A5)"}
         },
         {
-            "other_info":"Kolmeen voittoon",
+            "other_info":"Kahteen voittoon",
             "name": "S4",
             "type": 5,
             "id": 16,
@@ -147,7 +148,7 @@
             "player2": { "id": "-11", "name": "Q5 (A3 - C1)"}
         },
         {
-            "other_info":"Kolmeen voittoon",
+            "other_info":"Kahteen voittoon",
             "name": "S2",
             "type": 5,
             "id": 17,
@@ -156,7 +157,7 @@
             "player2": { "id": "-13", "name": "Q7 (A4 - B5)"}
         }, 
         {
-            "other_info":"Kolmeen voittoon",
+            "other_info":"Kahteen voittoon",
             "name": "S3",
             "type": 5,
             "id": 18,

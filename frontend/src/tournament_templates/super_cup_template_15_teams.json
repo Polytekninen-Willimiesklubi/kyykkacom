@@ -1,5 +1,6 @@
 { 
     "first_round": 0,
+    "bronze": false,
     "two_bracket" : [],
     "one_bracket" : [
         {

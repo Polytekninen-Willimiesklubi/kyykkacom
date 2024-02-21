@@ -49,7 +49,11 @@ export default {
         only_format: Boolean,
         bracket_placements: Array,
         load_ended: Boolean,
-        non_default_seeds: Array
+        non_default_seeds: Array,
+        bronze: {
+            type: Boolean,
+            default: true,
+        }
     },
     components: {
     Bracket
@@ -205,7 +209,7 @@ export default {
                             let correct_column = new_match.player1.name.includes(match[n]) ? 'player1' : 'player2'
                             let template = new_match[correct_column].template_name
                             
-                            new_match[correct_column] = (7-i != 4) ? new_winner : new_loser // SemiFinals -> Loser needs to be assigned to Bronze match
+                            new_match[correct_column] = (7-i == 4) && this.bronze ? new_loser : new_winner // SemiFinals -> Loser needs to be assigned to Bronze match
                             new_match[correct_column].template_name = template
                         }
                     }
