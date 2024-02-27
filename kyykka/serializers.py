@@ -1124,7 +1124,14 @@ class Match2ListSerializer(serializers.ModelSerializer):
             6 : "Neljännesvälierä",
             7 : "Kahdeksannesvälierä",
             10 : "Runkosarjafinaali",
-            20 : "Jumbofinaali"
+            20 : "Jumbofinaali",
+            31: "SuperWeekend: Alkulohko",
+            32: "SuperWeekend: Finaali",
+            33: "SuperWeekend: Pronssi",
+            34: "SuperWeekend: Välierä",
+            35: "SuperWeekend: Puolivälierä",
+            36: "SuperWeekend: Neljännesvälierä",
+            37: "SuperWeekend: Kahdeksannesvälierä",
         }
         try:
             return game[obj.match_type] if obj.match_type is not None else ''
@@ -1153,6 +1160,7 @@ class MatchDetailSerializer(SharedMatchSerializer):
     away_team = serializers.SerializerMethodField()
     first_round = serializers.SerializerMethodField()
     second_round = serializers.SerializerMethodField()
+    type_name = serializers.SerializerMethodField()
 
     def get_second_round(self, obj):
         return MatchRoundSerializer(obj.throw_set.filter(throw_round=2),
@@ -1167,14 +1175,37 @@ class MatchDetailSerializer(SharedMatchSerializer):
 
     def get_away_team(self, obj):
         return MatchTeamSerializer(obj.away_team, context={'season': self.context.get('season')}).data
-
+    
+    def get_type_name(self, obj):
+        game = {
+            1 : "Runkosarja",
+            2 : "Finaali",
+            3 : "Pronssi",
+            4 : "Välierä",
+            5 : "Puolivälierä",
+            6 : "Neljännesvälierä",
+            7 : "Kahdeksannesvälierä",
+            10 : "Runkosarjafinaali",
+            20 : "Jumbofinaali",
+            31: "SuperWeekend: Alkulohkopeli",
+            32: "SuperWeekend: Finaali",
+            33: "SuperWeekend: Pronssi",
+            34: "SuperWeekend: Välierä",
+            35: "SuperWeekend: Puolivälierä",
+            36: "SuperWeekend: Neljännesvälierä",
+            37: "SuperWeekend: Kahdeksannesvälierä",
+        }
+        try:
+            return game[obj.match_type] if obj.match_type is not None else ''
+        except:
+            print(obj.match_type)
     class Meta:
         model = Match
         fields = (
             'id', 'match_time', 'field', 'home_score_total', 'away_score_total', 
             'home_first_round_score','home_second_round_score','away_first_round_score',
             'away_second_round_score', 'first_round', 'second_round', 'home_team',
-            'away_team', 'is_validated', 'post_season', 'match_type', 'seriers')
+            'away_team', 'is_validated', 'post_season', 'match_type', 'type_name', 'seriers')
 
 
 class MatchTeamSerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 <template>
       <v-card>
         <h3 class="text-md-left headline">
-          Runkosarja kenttä <span v-if="this.match_field">{{this.match_field}}</span><span v-else>TBD</span>
+          {{this.type_name}} kenttä <span v-if="this.match_field">{{this.match_field}}</span><span v-else>TBD</span>
           <span style="float:right;">{{ this.match_time | luxon('y-MM-dd HH:mm') }}</span>
         </h3>
         <v-row>
@@ -71,6 +71,7 @@ export default {
           this.home.name = this.matchData.home_team.current_name;
           this.home.id = this.matchData.home_team.id;
           this.away.id = this.matchData.away_team.id;
+          this.type_name = this.matchData.type_name
 
           this.home.score_total = this.matchData.home_score_total;
           this.away.score_total = this.matchData.away_score_total;
