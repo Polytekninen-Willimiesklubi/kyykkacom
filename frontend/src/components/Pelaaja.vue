@@ -4,16 +4,23 @@
       <v-col>
         <v-card>
           <v-toolbar-title align="center">{{header}}</v-toolbar-title>
-          <v-data-table mobile-breakpoint="0" disable-pagination dense color='alert' 
+          <v-data-table 
             :headers="overall_player_stats" 
             :items="stats"
+            color='alert'
+            mobile-breakpoint="0" 
             hide-default-header
             hide-default-footer
+            disable-pagination
+            dense 
           >
             <template v-slot:header="{ props }">
-              <th v-for="h in props.headers" class="head-font"
-              :class="returnHeaderColor(h.text)"
-              @click="chanceHeaderStat">
+              <th 
+                v-for="h in props.headers" 
+                class="head-font"
+                :class="returnHeaderColor(h.text)"
+                @click="chanceHeaderStat"
+              >
                 {{ h.text }}
               </th>
             </template>
@@ -24,20 +31,26 @@
     <v-row>
       <v-col>
         <v-card>
-          <v-data-table mobile-breakpoint="0" disable-pagination dense color='alert'
+          <v-data-table 
+            mobile-breakpoint="0" 
+            disable-pagination 
+            color='alert'
             @click:row="chanceSeason"
             :headers="season_stats" 
-            height = "200px"
+            height="200px"
             :items="all_seasons"
-            :item-class="returnStyle" hide-default-footer>
-          </v-data-table>
+            :item-class="returnStyle" 
+            hide-default-footer
+            dense 
+           />
         </v-card>
       </v-col>
-      <v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="4">
         <v-card>
           <graph
             id_name="chart"
-            width_px="300px"
             height_px="200px"
             title="Heittotuloksen jakauma"
             :dataset=this.canvas1_data
@@ -47,11 +60,10 @@
           />
         </v-card>
       </v-col> 
-      <v-col>
+      <v-col cols="4">
         <v-card>
           <graph
             id_name="statGraph"
-            width_px="300px"
             height_px="200px"
             title="Statsin kehitys kausittain"
             :dataset=this.canvas2_data
@@ -61,11 +73,10 @@
           />
         </v-card>
       </v-col>
-      <v-col>
+      <v-col cols="4">
         <v-card>
           <graph
             id_name="kHP KPH"
-            width_px="300px"
             height_px="200px"
             title="Heittokeskiarvo heittopaikan mukaan"
             :dataset=this.canvas3_data
@@ -77,49 +88,57 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
-        <v-switch v-model="sort_games_switch"
-        hide-details
-        true-value="Peleittäin"
-        false-value="Erittäin"
-        :label="`${sort_games_switch}`"></v-switch>
+      <v-col cols="2">
+        <v-switch
+          class='pl-2'
+          v-model="sort_games_switch"
+          hide-details
+          true-value="Peleittäin"
+          false-value="Erittäin"
+          :label="`${sort_games_switch}`" 
+        />
       </v-col>
-      <v-col>
-        <v-switch v-model="filter_games_switch"
-        hide-details
-        true-value="Valitut kaudet"
-        false-value="Kaikki kaudet"
-        :label="`${filter_games_switch}`"></v-switch>
+      <v-col cols="2">
+        <v-switch 
+          v-model="filter_games_switch"
+          hide-details
+          true-value="Valitut kaudet"
+          false-value="Kaikki kaudet"
+          :label="`${filter_games_switch}`"
+        />
       </v-col>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
+      <v-spacer/>
     </v-row>
     <v-row>
-      <v-col>
-        <v-text-field color="red" v-model="search" label="Etsi" single-line hide-details variant="outlined"></v-text-field>
+      <v-col cols="2">
+        <v-text-field
+          class='pl-2'
+          color="red"
+          v-model="search" 
+          label="Etsi" 
+          single-line 
+          ide-details 
+          variant="outlined" 
+        />
       </v-col>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
-      <v-spacer></v-spacer>
     </v-row>
     <v-row>
       <v-col>
         <v-card>
-          <v-data-table mobile-breakpoint="0" @click:row="handleRedirect" dense color='alert' 
-          :search="search" 
-          :headers="headers"
-          :items="filtteredItems"
-          :custom-sort="throwSort"
-          v-if="sort_games_switch=='Erittäin'">
+          <v-data-table
+            v-if="sort_games_switch=='Erittäin'"
+            @click:row="handleRedirect" 
+            mobile-breakpoint="0" 
+            color='alert'
+            class="left-border-period"
+            :search="search" 
+            :headers="headers"
+            :items="filtteredItems"
+            :custom-sort="throwSort"
+            dense
+          >
             <template slot="no-data" v-if="!data_loaded">
-              <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
+              <v-progress-linear color="red" slot="progress" indeterminate />
             </template>
             <template v-for="h in headers" v-slot:[`header.${h.value}`]="{ header }">
               <v-tooltip bottom>
@@ -129,7 +148,7 @@
                 <span>{{h.tooltip}}</span>
               </v-tooltip>
             </template>
-            <template v-slot:[`item.match_time`]="{ item }">
+            <template v-slot:item.match_time="{ item }">
               <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
             </template>
             <template v-slot:item.own_score_round="{ item }">
@@ -137,64 +156,47 @@
                 {{ item.own_score_round }}
               </v-chip>              
             </template>
-            <template v-slot:item.opp_score_round="{item}">
+            <template v-slot:item.opp_score_round="{ item }">
               <v-chip :color="getColor(item.opp_score_round, item.own_score_round)">
                 {{ item.opp_score_round }}
               </v-chip>              
             </template>
-            <template v-slot:item.score_first="{item}">
-              <td class="border_left">
-                {{ item.score_first }}
-              </td>
-            </template>
-            <template v-slot:item.score_total="{item}">
-              <td class="border_left">
-                {{ item.score_total }}
-              </td>
-            </template>
           </v-data-table>
-          <v-data-table mobile-breakpoint="0" @click:row="handleRedirect" dense color='alert'
-          :headers="headers_games"
-          :items="filtteredItems"
-          :custom-sort="throwSort"
-          v-else>
+          <v-data-table v-else
+            :headers="headers_games"
+            :items="filtteredItems"
+            @click:row="handleRedirect" 
+            :custom-sort="throwSort"
+            mobile-breakpoint="0"
+            class='left-border-match'
+            color='alert'
+            dense 
+          >
             <template slot="no-data" v-if="!data_loaded">
               <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
             </template>
             <template v-for="h in headers_games" v-slot:[`header.${h.value}`]="{ header }">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
-                  <span v-on="on">{{h.text}}</span>
+                  <span v-on="on">{{ h.text }}</span>
                 </template>
-                <span>{{h.tooltip}}</span>
+                <span>{{ h.tooltip }}</span>
               </v-tooltip>
             </template>
-            <template v-slot:[`item.match_time`]="{ item }">
+            <template v-slot:item.match_time="{ item }">
               <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
             </template>
-            <template v-slot:[`item.own_score`]="{ item }">
+            <template v-slot:item.own_score="{ item }">
               <v-chip :color="getColor(item.own_score, item.opponent_score)">
                 {{ item.own_score }}
               </v-chip>              
             </template>
-            <template v-slot:item.opponent_score="{item}">
+            <template v-slot:item.opponent_score="{ item }">
               <v-chip :color="getColor(item.opponent_score, item.own_score)">
                 {{ item.opponent_score }}
               </v-chip>              
             </template>
-            <template v-slot:item.score_first="{item}">
-              <td class="border_left">
-                {{ item.score_first }}
-              </td>
-            </template>
-            <template v-slot:item.score_total="{item}">
-              <td class="border_left">
-                {{ item.score_total }}
-              </td>
-            </template>
           </v-data-table>
-
-
         </v-card>
       </v-col>
     </v-row>
@@ -203,7 +205,6 @@
   
 
 <script>
-import Chart, { _adapters } from "chart.js/auto"
 import Graph from "./Graph.vue";
 
 export default {
@@ -229,7 +230,7 @@ export default {
               { text: 'V pis.', value: 'opp_score_round', align: 'center', tooltip:'Vastustaja joukkueen pisteet' }
           ],
           headers_games : [
-              { text: 'Aika', value: 'match_time', align: 'center', tooltip:'Aika'},
+              { text: 'Aika', value: 'match_time', align: 'center', tooltip:'Pelausaika'},
               { text: 'Vastustaja', value: 'opponent_name', align: 'center', tooltip:'Vastustaja joukkue'},
               { text: 'HP1', value: 'throw_turn_one', align: 'center', tooltip:'1. erän heittopaikka'},
               { text: 'HP2', value: 'throw_turn_two', align: 'center', tooltip:'2. erän heittopaikka'},
@@ -259,11 +260,9 @@ export default {
             canvas1_labels: ['0', '1', '2', '3', '4', '5', '≥6'],
             canvas2_labels: [],
             canvas3_labels: ['1', '2', '3', '4'],
-
             canvas1_data: [],
             canvas2_data: [],
             canvas3_data: [],
-
             matches_periods: [],
             matches_match: [],
             all_seasons: [],
@@ -625,7 +624,22 @@ tbody tr :hover {
     cursor: unset;
 }
 
-.border_left {
+.left-border-period > .v-data-table__wrapper > table > tbody > tr > td:nth-child(5) {
+  border-left: 1px solid grey;
+  text-align: center;
+}
+
+.left-border-period > .v-data-table__wrapper > table > tbody > tr > td:nth-child(9) {
+  border-left: 1px solid grey;
+  text-align: center;
+}
+
+.left-border-match > .v-data-table__wrapper > table > tbody > tr > td:nth-child(5) {
+  border-left: 1px solid grey;
+  text-align: center;
+}
+
+.left-border-match > .v-data-table__wrapper > table > tbody > tr > td:nth-child(13) {
   border-left: 1px solid grey;
   text-align: center;
 }
