@@ -9,9 +9,9 @@
           <v-row>
             <v-col>
               <v-app-bar color="red darken-5" dark text>
-                  <v-spacer></v-spacer>
+                  <v-spacer />
                   <v-toolbar-title>{{header}}</v-toolbar-title>
-                  <v-spacer></v-spacer>
+                  <v-spacer />
               </v-app-bar>
             </v-col>
           </v-row>
@@ -22,14 +22,15 @@
                     <v-slide-item>
                         <v-btn text 
                           :value="all_time" 
-                          @click="jotain('all_time')">
+                          @click="chanceTeamStats('all_time')"
+                        >
                           All-Time
                         </v-btn>
                     </v-slide-item>
                     <v-slide-item v-for="year in Object.keys(this.seasons_data).sort((a,b) => b-a)" :key="year">
                       <v-btn text
                         :value="year"
-                        @click="jotain(year)">
+                        @click="chanceTeamStats(year)">
                         {{ year }}
                       </v-btn>
                     </v-slide-item>
@@ -39,81 +40,48 @@
           </v-row>
         </v-col>
       </v-row>
-            <v-row style="height:220px">
-              <v-col class="pt-0">
-              <v-data-iterator
-                :items="stats"
-                :headers="header"
-                hide-default-footer
-              >
-                <template v-slot:item="props">
-                      <v-list dense>
-                        <v-list-item>
-                          <v-list-item-content>Poistetut Kyykät:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.score_total }}</v-list-item-content>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item>
-                          <v-list-item-content>Ottelut:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.match_count }}</v-list-item-content>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item>
-                          <v-list-item-content>Hauet:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.pikes_total }}</v-list-item-content>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item>
-                          <v-list-item-content>Nolla heitot:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.zeros_total }}</v-list-item-content>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item>
-                          <v-list-item-content>Nolla aloitukset:</v-list-item-content>
-                          <v-list-item-content
-                            class="align-end"
-                          >{{ props.item.zero_or_pike_first_throw_total }}</v-list-item-content>
-                        </v-list-item>
-                      </v-list>
-                </template>
-              </v-data-iterator>
-              </v-col>
-              <v-divider vertical></v-divider>
-              <v-col class="pt-0">
-              <v-data-iterator :items="stats" hide-default-footer row wrap>
-                <template v-slot:item="props">
-                      <v-list dense>
-                        <v-list-item>
-                          <v-list-item-content>Heitot:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.throws_total }}</v-list-item-content>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item>
-                          <v-list-item-content>Ottelu keskiarvo:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.match_average }}</v-list-item-content>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item>
-                          <v-list-item-content>Haukiprosentti:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.pike_percentage }}</v-list-item-content>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item>
-                          <v-list-item-content>Nollaprosentti:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.zero_percentage }}</v-list-item-content>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item>
-                          <v-list-item-content>Joulukuuset:</v-list-item-content>
-                          <v-list-item-content class="align-end">{{ props.item.gteSix_total }}</v-list-item-content>
-                        </v-list-item>
-                      </v-list>
-                </template>
-              </v-data-iterator>
-              </v-col>
-            </v-row>
-        </v-card>
-        <v-divider></v-divider>
+      <v-row style="height:220px">
+        <v-col class="pt-0">
+          <v-data-iterator
+            :items="stats"
+            hide-default-footer
+          >
+            <template v-slot:item="props">
+                  <v-list dense>
+                    <div v-for="(stat, index) in left_stats">
+                      <v-list-item>
+                        <v-list-item-content>{{ stat.text }}:</v-list-item-content>
+                        <v-list-item-content class="align-end">{{ props.item[stat.value] }}</v-list-item-content>
+                      </v-list-item>
+                      <v-divider v-if="index -1 != left_stats.length" />
+                    </div>
+                  </v-list>
+            </template>
+          </v-data-iterator>
+        </v-col>
+        <v-divider vertical />
+        <v-col class="pt-0">
+          <v-data-iterator 
+            :items="stats" 
+            hide-default-footer 
+            row wrap
+          >
+            <template v-slot:item="props">
+              <v-list dense>
+                <div v-for="(stat, index) in right_stats">
+                  <v-list-item>
+                    <v-list-item-content>{{ stat.text }}:</v-list-item-content>
+                    <v-list-item-content class="align-end">{{ props.item[stat.value] }}</v-list-item-content>
+                  </v-list-item>
+                  <v-divider v-if="index -1 != right_stats.length" />
+                </div>
+              </v-list>
+            </template>
+          </v-data-iterator>
+        </v-col>
+      </v-row>
+    </v-card>
+    <v-divider />
     <v-expansion-panels v-model="panel" multiple>
       <v-expansion-panel>
         <v-expansion-panel-header>
@@ -130,7 +98,7 @@
               <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
             </template>
           </v-data-table>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-expansion-panels>
             <v-expansion-panel v-if="isCaptain">
               <v-expansion-panel-header>
@@ -165,19 +133,23 @@
       <v-expansion-panel>
         <v-expansion-panel-header>Ottelut</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-data-table mobile-breakpoint="0" @click:row="handleRedirectMatches" dense color='alert' 
-          :search="search" 
-          :headers="match_headers"
-          :items="matches">
+          <v-data-table mobile-breakpoint="0" 
+            @click:row="handleRedirectMatches"  
+            color='alert' 
+            :search="search" 
+            :headers="match_headers"
+            :items="matches"
+            dense
+          >
             <template slot="no-data">
               <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
             </template>
             <template v-for="h in match_headers" v-slot:[`header.${h.value}`]="{ header }">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
-                  <span v-on="on">{{h.text}}</span>
+                  <span v-on="on">{{ h.text }}</span>
                 </template>
-                <span>{{h.tooltip}}</span>
+                <span>{{ h.tooltip }}</span>
               </v-tooltip>
             </template>
             <template v-slot:[`item.match_time`]="{ item }">
@@ -292,6 +264,21 @@ export default {
             { text: 'OJ pis.', value: 'own_team_total', align: 'center', tooltip:'Oman joukkueen pisteet' },
             { text: 'V pis.', value: 'opposite_team_total', align: 'center', tooltip:'Vastustaja joukkueen pisteet' }
             ],
+            left_stats: [
+              {text: 'Poistetut Kyykät', value: 'score_total'},
+              {text: 'Ottelut', value: 'match_count'},
+              {text: 'Hauet', value: 'pikes_total'},
+              {text: 'Nolla heitot', value: 'zeros_total'},
+              {text: 'Nolla aloitukset', value: 'zero_or_pike_first_throw_total'},
+            ],
+            right_stats: [
+              {text: 'Heitot', value: 'throws_total'},
+              {text: 'Ottelu keskiarvo', value: 'match_average'},
+              {text: 'Haukiprosentti', value: 'pike_percentage'},
+              {text: 'Nollaprosentti', value: 'zero_percentage'},
+              {text: 'Joulukuuset', value: 'gteSix_total'},
+            ],
+
             panel: [0],
             stats: [],
             players: [],
@@ -388,7 +375,7 @@ export default {
         handleRedirectMatches(value) {
           location.href = '/ottelu/'+value.id;
         },
-        jotain: function(value) {
+        chanceTeamStats(value) {
           this.selected_season = value
           if (value == 'all_time') {
             this.stats = [this.all_time]
@@ -399,10 +386,9 @@ export default {
             this.header = this.seasons_data[value].current_name;
             this.stats = [this.seasons_data[value]];
             this.matches = this.seasons_data[value].matches
-            console.log(this.selected_season)
           }
         },
-        getColor: function(val1, val2) {
+        getColor(val1, val2) {
           if (val1 < val2) return '#C8E6C9' // green-lighten-4
           else if (val1 > val2) return '#EF9A9A' // red-lighten-4
           else return '#F0F4C3' // yellow-lighten-4
