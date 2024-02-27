@@ -2,12 +2,21 @@
   <v-card>
     <v-card-title>
       Joukkueet
-      <v-spacer></v-spacer>
+      <v-spacer />
       <v-text-field color="red" v-model="search" label="Search" single-line hide-details></v-text-field>
     </v-card-title>
-    <v-data-table mobile-breakpoint="0" disable-pagination @click:row="handleRedirect" dense color='alert' :headers="headers" :search="search" :items="teams" hide-default-footer>
+    <v-data-table mobile-breakpoint="0"
+      @click:row="handleRedirect"
+      color='alert'
+      :headers="headers"
+      :search="search"
+      :items="teams"
+      disable-pagination
+      hide-default-footer
+      dense
+    >
       <template slot="no-data">
-        <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
+        <v-progress-linear color="red" slot="progress" indeterminate />
       </template>
     </v-data-table>
   </v-card>
