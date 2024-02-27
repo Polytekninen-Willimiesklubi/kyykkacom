@@ -51,6 +51,7 @@ export default {
         return {
             match_time: '',
             match_field: '',
+            type_name: '',
             home: {
                 name: '',
                 score_total: '',
