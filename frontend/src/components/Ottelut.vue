@@ -3,25 +3,29 @@
     <v-card-title class="d-flex flex-wrap-reverse">
       <div>
         Ottelut
-        <v-select v-on:input="selectChange()" v-model="defaultSelected" style="width: 50%" color="red" :items="options">
-        </v-select>
+        <v-select v-on:input="selectChange()" v-model="defaultSelected" style="width: 50%" color="red" :items="options" />
       </div>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <div>
-        <v-text-field color="red" v-model="search" label="Search" single-line hide-details></v-text-field>             
+        <v-text-field color="red" v-model="search" label="Search" single-line hide-details />            
       </div>
     </v-card-title>
-    <v-data-table mobile-breakpoint="0" disable-pagination
-    @click:row="handleRedirect" dense 
-    :headers="headers"
-    :item-class="itemRowBackground"
-    :items="data"
-    :search="search" hide-default-footer
-    v-if="defaultSelected != 'Jatkosarja'">
+    <v-data-table 
+      v-if="defaultSelected != 'Jatkosarja'"
+      :headers="headers"
+      :items="data"
+      :search="search"
+      @click:row="handleRedirect" 
+      :item-class="itemRowBackground"
+      mobile-breakpoint="0"
+      hide-default-footer
+      disable-pagination
+      dense
+    >
     <template slot="no-data">
-      <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
+      <v-progress-linear color="red" slot="progress" indeterminate />
     </template>
-    <template slot="headers" class="text-xs-center"></template>
+    <template slot="headers" class="text-xs-center" />
     <!-- [``] needed to prevent eslint error -->
     <template v-slot:[`item.match_time`]="{ item }">
       <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
@@ -38,13 +42,17 @@
         color="error"
       >Your search for "{{ search }}" found no results.</v-alert>
     </v-data-table>
-    <v-data-table mobile-breakpoint="0" disable-pagination 
-    @click:row="handleRedirect" dense 
-    :headers="post_headers"
-    :group-by="seriers"
-    :items="data"
-    :search="search" hide-default-footer
-    v-else>
+    <v-data-table v-else
+      :headers="post_headers"
+      :items="data"
+      :search="search" 
+      @click:row="handleRedirect" 
+      :group-by="seriers"
+      mobile-breakpoint="0" 
+      disable-pagination 
+      hide-default-footer
+      dense
+    >
       <template v-slot:[`item.match_time`]="{ item }">
           <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
       </template>
