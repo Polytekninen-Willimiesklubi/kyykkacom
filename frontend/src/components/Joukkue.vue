@@ -18,7 +18,7 @@
           <v-row>
             <v-col>
               <v-btn-toggle v-model="selected_season" mandatory>
-                <v-slide-group multiple show-arrows>
+                <v-slide-group show-arrows>
                     <v-slide-item>
                         <v-btn text 
                           :value="all_time" 
