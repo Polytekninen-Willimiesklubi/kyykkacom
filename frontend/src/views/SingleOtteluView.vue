@@ -1,6 +1,6 @@
 <template>
   <v-layout class="pt-5">
-    <ottelu></ottelu>
+    <ottelu />
   </v-layout>
 </template>
 

@@ -5,9 +5,9 @@
     </v-flex>
     <v-flex xs4 class="pl-3 hidden-md-and-down">
       <side-bar
-          :no_brackets="no_brackets"
-          :non-default-teams="teams"
-        />
+        :no_brackets="no_brackets"
+        :non-default-teams="teams"
+      />
     </v-flex>
   </v-layout>
 </template>
