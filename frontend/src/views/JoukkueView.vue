@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <v-flex auto>
+    <v-flex auto style="max-width: 66%;">
       <joukkue />
     </v-flex>
     <v-flex pl-2 class="hidden-md-and-down">
