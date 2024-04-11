@@ -2,7 +2,7 @@
   <v-layout>
     <div class="d-flex">
       <h1 class="topic">Nationaali Kyykkä Liiga</h1>
-      <!-- <lorem-ipsum /> -->
+      <lorem-ipsum />
     </div>
     <div class="d-flex right">
       <!-- <side-bar
