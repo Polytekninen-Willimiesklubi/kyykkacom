@@ -1,3 +1,9 @@
+<script setup>
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '../stores/auth.store';
+</script>
+
+
 <template>
   <v-dialog v-model="dialog" persistent width="600px">
     <template v-slot:activator="{on}">
@@ -42,99 +48,96 @@
 </template>
 
 <script>
-import { eventBus } from '../main';
+import { eventBus } from '../main'
 
 export default {
-    name: 'LogIn',
-    data: () => ({
-        dialog: false,
-        alert: false,
-        valid: true,
-        loading: false,
-        credentials: {}
-    }),
-    methods: {
-        changeLogin(username) {
-            eventBus.$emit('loginChanged', username);
+  name: 'LogIn',
+  data: () => ({
+    dialog: false,
+    alert: false,
+    valid: true,
+    loading: false,
+    credentials: {}
+  }),
+  methods: {
+    changeLogin (username) {
+      eventBus.$emit('loginChanged', username)
+    },
+    login () {
+      this.$session.start()
+      this.$http
+        .post('api/login/', this.credentials, {
+          headers: {
+            'X-CSRFToken': this.getCookie('csrftoken')
+          },
+          withCredentials: true
+        })
+        .then(function (response) {
+          if (response.status === 200) {
+            this.dialog = !this.dialog
+            this.alert = false
+
+            localStorage.role_id = response.body.role
+            localStorage.user_id = response.body.user.id
+            localStorage.team_id = response.body.team_id
+            localStorage.player_name = response.body.user.player_name
+
+            this.$session.set('role_id', response.body.role)
+            this.$session.set('user_id', response.body.user.id)
+            this.changeLogin(response.body.user.player_name)
+          }
         },
-        login() {
-            this.$session.start();
+        response => {
+          this.alert = !this.alert
+          if (response.status == 403) {
             this.$http
-                .post('api/login/', this.credentials, {
-                    headers: {
+              .get('api/csrf/', { withCredentials: true })
+              .then(function (response) {
+                if (response.status === 200) {
+                  this.$http
+                    .post('api/login/', this.credentials, {
+                      headers: {
                         'X-CSRFToken': this.getCookie('csrftoken')
-                    },
-                  'withCredentials': true,
-                })
-                .then(function(response) {
-                    if (response.status === 200) {
-                        this.dialog = !this.dialog;
-                        this.alert = false;
+                      },
+                      withCredentials: true
+                    })
+                    .then(function (response) {
+                      if (response.status === 200) {
+                        this.dialog = !this.dialog
+                        this.alert = false
 
-                        localStorage.role_id = response.body.role;
-                        localStorage.user_id = response.body.user.id;
+                        localStorage.role_id = response.body.role
+                        localStorage.user_id = response.body.user.id
                         localStorage.team_id = response.body.team_id
-                        localStorage.player_name = response.body.user.player_name;
+                        localStorage.player_name = response.body.user.player_name
 
-                        this.$session.set('role_id', response.body.role);
-                        this.$session.set('user_id', response.body.user.id);
-                        this.changeLogin(response.body.user.player_name);
-                    }
+                        this.$session.set('role_id', response.body.role)
+                        this.$session.set('user_id', response.body.user.id)
+                        this.changeLogin(response.body.user.player_name)
+                      }
                     },
                     response => {
-                        this.alert = !this.alert;
-                          if (response.status == 403) {
-                            this.$http
-                              .get('api/csrf/', {'withCredentials': true})
-                              .then(function(response) {
-                                  if (response.status === 200) {
-                                    this.$http
-                                        .post('api/login/', this.credentials, {
-                                            headers: {
-                                                'X-CSRFToken': this.getCookie('csrftoken')
-                                            },
-                                          'withCredentials': true,
-                                        })
-                                        .then(function(response) {
-                                            if (response.status === 200) {
-                                                this.dialog = !this.dialog;
-                                                this.alert = false;
-
-                                                localStorage.role_id = response.body.role;
-                                                localStorage.user_id = response.body.user.id;
-                                                localStorage.team_id = response.body.team_id
-                                                localStorage.player_name = response.body.user.player_name;
-
-                                                this.$session.set('role_id', response.body.role);
-                                                this.$session.set('user_id', response.body.user.id);
-                                                this.changeLogin(response.body.user.player_name);
-                                            }
-                                            },
-                                            response => {
-                                                this.alert = !this.alert;
-                                            }).catch(function(response) {
-                                                console.log(response);
-                                          });
-                                  }
-                              });
-  
-                        }
-
-                    }).catch(function(response) {
-                        console.log(response);
-                  });
-            }
-    },
-    mounted() {
-      if (localStorage.role_id && localStorage.user_id) {
-        this.$session.set('role_id', localStorage.role_id);
-        this.$session.set('user_id', localStorage.user_id);
-        this.changeLogin(localStorage.player_name)
-      }
-      if (localStorage.csrfToken) {
-        this.$session.set('csrf', localStorage.csrfToken);
-      }
-
+                      this.alert = !this.alert
+                    }).catch(function (response) {
+                      console.log(response)
+                    })
+                }
+              })
+          }
+        }).catch(function (response) {
+          console.log(response)
+        })
     }
-};
+  },
+  mounted () {
+    if (localStorage.role_id && localStorage.user_id) {
+      this.$session.set('role_id', localStorage.role_id)
+      this.$session.set('user_id', localStorage.user_id)
+      this.changeLogin(localStorage.player_name)
+    }
+    if (localStorage.csrfToken) {
+      this.$session.set('csrf', localStorage.csrfToken)
+    }
+  }
+}
 </script>

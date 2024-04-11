@@ -6,6 +6,8 @@
   </v-layout>
 </template>
 
+<script setup></script>
+
 <style>
 .rules__link {
   text-decoration: none;
@@ -13,9 +15,3 @@
 }
 
 </style>
-
-<script>
-export default {
-    name: 'info-view',
-};
-</script>

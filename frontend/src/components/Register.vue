@@ -60,113 +60,113 @@
 </template>
 
 <script>
-import { eventBus } from '../main';
+import { eventBus } from '../main'
 
 export default {
-    name: 'Register',
-    data: () => ({
-        dialog: false,
-        alert: false,
-        errors: [],
-        response_errors: [],
-        credentials: {},
-        numbers: []
-    }),
-    methods: {
-        register() {
-            this.$http.get('api/csrf', {'withCredentials': true});
-            this.$http
-                .post('api/register/', this.credentials, {
-                  headers: {
-                    'X-CSRFToken': this.getCookie('csrftoken')
-                  },
-                  'withCredentials': true,        
-                  })
-                .then(function(response) {
-                    this.dialog = false;
-                    this.alert = false;
+  name: 'Register',
+  data: () => ({
+    dialog: false,
+    alert: false,
+    errors: [],
+    response_errors: [],
+    credentials: {},
+    numbers: []
+  }),
+  methods: {
+    register () {
+      this.$http.get('api/csrf', { withCredentials: true })
+      this.$http
+        .post('api/register/', this.credentials, {
+          headers: {
+            'X-CSRFToken': this.getCookie('csrftoken')
+          },
+          withCredentials: true
+        })
+        .then(function (response) {
+          this.dialog = false
+          this.alert = false
 
-                    localStorage.role_id = response.body.role;
-                    localStorage.user_id = response.body.user.id;
-                    localStorage.player_name = response.body.user.player_name;
-                    this.changeLogin();
+          localStorage.role_id = response.body.role
+          localStorage.user_id = response.body.user.id
+          localStorage.player_name = response.body.user.player_name
+          this.changeLogin()
+        })
+        .catch(function (response) {
+          this.response_errors = response.body
+          this.checkForm()
+          switch (response.status) {
+            case 403:
+              this.$http
+                .get('api/csrf', { withCredentials: true })
+                .then(function (response) {
+                  if (response.status === 200) {
+                    this.$http.patch(post_url, post_data, {
+                      headers: {
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                      },
+                      withCredentials: true
+                    }).then(function (response) {
+                      localStorage.role_id = response.body.role
+                      localStorage.user_id = response.body.user.id
+                      localStorage.player_name = response.body.user.player_name
+                    })
+                  }
                 })
-                .catch(function(response) {
-                    this.response_errors = response.body;
-                    this.checkForm();
-                    switch(response.status) {
-                      case 403:
-                        this.$http
-                          .get('api/csrf', {'withCredentials': true})
-                          .then(function(response) {
-                              if (response.status === 200) {
-                                  this.$http.patch(post_url, post_data, {
-                                  headers: {
-                                    'X-CSRFToken': this.getCookie('csrftoken')
-                                  },
-                                    'withCredentials': true,
-                                  }).then(function(response) {
-                                    localStorage.role_id = response.body.role;
-                                    localStorage.user_id = response.body.user.id;
-                                    localStorage.player_name = response.body.user.player_name;
-                                  })
-                              }
-                          });
-                    }
-                });
-        },
-        checkForm() {
-            this.errors = []
-
-            if (!this.alert) {
-                this.alert = !this.alert;
-            }
-
-            if (this.response_errors.username == 'This field must be unique.') {
-              this.errors.push('Sähköposti on jo käytössä.')
-            }
-
-            if (!this.credentials.first_name) {
-                this.errors.push('Etunimi puuttuu.');
-            }
-            if (!this.credentials.last_name) {
-                this.errors.push('Sukunimi puuttuu.');
-            }
-            if (!this.credentials.username) {
-                this.errors.push('Email puuttuu.');
-            } else if (!this.validEmail(this.credentials.username)) {
-                this.errors.push('Anna sähköposti mallia foo@bar.xyz.');
-            }
-            if (!this.credentials.password) {
-                this.errors.push('Salasana puuttuu.');
-            }
-            if (!this.credentials.number && this.credentials.number != 0) {
-              this.errors.push('Pelaajanumero puuttuu.');
-            }
-
-            if (this.credentials.password !== this.credentials.password_check) {
-              this.errors.push('Salasanat eivät täsmää.')
-            }
-
-            if (this.errors.length == 0) {
-                this.register();
-            }
-        },
-        changeLogin(username) {
-            eventBus.$emit(
-                'loginChanged',
-                this.credentials.first_name + ' ' + this.credentials.last_name
-            );
-        },
-        validEmail(email) {
-            var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            return re.test(email);
-        }
+          }
+        })
     },
-    mounted() {
-        this.numbers = Array.from(Array(100).keys());
+    checkForm () {
+      this.errors = []
+
+      if (!this.alert) {
+        this.alert = !this.alert
+      }
+
+      if (this.response_errors.username == 'This field must be unique.') {
+        this.errors.push('Sähköposti on jo käytössä.')
+      }
+
+      if (!this.credentials.first_name) {
+        this.errors.push('Etunimi puuttuu.')
+      }
+      if (!this.credentials.last_name) {
+        this.errors.push('Sukunimi puuttuu.')
+      }
+      if (!this.credentials.username) {
+        this.errors.push('Email puuttuu.')
+      } else if (!this.validEmail(this.credentials.username)) {
+        this.errors.push('Anna sähköposti mallia foo@bar.xyz.')
+      }
+      if (!this.credentials.password) {
+        this.errors.push('Salasana puuttuu.')
+      }
+      if (!this.credentials.number && this.credentials.number != 0) {
+        this.errors.push('Pelaajanumero puuttuu.')
+      }
+
+      if (this.credentials.password !== this.credentials.password_check) {
+        this.errors.push('Salasanat eivät täsmää.')
+      }
+
+      if (this.errors.length == 0) {
+        this.register()
+      }
+    },
+    changeLogin (username) {
+      eventBus.$emit(
+        'loginChanged',
+        this.credentials.first_name + ' ' + this.credentials.last_name
+      )
+    },
+    validEmail (email) {
+      const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      return re.test(email)
     }
-};
+  },
+  mounted () {
+    this.numbers = Array.from(Array(100).keys())
+  }
+}
 </script>
 
 <style scoped>

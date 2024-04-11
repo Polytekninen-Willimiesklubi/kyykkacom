@@ -15,7 +15,7 @@
       hide-default-footer
       dense
     >
-      <template slot="no-data">
+      <template v-slot:no-data>
         <v-progress-linear color="red" slot="progress" indeterminate />
       </template>
     </v-data-table>
@@ -24,42 +24,42 @@
 
 <script>
 export default {
-    data() {
-        return {
-            search: '',
-            headers: [
-                { text: 'Nimi', value: 'current_name', align: 'center' },
-                { text: 'Lyhenne', value: 'current_abbreviation' },
-                { text: 'Ottelut', value: 'matches_played' },
-                { text: 'Voitot', value: 'matches_won' },
-                { text: 'Häviöt', value: 'matches_lost' },
-                { text: 'Tasurit', value: 'matches_tie' },
-                { text: 'Ottelu Ka', value: 'match_average' }
-            ],
-            teams: []
-        };
-    },
-    methods: {
-        getTeams() {
-            this.$http.get('api/teams/'+'?season='+sessionStorage.season_id).then(
-                function(data) {
-                    this.teams = data.body;
-                    sessionStorage.teams = JSON.stringify(data.body)
-                }
-            );
-        },
-        handleRedirect(value) {
-          location.href = '/joukkue/'+value.id;
-        }
-    },
-    mounted() {
-      console.log(sessionStorage.loaded_season)
-      if (!sessionStorage.loaded_season || sessionStorage.loaded_season != sessionStorage.season_id) {
-        this.getTeams();
-        sessionStorage.loaded_season = sessionStorage.season_id
-      } else {
-        this.teams = JSON.parse(sessionStorage.teams)
-      }
+  data () {
+    return {
+      search: '',
+      headers: [
+        { text: 'Nimi', value: 'current_name', align: 'center' },
+        { text: 'Lyhenne', value: 'current_abbreviation' },
+        { text: 'Ottelut', value: 'matches_played' },
+        { text: 'Voitot', value: 'matches_won' },
+        { text: 'Häviöt', value: 'matches_lost' },
+        { text: 'Tasurit', value: 'matches_tie' },
+        { text: 'Ottelu Ka', value: 'match_average' }
+      ],
+      teams: []
     }
-};
+  },
+  methods: {
+    getTeams () {
+      this.$http.get('api/teams/' + '?season=' + sessionStorage.season_id).then(
+        function (data) {
+          this.teams = data.body
+          sessionStorage.teams = JSON.stringify(data.body)
+        }
+      )
+    },
+    handleRedirect (value) {
+      location.href = '/joukkue/' + value.id
+    }
+  },
+  mounted () {
+    console.log(sessionStorage.loaded_season)
+    if (!sessionStorage.loaded_season || sessionStorage.loaded_season != sessionStorage.season_id) {
+      this.getTeams()
+      sessionStorage.loaded_season = sessionStorage.season_id
+    } else {
+      this.teams = JSON.parse(sessionStorage.teams)
+    }
+  }
+}
 </script>

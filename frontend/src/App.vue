@@ -1,35 +1,45 @@
-<template>
-  <v-app class="app">
-    <nav-bar class="mb-5"></nav-bar>
-    <v-main transition="slide-x-transition" class="content pa-0 mx-auto">
-      <router-view></router-view>
-    </v-main>
-  </v-app>
-</template>
+<script setup>
+// import NavBar from '@/components/NavBar.vue';
 
-<script>
-import NavBar from '@/components/NavBar';
+// if (!sessionStorage.season_id) {
+//   // Index starts at 1 : 2000
+//   sessionStorage.season_id = new Date().getFullYear() - 2000 + 1;
+// }
 
-if (!sessionStorage.season_id) {
-  // Index starts at 1 : 2000
-  sessionStorage.season_id = new Date().getFullYear() - 2000 + 1;
-}
-
-export default {
-    name: 'App',
-    components: {
-        NavBar
-    }
-};
 </script>
 
-<style scoped>
-.content {
-    width: 90%;
+
+<!-- <template>
+  <v-app>
+    <v-main>
+      <p>
+        jotain
+      </p>
+    </v-main>
+  </v-app>
+</template> -->
+
+<template>
+  <v-app class="app">
+    <v-main>
+      <p>
+        Kokeilu
+      </p>
+      <router-view />
+    </v-main>
+  </v-app>
+ </template>
+
+<style>
+
+#app {
+    background: url('./src/assets/kyykka_background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    --v-theme-background: rgba(0,0,0,0) !important;
+  }
+  
+.v-application {
+  --v-theme-background: rgba(0,0,0,0) !important;
 }
 
-.app {
-    background-color: transparent;
-    overflow: hidden;
-}
 </style>

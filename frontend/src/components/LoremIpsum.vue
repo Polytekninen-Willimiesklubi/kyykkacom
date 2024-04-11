@@ -1,7 +1,7 @@
 <template>
   <v-container class="lorem-ipsum">
-    <v-layout column>
-      <v-flex>
+    <v-layout row>
+      <div class="d-flex flex-column">
         <h2>Kausiennakko 2024</h2>
         <p>Mitä mitä mitä. KyykkäAasianTuntijat ovat olleet taas liikenteessä, kun heiltä löytyy jo tässä
             vaiheessa joulukuuta tietoa ja on taitoa, ja sitä mitä muilla ei tunnu olevan, sitä näkemystä,
@@ -57,7 +57,6 @@
               Yksi asia on varmaa, joukkue menestyy jälkipeleillä kentällä nähdyistä tuloksista
               riippumaatta. G-baarissa tavataan!</p>
 
-
             <h2>Lohko B</h2>
 
             <p><b>1. Sulavasti Keskelle [SulaKe]</b></p>
@@ -90,7 +89,7 @@
               kauden pelaava sikalauma löytyy lohkon kärkipäästä ja jatkaa menoaan pudotuspeleihin.</p>
             <p><b>5. Voimakkaasti Eläköitymistä Kaipaavat Tieteenharjoittajat Optimistisesti Raivaamassa
               Ilmaan Torneja TEKOÄLY !!! [VEKTORIT]</b></p>
-            
+
             <p> Järkyttävän pitkän nimen takaa löytyy joukkueellinen latelaisia jotka ovat hakeneet
               uudelleenbrändäyksen myötä vauhtia kauteen. Kyykkä_Aasian_Tuntiat ovat
               vakoilulaitteiltaan havainneet, että fuksianpunaiset haalarit vilkkuvat hälyttävän usein
@@ -103,9 +102,9 @@
             </p>
 
         <v-divider></v-divider>
-        
+
         <h2>Kyykkäsivusto on päivittynyt!</h2>
-        
+
         <p>Hei täältä kehitystyön takaa. Täällä on painettu duunia maailman parasta kyykkää pelaavan liigan iloksi ja nyt (ehkä) ensimmäiset kunnolliset muutokset meidän ihanalle nettisivullemme saapuvat kaikkien näkyville. Tulevaisuudessa näistä päivityksistä tuskin ilmoitamme näin äänekkäästi, mutta ymmärtääkseni sivustolle on tullut jotain uutta viimeksi, kun uusi sivusto luotiin (josta alkaa olemaan jo 4-5 vuotta). Listaan alla uusista asioita/muutoksista:</p>
         <p><b>1.</b> Uusi '<b>Pelaaja</b>' - sivu kaikkineen hienouksineen. Paina pelaajan nimeä missä vain päästäksesi katsomaan tämän pelaajan statseja kautta historian!</p>
         <p><b>2.</b> <b>Vanha data</b> on lisätty. Dataa löytyy 2000-kaudesta alkaen. Huomioita datan lukijalla: Aikoinaan pelattiin 19 tolpalla. Aikoinaan oli sanktioita ja aikoinaan haukia ei ollut merkitty heittokohtaisesti tietokantaan, vaan erä kohtaisesti summattu. Nämä ohi heitot on merkitty eri tavalla jos ei voinut olla varma että heitto oli ollut hauki vai virkamies. Muistaakseni tämä vaikuttaa vain ennen 2013 kautta pelattuja pelejä. Merkintä tapa heittäjälle on ollut. Formaatti on niinkin epäselvä kuin " h{haukien määrä}0{virkamiesten määrä} "</p>
@@ -115,7 +114,7 @@
         <p>Joitain pienmpiä muutoksia ehkä jäi mainisematta ja siitäkin suurin osa onkin vain esiriipun takana tapahtunutta muutosta. Omaksi huviksi tätä on koodailu ja siksi talvikauden aikana tuskin tulee mitää yhtä 'mullistavaa' tai ainakaan yhtä paljon muutoksia.</p>
         <p></p>
         <p>Terveisin sivuston (tämän hetkinen) ylläpitäjä.</p>
-        
+
         <v-divider></v-divider>
 
         <h2>Ohjeita kapteeneille</h2>
@@ -135,7 +134,7 @@
           <p>Neljännen sijan kirouksesta ei tämän joukkueen tapauksessa voida enää puhua. Jarnon varmalla johdatuksella MaHaLasKu laskeskelee itsensä helpon oloisesti lohkon ykkösenä jatkoon. Massupojat ovat tehneet offseasonilla hankintoja nuoremmista laskimennäpyttelijöistä jatkamaan seuran perinteitä. Tästä johtuen runkosarjan aikana saattaa tuloksissa ilmetä pientä satunnaisvaihtelua, mutta tulokkailla on kuitenkin konkareiden jäljiltä hyvä polku tampattuna, jota seurata päätyyn asti. Suurin uhka joukkueella on ennakkosuosikin viitan paino hartioilla.</p>
 
           <p>2. Draconis [Dra] </p>
-          <p>Draconiksen viime kausi päättyi sensaatiomaiseen pettymykseen, joukkueen pudottua ensimmäistä kertaa miesmuistiin NKL:än neljän parhaan ulkopuolelle. Niinpä Lohikärmes on 
+          <p>Draconiksen viime kausi päättyi sensaatiomaiseen pettymykseen, joukkueen pudottua ensimmäistä kertaa miesmuistiin NKL:än neljän parhaan ulkopuolelle. Niinpä Lohikärmes on
           laittanut pelaajamarkkinoilla tuulemaan ja hankkinut “uuden” pelaajan ja Tiinan myötä lisää sitä kuuluisaa kokemuksen tuomaa varmuutta. Löytyypä joukkueesta myös kolmea kyykkäliigaa pelaavaa Ippe ja kaikessa keitetty Temmi vaan se että sattuvatko männävuosien tähdet samaan peliin pelaamaan on asia erikseen. Kannatteleeko ääretön kokemus Draconiksen vielä runkkarin piikkipaikoille vai alkaako reumatismi jo vaivata ranteita?</p>
           <p>3. Kyykkäkerho RSÄ [KyRSÄ]</p>
           <p>Titeläisten ikääntyvä edustusjoukkue on tahkonnut NKL:ää jo useamman vuoden ja löytänyt tiensä lopulta myös kyykkä A. Sian tuntijoiden tietoisuuteen. Poijukartut on toivottavasti jo poltettu wappunotskissa sillä huhujen mukaan joukkueen pelaajat ovat hankkineet ihan oikean mallisia kapuloita sekä naisoletetun tähtipelaajan kantamaan poikia kohti liigan kärkeä. Alkukesästä kuului myös uhkauksia ahkerasta harjoittelusta, valitettavasti ne treenitunnit valui joko CS-servuille tai johonkin helvetin golfkentille. Aiemmilta vuosilta tuttu tasaisuus saattaa pienellä tulostason korotuksella kantaa pitkälle. Simulaatioissa Kyykkäkerho RSÄ siis A-lohkon kolmas.</p>
@@ -143,7 +142,6 @@
           <p>Karttu Wiskarit lähtevät liigan parhaalla nimellä ja mielenkiintoisilla rosterimuutoksilla uuteen NKL-kauteen. Suomen muotoisen pilven alla on tehty uusia mielenkiintoisia hankintoja ja joukkueesta löytyykin liitonkin kisoissa kesällä kunnostautuneita nimiä. Joukkueesta löytyy sopivassa suhteessa vielä nuoruuden intoa kuten myös Elämän Kovan Koulun tuomaa kokemusta. Jos KooWeelle siunaantuu menestystä, järjestettänee juhlat Kankaanpään torilla, mutta sinne mieliäkseen täytyy varoa Tappavan hiljaisia rivinpätkiä ja niiden jättämistä kenttään. Mökkitien päässä siintää kuitenkin A-lohkon nelossija jonka jälkeen pelaajat jäävät miettimään Tässäkö tää oli? No ei sentään vaan pudotuspelien jälkeen muistellaan sitä Kun me DiSKOA suudeltiin.</p>
           <p>5. Skinnarilan Sika Klupi [SSK]</p>
           <p>Jaaha, viina maistuu ja kartut lentää. lappeen Rantojen kovaäänisin kyykkäjoukkue kuorii vastustajien sipulia huutelullaan ja pelaa siinä sivussa hämmentävän kovaa tulosta. Viime kaudella siat olivat runkkarissa top 8 joukossa sekä etenivät pudotuspeleissä vakuuttavasti toiselle kierrokselle, missä kuitenkin vastaan tuli MaHaLasKu-niminen seinä. Tänä vuonna tullee olemaan samanlainen ääni kellossa, ja miksei samanlainen tulostasokin. Vanhojen karjujen eläköityessä on klupi hankkinut uutta (sian)verta täydentämään rivejään, mutta eivätköhän tulokkaatkin opi pikkuhiljaa tavoille - ja pelaamaan kyykkää.</p>
-
 
           <h3>Lohko B</h3>
           <p>1. KonjakkiMafia [VSOP]</p>
@@ -156,15 +154,11 @@
           <p>Sosiaalisessa mediassa maailman eniten seurattua kyykkäjoukkuetta, BooB’s:eja ei voi enää kukaan ottaa helppona vastuksena. 2022 MM-kyykässä tissit näyttivät olevansa valmiita haastamaan kenet tahansa sijoittumalla turnauksessa hopealle. BooB’s peli tulee olemaan henkisesti vaikea paikka monelle kovalle joukkueelle loputtoman länkytyksen ansiosta. Henkisen yliotteen avulla tissit nostavat aina pelin tunnelmaa korkealle. Näennäisesti uusia tulokkaita on joukkeessa paljon, mutta rekrytointi on kyykkä_asian_tuntijoiden mielestä onnistunut erinomaisesti. Rintoja kohottaneen nuorennusleikkauksen jälkeen Boobsit lähtevätkin terhakkaina haastamaan kaikkia. Kuitenkin B-lohkon 4. sija tulee todennäköisesti olemaan korkein sijoitus tällä kaudella, ellei joukkuessa päästä eroon runkosarjassa aikaisemmin piinaneesta “aina maksimit”-viiruksesta. </p>
           <p>5. Alkosta Liikaa Tiukkaa Faktat Filosofioitiin Fiksusti Finaalissa [ALT F4]</p>
           <p>Pelistä mahdollisimman nopeasti poistuvilla koodareilla alkaa pikkuhiljaa olla kaikki edellytykset alkaa menestyä NKL:ssä ja havitella pudotuspelipaikkaa tosissaan. Vaikka pelaajamarkkinoilla ei kesäkauden aikana pystyttykään vastaamaan muiden joukkueiden tarjouksiin huippupelaajista, on titeläisten lähtökohdat kauteen parhaat tähän mennessä. Kyykkä aasian tuntijoiden vakoilu- ja tiedustelujaosto on havainnut porukan treenaamassa gardenilla ja tulostaso on tietojen mukaan ollut vähintään kohtalaista, eikä pidä myöskään unohtaa, että joukkue kävi viime vuonna keräämässä kokemusta PoWiCupin jalosarjasta. Erityisesti joukkueen konapommiosasto Otto ja Konsta ovat aiheuttaneet preseasonin suorituksillaan hyväksyvää nyökyttelyä. Kovan kärjen jälkeen alkaakin murheet kasautua sillä siivousosastolla tulossarakkeeseen kirjataan liian usein 01001000. Niimpä kovimpiin kärkisijoihin oikeuttavat tulokset loistavat poissaolollaan.</p>
-      </v-flex>
+      </div>
     </v-layout>
   </v-container>
 </template>
 
-<script>
-export default {
-    name: 'LoremIpsum'
-};
-</script>
+<script setup></script>
 
 <style scoped></style>

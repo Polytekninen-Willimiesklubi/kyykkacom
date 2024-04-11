@@ -3,7 +3,7 @@
     <v-card elevation=0>
       <v-row style="height:130px margin-bottom:3px">
         <v-col align="center" justify="center" cols="2">
-          <img src="../../public/kyykkalogo120px.png">
+          <img src="../../kyykkalogo120px.png">
         </v-col>
         <v-col cols="10">
           <v-row>
@@ -20,8 +20,8 @@
               <v-btn-toggle v-model="selected_season" mandatory>
                 <v-slide-group show-arrows>
                     <v-slide-item>
-                        <v-btn text 
-                          :value="all_time" 
+                        <v-btn text
+                          :value="all_time"
                           @click="chanceTeamStats('all_time')"
                         >
                           All-Time
@@ -61,9 +61,9 @@
         </v-col>
         <v-divider vertical />
         <v-col class="pt-0">
-          <v-data-iterator 
-            :items="stats" 
-            hide-default-footer 
+          <v-data-iterator
+            :items="stats"
+            hide-default-footer
             row wrap
           >
             <template v-slot:item="props">
@@ -88,13 +88,13 @@
           Pelaajat
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-data-table mobile-breakpoint="0" class="mt-5" 
-          disable-pagination 
+          <v-data-table mobile-breakpoint="0" class="mt-5"
+          disable-pagination
           :headers="headers"
           @click:row="handleRedirect"
           :items="players"
            hide-default-footer>
-            <template slot="no-data">
+            <template v-slot:no-data>
               <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
             </template>
           </v-data-table>
@@ -117,7 +117,7 @@
                         mdi-plus
                       </v-icon>
                       <v-icon
-                        v-else  
+                        v-else
                         color=gray
                         >
                         <!-- @click="deleteItem(item)" -->
@@ -133,15 +133,15 @@
       <v-expansion-panel>
         <v-expansion-panel-header>Ottelut</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-data-table mobile-breakpoint="0" 
-            @click:row="handleRedirectMatches"  
-            color='alert' 
-            :search="search" 
+          <v-data-table mobile-breakpoint="0"
+            @click:row="handleRedirectMatches"
+            color='alert'
+            :search="search"
             :headers="match_headers"
             :items="matches"
             dense
           >
-            <template slot="no-data">
+            <template v-slot:no-data>
               <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
             </template>
             <template v-for="h in match_headers" v-slot:[`header.${h.value}`]="{ header }">
@@ -158,12 +158,12 @@
             <template v-slot:item.own_team_total="{ item }">
               <v-chip :color="getColor(item.own_team_total, item.opposite_team_total)">
                 {{ item.own_team_total }}
-              </v-chip>              
+              </v-chip>
             </template>
             <template v-slot:item.opposite_team_total="{item}">
               <v-chip :color="getColor(item.opposite_team_total, item.own_team_total)">
                 {{ item.opposite_team_total }}
-              </v-chip>              
+              </v-chip>
             </template>
           </v-data-table>
         </v-expansion-panel-content>
@@ -174,237 +174,236 @@
 
 <script>
 export default {
-    data() {
-        return {
-            search: '',
-            header: '',
-            isCaptain: false,
-            team_id: this.$route.fullPath.substr(
-                this.$route.fullPath.lastIndexOf('/') + 1
-            ),
-            reserveHeaders: [
-                { text: '#', value: 'player_number'},
-                { text: 'Pelaajan nimi', value: 'player_name' },
-                {
-                    text: 'Varaa',
-                    value: 'actions',
-                    align: 'left',
-                    sortable: false,
-                },
-            ],
-            headers: [
-                { text: '#', value: 'player_number', width:"1%" },
-                {
-                    text: 'Nimi',
-                    value: 'player_name',
-                    width: '20%',
-                    align: 'left'
-                },
-                {
-                    text: 'E',
-                    value: 'rounds_total',
-                    width: '1%',
-                    align: 'left'
-                },
-                { text: 'P', value: 'score_total', width: '1%', align: 'left' },
-                {
-                    text: 'PPH',
-                    value: 'score_per_throw',
-                    width: '1%',
-                    align: 'left'
-                },
-                {
-                    text: 'SP',
-                    value: 'scaled_points',
-                    width: '1%',
-                    alignt: 'left'
-                },
-                {
-                    text: 'SPPH',
-                    value: 'scaled_points_per_throw',
-                    width: '1%',
-                    alignt: 'left'
-                },
-                {
-                    text: 'kHP',
-                    value: 'avg_throw_turn',
-                    width: '1%',
-                    align: 'left'
-                },
-                { text: 'H', value: 'pikes_total', width: '1%', align: 'left' },
-                {
-                    text: 'H%',
-                    value: 'pike_percentage',
-                    width: '1%',
-                    align: 'left'
-                },
-                {
-                    text: 'VM',
-                    value: 'zeros_total',
-                    width: '1%',
-                    align: 'left'
-                },
-                {
-                    text: 'JK',
-                    value: 'gteSix_total',
-                    width: '1%',
-                    alignt: 'left'
-                }
-            ],
-            match_headers: [
-            { text: 'Aika', value: 'match_time', align: 'center', tooltip:'Pelausaika'},
-            { text: 'Tyyppi', value: 'match_type', align: 'center',tooltip: 'Peli Tyyppi' },
-            { text: 'Vastustaja', value: 'opposite_team', align: 'center', tooltip: 'Vastustaja joukkue'},
-            { text: 'OJ 1', value: 'own_first', align: 'center', tooltip:'Oman Joukkueen 1. Erä', width: '2%'},
-            { text: 'OJ 2', value: 'own_second', align: 'center', tooltip: 'Oman Joukkueen 2. Erä', width: '2%'},
-            { text: 'V 1', value: 'opp_first', align: 'center', tooltip: 'Vastustaja Joukkueen 1. Erä', width: '2%'},
-            { text: 'V 2', value: 'opp_second', align: 'center', tooltip: 'Vastustaja Joukkueen 2. Erä', width: '2%'},
-            // { text: 'H+VM', value: 'jotain', align: 'center', tooltip: 'Yhteensä pelissä oman joukkueen heittämät nolla heitot'},
-            // { text: 'JK', value: 'jotain', align: 'center', tooltip: '(Joulukuusi) Yhteensä pelissä oman joukkueen heittämät "6 kyykkää tai enemmän"- heitot'},
-            { text: 'OJ pis.', value: 'own_team_total', align: 'center', tooltip:'Oman joukkueen pisteet' },
-            { text: 'V pis.', value: 'opposite_team_total', align: 'center', tooltip:'Vastustaja joukkueen pisteet' }
-            ],
-            left_stats: [
-              {text: 'Poistetut Kyykät', value: 'score_total'},
-              {text: 'Ottelut', value: 'match_count'},
-              {text: 'Hauet', value: 'pikes_total'},
-              {text: 'Nolla heitot', value: 'zeros_total'},
-              {text: 'Nolla aloitukset', value: 'zero_or_pike_first_throw_total'},
-            ],
-            right_stats: [
-              {text: 'Heitot', value: 'throws_total'},
-              {text: 'Ottelu keskiarvo', value: 'match_average'},
-              {text: 'Haukiprosentti', value: 'pike_percentage'},
-              {text: 'Nollaprosentti', value: 'zero_percentage'},
-              {text: 'Joulukuuset', value: 'gteSix_total'},
-            ],
-
-            panel: [0],
-            stats: [],
-            players: [],
-            reserve: [],
-            matches: [],
-            selected_season: null,
-            all_time: [],
-            seasons_data: {}
-        };
-    },
-    methods: {
-        getPlayers() {
-            this.$http
-                .get('api/teams/' + this.team_id +'/?season='+sessionStorage.season_id)
-                .then(
-                    function(data) {
-                        for (const [k, v] of Object.entries(data.body)) {
-                          if (k == 'all_time') {
-                            this.all_time = v
-                          } else {
-                            this.seasons_data[k] = v
-                          }
-                        }
-                        if (sessionStorage.season_id in this.seasons_data) {
-                          this.selected_season = sessionStorage.season_id.toString()
-                        } else {
-                          this.selected_season = Math.max(...Object.keys(this.seasons_data).map(x => +x)).toString()
-                        }
-                        const tmp = this.seasons_data[this.selected_season]
-                        this.players = tmp.players;
-                        this.header = tmp.current_name;
-                        this.stats = [tmp];
-                        this.matches = tmp.matches;
-                    },
-                );
+  data () {
+    return {
+      search: '',
+      header: '',
+      isCaptain: false,
+      team_id: this.$route.fullPath.substr(
+        this.$route.fullPath.lastIndexOf('/') + 1
+      ),
+      reserveHeaders: [
+        { text: '#', value: 'player_number' },
+        { text: 'Pelaajan nimi', value: 'player_name' },
+        {
+          text: 'Varaa',
+          value: 'actions',
+          align: 'left',
+          sortable: false
+        }
+      ],
+      headers: [
+        { text: '#', value: 'player_number', width: '1%' },
+        {
+          text: 'Nimi',
+          value: 'player_name',
+          width: '20%',
+          align: 'left'
         },
-        getReserve() {
-            this.$http.get('api/reserve/', {
-                  'withCredentials': true,
-                }).then(
-                function(data) {
-                    var i = 0;
-                    for (var player in data.body) {
-                        if (data.body[i].team.current_name == "") {
-                            this.reserve.push(data.body[i]);
-                        }
-                        i++;
-                    }
-                },
-                function(error) {
-                    console.log(error.statusText);
-                }
-            );
+        {
+          text: 'E',
+          value: 'rounds_total',
+          width: '1%',
+          align: 'left'
         },
-        reserveButton(item) {
-            let post_data = {'player': item.id}
-            let post_url = 'api/reserve/'+'?season='+sessionStorage.season_id;
-            var index = this.reserve.findIndex(player => player.id === item.id);
+        { text: 'P', value: 'score_total', width: '1%', align: 'left' },
+        {
+          text: 'PPH',
+          value: 'score_per_throw',
+          width: '1%',
+          align: 'left'
+        },
+        {
+          text: 'SP',
+          value: 'scaled_points',
+          width: '1%',
+          alignt: 'left'
+        },
+        {
+          text: 'SPPH',
+          value: 'scaled_points_per_throw',
+          width: '1%',
+          alignt: 'left'
+        },
+        {
+          text: 'kHP',
+          value: 'avg_throw_turn',
+          width: '1%',
+          align: 'left'
+        },
+        { text: 'H', value: 'pikes_total', width: '1%', align: 'left' },
+        {
+          text: 'H%',
+          value: 'pike_percentage',
+          width: '1%',
+          align: 'left'
+        },
+        {
+          text: 'VM',
+          value: 'zeros_total',
+          width: '1%',
+          align: 'left'
+        },
+        {
+          text: 'JK',
+          value: 'gteSix_total',
+          width: '1%',
+          alignt: 'left'
+        }
+      ],
+      match_headers: [
+        { text: 'Aika', value: 'match_time', align: 'center', tooltip: 'Pelausaika' },
+        { text: 'Tyyppi', value: 'match_type', align: 'center', tooltip: 'Peli Tyyppi' },
+        { text: 'Vastustaja', value: 'opposite_team', align: 'center', tooltip: 'Vastustaja joukkue' },
+        { text: 'OJ 1', value: 'own_first', align: 'center', tooltip: 'Oman Joukkueen 1. Erä', width: '2%' },
+        { text: 'OJ 2', value: 'own_second', align: 'center', tooltip: 'Oman Joukkueen 2. Erä', width: '2%' },
+        { text: 'V 1', value: 'opp_first', align: 'center', tooltip: 'Vastustaja Joukkueen 1. Erä', width: '2%' },
+        { text: 'V 2', value: 'opp_second', align: 'center', tooltip: 'Vastustaja Joukkueen 2. Erä', width: '2%' },
+        // { text: 'H+VM', value: 'jotain', align: 'center', tooltip: 'Yhteensä pelissä oman joukkueen heittämät nolla heitot'},
+        // { text: 'JK', value: 'jotain', align: 'center', tooltip: '(Joulukuusi) Yhteensä pelissä oman joukkueen heittämät "6 kyykkää tai enemmän"- heitot'},
+        { text: 'OJ pis.', value: 'own_team_total', align: 'center', tooltip: 'Oman joukkueen pisteet' },
+        { text: 'V pis.', value: 'opposite_team_total', align: 'center', tooltip: 'Vastustaja joukkueen pisteet' }
+      ],
+      left_stats: [
+        { text: 'Poistetut Kyykät', value: 'score_total' },
+        { text: 'Ottelut', value: 'match_count' },
+        { text: 'Hauet', value: 'pikes_total' },
+        { text: 'Nolla heitot', value: 'zeros_total' },
+        { text: 'Nolla aloitukset', value: 'zero_or_pike_first_throw_total' }
+      ],
+      right_stats: [
+        { text: 'Heitot', value: 'throws_total' },
+        { text: 'Ottelu keskiarvo', value: 'match_average' },
+        { text: 'Haukiprosentti', value: 'pike_percentage' },
+        { text: 'Nollaprosentti', value: 'zero_percentage' },
+        { text: 'Joulukuuset', value: 'gteSix_total' }
+      ],
 
-            if (confirm('Haluatko varmasti varata pelaajan "'+item.player_name+'"?')) {
-              this.$http.post(post_url, post_data, {
-                headers: {
-                  'X-CSRFToken': this.getCookie('csrftoken')
-                },
-                  'withCredentials': true,        
-                }).then(function(response) {
-                  if (response.status === 200) {
-                      this.getPlayers();
-                      this.reserve.splice(index, 1);
-                  }
-                }).catch(function(response) {
-                  if (response.status == 403) {
-                    this.$http
-                      .get('api/csrf', {'withCredentials': true})
-                      .then(function(response) {
-                          if (response.status === 200) {
-                              this.getPlayers();
-                              this.reserve.splice(index, 1);
-                              this.$http.patch(post_url, post_data, {
-                              headers: {
-                                'X-CSRFToken': this.getCookie('csrftoken')
-                              },
-                                'withCredentials': true,
-                              })
-                          }
-                      });
-                  }
-              })
+      panel: [0],
+      stats: [],
+      players: [],
+      reserve: [],
+      matches: [],
+      selected_season: null,
+      all_time: [],
+      seasons_data: {}
+    }
+  },
+  methods: {
+    getPlayers () {
+      this.$http
+        .get('api/teams/' + this.team_id + '/?season=' + sessionStorage.season_id)
+        .then(
+          function (data) {
+            for (const [k, v] of Object.entries(data.body)) {
+              if (k == 'all_time') {
+                this.all_time = v
+              } else {
+                this.seasons_data[k] = v
+              }
             }
-        },
-        handleRedirect(value) {
-          location.href = '/pelaaja/'+value.id;
-        },
-        handleRedirectMatches(value) {
-          location.href = '/ottelu/'+value.id;
-        },
-        chanceTeamStats(value) {
-          this.selected_season = value
-          if (value == 'all_time') {
-            this.stats = [this.all_time]
-            this.players = this.all_time.players;
-            this.matches = this.all_time.matches
-          } else {
-            this.players = this.seasons_data[value].players;
-            this.header = this.seasons_data[value].current_name;
-            this.stats = [this.seasons_data[value]];
-            this.matches = this.seasons_data[value].matches
+            if (sessionStorage.season_id in this.seasons_data) {
+              this.selected_season = sessionStorage.season_id.toString()
+            } else {
+              this.selected_season = Math.max(...Object.keys(this.seasons_data).map(x => +x)).toString()
+            }
+            const tmp = this.seasons_data[this.selected_season]
+            this.players = tmp.players
+            this.header = tmp.current_name
+            this.stats = [tmp]
+            this.matches = tmp.matches
+          }
+        )
+    },
+    getReserve () {
+      this.$http.get('api/reserve/', {
+        withCredentials: true
+      }).then(
+        function (data) {
+          let i = 0
+          for (const player in data.body) {
+            if (data.body[i].team.current_name == '') {
+              this.reserve.push(data.body[i])
+            }
+            i++
           }
         },
-        getColor(val1, val2) {
-          if (val1 < val2) return '#C8E6C9' // green-lighten-4
-          else if (val1 > val2) return '#EF9A9A' // red-lighten-4
-          else return '#F0F4C3' // yellow-lighten-4
-        },
-    },
-    mounted() {
-        this.header = '';
-        this.getPlayers();
-        if (this.$session.get('user_id') && this.$session.get('role_id') == 1) {
-            this.getReserve();
-            this.isCaptain = true;
+        function (error) {
+          console.log(error.statusText)
         }
-    }
-};
-</script>
+      )
+    },
+    reserveButton (item) {
+      const post_data = { player: item.id }
+      const post_url = 'api/reserve/' + '?season=' + sessionStorage.season_id
+      const index = this.reserve.findIndex(player => player.id === item.id)
 
+      if (confirm('Haluatko varmasti varata pelaajan "' + item.player_name + '"?')) {
+        this.$http.post(post_url, post_data, {
+          headers: {
+            'X-CSRFToken': this.getCookie('csrftoken')
+          },
+          withCredentials: true
+        }).then(function (response) {
+          if (response.status === 200) {
+            this.getPlayers()
+            this.reserve.splice(index, 1)
+          }
+        }).catch(function (response) {
+          if (response.status == 403) {
+            this.$http
+              .get('api/csrf', { withCredentials: true })
+              .then(function (response) {
+                if (response.status === 200) {
+                  this.getPlayers()
+                  this.reserve.splice(index, 1)
+                  this.$http.patch(post_url, post_data, {
+                    headers: {
+                      'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    withCredentials: true
+                  })
+                }
+              })
+          }
+        })
+      }
+    },
+    handleRedirect (value) {
+      location.href = '/pelaaja/' + value.id
+    },
+    handleRedirectMatches (value) {
+      location.href = '/ottelu/' + value.id
+    },
+    chanceTeamStats (value) {
+      this.selected_season = value
+      if (value == 'all_time') {
+        this.stats = [this.all_time]
+        this.players = this.all_time.players
+        this.matches = this.all_time.matches
+      } else {
+        this.players = this.seasons_data[value].players
+        this.header = this.seasons_data[value].current_name
+        this.stats = [this.seasons_data[value]]
+        this.matches = this.seasons_data[value].matches
+      }
+    },
+    getColor (val1, val2) {
+      if (val1 < val2) return '#C8E6C9' // green-lighten-4
+      else if (val1 > val2) return '#EF9A9A' // red-lighten-4
+      else return '#F0F4C3' // yellow-lighten-4
+    }
+  },
+  mounted () {
+    this.header = ''
+    this.getPlayers()
+    if (this.$session.get('user_id') && this.$session.get('role_id') == 1) {
+      this.getReserve()
+      this.isCaptain = true
+    }
+  }
+}
+</script>
 
 <style>
 
@@ -413,4 +412,3 @@ tbody tr :hover {
 }
 
 </style>
-

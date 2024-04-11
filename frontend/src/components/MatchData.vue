@@ -25,10 +25,10 @@
             </v-col>
             <v-col justify="center" align="center">
               <a :href="'/joukkue/'+this.away.id">{{this.away.name}}</a>
-            </v-col>            
+            </v-col>
             <v-col justify="center" align="center" class="mr-5">
               <figure style="float:right;">
-                <img src="../../public/kyykkalogo120px.png">
+                <img src="../../kyykkalogo120px.png">
                 <figcaption v-if="this.home.score_total">
                   <br>
                   <v-chip
@@ -44,59 +44,59 @@
 
 <script>
 export default {
-    props: {
-      matchData: Object,
-    },
-    data() {
-        return {
-            match_time: '',
-            match_field: '',
-            type_name: '',
-            home: {
-                name: '',
-                score_total: '',
-                color: ''
-            },
-            away: {
-                name: '',
-                score_total: '',
-                color: ''
-            }
-        };
-    },
-    methods: {
-        getMatch() {
-          this.match_time = this.matchData.match_time;
-          this.match_field = this.matchData.field;
-          this.away.name = this.matchData.away_team.current_name;
-          this.home.name = this.matchData.home_team.current_name;
-          this.home.id = this.matchData.home_team.id;
-          this.away.id = this.matchData.away_team.id;
-          this.type_name = this.matchData.type_name
-
-          this.home.score_total = this.matchData.home_score_total;
-          this.away.score_total = this.matchData.away_score_total;
-
-          if (
-              this.home.score_total > this.away.score_total
-          ) {
-              this.home.color = 'red';
-              this.away.color = 'green';
-          } else if (
-            this.home.score_total < this.away.score_total
-          ) {
-              this.home.color = 'green';
-              this.away.color = 'red';
-          } else {
-              this.home.color = 'yellow'
-              this.away.color = 'yellow'
-          }
-        }
-    },
-    mounted() {
-        this.getMatch();
+  props: {
+    matchData: Object
+  },
+  data () {
+    return {
+      match_time: '',
+      match_field: '',
+      type_name: '',
+      home: {
+        name: '',
+        score_total: '',
+        color: ''
+      },
+      away: {
+        name: '',
+        score_total: '',
+        color: ''
+      }
     }
-};
+  },
+  methods: {
+    getMatch () {
+      this.match_time = this.matchData.match_time
+      this.match_field = this.matchData.field
+      this.away.name = this.matchData.away_team.current_name
+      this.home.name = this.matchData.home_team.current_name
+      this.home.id = this.matchData.home_team.id
+      this.away.id = this.matchData.away_team.id
+      this.type_name = this.matchData.type_name
+
+      this.home.score_total = this.matchData.home_score_total
+      this.away.score_total = this.matchData.away_score_total
+
+      if (
+        this.home.score_total > this.away.score_total
+      ) {
+        this.home.color = 'red'
+        this.away.color = 'green'
+      } else if (
+        this.home.score_total < this.away.score_total
+      ) {
+        this.home.color = 'green'
+        this.away.color = 'red'
+      } else {
+        this.home.color = 'yellow'
+        this.away.color = 'yellow'
+      }
+    }
+  },
+  mounted () {
+    this.getMatch()
+  }
+}
 </script>
 
 <style scoped>
@@ -104,6 +104,5 @@ a {
   color: black;
   text-decoration: none;
 }
-
 
 </style>
