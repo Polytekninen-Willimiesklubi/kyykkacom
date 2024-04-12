@@ -7,8 +7,9 @@ import { useNavBarStore } from "@/stores/navbar.store";
 const baseUrl = 'http://localhost:8000/api/teams/'; // TODO: change this to .env variable
 
 export const useHomeStore = defineStore('home', () => {
-    const allTeams = ref([]);
+    const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')));
     const noBrackets = ref(0);
+    const loading = ref(false);
 
     // Return in array of arrays. Each array contains one bracket teams 
     const bracketedTeams = computed(() => {
@@ -51,11 +52,12 @@ export const useHomeStore = defineStore('home', () => {
         const navStore = useNavBarStore()
         const question = '?season=' + navStore.seasonId + '&post_season=0'
         try {
+            loading.value = true;
             const response = await fetch(baseUrl + question, {method: 'GET'});
             const payload = await response.json();
-
             allTeams.value = payload;
             localStorage.setItem('allTeams', JSON.stringify(allTeams.value));
+            loading.value = false;
         } catch (error) {
             console.log(error);
         }
@@ -66,6 +68,7 @@ export const useHomeStore = defineStore('home', () => {
         noBrackets,
         bracketedTeams,
         superWeekendBrackets,
+        loading,
         getTeams,
     }
 })

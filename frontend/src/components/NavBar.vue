@@ -32,6 +32,7 @@
       class="mt-4"
       item-title="name"
       item-color="red"
+      return-object
       attach
     ></v-select>
     <v-spacer class="hidden-md-and-down"></v-spacer>

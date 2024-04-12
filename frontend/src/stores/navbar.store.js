@@ -1,5 +1,6 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
+import { useHomeStore } from "./home.store";
 // import { router } from "@/router";
 
 const baseUrl = 'http://localhost:8000/api/seasons' // TODO: change this to .env variable
@@ -9,9 +10,16 @@ export const useNavBarStore = defineStore('navbar', () => {
     const seasonId = ref(null)
     const seasons = ref([]);
 
-    function setSelectedSeason(val) {
-        localStorage.setItem('seasonId', val)
-        // router.push('/').catch(() => {
+    function setSelectedSeason(season) {
+        const homeStore = useHomeStore();
+
+        selectedSeason.value = season
+        seasonId.value = season.value
+        localStorage.setItem('seasonId', seasonId)
+
+        homeStore.getTeams();
+
+        // router.push('/').catch(() => { // TODO
         //     window.location.reload()
         // })
     }
