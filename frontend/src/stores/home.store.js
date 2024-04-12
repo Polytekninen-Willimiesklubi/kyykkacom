@@ -1,40 +1,71 @@
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { defineStore } from "pinia";
+import { useNavBarStore } from "@/stores/navbar.store";
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
+// const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
+
+const baseUrl = 'http://localhost:8000/api/teams/'; // TODO: change this to .env variable
 
 export const useHomeStore = defineStore('home', () => {
-    const teams = ref([]);
+    const allTeams = ref([]);
     const noBrackets = ref(0);
 
-    async function getTeams() {
-        const sessionId = localStorage.sessionId
-        const question = '?season=' + sessionId + '"post_season=0'
+    // Return in array of arrays. Each array contains one bracket teams 
+    const bracketedTeams = computed(() => {
+        if (noBrackets.value === 0 || allTeams.value.length === 0) {
+            return []
+        }
+        const returnedTeams = []
+        if (noBrackets.value > 1) {
+            for (let i = 0; i < noBrackets; i++) {
+                returnedTeams.push([]);
+            }
+            allTeams.forEach(ele => {
+                returnedTeams[ele.bracket -1].push(ele);
+            });
+            return returnedTeams
+        } else {
+            return [allTeams]
+        }
+    })
 
+    const superWeekendBrackets = computed( () => {
+        if (noBrackets.value === 0 || allTeams.value.length === 0) {
+            return []
+        }
+        const returnedTeams = []
+        if (noBrackets.value > 1) {
+            for (let i = 0; i < noBrackets; i++) {
+                returnedTeams.push([]);
+            }
+            allTeams.forEach(ele => {
+                returnedTeams[ele.super_weekend_bracket -1].push(ele);
+            });
+            return returnedTeams
+        } else {
+            return [allTeams]
+        }
+    }) 
+
+    async function getTeams() {
+        const navStore = useNavBarStore()
+        const question = '?season=' + navStore.seasonId + '&post_season=0'
         try {
             const response = await fetch(baseUrl + question, {method: 'GET'});
-            teams.value = response.data.body;
-            localStorage.setItem('allTeams', JSON.stringify(allTeams));
-        } catch (error) {
-            console.log(error.statusText);
-        }
-        splitToBrackets();
-    }
+            const payload = await response.json();
 
-    function splitToBrackets() {
-        if (localStorage.allSeasons) {
-            const allSeasons = JSON.parse(localStorage.getItem('allSeasons'));
-            const tmpIdx = allSeasons.map(ele => String(ele.id).indexOf(sessionId))
-            noBrackets.value = allSeasons[tmpIdx].no_brackets
-        } else {
-            noBrackets.value = 1
+            allTeams.value = payload;
+            localStorage.setItem('allTeams', JSON.stringify(allTeams.value));
+        } catch (error) {
+            console.log(error);
         }
     }
 
     return {
-        teams,
+        allTeams,
         noBrackets,
+        bracketedTeams,
+        superWeekendBrackets,
         getTeams,
-        splitToBrackets,
     }
 })

@@ -1,13 +1,3 @@
-<script setup>
-// import NavBar from '@/components/NavBar.vue';
-
-// if (!sessionStorage.season_id) {
-//   // Index starts at 1 : 2000
-//   sessionStorage.season_id = new Date().getFullYear() - 2000 + 1;
-// }
-
-</script>
-
 <template>
   <v-app>
     <v-main>
@@ -15,6 +5,18 @@
     </v-main>
   </v-app>
  </template>
+
+<script setup>
+import {useNavBarStore} from '@/stores/navbar.store';
+
+const store = useNavBarStore() 
+
+if (!store.seasonId) {
+  // Index starts at 1 : 2000
+  store.seasonId = new Date().getFullYear() - 2000 + 1;
+}
+
+</script>
 
 <style>
 

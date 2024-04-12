@@ -15,17 +15,18 @@
 
 <script setup>
 import { useHomeStore } from '@/stores/home.store';
+import { useNavBarStore } from '@/stores/navbar.store';
 
-const store = useHomeStore();
+const navStore = useNavBarStore(); 
+const homeStore = useHomeStore();
 
-// const loadedSeason = localStorage.loadedSeason;
-// const seasonId = localStorage.seasonId;
-// if (!loadedSeason || loadedSeason != seasonId) {
-//   store.getTeams()
-//   sessionStorage.loaded_season = seasonId
-// } else {
-//   store.splitToBrackets()
-// }
+const loadedSeason = localStorage.loadedSeason;
+const seasonId = localStorage.seasonId;
+if (loadedSeason !== seasonId || !localStorage.allTeams) {
+  homeStore.getTeams();
+  localStorage.loadedSeason = seasonId;
+}
+
 </script>
 
 <style>
