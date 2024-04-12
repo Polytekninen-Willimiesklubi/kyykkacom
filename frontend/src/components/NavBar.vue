@@ -117,7 +117,7 @@ const drawer = ref(false);
 const headers = [ 
   { title: 'Koti', route: '/', icon: 'mdi-home' },
   // { title: 'Ottelut', route: '/ottelut', icon: 'mdi-space-invaders' },
-  // { title: 'Joukkueet', route: '/joukkueet', icon: 'mdi-emoticon-poop' },
+  { title: 'Joukkueet', route: '/joukkueet', icon: 'mdi-emoticon-poop' },
   // { title: 'Pelaajat', route: '/pelaajat', icon: 'mdi-account-group' },
   // { 
   //   title: 'Oma Joukkue', route: '/joukkue/' + userStore.teamId, 
