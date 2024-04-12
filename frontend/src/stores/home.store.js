@@ -35,5 +35,6 @@ export const useHomeStore = defineStore('home', () => {
         teams,
         noBrackets,
         getTeams,
+        splitToBrackets,
     }
 })

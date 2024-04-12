@@ -1,7 +1,7 @@
 <template>
   <v-layout>
-    <div class="d-flex">
-      <h1 class="topic">Nationaali Kyykkä Liiga</h1>
+    <div class="d-flex flex-column">
+      <h1>Nationaali Kyykkä Liiga</h1>
       <lorem-ipsum />
     </div>
     <div class="d-flex right">

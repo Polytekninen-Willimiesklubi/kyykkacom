@@ -1,15 +1,16 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
+import { computed } from "vue";
 // import { router } from "@/router";
 
-const baseUrl = 'api/seasons'
+const baseUrl = 'http://localhost:8000/api/seasons' // TODO: change this to .env variable
 
 export const useNavBarStore = defineStore('navbar', () => {
     const selectedSeason = ref({});
     const seasons = ref([]);
 
-    function setSelectedSeason() {
-        localStorage.setItem('seasonId', selectedSeason)
+    function setSelectedSeason(val) {
+        localStorage.setItem('seasonId', val)
         // router.push('/').catch(() => {
         //     window.location.reload()
         // })
@@ -18,15 +19,11 @@ export const useNavBarStore = defineStore('navbar', () => {
     async function getSeasons() {
         try {
             const response = await fetch(baseUrl, {method: 'GET'})
-            const payload = response.data.body
-            const allSeasons = []
-            payload[0].forEach(ele => {
-                allSeasons.push(ele)
-            })
+            const payload = await response.json()
+            const allSeasons = payload[0]
+
             // There is two values in body and second one is current year
-            selectedSeason.value = {
-                value: payload[1].value   
-            }
+            selectedSeason.value = payload[1] 
             allSeasons.sort((x, y) => { // This makes the current year top most
                 if (x.name < y.name) { 
                     return 1 
@@ -45,8 +42,8 @@ export const useNavBarStore = defineStore('navbar', () => {
         }
     }
     return {
-        seasons,
         selectedSeason,
+        seasons,
         setSelectedSeason,
         getSeasons,
     }

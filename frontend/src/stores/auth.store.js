@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/login/`;
 
-function getCookie(name) {
+export function getCookie(name) {
     let cookieValue = null
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';')
@@ -19,7 +19,7 @@ function getCookie(name) {
     return cookieValue
 }
 
-async function fetchNewToken() {
+export async function fetchNewToken() {
     await fetch('api/csrf/', {withCredentials: true})
 }
 
@@ -30,7 +30,12 @@ export const useAuthStore = defineStore('auth', () => {
     const playerName = ref(JSON.parse(localStorage.getItem('playeName')));
     const loggedIn = ref(JSON.parse(localStorage.getItem('loggedIn')));
 
-    async function logIn(username, password, again=false) {
+    const alert = ref(false);
+    // const valid = ref(true);
+    // const loading = ref(false);
+    const credentials = ref({});
+
+    async function logIn( again=false) {
         try {
             const requestOpt = {
                 'method': 'POST',
@@ -38,10 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
                     'X-CSRFToken': getCookie('csrftoken')
                 },
                 'content-type': 'application/json',
-                'body': JSON.stringify({
-                    'username' : username,
-                    'password' : password
-                }),
+                'body': JSON.stringify(credentials),
                 withCredentials: true,
             };
             
@@ -53,28 +55,36 @@ export const useAuthStore = defineStore('auth', () => {
             if ([401, 403].includes(response.status) && user) {
                 // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
                 if (again) {
+                    alert.value = true
                     return false
                 }
                 fetchNewToken();
                 success = logIn(username, password, true);
                 if (!success) {
                     logOut();
+                    alert.value = true
                     return false
                 }
+                dialog.value = !dialog.value
+                alert.value = false
                 loggedIn.value = true
+
                 return true
             }
+            
+            dialog.value = !dialog.value
+            alert.value = false
 
-            userId.value = response.body.user_id
-            roleId.value = response.body.role
-            teamId.value = response.body.team_id
-            playerName.value = response.body.player_name
+            userId.value = data.body.user_id
+            roleId.value = data.body.role
+            teamId.value = data.body.team_id
+            playerName.value = data.body.player_name
             
             // store user details local storage to keep user logged in between page refreshes
-            localStorage.setItem('user_id', JSON.stringify(response.body.user.id));
-            localStorage.setItem('team_id', JSON.stringify(response.body.team_id));
-            localStorage.setItem('role_id', JSON.stringify(response.body.role));
-            localStorage.setItem('player_name', JSON.stringify(response.body.user.player_name));
+            localStorage.setItem('userId', JSON.stringify(data.body.user.id));
+            localStorage.setItem('teamId', JSON.stringify(data.body.team_id));
+            localStorage.setItem('roleId', JSON.stringify(data.body.role));
+            localStorage.setItem('playerName', JSON.stringify(data.body.user.player_name));
             localStorage.setItem('loggedIn', JSON.stringify(true));
 
             loggedIn.value = true
@@ -92,19 +102,35 @@ export const useAuthStore = defineStore('auth', () => {
         teamId.value = null
         playerName.value = null
         loggedIn.value = true
-        localStorage.removeItem('user')
         localStorage.removeItem('userId')
         localStorage.removeItem('teamId')
         localStorage.removeItem('roleId')
         localStorage.removeItem('playerName')
         localStorage.setItem('loggedIn', JSON.stringify(false))
     }
+
+    function changeLogin(userId, roleId, teamId, playeName, loginStatus=true) {
+        userId.value = userId
+        roleId.value = roleId
+        teamId.value = teamId
+        playerName.value = playeName
+        loggedIn.value = loginStatus
+        localStorage.setItem('userId', JSON.stringify(userId));
+        localStorage.setItem('teamId', JSON.stringify(teamId));
+        localStorage.setItem('roleId', JSON.stringify(roleId));
+        localStorage.setItem('playerName', JSON.stringify(playeName));
+        localStorage.setItem('loggedIn', JSON.stringify(loginStatus));
+    }
+
     return {
         userId,
         roleId,
         teamId,
         playerName,
+        loggedIn,
+        alert,
+        credentials,
         logIn,
-        logOut
+        logOut,
     }
 })

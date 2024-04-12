@@ -8,23 +8,9 @@
 
 </script>
 
-
-<!-- <template>
+<template>
   <v-app>
     <v-main>
-      <p>
-        jotain
-      </p>
-    </v-main>
-  </v-app>
-</template> -->
-
-<template>
-  <v-app class="app">
-    <v-main>
-      <p>
-        Kokeilu
-      </p>
       <router-view />
     </v-main>
   </v-app>
