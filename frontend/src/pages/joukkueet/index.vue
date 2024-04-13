@@ -11,7 +11,7 @@
           label="Etsi" 
           single-line 
           hide-details
-        ></v-text-field>
+        />
         <v-data-table 
           mobile-breakpoint="0"
           @click:row="handleRedirect"
@@ -24,8 +24,7 @@
           disable-pagination
           hide-default-footer
           dense
-        >
-        </v-data-table>
+        />
       </v-card>
     </div>
   </v-layout>
@@ -33,6 +32,8 @@
 
 <script setup>
 import { useHomeStore } from '@/stores/home.store';
+import { useTeamStore } from '@/stores/team.store';
+
 import { ref } from 'vue';
 
 const homeStore = useHomeStore();
@@ -46,10 +47,15 @@ const headers = [
   { text: 'Häviöt', value: 'matches_lost' },
   { text: 'Tasurit', value: 'matches_tie' },
   { text: 'Ottelu Ka', value: 'match_average' }
-]
+];
 
-function handleRedirect(value) {
-  location.href = '/joukkue/' + value.id
+function handleRedirect(value, row) {
+  const teamStore = useTeamStore();
+  teamStore.teamId = row.item.id;
+  console.log(teamStore.teamId)
+  setTimeout(() => {
+    location.href = '/joukkueet/' + row.item.id;
+  }, 4000)
 }
 
 </script>

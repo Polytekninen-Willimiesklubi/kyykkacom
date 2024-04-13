@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
+import { computed } from "vue";
 // import { router } from '@/router';
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/login/`;
@@ -34,6 +35,10 @@ export const useAuthStore = defineStore('auth', () => {
     // const valid = ref(true);
     // const loading = ref(false);
     const credentials = ref({});
+
+    const isCaptain = computed(() => {
+        return roleId.value === 1;
+    });
 
     async function logIn( again=false) {
         try {
@@ -130,6 +135,7 @@ export const useAuthStore = defineStore('auth', () => {
         loggedIn,
         alert,
         credentials,
+        isCaptain,
         logIn,
         logOut,
     }

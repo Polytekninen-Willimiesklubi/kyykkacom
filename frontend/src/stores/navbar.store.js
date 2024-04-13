@@ -7,8 +7,9 @@ const baseUrl = 'http://localhost:8000/api/seasons' // TODO: change this to .env
 
 export const useNavBarStore = defineStore('navbar', () => {
     const selectedSeason = ref({});
-    const seasonId = ref(null)
+    const seasonId = ref(null);
     const seasons = ref([]);
+    const currentSeasonId = ref(null);
 
     function setSelectedSeason(season) {
         const homeStore = useHomeStore();
@@ -47,6 +48,7 @@ export const useNavBarStore = defineStore('navbar', () => {
             // There is two values in body and second one is current year
             selectedSeason.value = payload !== null ? payload[1] : allSeasons[0]
             seasonId.value = selectedSeason.value.value;
+            currentSeasonId.value = seasonId.value
             localStorage.setItem('allSeasons', JSON.stringify(allSeasons));
             seasons.value = allSeasons;
 
@@ -59,6 +61,7 @@ export const useNavBarStore = defineStore('navbar', () => {
         selectedSeason,
         seasons,
         seasonId,
+        currentSeasonId,
         setSelectedSeason,
         getSeasons,
     }
