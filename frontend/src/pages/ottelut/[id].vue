@@ -6,7 +6,9 @@
           <v-card v-if="dataReady">
             <h3 class="text-md-left headline">
               {{matchData.type_name}} kenttä <span v-if="matchData.field">{{matchData.field}}</span><span v-else>TBD</span>
-              <span style="float:right;">{{ date.formatByString(date.date(matchData.match_time), 'yyyy-MM-dd HH:mm') }}</span>
+              <span style="float:right;">
+                {{ date.formatByString(date.date(matchData.match_time), 'yyyy-MM-dd HH:mm') }}
+              </span>
             </h3>
             <v-row>
               <v-col justify="center" align="center" class="ml-5">
@@ -15,19 +17,26 @@
                   <figcaption v-if="matchData.home_score_total">
                     <br>
                     <v-chip
-                      :color="`${getColor(matchData.home_score_total, matchData.away_score_total)} lighten-2`"
-                    >{{matchData.home_score_total}}</v-chip>
+                      :color="`${getColor(matchData.home_score_total,
+                        matchData.away_score_total)} lighten-2`"
+                    >
+                      {{matchData.home_score_total}}
+                    </v-chip>
                   </figcaption>
                 </figure>
               </v-col>
               <v-col justify="center" align="center">
-                <a :href="'/joukkue/'+matchData.home_team.id">{{matchData.home_team.current_name}}</a>
+                <a :href="'/joukkue/'+matchData.home_team.id">
+                  {{matchData.home_team.current_name}}
+                </a>
               </v-col>
               <v-col justify="center" align="center">
                 vs.
               </v-col>
               <v-col justify="center" align="center">
-                <a :href="'/joukkue/'+matchData.away_team.id">{{matchData.away_team.current_name}}</a>
+                <a :href="'/joukkue/'+matchData.away_team.id">
+                  {{matchData.away_team.current_name}}
+                </a>
               </v-col>
               <v-col justify="center" align="center" class="mr-5">
                 <figure>
@@ -35,7 +44,8 @@
                   <figcaption v-if="matchData.home_score_total">
                     <br>
                     <v-chip
-                      :color="`${getColor(matchData.away_score_total, matchData.home_score_total)} lighten-2`"
+                      :color="`${getColor(matchData.away_score_total,
+                        matchData.home_score_total)} lighten-2`"
                     >{{matchData.away_score_total}}</v-chip>
                   </figcaption>
                 </figure>
@@ -52,7 +62,8 @@
               :matchData="matchData" 
               roundNumber="1" 
               teamSide="home"
-              :color="getColor(matchData.home_first_round_score, matchData.away_first_round_score)"
+              :color="getColor(matchData.home_first_round_score,
+                matchData.away_first_round_score)"
             />
           </v-card>
         </v-col>
@@ -63,7 +74,8 @@
               :matchData="matchData" 
               roundNumber="1" 
               teamSide="away"
-              :color="getColor(matchData.away_first_round_score, matchData.home_first_round_score)"
+              :color="getColor(matchData.away_first_round_score,
+                matchData.home_first_round_score)"
             />
           </v-card>
         </v-col>
@@ -76,7 +88,8 @@
               :matchData="matchData" 
               roundNumber="2" 
               teamSide="home"
-              :color="getColor(matchData.home_second_round_score, matchData.away_second_round_score)"
+              :color="getColor(matchData.home_second_round_score,
+                matchData.away_second_round_score)"
             />
           </v-card>
         </v-col>
@@ -87,7 +100,8 @@
               :matchData="matchData" 
               roundNumber="2" 
               teamSide="away"
-              :color="getColor(matchData.away_second_round_score, matchData.home_second_round_score)"
+              :color="getColor(matchData.away_second_round_score,
+                matchData.home_second_round_score)"
             />
           </v-card>
         </v-col>
@@ -96,7 +110,7 @@
         <v-col class="text-xs-center">
           <v-btn 
             v-if="dataReady && authStore.isCaptain" 
-            @click="validateClick" 
+            @click="matchStore.validateClick()" 
             x-large
             color="error"
           >
@@ -139,9 +153,6 @@ function getColor(teamScore, team2Score) {
   }
 
 }
-
-
-
 
 </script>
 
