@@ -9,7 +9,7 @@ import { getCookie, fetchNewToken } from '@/stores/auth.store';
 const baseUrl = 'http://localhost:8000/api/matches/'; // TODO: change this to .env variable
 const throwUrl = 'http://localhost:8000/api/throws/update/';
 
-export const useMatchStore = defineStore('round', () => {
+export const useRoundStore = defineStore('round', () => {
     const loading = ref(false);
 
     async function patchRoundScore(teamSide, roundNumber, roundScore) {
