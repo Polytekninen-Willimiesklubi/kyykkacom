@@ -15,7 +15,7 @@
         <v-data-table 
           mobile-breakpoint="0"
           :headers="headers"
-          @click:row="handleRedirect()"
+          @click:row="handleRedirect"
           :sortDesc="sortDesc"
           :sortBy="sortBy"
           :items="playerStore.players"
@@ -149,6 +149,7 @@ function custSort(items, index, isDescending) {
 
 
 </script>
+
 <style scoped>
 
 tbody tr :hover {

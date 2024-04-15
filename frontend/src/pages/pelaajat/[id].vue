@@ -1,14 +1,14 @@
 <template>
     <v-layout>
-      <v-flex auto>
+      <div class="d-flex" auto>
         <pelaaja />
-      </v-flex>
-      <v-flex xs4 class="pl-3 hidden-md-and-down">
+      </div>
+      <div class="d-flex pl-3 xs4 hidden-md-and-down">
         <!-- <side-bar
           :no_brackets="no_brackets"
           :non-default-teams="teams"
         /> -->
-      </v-flex>
+      </div>
     </v-layout>
   </template>
 

@@ -17,7 +17,6 @@ export const useRoundStore = defineStore('round', () => {
         const index = roundNumber === '1' ? 0 : 1;
         const key = teamSide + '_' + round[index] + '_round_score'
 
-
         const requestOpt = {
             'method': 'PATCH',
             'headers': {
@@ -130,6 +129,8 @@ export const useRoundStore = defineStore('round', () => {
     }
 
     return {
-        patchRoundScore
+        loading,
+        patchRoundScore,
+        updateThrowScores
     }
 });

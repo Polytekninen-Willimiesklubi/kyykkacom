@@ -1,6 +1,10 @@
 <template>
     <v-card>
-        <canvas :id="this.id_name" :width="this.width_px" :height="this.height_px"></canvas>
+        <canvas 
+          :id="this.id_name" 
+          :width="this.width_px" 
+          :height="this.height_px"
+        ></canvas>
     </v-card>
 </template>
 
