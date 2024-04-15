@@ -52,6 +52,7 @@
               :matchData="matchData" 
               roundNumber="1" 
               teamSide="home"
+              :color="getColor(matchData.home_first_round_score, matchData.away_first_round_score)"
             />
           </v-card>
         </v-col>
@@ -62,6 +63,7 @@
               :matchData="matchData" 
               roundNumber="1" 
               teamSide="away"
+              :color="getColor(matchData.away_first_round_score, matchData.home_first_round_score)"
             />
           </v-card>
         </v-col>
@@ -74,6 +76,7 @@
               :matchData="matchData" 
               roundNumber="2" 
               teamSide="home"
+              :color="getColor(matchData.home_second_round_score, matchData.away_second_round_score)"
             />
           </v-card>
         </v-col>
@@ -84,6 +87,7 @@
               :matchData="matchData" 
               roundNumber="2" 
               teamSide="away"
+              :color="getColor(matchData.away_second_round_score, matchData.home_second_round_score)"
             />
           </v-card>
         </v-col>

@@ -30,12 +30,10 @@ export const useMatchStore = defineStore('match', () => {
         }
     }
 
-
     return {
         matchData,
         dataReady,
         isAwayCaptain,
         getMatchData,
     }
-
 });
