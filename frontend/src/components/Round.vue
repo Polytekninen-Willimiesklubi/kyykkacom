@@ -1,67 +1,108 @@
 <template>
   <v-card>
-    <v-card-title class="pa-0 pl-3 pt-3">Erä {{this.roundNumber}}<v-spacer/><v-progress-circular :size="20" :width="2" indeterminate color="red" v-if="loading"/></v-card-title>
+    <v-card-title class="pa-0 pl-3 pt-3">
+      Erä {{this.roundNumber}}
+      <v-spacer/>
+      <v-progress-circular 
+        :size="20" 
+        :width="2" 
+        indeterminate color="red" 
+        v-if="loading"
+      />
+    </v-card-title>
     <v-row v-if="!show_input" row wrap>
       <v-card-text v-if="this.round_score || this.round_score == '0'">
         <p>
           {{this.team}}
           <v-chip
             style="float:right;"
-            :color="`${this.color} lighten-2`"
+            :color="this.color"
             label
             small
             class="mr-2"
-          >{{this.round_score}}</v-chip>
+          >
+            {{this.round_score}}
+          </v-chip>
         </p>
       </v-card-text>
     </v-row>
-    <v-divider></v-divider>
+    <v-divider />
     <v-row v-if="show_input" row wrap>
       <v-card-text v-if="loaded">
         <p>
           {{this.team}}
-          <v-text-field @input="roundScore()" style="width:10%; float:right;" v-model="round_score" class="centered-input" label="total" maxlength="3"/>
+          <v-text-field 
+            @input="roundScore()" 
+            style="width:10%; float:right;" 
+            v-model="round_score" 
+            class="centered-input" 
+            label="total" 
+            maxlength="3"
+          />
         </p>
       </v-card-text>
     </v-row>
-    <v-data-table mobile-breakpoint="0" disable-pagination dense
+    <!-- TODO loading -->
+    <v-data-table 
       v-if="!show_input"
+      mobile-breakpoint="0" 
       :headers="headers"
       @click:row="handleRedirect"
       :items="data"
-      hide-default-footer
+      no-data-text="Ei dataa :("
+      :no-filter="true"
     >
-      <template v-slot:no-data>
-        <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
-      </template>
-
+      <template #bottom></template> <!-- This hides the pagination controls-->
     </v-data-table>
-    <v-data-table mobile-breakpoint="0" disable-pagination dense
-      v-if="show_input"
-      disable-initial-sort
+    <!-- TODO loading -->
+    <v-data-table 
+      v-else
+      mobile-breakpoint="0" 
       v-model="select"
       :headers="headers"
       :items="data"
-      hide-default-footer
       :items-per-page="4"
-      >
-      <template v-slot:no-data>
-        <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
-      </template>
+    >
       <template v-slot:headers class="text-xs-center"></template>
       <template v-slot:item="props" >
         <tr>
           <td :ref="'id_'+props.index">{{selected[props.index].player.id}}</td>
           <td>
-            <v-select item-color="red" color="red" v-model="selected[props.index].player.player_name" @change="loadPlayer($event, props.index)" class="text-center pr-1" placeholder="Select player" :items="players" single-line></v-select>
+            <v-select 
+              item-color="red"
+              color="red"
+              v-model="selected[props.index].player.player_name"
+              @change="loadPlayer($event, props.index)" 
+              class="text-center pr-1" 
+              placeholder="Select player" 
+              :items="players" 
+              single-line
+            />
           </td>
-          <td><v-text-field color="red" v-model="selected[props.index]['score_first']" :ref="'first_throw_'+props.index" class="centered-input" maxlength="2" @input="sumTotal(props.index)" v-on:keypress="isNumber($event)"/></td>
-          <td><v-text-field color="red" v-model="selected[props.index]['score_second']" :ref="'second_throw_'+props.index" class="centered-input" maxlength="2" @input="sumTotal(props.index)" v-on:keypress="isNumber($event)"/></td>
-          <td><v-text-field color="red" v-model="selected[props.index]['score_third']" :ref="'third_throw_'+props.index" class="centered-input" maxlength="2" @input="sumTotal(props.index)" v-on:keypress="isNumber($event)"/></td>
-          <td><v-text-field color="red" v-model="selected[props.index]['score_fourth']" :ref="'fourth_throw_'+props.index" class="centered-input" maxlength="2" @input="sumTotal(props.index)" v-on:keypress="isNumber($event)"/></td>
-          <td class="centered-input" style="font-size:18px" :ref="'throw_sum_'+props.index">{{selected[props.index]['score_total']}}</td>
+          <div v-for="i in ['first', 'second', 'third', 'fourth']">
+            <td>
+              <v-text-field 
+                color="red"
+                v-model="selected[props.index]['score_'+ i]"
+                :ref="i+'_throw_'+props.index"
+                class="centered-input"
+                maxlength="2"
+                @input="sumTotal(props.index)"
+                @keypress="isNumber($event)"
+              />
+            </td>
+          </div>
+          <td 
+            class="centered-input" 
+            style="font-size:18px" 
+            :ref="'throw_sum_'+props.index"
+          >
+            {{selected[props.index]['score_total']}}
+          </td>
         </tr>
+        
       </template>
+      <template #bottom></template> <!-- This hides the pagination controls-->
     </v-data-table>
   </v-card>
 </template>
@@ -109,23 +150,21 @@ export default {
       is_validated: '',
       data: [],
       headers: [
+        // {
+        //   text: this.teamSide,
+        //   value: 'player.player_number',
+        //   width: '5%'
+        // },
         {
-          text: this.teamSide,
-          value: 'player.player_number',
-          sortable: false,
-          width: '5%'
-        },
-        {
-          text: 'player',
+          title: 'Pelaaja',
           value: 'player.player_name',
-          sortable: false,
-          width: '35%'
+          width: '45%'
         },
-        { text: 1, value: 'score_first', sortable: false, width: '10%' },
-        { text: 2, value: 'score_second', sortable: false, width: '10%' },
-        { text: 3, value: 'score_third', sortable: false, width: '10%' },
-        { text: 4, value: 'score_fourth', sortable: false, width: '10%' },
-        { text: 'Pts.', align: 'center', sortable: false, value: 'score_total', width: '5%' }
+        { title: 1, align: 'center', value: 'score_first', width: '10%' },
+        { title: 2, align: 'center', value: 'score_second', width: '10%' },
+        { title: 3, align: 'center', value: 'score_third', width: '10%' },
+        { title: 4, align: 'center', value: 'score_fourth', width: '10%' },
+        { title: 'Yht.', align: 'center', value: 'score_total', width: '5%' }
       ],
       options: {
         itemsPerPage: 4
@@ -133,9 +172,9 @@ export default {
     }
   },
   methods: {
-    handleRedirect (value) {
-      console.log(value)
-      location.href = '/pelaaja/' + value.player.id
+    handleRedirect (value, row) {
+      console.log(value, row)
+      location.href = '/pelaajat/' + row.item.player.id
     },
     isNumber (evt) {
       // Checks that the value is an H or a numeric value from the ASCII table.
