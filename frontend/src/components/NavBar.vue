@@ -23,8 +23,8 @@
       </v-btn>
     </div>
 
-    <v-spacer class="hidden-md-and-down"></v-spacer>
-    <v-spacer class="hidden-md-and-down"></v-spacer>
+    <v-spacer class="hidden-md-and-down" />
+    <v-spacer class="hidden-md-and-down" />
     <v-select
       @update:model-value="(val) => navStore.setSelectedSeason(val)"
       v-model="navStore.selectedSeason"
@@ -34,9 +34,9 @@
       item-color="red"
       return-object
       attach
-    ></v-select>
-    <v-spacer class="hidden-md-and-down"></v-spacer>
-    <v-spacer class="hidden-md-and-down"></v-spacer>
+    />
+    <v-spacer class="hidden-md-and-down" />
+    <v-spacer class="hidden-md-and-down" />
 
     <div class="hidden-md-and-down pa-4" v-if="!userStore.loggedIn">
       <!-- <log-in /> -->
@@ -57,7 +57,7 @@
         </v-btn>
     </div>
 
-    <v-spacer></v-spacer>
+    <v-spacer />
     <v-app-bar-nav-icon class="hidden-lg-and-up mr-4" @click.stop="drawer = !drawer"/>
   </v-app-bar>
     <v-navigation-drawer

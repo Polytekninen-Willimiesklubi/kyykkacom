@@ -3,23 +3,34 @@
     <v-row>
       <v-col>
         <v-card>
-          <v-card-title align="center">{{header}}</v-card-title>
+          <v-card-title align="center">{{playerStore.player.player_name}}</v-card-title>
           <v-data-table
             :headers="overall_player_stats"
-            :items="stats"
+            :items="[playerStore.player]"
             color='alert'
             mobile-breakpoint="0"
           >
-            <template v-slot:header="{ props }">
-              <th
-                v-for="h in props.headers"
+            <template v-for="h in overall_player_stats" v-slot:[`header.${h.value}`]="{ header }"> 
+              <th>
+                {{ h.title }}
+                <v-tooltip
+                  activator="parent"
+                  location="bottom"
+                >
+                  {{ h.tooltip }}
+                </v-tooltip>
+              </th>
+              <!-- <th
+                v-for="h in header"
                 class="head-font"
                 :class="returnHeaderColor(h.text)"
                 @click="chanceHeaderStat"
               >
                 {{ h.text }}
-              </th>
+              </th> -->
+          
             </template>
+            <template #bottom></template> <!-- This hides the pagination controls-->
           </v-data-table>
         </v-card>
       </v-col>
@@ -29,16 +40,17 @@
         <v-card>
           <v-data-table
             mobile-breakpoint="0"
-            disable-pagination
             color='alert'
             @click:row="chanceSeason"
             :headers="season_stats"
             height="200px"
-            :items="all_seasons"
+            no-data-text="Ei pelattuja kausia"
+            :items="playerStore.player.stats_per_seasons"
             :item-class="returnStyle"
-            hide-default-footer
-            dense
-           />
+            fixed-header
+          >
+            <template #bottom></template> <!-- This hides the pagination controls-->
+          </v-data-table>
         </v-card>
       </v-col>
     </v-row>
@@ -92,6 +104,7 @@
           true-value="Peleittäin"
           false-value="Erittäin"
           :label="`${sort_games_switch}`"
+          @update:modelValue="filtterItems"
         />
       </v-col>
       <v-col cols="2">
@@ -101,6 +114,7 @@
           true-value="Valitut kaudet"
           false-value="Kaikki kaudet"
           :label="`${filter_games_switch}`"
+          @update:modelValue="filtterItems"
         />
       </v-col>
       <v-spacer/>
@@ -121,75 +135,40 @@
     <v-row>
       <v-col>
         <v-card>
+          <!-- TODO: loading -->
           <v-data-table
-            v-if="sort_games_switch=='Erittäin'"
             @click:row="handleRedirect"
             mobile-breakpoint="0"
             color='alert'
             class="left-border-period"
+            no-data-text="Ei dataa :("
             :search="search"
-            :headers="headers"
-            :items="filtterItems"
+            :headers="matchHeaders"
+            :items="matchItems"
             :custom-sort="throwSort"
-            dense
           >
-            <template v-slot:no-data v-if="!data_loaded">
-              <v-progress-linear color="red" slot="progress" indeterminate />
+            <template v-for="h in matchHeaders" v-slot:[`header.${h.value}`]="{ header }">  
+              <span>
+                {{ h.title }}
+                <v-tooltip
+                  activator="parent"
+                  location="bottom"
+                >
+                  {{ h.tooltip }}
+                </v-tooltip>
+              </span>
             </template>
-            <template v-for="h in headers" v-slot:[`header.${h.value}`]="{ header }">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <span v-on="on">{{h.text}}</span>
-                </template>
-                <span>{{h.tooltip}}</span>
-              </v-tooltip>
+            <template v-slot:[`item.match_time`]="{ item }">
+              <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
             </template>
-            <template v-slot:item.match_time="{ item }">
-              <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
-            </template>
-            <template v-slot:item.own_score_round="{ item }">
-              <v-chip :color="getColor(item.own_score_round, item.opp_score_round)">
-                {{ item.own_score_round }}
+            <template v-slot:item.own_team_total="{ item }">
+              <v-chip :color="getColor(item.own_team_total, item.opposite_team_total)">
+                {{ item.own_team_total }}
               </v-chip>
             </template>
-            <template v-slot:item.opp_score_round="{ item }">
-              <v-chip :color="getColor(item.opp_score_round, item.own_score_round)">
-                {{ item.opp_score_round }}
-              </v-chip>
-            </template>
-          </v-data-table>
-          <v-data-table v-else
-            :headers="headers_games"
-            :items="filtterItems"
-            @click:row="handleRedirect"
-            :custom-sort="throwSort"
-            mobile-breakpoint="0"
-            class='left-border-match'
-            color='alert'
-            dense
-          >
-            <template v-slot:no-data v-if="!data_loaded">
-              <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
-            </template>
-            <template v-for="h in headers_games" v-slot:[`header.${h.value}`]="{ header }">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <span v-on="on">{{ h.text }}</span>
-                </template>
-                <span>{{ h.tooltip }}</span>
-              </v-tooltip>
-            </template>
-            <template v-slot:item.match_time="{ item }">
-              <span>{{ item.match_time | luxon('y-MM-dd HH:mm') }}</span>
-            </template>
-            <template v-slot:item.own_score="{ item }">
-              <v-chip :color="getColor(item.own_score, item.opponent_score)">
-                {{ item.own_score }}
-              </v-chip>
-            </template>
-            <template v-slot:item.opponent_score="{ item }">
-              <v-chip :color="getColor(item.opponent_score, item.own_score)">
-                {{ item.opponent_score }}
+            <template v-slot:item.opposite_team_total="{item}">
+              <v-chip :color="getColor(item.opposite_team_total, item.own_team_total)">
+                {{ item.opposite_team_total }}
               </v-chip>
             </template>
           </v-data-table>
@@ -200,17 +179,19 @@
 </template>
 
 <script setup>
+import { useNavBarStore } from '@/stores/navbar.store';
 import { usePlayerStore } from '@/stores/players.store';
+import { useDate } from 'vuetify';
 
 const playerStore = usePlayerStore();
+const navStore = useNavBarStore();
+const date = useDate();
 
 const playersSeasons = playerStore.player.stats_per_seasons;
 
-const header = ref('')
 const search = ref('')
 const sort_games_switch = ref('Erittäin');
 const filter_games_switch = ref('Kaikki kaudet');
-const stats = ref([]);
 const styles = ref(['blue-row', 'red-row', 'green-row', 'yellow-row', 'purple-row']);
 const all_colors = ref(['#B3E5FC', '#EF9A9A', '#A5D6A7', '#DCE775', '#BA68C8']);
 const canvas1_labels = ref(['0', '1', '2', '3', '4', '5', '≥6']);
@@ -219,88 +200,96 @@ const canvas3_labels = ref(['1', '2', '3', '4']);
 const canvas1_data = ref([]);
 const canvas2_data = ref([]);
 const canvas3_data = ref([]);
-const matches_periods = ref([]);
-const matches_match = ref([]);
-const all_seasons = ref([]);
 const current_selection = ref([]);
 const column_current_selection = ref([]);
 const column_colors =  ref(['KPH', '', '', '', '']);
 const colors = ref(['', '', '', '', '']);
-const throw_chart = ref('');
 
-const headers = [
-  { text: 'Aika', value: 'match_time', align: 'center', tooltip: 'Pelausaika' },
-  { text: 'Vastustaja', value: 'opp_name', align: 'center', tooltip: 'Vastustaja joukkue' },
-  { text: 'Erä', value: 'period', align: 'center', tooltip: 'Pelin erä' },
-  { text: 'HP', value: 'turn', align: 'center', tooltip: 'Heittopaikka' },
-  { text: '1', value: 'score_first', align: 'center', tooltip: '1. heitto (Kyykkää)' },
-  { text: '2', value: 'score_second', align: 'center', tooltip: '2. heitto (Kyykkää)' },
-  { text: '3', value: 'score_third', align: 'center', tooltip: '3. heitto (Kyykkää)' },
-  { text: '4', value: 'score_fourth', align: 'center', tooltip: '4. heitto (Kyykkää)' },
-  { text: 'Yht.', value: 'score_total', align: 'center', tooltip: 'Heitot Yhteensä (Kyykkää)' },
-  { text: 'KPH', value: 'score_average_round', align: 'center', tooltip: 'Kyykkää per Heitto' },
-  { text: 'OJ pis.', value: 'own_score_round', align: 'center', tooltip: 'Oman joukkueen pisteet' },
-  { text: 'V pis.', value: 'opp_score_round', align: 'center', tooltip: 'Vastustaja joukkueen pisteet' }
-]
+const matchItems = ref([]);
+
+const headers_periods = [
+  { title: 'Aika', value: 'match_time', align: 'center', tooltip: 'Pelausaika' },
+  { title: 'Vastustaja', value: 'opp_name', align: 'center', tooltip: 'Vastustaja joukkue' },
+  { title: 'Erä', value: 'period', align: 'center', tooltip: 'Pelin erä' },
+  { title: 'HP', value: 'turn', align: 'center', tooltip: 'Heittopaikka' },
+  { title: '1', value: 'score_first', align: 'center', tooltip: '1. heitto (Kyykkää)' },
+  { title: '2', value: 'score_second', align: 'center', tooltip: '2. heitto (Kyykkää)' },
+  { title: '3', value: 'score_third', align: 'center', tooltip: '3. heitto (Kyykkää)' },
+  { title: '4', value: 'score_fourth', align: 'center', tooltip: '4. heitto (Kyykkää)' },
+  { title: 'Yht.', value: 'score_total', align: 'center', tooltip: 'Heitot Yhteensä (Kyykkää)' },
+  { title: 'KPH', value: 'score_average_round', align: 'center', tooltip: 'Kyykkää per Heitto' },
+  { title: 'OJ pis.', value: 'own_score_round', align: 'center', tooltip: 'Oman joukkueen pisteet' },
+  { title: 'V pis.', value: 'opp_score_round', align: 'center', tooltip: 'Vastustaja joukkueen pisteet' }
+];
+
+const matchHeaders = ref(headers_periods);
+
 const headers_games = [
-  { text: 'Aika', value: 'match_time', align: 'center', tooltip: 'Pelausaika' },
-  { text: 'Vastustaja', value: 'opponent_name', align: 'center', tooltip: 'Vastustaja joukkue' },
-  { text: 'HP1', value: 'throw_turn_one', align: 'center', tooltip: '1. erän heittopaikka' },
-  { text: 'HP2', value: 'throw_turn_two', align: 'center', tooltip: '2. erän heittopaikka' },
-  { text: '1', value: 'score_first', align: 'center', tooltip: '1.erän 1.heitto (Kyykkää)' },
-  { text: '2', value: 'score_second', align: 'center', tooltip: '1.erän 2.heitto (Kyykkää)' },
-  { text: '3', value: 'score_third', align: 'center', tooltip: '1.erän 3.heitto (Kyykkää)' },
-  { text: '4', value: 'score_fourth', align: 'center', tooltip: '1.erän 4.heitto (Kyykkää)' },
-  { text: '5', value: 'score_fifth', align: 'center', tooltip: '2.erän 1.heitto (Kyykkää)' },
-  { text: '6', value: 'score_sixth', align: 'center', tooltip: '2.erän 2.heitto (Kyykkää)' },
-  { text: '7', value: 'score_seventh', align: 'center', tooltip: '2.erän 3.heitto (Kyykkää)' },
-  { text: '8', value: 'score_eighth', align: 'center', tooltip: '2.erän 4.heitto (Kyykkää)' },
-  { text: 'Yht.', value: 'score_total', align: 'center', tooltip: 'Heitot Yhteensä (Kyykkää)' },
-  { text: 'KPH', value: 'score_average_match', align: 'center', tooltip: 'Kyykkää per Heitto' },
-  { text: 'OJ pis.', value: 'own_score', align: 'center', tooltip: 'Oman joukkueen pisteet' },
-  { text: 'V pis.', value: 'opponent_score', align: 'center', tooltip: 'Vastustaja joukkueen pisteet' }
+  { title: 'Aika', value: 'match_time', align: 'center', tooltip: 'Pelausaika' },
+  { title: 'Vastustaja', value: 'opponent_name', align: 'center', tooltip: 'Vastustaja joukkue' },
+  { title: 'HP1', value: 'throw_turn_one', align: 'center', tooltip: '1. erän heittopaikka' },
+  { title: 'HP2', value: 'throw_turn_two', align: 'center', tooltip: '2. erän heittopaikka' },
+  { title: '1', value: 'score_first', align: 'center', tooltip: '1.erän 1.heitto (Kyykkää)' },
+  { title: '2', value: 'score_second', align: 'center', tooltip: '1.erän 2.heitto (Kyykkää)' },
+  { title: '3', value: 'score_third', align: 'center', tooltip: '1.erän 3.heitto (Kyykkää)' },
+  { title: '4', value: 'score_fourth', align: 'center', tooltip: '1.erän 4.heitto (Kyykkää)' },
+  { title: '5', value: 'score_fifth', align: 'center', tooltip: '2.erän 1.heitto (Kyykkää)' },
+  { title: '6', value: 'score_sixth', align: 'center', tooltip: '2.erän 2.heitto (Kyykkää)' },
+  { title: '7', value: 'score_seventh', align: 'center', tooltip: '2.erän 3.heitto (Kyykkää)' },
+  { title: '8', value: 'score_eighth', align: 'center', tooltip: '2.erän 4.heitto (Kyykkää)' },
+  { title: 'Yht.', value: 'score_total', align: 'center', tooltip: 'Heitot Yhteensä (Kyykkää)' },
+  { title: 'KPH', value: 'score_average_match', align: 'center', tooltip: 'Kyykkää per Heitto' },
+  { title: 'OJ pis.', value: 'own_score', align: 'center', tooltip: 'Oman joukkueen pisteet' },
+  { title: 'V pis.', value: 'opponent_score', align: 'center', tooltip: 'Vastustaja joukkueen pisteet' }
 ]
 const overall_player_stats = [
-  { text: 'Kausi', value: 'season', align: 'center', tooltip: 'Kaikkien kausien tulokset', sortable: false },
-  { text: 'Kaudet', value: 'season_count', align: 'center', tooltip: 'Pelatut NKL kaudet', sortable: false },
-  { text: 'Erät', value: 'all_rounds_total', align: 'center', tooltip: 'Kaikki pelatut erät', sortable: false },
-  { text: 'Poistetut kyykät', value: 'all_score_total', align: 'center', tooltip: 'Kaikki poistetut kyykät', sortable: false },
-  { text: 'Heitot', value: 'all_throws_total', align: 'center', tooltip: 'Kaikki heitot', sortable: false },
-  { text: 'KPH', value: 'total_average_throw', align: 'center', tooltip: 'Kyykkää per Heitto', sortable: false },
-  { text: 'kHP', value: 'total_average_throw_turn', align: 'center', tooltip: 'Keskimääräinen heittopaikka', sortable: false },
-  { text: 'Hauet', value: 'all_pikes_total', align: 'center', tooltip: 'Kaikki Hauet', sortable: false },
-  { text: 'H%', value: 'total_pike_percentage', align: 'center', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot', sortable: false },
-  { text: 'Virkamiehet', value: 'all_zeros_total', align: 'center', tooltip: 'Nollaheitot ilman haukia', sortable: false },
-  { text: 'VM%', value: 'total_zero_percentage', align: 'center', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot', sortable: false },
-  { text: 'JK', value: 'all_gteSix_total', align: 'center', tooltip: 'Joulukuuset: 6 tai paremmat heitot', sortable: false }
+  { title: 'Kausi', value: 'season', align: 'center', tooltip: 'Kaikkien kausien tulokset', sortable: false },
+  { title: 'Kaudet', value: 'season_count', align: 'center', tooltip: 'Pelatut NKL kaudet', sortable: false },
+  { title: 'Erät', value: 'all_rounds_total', align: 'center', tooltip: 'Kaikki pelatut erät', sortable: false },
+  { title: 'Poistetut kyykät', value: 'all_score_total', align: 'center', tooltip: 'Kaikki poistetut kyykät', sortable: false },
+  { title: 'Heitot', value: 'all_throws_total', align: 'center', tooltip: 'Kaikki heitot', sortable: false },
+  { title: 'KPH', value: 'total_average_throw', align: 'center', tooltip: 'Kyykkää per Heitto', sortable: false },
+  { title: 'kHP', value: 'total_average_throw_turn', align: 'center', tooltip: 'Keskimääräinen heittopaikka', sortable: false },
+  { title: 'Hauet', value: 'all_pikes_total', align: 'center', tooltip: 'Kaikki Hauet', sortable: false },
+  { title: 'H%', value: 'total_pike_percentage', align: 'center', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot', sortable: false },
+  { title: 'Virkamiehet', value: 'all_zeros_total', align: 'center', tooltip: 'Nollaheitot ilman haukia', sortable: false },
+  { title: 'VM%', value: 'total_zero_percentage', align: 'center', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot', sortable: false },
+  { title: 'JK', value: 'all_gteSix_total', align: 'center', tooltip: 'Joulukuuset: 6 tai paremmat heitot', sortable: false }
 ]
 const season_stats = [
-  { text: 'Kausi', value: 'season', align: 'center', tooltip: 'Pelikausi (vuosi)' },
-  { text: 'Joukkue', value: 'team_name', align: 'center', tooltip: 'Joukkue nimi' },
-  { text: 'Erät', value: 'rounds_total', align: 'center', tooltip: 'Kaikki pelatut erät' },
-  { text: 'Poistetut kyykät', value: 'score_total', align: 'center', tooltip: 'Kaikki poistetut kyykät' },
-  { text: 'Heitot', value: 'throws_total', align: 'center', tooltip: 'Kaikki heitot' },
-  { text: 'KPH', value: 'score_per_throw', align: 'center', tooltip: 'Kyykkää per Heitto' },
-  { text: 'kHP', value: 'avg_throw_turn', align: 'center', tooltip: 'Keskimääräinen heittopaikka' },
-  { text: 'Hauet', value: 'pikes_total', align: 'center', tooltip: 'Kaikki Hauet' },
-  { text: 'H%', value: 'pike_percentage', align: 'center', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
-  { text: 'Virkamiehet', value: 'zeros_total', align: 'center', tooltip: 'Nollaheitot ilman haukia' },
-  { text: 'VM%', value: 'zero_percentage', align: 'center', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
-  { text: 'JK', value: 'gteSix_total', align: 'center', tooltip: 'Joulukuuset: 6 tai paremmat heitot' }
+  { title: 'Kausi', value: 'season', align: 'center', tooltip: 'Pelikausi (vuosi)' },
+  { title: 'Joukkue', value: 'team_name', align: 'center', tooltip: 'Joukkue nimi' },
+  { title: 'Erät', value: 'rounds_total', align: 'center', tooltip: 'Kaikki pelatut erät' },
+  { title: 'Poistetut kyykät', value: 'score_total', align: 'center', tooltip: 'Kaikki poistetut kyykät' },
+  { title: 'Heitot', value: 'throws_total', align: 'center', tooltip: 'Kaikki heitot' },
+  { title: 'KPH', value: 'score_per_throw', align: 'center', tooltip: 'Kyykkää per Heitto' },
+  { title: 'kHP', value: 'avg_throw_turn', align: 'center', tooltip: 'Keskimääräinen heittopaikka' },
+  { title: 'Hauet', value: 'pikes_total', align: 'center', tooltip: 'Kaikki Hauet' },
+  { title: 'H%', value: 'pike_percentage', align: 'center', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
+  { title: 'Virkamiehet', value: 'zeros_total', align: 'center', tooltip: 'Nollaheitot ilman haukia' },
+  { title: 'VM%', value: 'zero_percentage', align: 'center', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
+  { title: 'JK', value: 'gteSix_total', align: 'center', tooltip: 'Joulukuuset: 6 tai paremmat heitot' }
 ]
 
 function filtterItems() {
-  const arr = sort_games_switch.value === 'Erittäin'
-    ? playerStore.playerMatchesPerPeriod 
-    : playerStore.playerMatchesPerMatch;
+  let arr
+  if(sort_games_switch.value === 'Erittäin') {
+    arr = playerStore.playerMatchesPerPeriod;
+    matchHeaders.value = headers_periods
+
+  } else {
+    arr = playerStore.playerMatchesPerMatch;
+    matchHeaders.value = headers_games
+  }
   const returning_arr = filter_games_switch.value === 'Kaikki kaudet'
     ? arr
     : arr.filter(ele => current_selection.value.includes(ele.season));
 
   if (search.value == '') {
-    return returning_arr
+    matchItems.value = returning_arr
+    return
   }
-  return returning_arr.filter(match => {
+  matchItems.value = returning_arr.filter(match => {
     let found = false
     for (const key in match) {
       if (key == 'id') { continue }
@@ -312,6 +301,7 @@ function filtterItems() {
     }
     return found
   })
+
 }
 
 function handleRedirect(value, row) {
@@ -426,7 +416,7 @@ function throwSort (items, index, isDescending) {
 }
 
 function chanceSeason (value, row) {
-  row.select(true) // <--- For some reason this is important to make returnStyle method work onclick
+  // row.select(true) // <--- For some reason this is important to make returnStyle method work onclick
   if (current_selection.value.includes(value.season)) { // Remove clicked season from datas
     var index = canvas1_data.value.map(e => e.label).indexOf('Kausi ' + value.season)
     canvas1_data.value.splice(index, 1)
@@ -477,61 +467,66 @@ function chanceSeason (value, row) {
 }
 
 
-playerStore.getPlayers();
+playerStore.getPlayer();
+// TODO: maybe not with the timeout??
+setTimeout(() => {
+  console.log('jotain')
+  const jotain = playerStore.player.stats_per_seasons
+  if (jotain && jotain.length !== 0) {
+    console.log('jotain')
+    let index = jotain.map(ele => ele.id).indexOf(navStore.seasonId)
+    // If the selected season is not in players history take the latest
+    index = (index === -1) ? jotain.length -1 : index
+    const currentSelcSeason = jotain[index]
+    const seasonString = currentSelcSeason.season
+    
+    current_selection.value.push(seasonString)
+    colors.value[0] = seasonString
+    column_current_selection.value.push('KPH')
 
-if (playersSeasons && playersSeasons.length !== 0) {
-  let index = playersSeasons.map(ele => ele.id).index(navStore.seasonId)
-  // If the selected season is not in players history take the latest
-  index = (index === -1) ? playersSeasons.length -1 : index
-  const currentSelcSeason = playersSeasons[index]
-  const seasonString = currentSelcSeason.season
-  
-  current_selection.value.push(seasonString)
-  colors.value[0] = seasonString
-  column_current_selection.value.push('KPH')
-  matches_periods.value = []
-  matches_match.value = []
+    const init1 = {
+      label: 'Kausi ' + currentSelcSeason.season,
+      backgroundColor: '#B3E5FC',
+      data: [
+        currentSelcSeason.zeros_total + currentSelcSeason.pikes_total,
+        currentSelcSeason.ones_total,
+        currentSelcSeason.twos_total,
+        currentSelcSeason.threes_total,
+        currentSelcSeason.fours_total,
+        currentSelcSeason.fives_total,
+        currentSelcSeason.gteSix_total
+      ]
+    }
+    const canvas2_data_tmp = []
+    for (const s of jotain) {
+      canvas2_data_tmp.push(s.score_per_throw)
+      canvas2_labels.value.push(s.season)
+    }
+    const init2 = {
+      label: 'KPH',
+      backgroundColor: '#B3E5FC',
+      borderColor: '#B3E5FC',
+      data: canvas2_data_tmp
+    }
+    
+    const init3 = {
+      label: 'Kausi ' + currentSelcSeason.season,
+      backgroundColor: '#B3E5FC',
+      data: [
+        currentSelcSeason.average_score_position_one,
+        currentSelcSeason.average_score_position_two,
+        currentSelcSeason.average_score_position_three,
+        currentSelcSeason.average_score_position_four
+      ]
+    }
+    canvas1_data.value.push(init1)
+    canvas2_data.value.push(init2)
+    canvas3_data.value.push(init3)
+  }
+},5000)
 
-  const init1 = {
-    label: 'Kausi ' + currentSelcSeason.season,
-    backgroundColor: '#B3E5FC',
-    data: [
-      currentSelcSeason.zeros_total + currentSelcSeason.pikes_total,
-      currentSelcSeason.ones_total,
-      currentSelcSeason.twos_total,
-      currentSelcSeason.threes_total,
-      currentSelcSeason.fours_total,
-      currentSelcSeason.fives_total,
-      currentSelcSeason.gteSix_total
-    ]
-  }
-  const canvas2_data_tmp = []
-  for (const s of playersSeasons) {
-    canvas2_data_tmp.push(s.score_per_throw)
-    canvas2_labels.value.push(s.season)
-  }
-  const init2 = {
-    label: 'KPH',
-    backgroundColor: '#B3E5FC',
-    borderColor: '#B3E5FC',
-    data: canvas2_data_tmp
-  }
-  
-  const init3 = {
-    label: 'Kausi ' + currentSelcSeason.season,
-    backgroundColor: '#B3E5FC',
-    data: [
-      currentSelcSeason.average_score_position_one,
-      currentSelcSeason.average_score_position_two,
-      currentSelcSeason.average_score_position_three,
-      currentSelcSeason.average_score_position_four
-    ]
-  }
-  canvas1_data.value.push(init1)
-  canvas2_data.value.push(init2)
-  canvas3_data.value.push(init3)
-}
-
+// Initialize the match list by calling the filtterItems() once
+filtterItems();
 
 </script>
 

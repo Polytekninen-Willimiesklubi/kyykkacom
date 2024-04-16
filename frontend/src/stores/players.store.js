@@ -91,7 +91,7 @@ export const usePlayerStore = defineStore('players', () => {
               input.season = season.season
               input.match_id = match.id
               input.id = match.id
-              playerMatchesPerMatch.push(input)
+              playerMatchesPerMatch.value.push(input)
             }
           }
 
