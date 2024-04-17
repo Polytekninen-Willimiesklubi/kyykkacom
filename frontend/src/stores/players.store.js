@@ -100,6 +100,7 @@ export const usePlayerStore = defineStore('players', () => {
 
     return {
         loading,
+        loadingPlayer,
         players,
         player,
         playerMatchesPerPeriod,
