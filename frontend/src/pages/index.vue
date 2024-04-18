@@ -21,10 +21,9 @@ const navStore = useNavBarStore();
 const homeStore = useHomeStore();
 
 const loadedSeason = localStorage.loadedSeason;
-const seasonId = localStorage.seasonId;
-if (loadedSeason !== seasonId || !localStorage.allTeams) {
+if (loadedSeason !== navStore.seasonId || !localStorage.allTeams) {
   homeStore.getTeams();
-  localStorage.loadedSeason = seasonId;
+  localStorage.loadedSeason = navStore.seasonId;
 }
 
 </script>

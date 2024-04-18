@@ -1,14 +1,14 @@
 <template>
-    <v-flex v-if="loaded_undefined">
+    <div class="d-flex" v-if="loaded_undefined">
         <div align="center">
             <h1>TBD</h1>
         </div>
-    </v-flex>
+    </div>
     <v-layout v-else>
         <div v-if="st_round.length" class="pr-10">
             <div v-for="listItem in st_round" :key="listItem.name" class="pt-10">
                 <bracket :flat-tree="[listItem]">
-                    <template v-slot:player="{player}" >
+                    <template #player="{player}" >
                         {{ !only_format ? player.name : player.template_name }}
                     </template>
                     <template #player-extension-bottom="{ match }">
@@ -19,9 +19,9 @@
                 </bracket>
             </div>
         </div>
-        <v-flex>
+        <div class="d-flex">
             <bracket :flat-tree="data">
-                <template v-slot:player="{player}" >
+                <template #player="{player}" >
                     {{ !only_format ? player.name : player.template_name }}
                 </template>
                 <template #player-extension-bottom="{ match }">
@@ -30,12 +30,13 @@
                     </div>
                 </template>
             </bracket>
-        </v-flex>
+          </div>
     </v-layout>
 </template>
 
 <script>
 import Bracket from 'vue-tournament-bracket'
+import { toRaw } from 'vue';
 
 export default {
   name: 'Tournament',
@@ -69,10 +70,8 @@ export default {
   },
   methods: {
     putTeamsPlayoffBracket () {
-      console.log(this.rounds)
       if (this.non_default_seeds !== undefined) {
         this.non_default_seeds.forEach(ele => {
-          console.log(ele)
           if (ele[1] !== undefined) {
             for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
               const placementString = (ele[1]).toString() + '. Seed'
@@ -89,17 +88,18 @@ export default {
         })
       } else {
         this.bracket_placements.forEach((bracket, idx) => {
+          bracket.sort((a,b) => a.bracket_placement-b.bracket_placement)
           for (let i = 0; i < bracket.length; i++) {
             for (let matchIdx = 0; matchIdx < this.rounds.length; matchIdx++) {
               const placementString = this.bracket_placements.length >= 2
                 ? String.fromCharCode(65 + idx) + (i + 1).toString()
-                : (i + 1).toString() + '. Seed'
+                : (i + 1).toString() + '. Seed';
               const match = this.rounds[matchIdx]
               if (match.player1.name === placementString) {
-                match.player1.name = bracket[i][0]
+                match.player1.name = bracket[i].current_abbreviation
                 break
               } else if (match.player2.name === placementString) {
-                match.player2.name = bracket[i][0]
+                match.player2.name = bracket[i].current_abbreviation
                 break
               }
             }
@@ -134,7 +134,7 @@ export default {
         this.loaded_undefined = true
         return
       }
-      this.rounds = structuredClone(this.rounds_parrent)
+      this.rounds = structuredClone(toRaw(this.rounds_parrent))
       this.rounds.forEach(ele => {
         ele.player1.template_name = ele.player1.name
         ele.player2.template_name = ele.player2.name
@@ -189,8 +189,8 @@ export default {
           if (el[match.player1.name] !== el[match.player2.name]) { // Not a tie
             const winner = el[match.player1.name] > el[match.player2.name] ? match.player1 : match.player2
             const loser = el[match.player1.name] > el[match.player2.name] ? match.player2 : match.player1
-            const new_winner = structuredClone(winner)
-            const new_loser = structuredClone(loser)
+            const new_winner = structuredClone(toRaw(winner))
+            const new_loser = structuredClone(toRaw(loser))
             new_winner.winner = null
             new_loser.winner = null
             winner.winner = true
@@ -231,21 +231,21 @@ export default {
 }
 </script>
 <style>
-    .vtb-player {
-        background-color: white;
-        border-color: black;
-        border-style: solid solid none solid;
-        border-width: 1px;
-        color: black;
-        text-align: center;
-    }
-    .vtb-item-players .winner {
-        color: white;
-    }
-    .vtb-item-players .defeated {
-        color: white;
-    }
-    .vtb-item-players > div {
-        width: 135px;
-    }
+.vtb-player {
+    background-color: white;
+    border-color: black;
+    border-style: solid solid none solid;
+    border-width: 1px;
+    color: black;
+    text-align: center;
+}
+.vtb-item-players .winner {
+    color: white;
+}
+.vtb-item-players .defeated {
+    color: white;
+}
+.vtb-item-players > div {
+    width: 135px;
+}
 </style>

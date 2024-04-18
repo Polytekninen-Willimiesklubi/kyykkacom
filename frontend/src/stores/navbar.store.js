@@ -10,6 +10,11 @@ export const useNavBarStore = defineStore('navbar', () => {
     const seasonId = ref(null);
     const seasons = ref([]);
     const currentSeasonId = ref(null);
+    const loaded = ref(false);
+
+    const playoffFormat = computed( () => {
+        return selectedSeason.playoff_format;
+    })
 
     function setSelectedSeason(season) {
         const homeStore = useHomeStore();
@@ -46,11 +51,12 @@ export const useNavBarStore = defineStore('navbar', () => {
                 }
             })
             // There is two values in body and second one is current year
-            selectedSeason.value = payload !== null ? payload[1] : allSeasons[0]
+            selectedSeason.value = payload !== null ? payload[1] : allSeasons[1]
             seasonId.value = selectedSeason.value.value;
             currentSeasonId.value = seasonId.value
             localStorage.setItem('allSeasons', JSON.stringify(allSeasons));
             seasons.value = allSeasons;
+            loaded.value = true;
 
         } catch (error) {
             console.log(error);
@@ -60,8 +66,10 @@ export const useNavBarStore = defineStore('navbar', () => {
     return {
         selectedSeason,
         seasons,
+        loaded,
         seasonId,
         currentSeasonId,
+        playoffFormat,
         setSelectedSeason,
         getSeasons,
     }

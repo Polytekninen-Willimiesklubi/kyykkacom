@@ -26,7 +26,7 @@
                 </figure>
               </v-col>
               <v-col justify="center" align="center">
-                <a :href="'/joukkue/'+matchData.home_team.id">
+                <a :href="'/joukkueet/'+matchData.home_team.id">
                   {{matchData.home_team.current_name}}
                 </a>
               </v-col>
@@ -34,7 +34,7 @@
                 vs.
               </v-col>
               <v-col justify="center" align="center">
-                <a :href="'/joukkue/'+matchData.away_team.id">
+                <a :href="'/joukkueet/'+matchData.away_team.id">
                   {{matchData.away_team.current_name}}
                 </a>
               </v-col>

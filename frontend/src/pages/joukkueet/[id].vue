@@ -158,7 +158,6 @@
                 :headers="matchHeaders"
                 no-data-text="Ei dataa :("
                 :items="teamStore.matches"
-                dense
               >
                 <!-- TODO can't I use :headers value here?  -->
                 <template v-for="h in matchHeaders" v-slot:[`header.${h.value}`]="{ header }"> 
@@ -172,15 +171,15 @@
                     </v-tooltip>
                   </span>
                 </template>
-                <template v-slot:[`item.match_time`]="{ item }">
+                <template #item.match_time="{ item }">
                   <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
                 </template>
-                <template v-slot:item.own_team_total="{ item }">
+                <template #item.own_team_total="{ item }">
                   <v-chip :color="getColor(item.own_team_total, item.opposite_team_total)">
                     {{ item.own_team_total }}
                   </v-chip>
                 </template>
-                <template v-slot:item.opposite_team_total="{item}">
+                <template #item.opposite_team_total="{ item }">
                   <v-chip :color="getColor(item.opposite_team_total, item.own_team_total)">
                     {{ item.opposite_team_total }}
                   </v-chip>

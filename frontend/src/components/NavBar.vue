@@ -39,11 +39,11 @@
     <v-spacer class="hidden-md-and-down" />
 
     <div class="hidden-md-and-down pa-4" v-if="!userStore.loggedIn">
-      <!-- <log-in /> -->
+      <log-in />
     </div>
 
     <div class="hidden-md-and-down" v-if="!userStore.loggedIn">
-      <!-- <register /> -->
+      <register />
     </div>
 
     <div class="hidden-md-and-down" v-if="userStore.loggedIn">
@@ -94,7 +94,7 @@
       </v-list>
       <template v-if="userStore.loggedIn" v-slot:prepend>
         <v-list-item 
-          :title="playerName"
+          :title="userStore.playerName"
           subtitle="Logged In"
           two-line
         >
@@ -120,12 +120,12 @@ const headers = [
   { title: 'Ottelut', route: '/ottelut', icon: 'mdi-space-invaders' },
   { title: 'Joukkueet', route: '/joukkueet', icon: 'mdi-emoticon-poop' },
   { title: 'Pelaajat', route: '/pelaajat', icon: 'mdi-account-group' },
-  // { 
-  //   title: 'Oma Joukkue', route: '/joukkue/' + userStore.teamId, 
-  //   if_clause: userStore.loggedIn && userStore.teamId != 'null' && userStore.teamId, 
-  //   icon: 'mdi-account',
-  // },
-  // { title: 'Jatkosarja', route: '/jatkosarja', icon: 'mdi-bank' },
+  { 
+    title: 'Oma Joukkue', route: '/joukkueet/' + userStore.teamId, 
+    if_clause: userStore.loggedIn && userStore.teamId != 'null' && userStore.teamId, 
+    icon: 'mdi-account',
+  },
+  { title: 'Jatkosarja', route: '/jatkosarja', icon: 'mdi-bank' },
   // { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
   { title: 'Info', route: '/info', icon: 'mdi-information-outline' }
 ];

@@ -503,7 +503,6 @@ function initalColor(value) {
 
 playerStore.getPlayer();
 watch(() => playerStore.loadedData, () => {
-
   if (playerStore.loadedData === false) {
     return
   }
@@ -571,14 +570,10 @@ watch(() => playerStore.loadedData, () => {
 },
 {once: true})
 
-
 // Initialize the match list by calling the filtterItems() once
 filtterItems();
 </script>
 
-
-<script>
-</script>
 
 <style>
 

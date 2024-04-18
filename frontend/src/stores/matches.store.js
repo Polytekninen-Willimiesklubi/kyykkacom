@@ -9,17 +9,22 @@ const baseUrl = 'http://localhost:8000/api/matches/'; // TODO: change this to .e
 export const useMatchesStore = defineStore('matches', () => {
     const matches = ref([]);
     const selection = ref('Kaikki ottelut');
+    const loaded = ref(false);
 
     const superWeekendMatches = computed(() => {
-        return matches.value.filter((match) => match.match_type >= 31)
+        return matches.value.filter((match) => match.match_type >= 31);
     })
 
     const regularSeasonMatches = computed(() => {
-        return matches.value.filter((match) => !match.post_season && match.match_type < 31)
+        return matches.value.filter((match) => !match.post_season && match.match_type < 31);
+    })
+
+    const excludingSuperMatches = computed(() => {
+        return matches.value.filter((match) => match.match_type < 31);
     })
 
     const postSeasonMatches = computed(() => {
-        return matches.value.filter((match) => match.post_season)
+        return matches.value.filter((match) => match.post_season);
     })
 
     const selectedMatches = computed(() => {
@@ -54,23 +59,26 @@ export const useMatchesStore = defineStore('matches', () => {
           35: 'SuperWeekend: Puolivälierä',
           36: 'SuperWeekend: Neljännesvälierä',
           37: 'SuperWeekend: Kahdeksannesvälierä'
-        }
-        const question = '?season=' + navStore.seasonId
-        const response = await fetch(baseUrl + question, {method: "GET"})
-        const payload = await response.json()
+        };
+        const question = '?season=' + navStore.seasonId;
+        const response = await fetch(baseUrl + question, {method: "GET"});
+        const payload = await response.json();
 
         payload.forEach(ele => {
             ele.type_name = pelit[ele.match_type]
             ele.dash = '-'
-        })
-        matches.value = payload
+        });
+        matches.value = payload;
+        loaded.value = true;
     }
 
     return {
         matches,
         selection,
+        loaded,
         superWeekendMatches,
         postSeasonMatches,
+        excludingSuperMatches,
         regularSeasonMatches,
         selectedMatches,
         getMatches
