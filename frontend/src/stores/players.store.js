@@ -12,6 +12,7 @@ const baseUrl = 'http://localhost:8000/api/players/'; // TODO: change this to .e
 export const usePlayerStore = defineStore('players', () => {
     const loading = ref(false);
     const loadingPlayer = ref(false);
+    const loadedData = ref(false);
     const players = ref([]);
     const player = ref({})
     const playerMatchesPerPeriod = ref([]);
@@ -96,11 +97,13 @@ export const usePlayerStore = defineStore('players', () => {
           }
 
         loadingPlayer.value = false;
+        loadedData.value = true;
     }
 
     return {
         loading,
         loadingPlayer,
+        loadedData,
         players,
         player,
         playerMatchesPerPeriod,

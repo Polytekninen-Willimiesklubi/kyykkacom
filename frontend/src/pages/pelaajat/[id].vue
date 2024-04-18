@@ -38,13 +38,36 @@
               <v-data-table
                 mobile-breakpoint="0"
                 class="seasonStats"
-                @click:row="chanceSeason"
                 :headers="seasonStats"
                 height="200px"
                 no-data-text="Ei pelattuja kausia"
                 :items="playerStore.player.stats_per_seasons"
                 fixed-header
               >
+                <!-- For god sakes is this the only way to make initial color happen???
+                  tried so many ways: setup code watchers, onMounted. Always hits the 'no-data-text'
+                  problem
+                -->
+                <template #item = {item}>
+                  <tr
+                    :class="{'blue-row': initalColor(item.season)}"
+                    @click="chanceSeason"
+                  >
+                    <td> {{ item.season }}</td>
+                    <td> {{ item.team_name }}</td>
+                    <td> {{ item.rounds_total }}</td>
+                    <td> {{ item.score_total }}</td>
+                    <td> {{ item.throws_total }}</td>
+                    <td> {{ item.score_per_throw }}</td>
+                    <td> {{ item.avg_throw_turn }}</td>
+                    <td> {{ item.pikes_total }}</td>
+                    <td> {{ item.pike_percentage }}</td>
+                    <td> {{ item.zeros_total }}</td>
+                    <td> {{ item.zero_percentage }}</td>
+                    <td> {{ item.gteSix_total }}</td>
+                  </tr>
+
+                </template>
                 <template #bottom></template> <!-- This hides the pagination controls-->
               </v-data-table>
             </v-card>
@@ -102,13 +125,6 @@
               false-value="Kaikki kaudet"
               :label="`${filterGamesSwitch}`"
               @update:modelValue="filtterItems"
-            />
-          </v-col>
-          <!-- @click="() =>{ jotain = !jotain; console.log(jotain)}" -->
-          <v-col cols="2">
-            <v-btn
-            text="Lisää dataaa"
-            @click="() => canvas1Data = [{data:[1,2,3,4,5,6,7], label:'data jotain', backgroundColor: '#B3E5FC'}]"
             />
           </v-col>
           <v-spacer/>
@@ -192,6 +208,7 @@ import { useNavBarStore } from '@/stores/navbar.store';
 import { usePlayerStore } from '@/stores/players.store';
 import { useDate } from 'vuetify';
 import { useHomeStore } from '@/stores/home.store'
+import { onMounted } from 'vue';
 
 const homeStore = useHomeStore();
 const teams = homeStore.getTeams();
@@ -206,6 +223,7 @@ const currentSelection = [];
 const columnCurrentSelection = [];
 const columnColors =  ['KPH', '', '', '', ''];
 const colors = ['', '', '', '', ''];
+let jotain2 = false;
 
 const search = ref('')
 const sortGamesSwitch = ref('Erittäin');
@@ -409,12 +427,11 @@ function throwSort (items, index, isDescending) {
   return items
 }
 
-function chanceSeason (value, row) {
-  console.log('current: ' + currentSelection);
-  console.log(value);
-  console.log(row);
-  const clickedSeason = row.item.season;
-  const headerClassList = value.target.tagName ===  "TD" ? value.target.parentNode.classList : value.target.classList;
+function chanceSeason (value) {
+  const headerClassList = value.target.tagName === "TD" ? value.target.parentNode.classList : value.target.classList;
+  const clickedSeason =  value.target.tagName === "TD" 
+    ? value.target.parentNode.children[0].innerText 
+    : value.target.children[0].innerText;
   if (currentSelection.includes(clickedSeason)) { // Remove clicked season from datas
     let index = canvas1Data.value.map(e => e.label).indexOf('Kausi ' + clickedSeason)
     canvas1Data.value.splice(index, 1)
@@ -434,13 +451,12 @@ function chanceSeason (value, row) {
   } else { // Add clicked season
     let tmp = playerStore.player.stats_per_seasons
     let index = tmp.map(ele => ele.season).indexOf(clickedSeason)
-    headerClassList.add(styles[index])
-
     const selected_season = tmp[index]
-
+    
     index = colors.indexOf('') // First valid color
     colors[index] = clickedSeason
     const color = allColors[index]
+    headerClassList.add(styles[index])
 
     canvas1Data.value = [ ...canvas1Data.value,  // To make it reactive, we must make new array
     {
@@ -475,10 +491,20 @@ function chanceSeason (value, row) {
   }
 }
 
-playerStore.getPlayer();
+function initalColor(value) {
+  const tmp = playerStore.player.stats_per_seasons
+  let index = tmp.map(ele => ele.id).indexOf(navStore.seasonId)
+  // If the selected season is not in players history take the latest
+  index = (index === -1) ? tmp.length -1 : index
+  if(jotain2 || value !== currentSelection[0]) return false
+  jotain2 = true;
+  return true
+}
 
-watch(() => playerStore.loadingPlayer, () => {
-  if (playerStore.loadingPlayer.value === true) {
+playerStore.getPlayer();
+watch(() => playerStore.loadedData, () => {
+
+  if (playerStore.loadedData === false) {
     return
   }
   const jotain = playerStore.player.stats_per_seasons
@@ -531,21 +557,27 @@ watch(() => playerStore.loadingPlayer, () => {
     canvas1Data.value = [init1];
     canvas2Data.value = [init2];
     canvas3Data.value = [init3];
-    const headerRow = document.getElementsByClassName('allTimeHeaders')[0]
-    // console.log(headerRow.childNodes);
-    for (let i = 0; i < headerRow.childNodes.length; i++) {
-      const text = headerRow.childNodes[i].innerText
-      if ( text === 'KPH' ) {
-        headerRow.childNodes[i].classList.add('blue-row')
-      }
-    }
-
   }
 
-})
+  // Initialize the selected allTime header color
+  const headerRow = document.getElementsByClassName('allTimeHeaders')[0]
+  for (let i = 0; i < headerRow.childNodes.length; i++) {
+    const text = headerRow.childNodes[i].innerText
+    if ( text === 'KPH' ) {
+      headerRow.childNodes[i].classList.add('blue-row')
+      break;
+    }
+  }
+},
+{once: true})
+
+
 // Initialize the match list by calling the filtterItems() once
 filtterItems();
+</script>
 
+
+<script>
 </script>
 
 <style>
