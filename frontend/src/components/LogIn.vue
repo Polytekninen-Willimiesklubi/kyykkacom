@@ -28,28 +28,31 @@
       >
         Invalid user credentials.
       </v-alert>
-      <v-container grid-list-md>
-        <v-layout wrap>
-          <div class="d-flex xs12">
-            <v-text-field 
-              v-model="authStore.credentials.username" 
-              color="red darken-1" 
-              label="Email*" 
-              required
-              ></v-text-field>
-          </div>
-          <div class="d-flex xs12">
-            <v-text-field
-              v-model="authStore.credentials.password"
-              label="Password*"
-              type="password"
-              color="red darken-1"
-              required
-            ></v-text-field>
-          </div>
+      <v-container>
+        <v-layout>
+          <v-row>
+            <v-col cols="7">
+              <v-text-field 
+                v-model="authStore.credentials.username" 
+                color="red darken-1" 
+                label="Email*" 
+                required
+              />
+            </v-col>
+            <v-spacer />
+            <v-col cols="5">
+              <v-text-field
+                v-model="authStore.credentials.password"
+                label="Password*"
+                type="password"
+                color="red darken-1"
+                required
+              />
+            </v-col>
+          </v-row>
         </v-layout>
       </v-container>
-      <small>*indicates required field</small>
+      <small class="ml-2">*indicates required field</small>
       <template v-slot:actions>
         <v-btn color="red darken-1" text @click="authStore.logIn()">Log in</v-btn>
         <v-btn color="red darken-1" text @click="dialog = !dialog, authStore.alert = !authStore.alert">Close</v-btn>

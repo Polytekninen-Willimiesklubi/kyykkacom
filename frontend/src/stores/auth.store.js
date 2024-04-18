@@ -3,7 +3,8 @@ import { defineStore } from "pinia";
 import { computed } from "vue";
 // import { router } from '@/router';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/login/`;
+// const baseUrl = `${import.meta.env.VITE_API_URL}/login/`;
+const baseUrl = 'http://localhost:8000/api/login/'; // TODO: change this to .env variable
 
 export function getCookie(name) {
     let cookieValue = null
@@ -28,7 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
     const userId = ref(JSON.parse(localStorage.getItem("userId")));
     const roleId = ref(JSON.parse(localStorage.getItem('roleId')));
     const teamId = ref(JSON.parse(localStorage.getItem('teamId')));
-    const playerName = ref(JSON.parse(localStorage.getItem('playeName')));
+    const playerName = ref(JSON.parse(localStorage.getItem('playerName')) );
     const loggedIn = ref(JSON.parse(localStorage.getItem('loggedIn')));
 
     const alert = ref(false);
@@ -40,16 +41,16 @@ export const useAuthStore = defineStore('auth', () => {
         return roleId.value === 1;
     });
 
-    async function logIn( again=false) {
+    async function logIn(again=false) {
         try {
             const requestOpt = {
                 'method': 'POST',
                 'headers': {
-                    'X-CSRFToken': getCookie('csrftoken')
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
                 },
-                'content-type': 'application/json',
-                'body': JSON.stringify(credentials),
-                withCredentials: true,
+                'body' : JSON.stringify(credentials.value),
+                'withCredentials': true,
             };
             
             const response = await fetch(baseUrl, requestOpt)
@@ -70,26 +71,26 @@ export const useAuthStore = defineStore('auth', () => {
                     alert.value = true
                     return false
                 }
-                dialog.value = !dialog.value
                 alert.value = false
                 loggedIn.value = true
 
                 return true
+            } else if (response.status === 400) {
+                return false
             }
             
-            dialog.value = !dialog.value
             alert.value = false
 
-            userId.value = data.body.user_id
-            roleId.value = data.body.role
-            teamId.value = data.body.team_id
-            playerName.value = data.body.player_name
+            userId.value = data.user.id
+            roleId.value = data.role
+            teamId.value = data.team_id
+            playerName.value = data.user.player_name
             
             // store user details local storage to keep user logged in between page refreshes
-            localStorage.setItem('userId', JSON.stringify(data.body.user.id));
-            localStorage.setItem('teamId', JSON.stringify(data.body.team_id));
-            localStorage.setItem('roleId', JSON.stringify(data.body.role));
-            localStorage.setItem('playerName', JSON.stringify(data.body.user.player_name));
+            localStorage.setItem('userId', JSON.stringify(data.user.id));
+            localStorage.setItem('teamId', JSON.stringify(data.team_id));
+            localStorage.setItem('roleId', JSON.stringify(data.role));
+            localStorage.setItem('playerName', JSON.stringify(data.user.player_name));
             localStorage.setItem('loggedIn', JSON.stringify(true));
 
             loggedIn.value = true

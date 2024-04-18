@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref, computed, toRaw } from "vue";
 import { defineStore } from "pinia";
 import { useNavBarStore } from "@/stores/navbar.store";
 
@@ -8,35 +8,37 @@ const baseUrl = 'http://localhost:8000/api/teams/'; // TODO: change this to .env
 
 export const useHomeStore = defineStore('home', () => {
     const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')));
-    const noBrackets = ref(0);
     const loading = ref(false);
+    const loaded = ref(false);
 
     // Return in array of arrays. Each array contains one bracket teams 
     const bracketedTeams = computed(() => {
-        if (noBrackets.value === 0 || allTeams.value.length === 0) {
+        const navStore = useNavBarStore();
+        if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
             return []
         }
         const returnedTeams = []
-        if (noBrackets.value > 1) {
-            for (let i = 0; i < noBrackets; i++) {
+        if (navStore.selectedSeason.no_brackets > 1) {
+            for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
                 returnedTeams.push([]);
             }
-            allTeams.forEach(ele => {
+            allTeams.value.forEach(ele => {
                 returnedTeams[ele.bracket -1].push(ele);
             });
             return returnedTeams
         } else {
-            return [allTeams]
+            return [allTeams.value]
         }
     })
 
     const superWeekendBrackets = computed( () => {
-        if (noBrackets.value === 0 || allTeams.value.length === 0) {
+        const navStore = useNavBarStore();
+        if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
             return []
         }
         const returnedTeams = []
         if (noBrackets.value > 1) {
-            for (let i = 0; i < noBrackets; i++) {
+            for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
                 returnedTeams.push([]);
             }
             allTeams.forEach(ele => {
@@ -49,7 +51,7 @@ export const useHomeStore = defineStore('home', () => {
     }) 
 
     async function getTeams() {
-        const navStore = useNavBarStore()
+        const navStore = useNavBarStore();
         const question = '?season=' + navStore.seasonId + '&post_season=0'
         try {
             loading.value = true;
@@ -58,6 +60,7 @@ export const useHomeStore = defineStore('home', () => {
             allTeams.value = payload;
             localStorage.setItem('allTeams', JSON.stringify(allTeams.value));
             loading.value = false;
+            loaded.value = true;
         } catch (error) {
             console.log(error);
         }
@@ -65,10 +68,10 @@ export const useHomeStore = defineStore('home', () => {
 
     return {
         allTeams,
-        noBrackets,
         bracketedTeams,
         superWeekendBrackets,
         loading,
+        loaded,
         getTeams,
     }
 })
