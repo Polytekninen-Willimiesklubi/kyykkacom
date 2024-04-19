@@ -2,11 +2,40 @@
   <v-app>
     <v-main>
       <NavBar/>
-      <router-view />
+      <v-layout>
+        <router-view />
+        <div class="d-flex right">
+          <side-bar 
+            :no_brackets="navStore.selectedSeason.no_brackets"
+            :teams="homeStore.bracketedTeams"
+            :lines="navStore.playoffLines"
+          />
+        </div>
+      </v-layout>
     </v-main>
 
     <!-- <AppFooter /> -->
   </v-app>
 </template>
 
-<script setup></script>
+<script setup>
+import { useHomeStore } from '@/stores/home.store';
+import { useNavBarStore } from '@/stores/navbar.store';
+
+const navStore = useNavBarStore(); 
+const homeStore = useHomeStore();
+
+const loadedSeason = localStorage.loadedSeason;
+if (loadedSeason !== navStore.seasonId || !localStorage.allTeams) {
+  homeStore.getTeams();
+  localStorage.loadedSeason = navStore.seasonId;
+}
+
+</script>
+
+<style>
+.right {
+    padding-right: 3em;
+    padding-top: 6em;
+}
+</style>
