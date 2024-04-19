@@ -1,33 +1,69 @@
 <template>
-  <v-card>
-    <v-card-title>{{ title }}</v-card-title>
+  <v-card :title="title">
     <v-row v-for="(listItem, index) in teams" :key="index">
       <v-col>
-        <v-card-subtitle v-if="multible_brackets"><b> Lohko {{ String.fromCharCode(65+index) }} </b></v-card-subtitle>
-        <v-divider></v-divider>
+        <v-card-subtitle v-if="no_brackets > 1">
+          <b> Lohko {{ String.fromCharCode(65+index) }} </b>
+        </v-card-subtitle>
+        <v-divider />
         <!-- note on :items="[...listItem]" here we make reduntant array just unpack it immediately,
           because otherwise returns an 'expected an array' error. This might be caused by listItem
           not being defined before the mouting happens (?) -->
         <!-- v-model:sort-by="sortBy" TODO 
         v-model:sort-desc="sortDesc"
+        v-model:sort-by="sortingType"
+        v-model:sort-desc="sortingDesc"
         -->
-        <v-data-table mobile-breakpoint="0" disable-pagination dense
-          :class="{regular_season : isClass, regular_season16 : is16Class, regular_season12: is12Class, regular_season8: is8Class,
-             regular_season16_2 : is16_2Class, regular_season4_2: is4_2Class, regular_season4: is4Class , regular_season6: is6Class}"
-          :header-props="{ sortIcon: null }"
+        <v-data-table
+          mobile-breakpoint="0"
+          class="sidebar"
           @click:row="handleRedirect"
           :headers="headers"
           :items="[...listItem]"
-          v-model:sort-by="sortingType"
-          v-model:sort-desc="sortingDesc"
-          hide-default-footer>
-          <template v-slot:no-data>
-            <v-progress-linear color="red" slot="progress" indeterminate></v-progress-linear>
+          :sort-by="[{key: 'points_total', order:'desc'}]"
+          no-data-text="Ei dataa :("
+          items-per-page="-1"
+          density="compact"
+        >
+          <template #headers="{ columns }">
+            <tr>
+              <template v-for="column in columns" :key="column.key">
+                <th class="v-data-table__td v-data-table__th">
+                  <div class="v-data-table-header__content">
+                    <span :style="column.title === 'P' ? 'font-weight:bold' : ''">
+                      {{ column.title }}
+                    </span>
+                  </div>
+                  <v-tooltip v-if="column.tooltip !== undefined"
+                    activator="parent"
+                    location="bottom"
+                  >
+                    {{ column.tooltip }}
+                  </v-tooltip>
+                </th>
+              </template>
+            </tr>
           </template>
+          <template #item = "{ item, index }">
+            <tr
+              class="v-data-table__tr v-data-table__tr"
+              :class="{'first-border': isFirst(index), 'second-border' : isSecond(index)}"
+            >
+              <td> {{ item.current_abbreviation }}</td>
+              <td> {{ item.matches_played }}</td>
+              <td> {{ item.matches_won }}</td>
+              <td> {{ item.matches_tie }}</td>
+              <td> {{ item.matches_lost }}</td>
+              <td style='font-weight:bold'> {{ item.points_total }}</td>
+              <td> {{ item.points_average }}</td>
+              <td> {{ item.match_average }}</td>
+            </tr>
+          </template>
+          <template #bottom></template>
         </v-data-table>
       </v-col>
     </v-row>
-    <v-divider v-if="multible_brackets"></v-divider>
+    <v-divider v-if="no_brackets > 1" />
   </v-card>
 </template>
 
@@ -42,14 +78,14 @@ export default {
       type: Array,
       default () {
         return [
-          { text: 'Joukkue', value: 'current_abbreviation', sortable: false },
-          { text: 'O', value: 'matches_played', sortable: false },
-          { text: 'V', value: 'matches_won', sortable: false },
-          { text: 'T', value: 'matches_tie', sortable: false },
-          { text: 'H', value: 'matches_lost', sortable: false },
-          { text: 'P', value: 'points_total' },
-          { text: 'P/O', value: 'points_average', sortable: false },
-          { text: 'OKA', value: 'match_average', sortable: false }
+          { title: 'Joukkue', key: 'current_abbreviation',  sortable: false },
+          { title: 'O',       key: 'matches_played',        sortable: false,  tooltip: "Pelatut Ottelut"},
+          { title: 'V',       key: 'matches_won',           sortable: false,  tooltip: "Voitot"},
+          { title: 'T',       key: 'matches_tie',           sortable: false,  tooltip: "Tasapelit"},
+          { title: 'H',       key: 'matches_lost',          sortable: false,  tooltip: "Häviöt"},
+          { title: 'P',       key: 'points_total',          sortable: false,  tooltip: "Pisteet"},
+          { title: 'P/O',     key: 'points_average',        sortable: false,  tooltip: "Pistettä per Ottelu "},
+          { title: 'OKA',     key: 'match_average',         sortable: false,  tooltip: "Ottelu keskiarvo"}
         ]
       }
     },
@@ -69,7 +105,9 @@ export default {
       type: Number,
       default: 1
     },
-    nonDefaultTeams: Array
+    nonDefaultTeams: Array,
+    teams: Array,
+    lines: Array,
 
   },
   data () {
@@ -77,106 +115,63 @@ export default {
       sortingType: 'points_total',
       sortingDesc: false,
       season: false,
-      isClass: false,
-      is12Class: false,
-      is16Class: false,
-      is16_2Class: false,
-      is4Class: false,
-      is4_2Class: false,
-      is6Class: false,
-      is8Class: false,
-
       multible_brackets: false,
       data: [],
-      teams: []
+      // teams: []
     }
   },
   methods: {
-    setClass () {
-      if (!this.super) {
-        this.isClass = (sessionStorage.season_id == 24 || sessionStorage.season_id == 25)
-        this.is16Class = (sessionStorage.season_id == 23 || sessionStorage.season_id == 21 || sessionStorage.season_id == 20)
-        this.is16_2Class = (sessionStorage.season_id == 22)
-        this.is12Class = (sessionStorage.season_id >= 11 && sessionStorage.season_id <= 19)
-        this.is4_2Class = (sessionStorage.season_id == 1)
-        this.is4Class = (sessionStorage.season_id == 8 || sessionStorage.season_id == 9)
-        this.is6Class = (sessionStorage.season_id >= 2 && sessionStorage.season_id <= 7)
-        this.is8Class = (sessionStorage.season_id == 10)
-      }
+    handleRedirect (value, row) {
+      location.href = '/joukkueet/' + row.item.id
     },
-    handleRedirect (value) {
-      location.href = '/joukkue/' + value.id
-    }
-  },
-  computed() {
-    this.sortingType = this.sortBy;
-    this.sortingDesc = this.sortDesc;
-  },
-  watch: {
-    nonDefaultTeams () {
-      if (this.no_brackets > 1) {
-        this.multible_brackets = true
-        for (let i = 0; i < this.no_brackets; i++) {
-          this.teams.push([])
-        }
-        const attr_string = this.super ? 'super_weekend_bracket' : 'bracket'
-        this.nonDefaultTeams.forEach(ele => {
-          this.teams[ele[attr_string] - 1].push(ele)
-        }, this)
-      } else {
-        this.teams = [this.nonDefaultTeams]
-        this.multible_brackets = false
-      }
-      this.setClass()
+    isFirst(val) {
+      if (this.lines.length === 0) return false;
+      const index = this.no_brackets > 1 ? 1 : 0;
+      return this.lines.length > 1 && this.lines[index][0] === val
+    },
+    isSecond(val) {
+      if (this.lines.length === 0) return false;
+      const index = this.no_brackets > 1 ? 1 : 0;
+      return this.lines.length === 1 && this.lines[index][0] === val ||
+            this.lines.length === 2 && this.lines[index][1] === val
     }
   }
+  // watch: {
+  //   nonDefaultTeams () {
+  //     if (this.no_brackets > 1) {
+  //       this.multible_brackets = true
+  //       for (let i = 0; i < this.no_brackets; i++) {
+  //         this.teams.push([])
+  //       }
+  //       const attr_string = this.super ? 'super_weekend_bracket' : 'bracket'
+  //       this.nonDefaultTeams.forEach(ele => {
+  //         this.teams[ele[attr_string] - 1].push(ele)
+  //       }, this)
+  //     } else {
+  //       this.teams = [this.nonDefaultTeams]
+  //       this.multible_brackets = false
+  //     }
+  //   }
+  // }
 }
 </script>
 
 <style>
 
-.regular_season12 > .v-data-table__wrapper > table > tbody > tr:nth-child(4) > td {
+.first-border {
   border-bottom: 0.15rem dashed red !important;
 }
 
-.regular_season12 > .v-data-table__wrapper > table > tbody > tr:nth-child(12) > td {
- border-bottom: 0.2rem double red !important;
+.second-border {
+  border-bottom: 0.2rem double red !important;
 }
 
-.regular_season > .v-data-table__wrapper > table > tbody > tr:nth-child(5) > td {
-  border-bottom: 0.15rem dashed red !important;
+.sidebar div {
+  text-align: center;
 }
 
-.regular_season > .v-data-table__wrapper > table > tbody > tr:nth-child(11) > td {
- border-bottom: 0.2rem double red !important;
-}
-
-.regular_season16 > .v-data-table__wrapper > table > tbody > tr:nth-child(16) > td {
- border-bottom: 0.2rem double red !important;
-}
-
-.regular_season16_2 > .v-data-table__wrapper > table > tbody > tr:nth-child(8) > td {
- border-bottom: 0.2rem double red !important;
-}
-
-.regular_season4_2 > .v-data-table__wrapper > table > tbody > tr:nth-child(2) > td {
- border-bottom: 0.2rem double red !important;
-}
-
-.regular_season4 > .v-data-table__wrapper > table > tbody > tr:nth-child(4) > td {
- border-bottom: 0.2rem double red !important;
-}
-
-.regular_season6 > .v-data-table__wrapper > table > tbody > tr:nth-child(6) > td {
-  border-bottom: 0.15rem dashed red !important;
-}
-
-.regular_season6 > .v-data-table__wrapper > table > tbody > tr:nth-child(2) > td {
- border-bottom: 0.2rem double red !important;
-}
-
-.regular_season8 > .v-data-table__wrapper > table > tbody > tr:nth-child(8) > td {
- border-bottom: 0.2rem double red !important;
+.sidebar .v-data-table-header__content {
+  display: grid; /* Hack to get to make header center align. 'text-align' don't work*/
 }
 
 </style>

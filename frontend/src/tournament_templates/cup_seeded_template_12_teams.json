@@ -1,6 +1,7 @@
 {
     "first_round": 6,
     "bronze": true,
+    "playoffLines": [[4, 12], []],
     "one_bracket" : [
         {
             "other_info":"Kahteen voittoon",

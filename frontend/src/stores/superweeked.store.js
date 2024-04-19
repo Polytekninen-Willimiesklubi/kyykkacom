@@ -25,12 +25,12 @@ const seasons_mapping = {
 }
 
 export const superSidebarHeaders = [
-{ title: 'Sij.', key: 'super_weekend_bracket_placement' },
-{ title: 'Joukkue', key: 'current_abbreviation', sortable: false, width: '10%' },
-{ title: 'V', key: 'matches_won', sortable: false, width: '3%' },
-{ title: 'T', key: 'matches_tie', sortable: false, width: '3%' },
-{ title: 'H', key: 'matches_lost', sortable: false, width: '3%' },
-{ title: 'OKA', key: 'match_average', sortable: false, width: '5%' }
+    { title: 'Sij.', key: 'super_weekend_bracket_placement' },
+    { title: 'Joukkue', key: 'current_abbreviation', sortable: false, width: '10%' },
+    { title: 'V', key: 'matches_won', sortable: false, width: '3%' },
+    { title: 'T', key: 'matches_tie', sortable: false, width: '3%' },
+    { title: 'H', key: 'matches_lost', sortable: false, width: '3%' },
+    { title: 'OKA', key: 'match_average', sortable: false, width: '5%' }
 ];
 
 export const useSuperStore = defineStore('superweekend', () => {

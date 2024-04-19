@@ -156,7 +156,7 @@
                 :items="matchItems"
                 :custom-sort="throwSort"
               >
-                <template v-slot:headers="{ columns, isSorted, getSortIcon, toggleSort }">
+                <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
                   <tr>
                     <template v-for="column in columns" :key="column.key">
                       <td class="mr-2 cursor-pointer" @click="() => toggleSort(column)">
@@ -176,15 +176,15 @@
                     </template>
                   </tr>
                 </template>
-                <template v-slot:item.match_time="{ item }">
+                <template #item.match_time="{ item }">
                   <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
                 </template>
-                <template v-slot:item.own_team_total="{ item }">
+                <template #item.own_team_total="{ item }">
                   <v-chip :color="getColor(item.own_team_total, item.opposite_team_total)">
                     {{ item.own_team_total }}
                   </v-chip>
                 </template>
-                <template v-slot:item.opposite_team_total="{ item }">
+                <template #item.opposite_team_total="{ item }">
                   <v-chip :color="getColor(item.opposite_team_total, item.own_team_total)">
                     {{ item.opposite_team_total }}
                   </v-chip>
@@ -208,7 +208,6 @@ import { useNavBarStore } from '@/stores/navbar.store';
 import { usePlayerStore } from '@/stores/players.store';
 import { useDate } from 'vuetify';
 import { useHomeStore } from '@/stores/home.store'
-import { onMounted } from 'vue';
 
 const homeStore = useHomeStore();
 const teams = homeStore.getTeams();

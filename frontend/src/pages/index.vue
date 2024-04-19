@@ -5,10 +5,11 @@
       <lorem-ipsum />
     </div>
     <div class="d-flex right">
-      <!-- <side-bar
-          :no_brackets="no_brackets"
-          :non-default-teams="teams"
-        /> -->
+      <side-bar
+        :no_brackets="navStore.selectedSeason.no_brackets"
+        :teams="homeStore.bracketedTeams"
+        :lines="navStore.playoffLines"
+      />
     </div>
   </v-layout>
 </template>

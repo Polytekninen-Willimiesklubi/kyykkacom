@@ -1,6 +1,7 @@
 { 
     "first_round": 0,
     "bronze": true,
+    "playoffLines": [[], [5,11]],
     "one_bracket" : [],
     "two_bracket" : [
         {
