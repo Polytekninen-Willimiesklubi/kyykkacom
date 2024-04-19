@@ -126,7 +126,7 @@ const headers = [
     icon: 'mdi-account',
   },
   { title: 'Jatkosarja', route: '/jatkosarja', icon: 'mdi-bank' },
-  // { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
+  { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
   { title: 'Info', route: '/info', icon: 'mdi-information-outline' }
 ];
 
