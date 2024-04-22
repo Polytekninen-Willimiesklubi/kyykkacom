@@ -2,28 +2,35 @@
   <v-layout>
     <div class="d-flex">
       <v-card>
-        <v-card-title class="d-flex flex-wrap-reverse">
-          <div>
-            Ottelut
-            <v-select 
-              v-model="matchStore.selection"
-              style="width: 50%" 
-              color="red" 
-              :items="selectionOptions" 
-            />
-          </div>
-          <v-spacer />
-          <div>
-            <v-text-field color="red" 
-            v-model="search" 
-            label="Search" 
-            single-line 
-            hide-details 
-            />
-          </div>
+        <v-card-title>
+          <v-row>
+            <v-col cols="12">
+              Ottelut
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="4">
+              <v-select 
+                v-model="matchStore.selection"
+                color="red" 
+                :items="selectionOptions" 
+              />
+            </v-col>
+            <v-spacer />
+            <v-col cols="4">
+              <v-text-field 
+                color="red" 
+                v-model="search" 
+                label="Search" 
+                single-line 
+                hide-details 
+              />
+            </v-col>
+          </v-row>
         </v-card-title>
         <!-- Todo: Loading -->
         <v-data-table
+          mobile-breakpoint="0"
           :headers="matchStore.selection !== 'Jatkosarja' 
             ? headers : postHeaders"
           :items="matchStore.selectedMatches"
@@ -33,19 +40,14 @@
           no-data-text="Ei dataa :("
           :group-by="matchStore.selection !== 'Jatkosarja' 
            ? [] : ['seriers']"
-          mobile-breakpoint="0"
-          hide-default-footer
-          disable-pagination
-          dense
         >
-        <template v-slot:headers class="text-xs-center" />
-        <!-- [``] needed to prevent eslint error -->
         <template v-slot:[`item.match_time`]="{ item }">
           <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
           <v-icon 
             color="gray" 
             class="mr-3">
             info
+          >
             <v-tooltip 
               activator='parent'
               text="Ottelu on validoimatta"
@@ -54,7 +56,6 @@
               (parseInt(item.home_team.id) === parseInt(authStore.teamId) 
               || parseInt(item.away_team.id) === parseInt(authStore.teamId))" 
             />
-
           </v-icon>
         </template>
         <template v-slot:group.header="{items, isOpen, toggle}">
@@ -68,12 +69,6 @@
         </template>
         </v-data-table>
       </v-card>
-    </div>
-    <div xs4 class="d-flex pl-3 hidden-md-and-down">
-      <!-- <side-bar
-        :no_brackets="no_brackets"
-        :non-default-teams="teams"
-      /> -->
     </div>
   </v-layout>
 </template>
@@ -90,38 +85,29 @@ const matchStore = useMatchesStore();
 const date = useDate();
 
 const headers = [
-  {
-    text: 'Aika',
-    align: 'left',
-    width: '20%',
-    value: 'match_time'
-  },
-  { text: 'Tyyppi', value: 'type_name', width: '10%' },
-  { text: 'Kenttä', value: 'field', width: '15%', align: 'left' },
-  { text: 'Koti', value: 'home_team.current_abbreviation' },
-  { text: 'Vieras', value: 'away_team.current_abbreviation' },
-  { text: '', value: 'home_score_total', width: '3%', align: 'right' },
-  { text: 'Tulos', value: 'dash', width: '1%', sortable: false, align: 'center' },
-  { text: '', value: 'away_score_total', width: '3%', align: 'left' }
+  { title: 'Aika', key: 'match_time', width: '20%', align: 'left'},
+  { title: 'Tyyppi', key: 'type_name', width: '10%', align: 'center' },
+  { title: 'Kenttä', key: 'field', width: '1%', align: 'center' },
+  { title: 'Koti', key: 'home_team.current_abbreviation', align: 'center' },
+  { title: 'Vieras', key: 'away_team.current_abbreviation', align: 'center' },
+  { title: '', key: 'home_score_total', width: '3%', align: 'center' },
+  { title: 'Tulos', key: 'dash', width: '1%', sortable: false, align: 'center' },
+  { title: '', key: 'away_score_total', width: '3%', align: 'center' }
 ];
 
 const postHeaders =  [
-  {
-    text: 'Aika',
-    align: 'left',
-    value: 'match_time'
-  },
-  { text: 'Kenttä', value: 'field' },
-  { text: 'Koti', value: 'home_team.current_abbreviation' },
-  { text: 'Vieras', value: 'away_team.current_abbreviation' },
-  { text: '', value: 'home_score_total', width: '3%', align: 'right' },
-  { text: 'Tulos', value: 'dash', width: '1%', sortable: false, align: 'center' },
-  { text: '', value: 'away_score_total', width: '3%', align: 'left' }
+  { title: 'Aika', key: 'match_time', align: 'left' },
+  { title: 'Kenttä', key: 'field', aling='center' },
+  { title: 'Koti', key: 'home_team.current_abbreviation' },
+  { title: 'Vieras', key: 'away_team.current_abbreviation' },
+  { title: '', key: 'home_score_total', width: '3%', align: 'right' },
+  { title: 'Tulos', key: 'dash', width: '1%', sortable: false, align: 'center' },
+  { title: '', key: 'away_score_total', width: '3%', align: 'left' }
 ];
 
 const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'SuperWeekend'];
 
-function  itemRowBackground (item) {
+function itemRowBackground(item) {
   // Handles the backround color of row items
   const matchDate = moment(item.match_time).format('YYYY-MM-DD HH:MM')
   const currentTime = moment(Date.now()).format('YYYY-MM-DD HH:MM')

@@ -19,24 +19,20 @@
                     <v-slide-group show-arrows>
                       <v-slide-group-item>
                         <v-btn 
-                          text
+                          text="All-Time"
                           value="all_time"
                           @click="teamStore.selectedSeasonId = 'allTime'"
-                        >
-                          All-Time
-                        </v-btn>
+                        />
                       </v-slide-group-item>
                       <v-slide-group-item 
                         v-for="year in Object.keys(teamStore.seasonsStats).sort((a,b) => b-a)" 
                         :key="year"
                       >
                         <v-btn 
-                          text
+                          :text="year"
                           :value="year"
                           @click="teamStore.selectedSeasonId = year"
-                        >
-                          {{ year }}
-                        </v-btn>
+                        />
                       </v-slide-group-item>
                     </v-slide-group>
                   </v-btn-toggle>
@@ -45,47 +41,31 @@
             </v-col>
           </v-row>
           <v-divider />
-          <v-row style="height:220px">
-            <v-col class="pt-0">
-              <v-data-iterator
-                :items="teamStore.seasonStats"
-                hide-default-footer
-              >
-                <template v-slot:item="props">
-                  <v-list dense>
-                    <div v-for="(stat, index) in leftStats">
-                      <v-list-item>
-                        <div>{{ stat.text }}:</div>
-                        <div class="align-end">{{ props.item[stat.value] }}</div>
-                      </v-list-item>
-                      <v-divider v-if="index -1 != leftStats.length" />
-                    </div>
-                  </v-list>
-                </template>
-              </v-data-iterator>
-            </v-col>
-            <v-divider vertical />
-            <v-col class="pt-0">
-              <v-data-iterator
-                :items="teamStore.seasonStats"
-                hide-default-footer
-                row 
-                wrap
-              >
-                <template v-slot:item="props">
-                  <v-list dense>
-                    <div v-for="(stat, index) in rightStats">
-                      <v-list-item>
-                        <div>{{ stat.text }}:</div>
-                        <div class="align-end">{{ props.item[stat.value] }}</div>
-                      </v-list-item>
-                      <v-divider v-if="index -1 != rightStats.length" />
-                    </div>
-                  </v-list>
-                </template>
-              </v-data-iterator>
-            </v-col>
-          </v-row>
+          <v-data-iterator 
+            :items="middleStats"
+            items-per-page="-1"
+            density="compact"
+          >
+            <template #default="{ items }">
+              <v-row>
+                <v-col 
+                  cols="6"
+                  v-for="(item, i) in items"
+                >
+                  <v-row>
+                    <v-col cols="6">
+                      {{ item.raw.title }}
+                    </v-col>
+                    <v-col cols="6" class="align-end">
+                      {{ teamStore.seasonStats[`${item.raw.key}`] }}
+                    </v-col>
+                  </v-row>
+                  <v-divider v-if="i % 2 == 0" />
+                  <v-divider vertical v-if="i -1 != items.length" />
+                </v-col>
+              </v-row>
+            </template>
+          </v-data-iterator>
         </v-card>
         <v-divider />
         <v-expansion-panels v-model="panel" multiple>
@@ -115,20 +95,17 @@
                     v-model="search"
                     label="Search"
                     single-line
-                    hide-details
                   />
                   <!-- TODO: loading -->
                   <v-data-table 
                     mobile-breakpoint="0"
-                    disable-pagination
                     :search="search"
                     :items="teamStore.unReservedPlayers"
                     :headers="reserveHeaders"
                     no-data-text="Ei dataa :("
-                    dense
-                    hide-default-footer
+                    density="compact"
                   >
-                    <template v-slot:[`item.actions`]="{ item }">
+                    <template #item.actions="{ item }">
                       <v-icon
                         v-if="!item.team.current_name"
                         color=green
@@ -136,13 +113,11 @@
                       >
                         mdi-plus
                       </v-icon>
-                      <v-icon
-                        v-else
-                        color=gray
-                      >
+                      <v-icon v-else color=gray>
                         mdi-lock
                       </v-icon>
                     </template>
+                    <template #bottom></template>
                   </v-data-table>
                 </v-expansion-panel-text>
               </v-expansion-panel>
@@ -151,7 +126,8 @@
           <v-expansion-panel title="Ottelut">
             <!-- TODO: loading -->
             <v-expansion-panel-text>
-              <v-data-table mobile-breakpoint="0"
+              <v-data-table 
+                mobile-breakpoint="0"
                 @click:row="handleRedirectMatches"
                 color='alert'
                 :search="search"
@@ -164,11 +140,10 @@
                   <span>
                     {{ h.text }}
                     <v-tooltip
+                      :text="h.tooltip"
                       activator="parent"
                       location="bottom"
-                    >
-                      {{ h.tooltip }}
-                    </v-tooltip>
+                    />
                   </span>
                 </template>
                 <template #item.match_time="{ item }">
@@ -190,18 +165,10 @@
         </v-expansion-panels>
       </v-card>
     </div>
-    <div class="d-flex hidden-md-and-down pl-2">
-      <!-- <side-bar
-          :no_brackets="no_brackets"
-          :non-default-teams="teams"
-        /> -->
-    </div>
   </v-layout>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-
 import { useTeamStore } from '@/stores/team.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useDate } from 'vuetify'
@@ -215,104 +182,51 @@ const teamStore = useTeamStore();
 const authStore = useAuthStore();
 
 const reserveHeaders = [
-  { text: '#', value: 'player_number' },
-  { text: 'Pelaajan nimi', value: 'player_name' },
-  {
-    text: 'Varaa',
-    value: 'actions',
-    align: 'left',
-    sortable: false
-  }
-]
+  { title: '#', key: 'player_number' },
+  { title: 'Pelaajan nimi', key: 'player_name' },
+  { title: 'Varaa', key: 'actions', align: 'left', sortable: false}
+];
 
 const headers = [
-  { text: '#', value: 'player_number', width: '1%' },
-  {
-    text: 'Nimi',
-    value: 'player_name',
-    width: '20%',
-    align: 'left'
-  },
-  {
-    text: 'E',
-    value: 'rounds_total',
-    width: '1%',
-    align: 'left'
-  },
-  { text: 'P', value: 'score_total', width: '1%', align: 'left' },
-  {
-    text: 'PPH',
-    value: 'score_per_throw',
-    width: '1%',
-    align: 'left'
-  },
-  {
-    text: 'SP',
-    value: 'scaled_points',
-    width: '1%',
-    alignt: 'left'
-  },
-  {
-    text: 'SPPH',
-    value: 'scaled_points_per_throw',
-    width: '1%',
-    alignt: 'left'
-  },
-  {
-    text: 'kHP',
-    value: 'avg_throw_turn',
-    width: '1%',
-    align: 'left'
-  },
-  { text: 'H', value: 'pikes_total', width: '1%', align: 'left' },
-  {
-    text: 'H%',
-    value: 'pike_percentage',
-    width: '1%',
-    align: 'left'
-  },
-  {
-    text: 'VM',
-    value: 'zeros_total',
-    width: '1%',
-    align: 'left'
-  },
-  {
-    text: 'JK',
-    value: 'gteSix_total',
-    width: '1%',
-    alignt: 'left'
-  }
-]
+  { title: '#', key: 'player_number', width: '1%' },
+  { title: 'Nimi', key: 'player_name', width: '20%',align: 'left'},
+  { title: 'E', key: 'rounds_total', width: '1%', align: 'left'},
+  { title: 'P', key: 'score_total', width: '1%', align: 'left' },
+  { title: 'PPH', key: 'score_per_throw', width: '1%', align: 'left'},
+  { title: 'SP', key: 'scaled_points', width: '1%', align: 'left'},
+  { title: 'SPPH', key: 'scaled_points_per_throw', width: '1%',align: 'left'},
+  { title: 'kHP', key: 'avg_throw_turn', width: '1%', align: 'left'},
+  { title: 'H', key: 'pikes_total', width: '1%', align: 'left' },
+  { title: 'H%', key: 'pike_percentage', width: '1%', align: 'left'},
+  { title: 'VM', key: 'zeros_total', width: '1%', align: 'left'},
+  { title: 'JK', key: 'gteSix_total', width: '1%', align: 'left'}
+];
 
 const matchHeaders = [
-  { text: 'Aika', value: 'match_time', align: 'center', tooltip: 'Pelausaika' },
-  { text: 'Tyyppi', value: 'match_type', align: 'center', tooltip: 'Peli Tyyppi' },
-  { text: 'Vastustaja', value: 'opposite_team', align: 'center', tooltip: 'Vastustaja joukkue' },
-  { text: 'OJ 1', value: 'own_first', align: 'center', tooltip: 'Oman Joukkueen 1. Erä', width: '2%' },
-  { text: 'OJ 2', value: 'own_second', align: 'center', tooltip: 'Oman Joukkueen 2. Erä', width: '2%' },
-  { text: 'V 1', value: 'opp_first', align: 'center', tooltip: 'Vastustaja Joukkueen 1. Erä', width: '2%' },
-  { text: 'V 2', value: 'opp_second', align: 'center', tooltip: 'Vastustaja Joukkueen 2. Erä', width: '2%' },
-  // { text: 'H+VM', value: 'jotain', align: 'center', tooltip: 'Yhteensä pelissä oman joukkueen heittämät nolla heitot'},
-  // { text: 'JK', value: 'jotain', align: 'center', tooltip: '(Joulukuusi) Yhteensä pelissä oman joukkueen heittämät "6 kyykkää tai enemmän"- heitot'},
-  { text: 'OJ pis.', value: 'own_team_total', align: 'center', tooltip: 'Oman joukkueen pisteet' },
-  { text: 'V pis.', value: 'opposite_team_total', align: 'center', tooltip: 'Vastustaja joukkueen pisteet' }
+  { title: 'Aika', key: 'match_time', align: 'center', tooltip: 'Pelausaika' },
+  { title: 'Tyyppi', key: 'match_type', align: 'center', tooltip: 'Peli Tyyppi' },
+  { title: 'Vastustaja', key: 'opposite_team', align: 'center', tooltip: 'Vastustaja joukkue' },
+  { title: 'OJ 1', key: 'own_first', align: 'center', tooltip: 'Oman Joukkueen 1. Erä', width: '2%' },
+  { title: 'OJ 2', key: 'own_second', align: 'center', tooltip: 'Oman Joukkueen 2. Erä', width: '2%' },
+  { title: 'V 1', key: 'opp_first', align: 'center', tooltip: 'Vastustaja Joukkueen 1. Erä', width: '2%' },
+  { title: 'V 2', key: 'opp_second', align: 'center', tooltip: 'Vastustaja Joukkueen 2. Erä', width: '2%' },
+  // { title: 'H+VM', key: 'jotain', align: 'center', tooltip: 'Yhteensä pelissä oman joukkueen heittämät nolla heitot'},
+  // { title: 'JK', key: 'jotain', align: 'center', tooltip: '(Joulukuusi) Yhteensä pelissä oman joukkueen heittämät "6 kyykkää tai enemmän"- heitot'},
+  { title: 'OJ pis.', key: 'own_team_total', align: 'center', tooltip: 'Oman joukkueen pisteet' },
+  { title: 'V pis.', key: 'opposite_team_total', align: 'center', tooltip: 'Vastustaja joukkueen pisteet' }
 ]
 
-const leftStats = [
-  { text: 'Poistetut Kyykät', value: 'score_total' },
-  { text: 'Ottelut', value: 'match_count' },
-  { text: 'Hauet', value: 'pikes_total' },
-  { text: 'Nolla heitot', value: 'zeros_total' },
-  { text: 'Nolla aloitukset', value: 'zero_or_pike_first_throw_total' }
-]
-
-const rightStats = [
-  { text: 'Heitot', value: 'throws_total' },
-  { text: 'Ottelu keskiarvo', value: 'match_average' },
-  { text: 'Haukiprosentti', value: 'pike_percentage' },
-  { text: 'Nollaprosentti', value: 'zero_percentage' },
-  { text: 'Joulukuuset', value: 'gteSix_total' }
+const middleStats = [
+  { title: 'Poistetut Kyykät', key: 'score_total' },
+  { title: 'Heitot', key: 'throws_total' },
+  { title: 'Ottelut', key: 'match_count' },
+  { title: 'Ottelu keskiarvo', key: 'match_average' },
+  { title: 'Hauet', key: 'pikes_total' },
+  { title: 'Haukiprosentti', key: 'pike_percentage' },
+  { title: 'Nolla heitot', key: 'zeros_total' },
+  { title: 'Nollaprosentti', key: 'zero_percentage' },
+  { title: 'Nolla aloitukset', key: 'zero_or_pike_first_throw_total' },
+  { title: 'Joulukuuset', key: 'gteSix_total' } ,
 ]
 
 function handleRedirect (value, row) {

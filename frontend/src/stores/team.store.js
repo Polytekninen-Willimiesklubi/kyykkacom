@@ -16,12 +16,13 @@ export const useTeamStore = defineStore('joukkue', () => {
 
     const seasonStats = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
-            return [allTimeStats.value];
+            console.log(allTimeStats.value)
+            return allTimeStats.value;
         }
         const returnValue = Object.keys(seasonsStats.value).length && selectedSeasonId.value
             ? seasonsStats.value[selectedSeasonId.value] 
             : {};
-        return [returnValue];
+        return returnValue;
     });
 
     const seasonPlayers = computed( () => {
@@ -36,7 +37,7 @@ export const useTeamStore = defineStore('joukkue', () => {
     const teamName = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
             const latestIndex = Math.max(...Object.keys(seasonsStats.value).map(x => +x)) //str -> int conversion
-            console.log(Object.keys(seasonsStats.value))
+            console.log(seasonsStats.value[latestIndex])
             return seasonsStats.value[latestIndex].current_name;
         }
         return Object.keys(seasonsStats.value).length && selectedSeasonId.value

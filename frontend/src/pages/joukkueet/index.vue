@@ -1,19 +1,24 @@
 <template>
   <v-layout>
     <div class="d-flex auto">
-      <v-card
-        title="Joukkueet"
-      >
-        <v-spacer />
-        <v-text-field 
-          color="red" 
-          v-model="search" 
-          label="Etsi" 
-          single-line 
-          hide-details
-        />
-        <v-data-table 
+      <v-card>
+        <v-card-title>
+          Joukkueet
+          <v-row>
+            <v-spacer />
+            <v-col cols="4">
+              <v-text-field 
+                color="red" 
+                v-model="search" 
+                label="Etsi" 
+                single-line 
+              />
+            </v-col>
+          </v-row>
+        </v-card-title>
+        <v-data-table
           mobile-breakpoint="0"
+          density='compact'
           @click:row="handleRedirect"
           color='alert'
           :headers="headers"
@@ -21,10 +26,10 @@
           :items="homeStore.allTeams"
           :loading="homeStore.loading"
           no-data-text="Ei dataa :("
-          disable-pagination
-          hide-default-footer
-          dense
-        />
+          items-per-page="-1"
+        >
+          <template #bottom></template>
+        </v-data-table>
       </v-card>
     </div>
   </v-layout>
@@ -40,13 +45,13 @@ const homeStore = useHomeStore();
 
 const search = ref('');
 const headers = [
-  { text: 'Nimi', value: 'current_name', align: 'center' },
-  { text: 'Lyhenne', value: 'current_abbreviation' },
-  { text: 'Ottelut', value: 'matches_played' },
-  { text: 'Voitot', value: 'matches_won' },
-  { text: 'Häviöt', value: 'matches_lost' },
-  { text: 'Tasurit', value: 'matches_tie' },
-  { text: 'Ottelu Ka', value: 'match_average' }
+  { title: 'Nimi', key: 'current_name', align: 'center' },
+  { title: 'Lyhenne', key: 'current_abbreviation', align: 'center' },
+  { title: 'Ottelut', key: 'matches_played', align: 'center' },
+  { title: 'Voitot', key: 'matches_won', align: 'center' },
+  { title: 'Häviöt', key: 'matches_lost', align: 'center' },
+  { title: 'Tasurit', key: 'matches_tie', align: 'center' },
+  { title: 'Ottelu Ka', key: 'match_average', align: 'center' }
 ];
 
 function handleRedirect(value, row) {

@@ -109,13 +109,11 @@
       <v-row>
         <v-col class="text-xs-center">
           <v-btn 
-            v-if="dataReady && authStore.isCaptain" 
+            text="vahvista"
             @click="matchStore.validateClick()" 
-            x-large
             color="error"
-          >
-            vahvista
-          </v-btn>
+            v-if="dataReady && authStore.isCaptain" 
+          />
         </v-col>
       </v-row>
     </v-container>
