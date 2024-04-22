@@ -123,7 +123,6 @@
 <script setup>
 import { useMatchStore } from '@/stores/match.store';
 import { useAuthStore } from '@/stores/auth.store';
-import { storeToRefs } from 'pinia';
 import { useDate } from 'vuetify';
 
 const authStore = useAuthStore();

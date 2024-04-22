@@ -1,11 +1,8 @@
-import { defineStore } from "pinia";
 import { useAuthStore } from '@/stores/auth.store';
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
 import { useNavBarStore } from "./navbar.store";
 
-
 // const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
-
 const baseUrl = 'http://localhost:8000/api/players/'; // TODO: change this to .env variable
 
 export const usePlayerStore = defineStore('players', () => {

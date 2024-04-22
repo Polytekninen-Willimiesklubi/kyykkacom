@@ -1,6 +1,4 @@
-import { defineStore } from "pinia";
 import { useHomeStore } from "./home.store";
-// import { router } from "@/router";
 
 import cup_22 from '../tournament_templates/cup_template_22_teams.json';
 import cup_16 from '../tournament_templates/cup_template_16_teams.json';

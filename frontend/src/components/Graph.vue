@@ -56,7 +56,6 @@ import {
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement)
 
 import { useChartStore } from "@/stores/chart.store";
-import { computed } from 'vue';
 
 const chartStore = useChartStore();
 

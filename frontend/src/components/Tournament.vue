@@ -36,7 +36,6 @@
 
 <script>
 import Bracket from 'vue-tournament-bracket'
-import { toRaw } from 'vue';
 
 export default {
   name: 'Tournament',

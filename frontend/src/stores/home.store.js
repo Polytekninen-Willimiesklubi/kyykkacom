@@ -1,6 +1,4 @@
-import { defineStore } from "pinia";
 import { useNavBarStore } from "@/stores/navbar.store";
-
 // const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
 
 const baseUrl = 'http://localhost:8000/api/teams/'; // TODO: change this to .env variable

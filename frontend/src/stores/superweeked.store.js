@@ -1,4 +1,3 @@
-import { defineStore } from "pinia";
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
 import { useNavBarStore } from "./navbar.store";
 

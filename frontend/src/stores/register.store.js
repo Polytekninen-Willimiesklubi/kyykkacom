@@ -1,8 +1,6 @@
-import { defineStore } from "pinia";
 import { fetchNewToken, getCookie, useAuthStore } from '@/stores/auth.store';
 
 const baseUrl = 'http://localhost:8000/api/register'; // TODO: change this to .env variable
-
 
 export const useRegisterStore = defineStore('register', () => {
     const alert = ref(false);

@@ -1,5 +1,3 @@
-import { defineStore } from "pinia";
-
 // const baseUrl = `${import.meta.env.VITE_API_URL}/login/`;
 const baseUrl = 'http://localhost:8000/api/login/'; // TODO: change this to .env variable
 

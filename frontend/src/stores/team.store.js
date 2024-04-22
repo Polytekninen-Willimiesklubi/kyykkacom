@@ -1,7 +1,5 @@
-import { defineStore } from "pinia";
 import { useNavBarStore } from "./navbar.store";
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
-
 
 const baseUrl = 'http://localhost:8000/api/teams/'; // TODO: change this to .env variable
 const reserveUrl = 'http://localhost:8000/api/reserve/';
