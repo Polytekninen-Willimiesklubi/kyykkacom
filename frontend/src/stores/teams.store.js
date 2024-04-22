@@ -73,24 +73,24 @@ export const useTeamsStore = defineStore('joukkue', () => {
         }
     });
 
-    const superWeekendBrackets = computed( () => {
-        const navStore = useNavBarStore();
-        if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
-            return []
-        }
-        const returnedTeams = []
-        if (noBrackets.value > 1) {
-            for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
-                returnedTeams.push([]);
-            }
-            allTeams.forEach(ele => {
-                returnedTeams[ele.super_weekend_bracket -1].push(ele);
-            });
-            return returnedTeams
-        } else {
-            return [allTeams]
-        }
-    });
+    // const superWeekendBrackets = computed( () => {
+    //     const navStore = useNavBarStore();
+    //     if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
+    //         return []
+    //     }
+    //     const returnedTeams = []
+    //     if (noBrackets.value > 1) {
+    //         for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
+    //             returnedTeams.push([]);
+    //         }
+    //         allTeams.forEach(ele => {
+    //             returnedTeams[ele.super_weekend_bracket -1].push(ele);
+    //         });
+    //         return returnedTeams
+    //     } else {
+    //         return [allTeams]
+    //     }
+    // });
 
     async function getTeams() {
         const navStore = useNavBarStore();
@@ -182,7 +182,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
         seasonStats,
         seasonPlayers,
         bracketedTeams,
-        superWeekendBrackets,
+        // superWeekendBrackets,
         teamName,
         matches,
         getTeams,

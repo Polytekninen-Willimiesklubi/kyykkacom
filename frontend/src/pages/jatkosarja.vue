@@ -1,14 +1,12 @@
 <template>
   <v-layout class="pt-5">
-    <div width="100px" class="pr-10">
+    <div class="pr-10 pl-10">
       <v-btn 
-        class="mb-5 ml-5"
+        class="mb-5"
         @click="showFormat = !showFormat"
-        width="150px"
         :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
       />
       <side-bar
-        class="ml-5"
         :headers="headers"
         sort-by="bracket_placement"
         :sort-desc=false
@@ -17,7 +15,7 @@
         :lines="navStore.playoffLines"
       />
     </div>
-    <div class="d-flex" width="100px">
+    <div class="d-flex">
       <tournament
         :played_games="matchesStore.excludingSuperMatches"
         :rounds_parrent="rounds"

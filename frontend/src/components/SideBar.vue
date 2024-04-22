@@ -17,7 +17,6 @@
         <v-data-table
           mobile-breakpoint="0"
           class="sidebar"
-          @click:row="handleRedirect"
           :headers="headers"
           :items="[...listItem]"
           :sort-by="[{key: 'points_total', order:'desc'}]"
@@ -48,6 +47,7 @@
               class="v-data-table__tr v-data-table__tr"
               :class="{'first-border': isFirst(index), 
                 'second-border': isSecond(index)}"
+              @click="handleRedirect(item['id'])"
             >
               <td 
                 v-for="header in headers"
@@ -118,23 +118,22 @@ export default {
       season: false,
       multible_brackets: false,
       data: [],
-      // teams: []
     }
   },
   methods: {
-    handleRedirect (value, row) {
-      location.href = '/joukkueet/' + row.item.id
+    handleRedirect (index) {
+      location.href = '/joukkueet/' + index
     },
     isFirst(val) {
       if (this.lines.length === 0) return false;
       const index = this.no_brackets > 1 ? 1 : 0;
-      return this.lines.length > 1 && this.lines[index][0] === val
+      return this.lines.length > 1 && this.lines[index][0] === val+1
     },
     isSecond(val) {
       if (this.lines.length === 0) return false;
       const index = this.no_brackets > 1 ? 1 : 0;
-      return this.lines.length === 1 && this.lines[index][0] === val ||
-            this.lines.length === 2 && this.lines[index][1] === val
+      return this.lines.length === 1 && this.lines[index][0] === val+1 ||
+            this.lines.length === 2 && this.lines[index][1] === val+1
     }
   }
   // watch: {

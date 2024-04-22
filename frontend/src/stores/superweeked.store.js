@@ -53,13 +53,15 @@ export const useSuperStore = defineStore('superweekend', () => {
     });
 
     const bracketTeams = computed(() => {
-        if (teams.value === null) return [];
+        if (teams.value === null || !teamsLoaded.value || !noBrackets.value) return [];
         const allBrackets = [];
         for (let i = 0; i < noBrackets.value; i++) {
             allBrackets.push([]);
         }
         teams.value.forEach((team) => {
-            allBrackets[team.super_weekend_bracket - 1].push(team);
+            if(team.super_weekend_bracket && team.super_weekend_bracket > 0) {
+                allBrackets[team.super_weekend_bracket - 1].push(team);
+            }
         })
         allBrackets.forEach(
             bracket => bracket.sort((a, b) => 
@@ -74,13 +76,10 @@ export const useSuperStore = defineStore('superweekend', () => {
         return seasons_mapping[format.value].one_bracket;
     })
 
-    // const playoffTeams = computed(() => {
-    //     const poTeams = [];
-    //     teams.value.forEach((team) => {
-            
-    //     })
-    //     return playoffTeams
-    // });
+    const playoffLines = computed(() => {
+        if (!format.value) return [];
+        return seasons_mapping[format.value].playoffLines
+    })
 
     async function getData() {
         dataLoaded.value = false;
@@ -91,6 +90,11 @@ export const useSuperStore = defineStore('superweekend', () => {
 
         noBrackets.value = payload.super_weekend_no_brackets;
         format.value = payload.super_weekend_playoff_format;
+        if (!Object.keys(seasons_mapping).includes(format.value)) {
+            dataLoaded.value = true;
+            return
+        }
+
         isBronze.value = seasons_mapping[format].bronze;
 
         dataLoaded.value = true;
@@ -109,8 +113,8 @@ export const useSuperStore = defineStore('superweekend', () => {
     }
 
     async function getAllData() {
-        getData();
         getSuperTeams();
+        getData();
     }
 
     return {
@@ -124,6 +128,7 @@ export const useSuperStore = defineStore('superweekend', () => {
         bracketTeams,
         bracket,
         seededTeams,
+        playoffLines,
         getData,
         getSuperTeams,
         getAllData,

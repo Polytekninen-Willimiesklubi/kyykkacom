@@ -28,9 +28,4 @@ if (loadedSeason !== navStore.seasonId || !localStorage.allTeams) {
 
 </script>
 
-<style>
-.left {
-    padding-left: 3em;
-    padding-top: 6em;
-}
-</style>
+<style></style>
