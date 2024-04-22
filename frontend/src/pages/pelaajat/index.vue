@@ -35,12 +35,6 @@
           </template> -->
       </v-card>
     </div>
-    <div xs4 class="pl-3 hidden-md-and-down">
-       <!-- <side-bar
-          :no_brackets="no_brackets"
-          :non-default-teams="teams"
-        /> -->
-    </div>
   </v-layout>
 </template>
 
@@ -59,68 +53,19 @@ playerStore.getPlayers();
 const teams = homeStore.getTeams();
 
 const headers = [
-  {
-    title: 'Nimi',
-    value: 'player_name',
-    align: 'left'
-  },
-  {
-    title: 'Joukkue',
-    value: 'team.current_abbreviation',
-    align: 'left'
-  },
-  {
-    title: 'E',
-    value: 'rounds_total',
-    align: 'center'
-  },
-  {
-    title: 'P', 
-    value: 'score_total',
-    width: '1%',
-    align: 'center' 
-  },
-  {
-  title: 'PPH',
-  value: 'score_per_throw',
-  align: 'center'
-},
-{
-  title: 'SP',
-  value: 'scaled_points',
-  align: 'center'
-},
-{
-  title: 'SPH',
-  value: 'scaled_points_per_throw',
-  align: 'center'
-},
-{
-  title: 'kHP',
-  value: 'avg_throw_turn',
-  align: 'center'
-},
-{ 
-  title: 'H',
-  value: 'pikes_total',
-  align: 'center' 
-},
-{
-  title: 'H%',
-  value: 'pike_percentage',
-  align: 'center'
-},
-{
-  title: 'VM',
-  value: 'zeros_total',
-  align: 'center'
-},
-{
-  title: 'JK',
-  value: 'gteSix_total',
-  align: 'center'
-}
-]
+  { title: 'Nimi', value: 'player_name', align: 'left'},
+  { title: 'Joukkue', value: 'team.current_abbreviation', align: 'left'},
+  { title: 'E', value: 'rounds_total', align: 'center'},
+  { title: 'P', value: 'score_total', width: '1%', align: 'center' },
+  { title: 'PPH', value: 'score_per_throw', align: 'center' },
+  { title: 'SP',value: 'scaled_points',align: 'center'},
+  { title: 'SPH',value: 'scaled_points_per_throw',align: 'center'},
+  { title: 'kHP', value: 'avg_throw_turn', align: 'center'},
+  { title: 'H', value: 'pikes_total', align: 'center' },
+  { title: 'H%', value: 'pike_percentage', align: 'center'},
+  { title: 'VM', value: 'zeros_total', align: 'center'},
+  { title: 'JK', value: 'gteSix_total', align: 'center'}
+];
 
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.id

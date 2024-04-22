@@ -195,12 +195,6 @@
         </v-row>
       </v-card>
     </div>
-    <!-- <div class="d-flex pl-3 xs4 hidden-md-and-down">
-      <side-bar
-        :no_brackets="no_brackets"
-        :non-default-teams="teams"
-      />
-    </div> -->
   </v-layout>
 </template>
 <script setup>
@@ -210,7 +204,6 @@ import { useDate } from 'vuetify';
 import { useHomeStore } from '@/stores/home.store'
 
 const homeStore = useHomeStore();
-const teams = homeStore.getTeams();
 
 const playerStore = usePlayerStore();
 const navStore = useNavBarStore();
