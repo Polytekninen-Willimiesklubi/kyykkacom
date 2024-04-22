@@ -194,8 +194,8 @@ export default {
             new_loser.winner = null
             winner.winner = true
             loser.winner = false
-            console.log(match);
-            console.log(el);
+            // console.log(match);
+            // console.log(el);
             match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
             if (7 - i >= 4) { // Ignore Bronze and Finals
               if (7 - i == 4) { // SemiFinals -> Winner needs to be assigned to Finals

@@ -7,14 +7,15 @@
         width="150px"
         :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
       />
-      <!-- <side-bar
-          title="Runkosarja"
-          :headers="headers"
-          sort-by="bracket_placement"
-          :sort-desc=false
-          :no_brackets="no_brackets"
-          :non-default-teams="teams"
-      /> -->
+      <side-bar
+        class="ml-5"
+        :headers="headers"
+        sort-by="bracket_placement"
+        :sort-desc=false
+        :no_brackets="navStore.selectedSeason.no_brackets"
+        :teams="teamStore.bracketedTeams"
+        :lines="navStore.playoffLines"
+      />
     </div>
     <div class="d-flex" width="100px">
       <tournament
@@ -29,13 +30,17 @@
     </div>
   </v-layout>
 </template>
-
+<route>
+{
+  meta: {
+    layout: "tournament"
+  }
+}
+</route>
 <script setup>
 import { useMatchesStore } from '@/stores/matches.store';
 import { useNavBarStore } from '@/stores/navbar.store';
 import { useTeamsStore } from '@/stores/teams.store';
-
-// import { definePage } from 'vue-router/auto';
 
 import cup_22 from '../tournament_templates/cup_template_22_teams.json';
 import cup_16 from '../tournament_templates/cup_template_16_teams.json';
@@ -44,22 +49,15 @@ import cup_8 from '../tournament_templates/cup_template_8_teams.json';
 import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json';
 import cup_4 from '../tournament_templates/cup_template_4_teams.json';
 
-// definePage({
-//   meta: {
-//     layout: '@/layouts/tournament.vue'
-//   }
-// })
-
-
 const headers = [
-  { text: 'Sij.', value: 'bracket_placement' },
-  { text: 'Joukkue', value: 'current_abbreviation', sortable: false, width: '10%' },
-  { text: 'O', value: 'matches_played', sortable: false, width: '3%' },
-  { text: 'V', value: 'matches_won', sortable: false, width: '3%' },
-  { text: 'T', value: 'matches_tie', sortable: false, width: '3%' },
-  { text: 'H', value: 'matches_lost', sortable: false, width: '3%' },
-  { text: 'P', value: 'points_total', sortable: false, width: '3%' },
-  { text: 'OKA', value: 'match_average', sortable: false, width: '5%' }
+  { title: 'Sij.', key: 'bracket_placement' },
+  { title: 'Joukkue', key: 'current_abbreviation', sortable: false, width: '10%' },
+  { title: 'O', key: 'matches_played', sortable: false, width: '3%' },
+  { title: 'V', key: 'matches_won', sortable: false, width: '3%' },
+  { title: 'T', key: 'matches_tie', sortable: false, width: '3%' },
+  { title: 'H', key: 'matches_lost', sortable: false, width: '3%' },
+  { title: 'P', key: 'points_total', sortable: false, width: '3%' },
+  { title: 'OKA', key: 'match_average', sortable: false, width: '5%' }
 ];
 
 const seasons_mapping = {
@@ -71,25 +69,26 @@ const seasons_mapping = {
   6: cup_12
 };
 
+
 const rounds = ref([]);
 const first_round = ref(false);
 const first = ref(0);
 const showFormat = ref(false);
 const load_ended = ref(false);
 
-const navbarStore = useNavBarStore();
+const navStore = useNavBarStore();
 const matchesStore = useMatchesStore();
 const teamStore = useTeamsStore(); 
 
 matchesStore.getMatches();
 teamStore.getTeams();
-navbarStore.getSeasons();
+navStore.getSeasons();
 
-watch(() => [matchesStore.loaded, teamStore.loaded, navbarStore.loaded], ([matchesReady, teamsReady, seasonsReady]) => {
-  if (!matchesReady || !teamsReady || !navbarStore.selectedSeason.playoff_format) return;
+watch(() => [matchesStore.loaded, teamStore.loaded, navStore.loaded], ([matchesReady, teamsReady, seasonsReady]) => {
+  if (!matchesReady || !teamsReady || !navStore.selectedSeason.playoff_format) return;
 
-  const json = seasons_mapping[navbarStore.selectedSeason.playoff_format]
-  rounds.value = navbarStore.selectedSeason.no_brackets === 1 ? json.one_bracket : json.two_bracket;
+  const json = seasons_mapping[navStore.selectedSeason.playoff_format]
+  rounds.value = navStore.selectedSeason.no_brackets === 1 ? json.one_bracket : json.two_bracket;
   first.value = json.first_round
   first_round.value = !!first.value
   load_ended.value = true;

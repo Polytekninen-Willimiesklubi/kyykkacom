@@ -1,15 +1,10 @@
+<!-- Only removes the sidebar. Sidebar is reused as differently in 
+  these pages and shoud be rendered in the "page"- file -->
 <template>
   <v-app>
     <v-main>
       <NavBar/>
       <v-layout>
-        <div class="d-flex left">
-          <side-bar 
-            :no_brackets="navStore.selectedSeason.no_brackets"
-            :teams="teamStore.bracketedTeams"
-            :lines="navStore.playoffLines"
-          />
-        </div>
         <router-view />
       </v-layout>
     </v-main>

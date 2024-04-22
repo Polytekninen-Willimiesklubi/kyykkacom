@@ -30,7 +30,7 @@
               <template v-for="column in columns" :key="column.key">
                 <th class="v-data-table__td v-data-table__th">
                   <div class="v-data-table-header__content">
-                    <span :style="column.title === 'P' ? 'font-weight:bold' : ''">
+                    <span :style="column.title === boldingkeys[0] ? 'font-weight:bold' : ''">
                       {{ column.title }}
                     </span>
                   </div>
@@ -46,16 +46,15 @@
           <template #item = "{ item, index }">
             <tr
               class="v-data-table__tr v-data-table__tr"
-              :class="{'first-border': isFirst(index), 'second-border': isSecond(index)}"
+              :class="{'first-border': isFirst(index), 
+                'second-border': isSecond(index)}"
             >
-              <td> {{ item.current_abbreviation }}</td>
-              <td> {{ item.matches_played }}</td>
-              <td> {{ item.matches_won }}</td>
-              <td> {{ item.matches_tie }}</td>
-              <td> {{ item.matches_lost }}</td>
-              <td style='font-weight:bold'> {{ item.points_total }}</td>
-              <td> {{ item.points_average }}</td>
-              <td> {{ item.match_average }}</td>
+              <td 
+                v-for="header in headers"
+                :style="header.key === boldingkeys[1] ? 'font-weight:bold' :''"
+              >
+                {{ item[header.key] }}
+              </td>
             </tr>
           </template>
           <template #bottom></template>
@@ -107,7 +106,10 @@ export default {
     nonDefaultTeams: Array,
     teams: Array,
     lines: Array,
-
+    boldingkeys: {
+      type: Array,
+      default: ['P', 'points_total']
+    },
   },
   data () {
     return {
