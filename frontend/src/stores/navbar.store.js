@@ -1,4 +1,3 @@
-import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import { useHomeStore } from "./home.store";
 // import { router } from "@/router";

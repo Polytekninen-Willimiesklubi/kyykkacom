@@ -97,7 +97,7 @@ const headers = [
 
 const postHeaders =  [
   { title: 'Aika', key: 'match_time', align: 'left' },
-  { title: 'Kenttä', key: 'field', aling='center' },
+  { title: 'Kenttä', key: 'field', aling: 'center' },
   { title: 'Koti', key: 'home_team.current_abbreviation' },
   { title: 'Vieras', key: 'away_team.current_abbreviation' },
   { title: '', key: 'home_score_total', width: '3%', align: 'right' },

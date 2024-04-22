@@ -39,8 +39,6 @@
 import { useHomeStore } from '@/stores/home.store';
 import { useTeamStore } from '@/stores/team.store';
 
-import { ref } from 'vue';
-
 const homeStore = useHomeStore();
 
 const search = ref('');

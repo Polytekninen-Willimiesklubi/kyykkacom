@@ -98,7 +98,6 @@
 
 <script setup>
 import { useRegisterStore } from '@/stores/register.store';
-import { ref } from 'vue'
 
 const store = useRegisterStore();
 

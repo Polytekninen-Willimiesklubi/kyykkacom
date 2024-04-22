@@ -1,12 +1,9 @@
-import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-
 
 export const useChartStore = defineStore('chart', () => {
     const datasets = ref([]);
     const labels = ref([]);
     
-
     return {
         datasets,
         labels,

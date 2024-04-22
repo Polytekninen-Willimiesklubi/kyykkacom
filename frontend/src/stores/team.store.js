@@ -1,4 +1,3 @@
-import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import { useNavBarStore } from "./navbar.store";
 import { getCookie, fetchNewToken } from '@/stores/auth.store';

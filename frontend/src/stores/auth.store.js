@@ -1,7 +1,4 @@
-import { ref } from "vue";
 import { defineStore } from "pinia";
-import { computed } from "vue";
-// import { router } from '@/router';
 
 // const baseUrl = `${import.meta.env.VITE_API_URL}/login/`;
 const baseUrl = 'http://localhost:8000/api/login/'; // TODO: change this to .env variable
