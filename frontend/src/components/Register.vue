@@ -3,19 +3,17 @@
     <template v-slot:activator="{ props: activatorProps }">
       <v-btn
         @click="dialog = !dialog"
+        text="Register"
         v-bind="activatorProps"
         class="hidden-lg-and-up ml-1" 
         width="100%"
-      >
-        Register
-      </v-btn>
+      />
       <v-btn
         @click="dialog = !dialog"
+        text="Register"
         class="hidden-md-and-down" 
         v-bind="activatorProps"
-      >
-        Register
-      </v-btn>
+      />
     </template>
     <v-card
       title="Rekisteröityminen"
@@ -89,8 +87,8 @@
       </v-container>
       <small>*pakollinen kenttä</small>
       <v-card-actions class=justify-center>
-        <v-btn color="red darken-1" text @click="store.checkForm()">Register</v-btn>
-        <v-btn color="red darken-1" text @click="dialog = !dialog">Close</v-btn>
+        <v-btn color="red darken-1" text="Register" @click="store.checkForm()" />
+        <v-btn color="red darken-1" text="Close" @click="dialog = !dialog" />
       </v-card-actions>
     </v-card>
   </v-dialog>

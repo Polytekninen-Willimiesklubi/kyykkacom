@@ -1,12 +1,12 @@
 <template>
   <v-layout class="pt-5 mr-2">
     <div width="100px" class="pr-10">
-      <v-btn class="mb-5"
-          @click="showFormat = !showFormat"
-          width="150px"
-      >
-          {{!showFormat ? "Vain Formaatti" : "Tulokset"}}
-      </v-btn>
+      <v-btn
+        class="mb-5"
+        @click="showFormat = !showFormat"
+        :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
+        width="150px"
+      />
       <!-- <side-bar
           title="Alkulohko"
           :headers="headers"

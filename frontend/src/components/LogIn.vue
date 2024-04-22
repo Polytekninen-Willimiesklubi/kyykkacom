@@ -4,18 +4,16 @@
       <v-btn
         @click="dialog = !dialog"
         v-bind="activatorProps"
+        text="Log In"
         class="hidden-lg-and-up mb-5 ml-1" 
         width="100%"
-      >
-        Log In
-      </v-btn>
+      />
       <v-btn
         @click="dialog = !dialog"
-        class="hidden-md-and-down" 
+        class="hidden-md-and-down"
+        text="Log In"
         v-bind="activatorProps"
-      >
-        Log in
-      </v-btn>
+      />
     </template>
     <v-card
       title="Log In"
@@ -54,8 +52,16 @@
       </v-container>
       <small class="ml-2">*indicates required field</small>
       <template v-slot:actions>
-        <v-btn color="red darken-1" text @click="authStore.logIn()">Log in</v-btn>
-        <v-btn color="red darken-1" text @click="dialog = !dialog, authStore.alert = !authStore.alert">Close</v-btn>
+        <v-btn
+          color="red darken-1" 
+          text="Log In" 
+          @click="authStore.logIn()"
+        />
+        <v-btn
+          color="red darken-1"
+          text="Close"
+          @click="dialog = !dialog, authStore.alert = !authStore.alert"
+        />
       </template>
     </v-card>
   </v-dialog>

@@ -11,17 +11,15 @@
       <img src="@/assets/kyykkalogo120px.png">
     </router-link>
 
-    <div v-for="item in headers">
+    <template v-for="item in headers">
       <v-btn 
-        text 
-        class="hidden-md-and-down" 
+        class="hidden-md-and-down"
+        :text="item.title"
         :to=item.route
         v-if="item.if_clause === undefined && 
         item.title != 'Koti' || item.if_clause"
-      >
-        {{ item.title }}
-      </v-btn>
-    </div>
+      />
+    </template>
 
     <v-spacer class="hidden-md-and-down" />
     <v-spacer class="hidden-md-and-down" />
@@ -49,12 +47,11 @@
     <div class="hidden-md-and-down" v-if="userStore.loggedIn">
       <span class="mr-5">{{ userStore.playerName }}</span>
       <v-btn 
-        class="hidden-md-and-down" 
+        class="hidden-md-and-down"
+        text="Kirjaudu Ulos"
         @click="userStore.logOut()" 
         :to="'/'"
-        >
-          Kirjaudu ulos
-        </v-btn>
+      />
     </div>
 
     <v-spacer />
@@ -81,15 +78,14 @@
               <log-in v-if="!userStore.loggedIn" />
               <register v-if="!userStore.loggedIn" />
             </div>
-            <v-btn 
+            <v-btn
+              text="Log out"
               style="position:absolute;"
               @click="userStore.logOut()"
               :to="'/'"
               width="95%" 
               v-if="userStore.loggedIn"
-            >
-              Log out
-            </v-btn>
+            />
           </v-list-item>
       </v-list>
       <template v-if="userStore.loggedIn" v-slot:prepend>

@@ -48,8 +48,18 @@
                         </v-card>
                     </v-col>
                 </v-row>
-                <v-btn class="ma-4 ml-10" v-on:click="validateResult(true)" x-large color="error">Vahvista Runkosarjan tulos</v-btn>
-                <v-btn class="ma-4 ml-10" v-on:click="validateWinner" x-large color="error">Vahvista Runkosarjan Voittaja</v-btn>
+                <v-btn 
+                  class="ma-4 ml-10" 
+                  @click="validateResult(true)" 
+                  color="x-large error"
+                  text="Vahvista Runkosarjan tulos"  
+                />
+                <v-btn 
+                  class="ma-4 ml-10" 
+                  @click="validateWinner" 
+                  color="x-large error"
+                  text="Vahvista Runkosarjan Voittaja"
+                />
 
             </v-window-item>
             <v-window-item
@@ -119,7 +129,12 @@
                                 </v-row>
                             </v-col>
                         </v-row>
-                        <v-btn class="ma-4 ml-10" v-on:click="validateBrackets()" x-large color="error">Vahvista Superin lohkot</v-btn>
+                        <v-btn
+                          class="ma-4 ml-10"
+                          @click="validateBrackets()"
+                          text="Vahvista Superin lohkot"
+                          color="error x-large"
+                        />
                     </v-window-item>
                     <v-window-item
                         :key="1"
@@ -255,7 +270,12 @@
                                     />
                                 </v-col>
                             </v-row>
-                            <v-btn type="submit" class="ma-2" color="error">Syötä tulos</v-btn>
+                            <v-btn 
+                              type="submit" 
+                              class="ma-2"
+                              text="Syötä tulos"
+                              color="error"
+                            />
                         </v-form>
 
                     </v-window-item>
@@ -290,8 +310,12 @@
                                 </v-card>
                             </v-col>
                         </v-row>
-                        <v-btn class="ma-4 ml-10" v-on:click="validateResult(false)" x-large color="error">Vahvista Superin lohko sijoitukset</v-btn>
-
+                        <v-btn
+                          class="ma-4 ml-10 x-large"
+                          @click="validateResult(false)"
+                          text="Vahvista Superin lohko sijoitukset"
+                          color="error"
+                        />
                     </v-window-item>
                     <v-window-item
                         :key="3"
@@ -321,7 +345,12 @@
                             </draggable>
 
                         </v-card>
-                        <v-btn class="ma-4 ml-10" v-on:click="validateSeeds()" x-large color="error">Vahvista Superin Seedit</v-btn>
+                        <v-btn
+                          class="ma-4 ml-10 x-large"
+                          @click="validateSeeds()"
+                          text="Vahvista Superin Seedit"
+                          color="error"
+                        />
                     </v-window-item>
                     <v-window-item
                         :key="4"
@@ -343,7 +372,12 @@
                                     />
                                 </v-col>
                             </v-row>
-                            <v-btn class="ma-8" type="submit" x-large color="error">Vahvista Superin Voittaja</v-btn>
+                            <v-btn
+                              class="ma-8 x-large"
+                              type="submit"
+                              text="Vahvista Superin Voittaja"
+                              color="error"
+                            />
                         </v-form>
                     </v-window-item>
                 </v-window>
