@@ -20,9 +20,8 @@
                         <v-tooltip
                           activator="parent"
                           location="bottom"
-                        >
-                          {{ column.tooltip }}
-                        </v-tooltip>
+                          :text="column.tooltip"
+                        />
                       </td>
                     </template>
                   </tr>
@@ -110,7 +109,6 @@
             <v-switch
               class='pl-2'
               v-model="sortGamesSwitch"
-              hide-details
               true-value="Peleittäin"
               false-value="Erittäin"
               :label="`${sortGamesSwitch}`"
@@ -120,7 +118,6 @@
           <v-col cols="2">
             <v-switch
               v-model="filterGamesSwitch"
-              hide-details
               true-value="Valitut kaudet"
               false-value="Kaikki kaudet"
               :label="`${filterGamesSwitch}`"
@@ -137,7 +134,6 @@
               v-model="search"
               label="Etsi"
               single-line
-              ide-details
               variant="outlined"
             />
           </v-col>
@@ -160,15 +156,12 @@
                   <tr>
                     <template v-for="column in columns" :key="column.key">
                       <td class="mr-2 cursor-pointer" @click="() => toggleSort(column)">
-                        <span>
-                          {{ column.title }}
-                          <v-tooltip
-                            activator="parent"
-                            location="bottom"
-                          >
-                            {{ column.tooltip }}
-                          </v-tooltip>
-                        </span>
+                        <span> {{ column.title }} </span>
+                        <v-tooltip
+                          activator="parent"
+                          location="bottom"
+                          :text="column.tooltip"
+                        />
                         <template v-if="isSorted(column)">
                           <v-icon :icon="getSortIcon(column)" />
                         </template>
@@ -180,14 +173,16 @@
                   <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
                 </template>
                 <template #item.own_team_total="{ item }">
-                  <v-chip :color="getColor(item.own_team_total, item.opposite_team_total)">
-                    {{ item.own_team_total }}
-                  </v-chip>
+                  <v-chip
+                    :color="getColor(item.own_team_total, item.opposite_team_total)"
+                    :text="item.own_team_total "
+                  />
                 </template>
                 <template #item.opposite_team_total="{ item }">
-                  <v-chip :color="getColor(item.opposite_team_total, item.own_team_total)">
-                    {{ item.opposite_team_total }}
-                  </v-chip>
+                  <v-chip 
+                    :color="getColor(item.opposite_team_total, item.own_team_total)"
+                    :text="item.opposite_team_total "
+                  />
                 </template>
               </v-data-table>
             </v-card>

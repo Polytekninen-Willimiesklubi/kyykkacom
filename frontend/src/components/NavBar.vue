@@ -64,29 +64,28 @@
       temporary
       dark
     >
-      <v-list nav>
-          <div v-for="item in headers">
-            <v-list-item 
-              :to=item.route v-if="item.if_clause == undefined || item.if_clause"
-              :prepend-icon="item.icon"
-              :title="item.title"  
-            />
-          </div>
+      <v-list :nav="true">
+        <template v-for="item in headers">
+          <v-list-item 
+            :to=item.route v-if="item.if_clause == undefined || item.if_clause"
+            :prepend-icon="item.icon"
+            :title="item.title"  
+          />
+        </template>
 
-          <v-list-item>
-            <div class="pa-2">
-              <log-in v-if="!userStore.loggedIn" />
-              <register v-if="!userStore.loggedIn" />
-            </div>
-            <v-btn
-              text="Log out"
-              style="position:absolute;"
-              @click="userStore.logOut()"
-              :to="'/'"
-              width="95%" 
-              v-if="userStore.loggedIn"
-            />
-          </v-list-item>
+        <v-list-item>
+          <div class="pa-2" v-if="!userStore.loggedIn">
+            <log-in />
+            <register />
+          </div>
+          <v-btn v-else
+            text="Log out"
+            style="position:absolute;"
+            @click="userStore.logOut()"
+            :to="'/'"
+            width="95%"
+          />
+        </v-list-item>
       </v-list>
       <template v-if="userStore.loggedIn" v-slot:prepend>
         <v-list-item 
@@ -94,9 +93,9 @@
           subtitle="Logged In"
           two-line
         >
-          <v-avatar>
-            <img src="https://www.robertharding.com/watermark.php?type=preview&im=RF/RH_RF/VERTICAL/1112-5071">
-          </v-avatar>
+          <v-avatar
+            image="https://www.robertharding.com/watermark.php?type=preview&im=RF/RH_RF/VERTICAL/1112-5071"
+          />
         </v-list-item>
       </template>
     </v-navigation-drawer>

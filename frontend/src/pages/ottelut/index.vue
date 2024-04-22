@@ -45,8 +45,8 @@
           <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
           <v-icon 
             color="gray" 
-            class="mr-3">
-            info
+            class="mr-3"
+            icon="info"
           >
             <v-tooltip 
               activator='parent'
@@ -60,9 +60,7 @@
         </template>
         <template v-slot:group.header="{items, isOpen, toggle}">
           <th colspan="12" @click="toggle">
-            <v-icon>
-              {{ isOpen ? 'mdi-minus' : 'mdi-plus' }}
-            </v-icon>
+            <v-icon :icon="isOpen ? 'mdi-minus' : 'mdi-plus'"/>
             {{ items[0].type_name }}
             {{ items[0].home_team.current_abbreviation}} vs. {{ items[0].away_team.current_abbreviation }}
           </th>

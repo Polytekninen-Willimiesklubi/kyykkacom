@@ -108,14 +108,14 @@
                     <template #item.actions="{ item }">
                       <v-icon
                         v-if="!item.team.current_name"
+                        icon="mdi-plus"
                         color=green
                         @click="teamStore.reservePlayer(item)"
-                      >
-                        mdi-plus
-                      </v-icon>
-                      <v-icon v-else color=gray>
-                        mdi-lock
-                      </v-icon>
+                      />
+                      <v-icon v-else 
+                        icon="mdi-lock"
+                        color=gray
+                      />
                     </template>
                     <template #bottom></template>
                   </v-data-table>
@@ -150,14 +150,16 @@
                   <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
                 </template>
                 <template #item.own_team_total="{ item }">
-                  <v-chip :color="getColor(item.own_team_total, item.opposite_team_total)">
-                    {{ item.own_team_total }}
-                  </v-chip>
+                  <v-chip 
+                    :color="getColor(item.own_team_total, item.opposite_team_total)"
+                    :text="item.own_team_total"
+                  />
                 </template>
                 <template #item.opposite_team_total="{ item }">
-                  <v-chip :color="getColor(item.opposite_team_total, item.own_team_total)">
-                    {{ item.opposite_team_total }}
-                  </v-chip>
+                  <v-chip
+                    :color="getColor(item.opposite_team_total, item.own_team_total)"
+                    :text="item.opposite_team_total"
+                  />
                 </template>
               </v-data-table>
             </v-expansion-panel-text>

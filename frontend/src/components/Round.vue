@@ -13,7 +13,7 @@
       />
     </v-card-title>
     <v-row v-if="!show_input" row wrap>
-      <v-card-text v-if="round_score || round_score == '0'">
+      <v-card-text v-if="roundScore || roundScore == '0'">
         <p>
           {{teamName}}
           <v-chip
@@ -22,9 +22,8 @@
             label
             small
             class="mr-2"
-          >
-            {{round_score}}
-          </v-chip>
+            :text="roundScore"
+          />
         </p>
       </v-card-text>
     </v-row>
@@ -36,7 +35,7 @@
           <v-text-field 
             @input="roundScore()" 
             style="width:10%; float:right;" 
-            v-model="round_score" 
+            v-model="roundScore" 
             class="centered-input" 
             label="total" 
             maxlength="3"
@@ -119,7 +118,7 @@ const props = defineProps({
 const roundString = props.roundNumber === '1' ? 'first_round' : 'second_round';
 
 const data = props.matchData[roundString][props.teamSide];
-const round_score = props.matchData[props.teamSide + '_' + roundString + '_score'];
+const roundScore = props.matchData[props.teamSide + '_' + roundString + '_score'];
 const players = props.matchData[props.teamSide+'_team'].players
 const teamName = props.matchData[props.teamSide+'_team'].current_abbreviation
 

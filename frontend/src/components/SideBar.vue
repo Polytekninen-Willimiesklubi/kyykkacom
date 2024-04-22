@@ -37,9 +37,8 @@
                   <v-tooltip v-if="column.tooltip !== undefined"
                     activator="parent"
                     location="bottom"
-                  >
-                    {{ column.tooltip }}
-                  </v-tooltip>
+                    :text="column.tooltip"
+                  />
                 </th>
               </template>
             </tr>

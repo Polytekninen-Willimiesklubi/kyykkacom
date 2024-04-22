@@ -19,9 +19,8 @@
                     <v-chip
                       :color="`${getColor(matchData.home_score_total,
                         matchData.away_score_total)} lighten-2`"
-                    >
-                      {{matchData.home_score_total}}
-                    </v-chip>
+                      :text="matchData.home_score_total"
+                    />
                   </figcaption>
                 </figure>
               </v-col>
@@ -46,7 +45,8 @@
                     <v-chip
                       :color="`${getColor(matchData.away_score_total,
                         matchData.home_score_total)} lighten-2`"
-                    >{{matchData.away_score_total}}</v-chip>
+                      :text="matchData.away_score_total"
+                    />
                   </figcaption>
                 </figure>
               </v-col>
