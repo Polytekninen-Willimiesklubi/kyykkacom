@@ -25,12 +25,10 @@ export const usePlayerStore = defineStore('players', () => {
         loading.value = false;
     }
 
-    async function getPlayer() {
+    async function getPlayer(playerIndex) {
         loadingPlayer.value = true;
         const navStore = useNavBarStore();
-        const splittedUrl = location.href.split('/')
-        const idx = splittedUrl[splittedUrl.length - 1]
-        const question = idx + '/?season=' + navStore.seasonId;
+        const question = playerIndex + '/?season=' + navStore.seasonId;
         try {
             const response = await fetch(baseUrl + question, {method : 'GET'});
             const payload = await response.json();

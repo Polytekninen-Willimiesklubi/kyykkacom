@@ -124,15 +124,17 @@
 import { useMatchStore } from '@/stores/match.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useDate } from 'vuetify';
+import { useRoute } from 'vue-router/auto';
 
 const authStore = useAuthStore();
 const matchStore = useMatchStore();
 
-const {matchData, dataReady, isAwayCaptain} = storeToRefs(matchStore);
-
+const route = useRoute('/ottelut/[id]');
 const date = useDate();
 
-matchStore.getMatchData();
+const {matchData, dataReady, isAwayCaptain} = storeToRefs(matchStore);
+
+matchStore.getMatchData(route.params.id);
 
 /**
  * Returns red/yellow/green depending is it higher, lower or tie
@@ -148,7 +150,6 @@ function getColor(teamScore, team2Score) {
   } else {
     return 'yellow';
   }
-
 }
 
 </script>

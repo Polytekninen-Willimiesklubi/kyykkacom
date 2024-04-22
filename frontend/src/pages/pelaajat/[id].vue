@@ -196,9 +196,9 @@
 import { useNavBarStore } from '@/stores/navbar.store';
 import { usePlayerStore } from '@/stores/players.store';
 import { useDate } from 'vuetify';
-import { useHomeStore } from '@/stores/home.store'
+import { useRoute } from 'vue-router/auto';
 
-const homeStore = useHomeStore();
+const route = useRoute('/pelaajat/[id]');
 
 const playerStore = usePlayerStore();
 const navStore = useNavBarStore();
@@ -488,7 +488,7 @@ function initalColor(value) {
   return true
 }
 
-playerStore.getPlayer();
+playerStore.getPlayer(route.params.id);
 watch(() => playerStore.loadedData, () => {
   if (playerStore.loadedData === false) {
     return

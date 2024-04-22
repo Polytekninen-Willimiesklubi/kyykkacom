@@ -174,7 +174,9 @@
 import { useTeamStore } from '@/stores/team.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useDate } from 'vuetify'
+import { useRoute } from 'vue-router/auto';
 
+const route = useRoute('/joukkueet/[id]');
 const date = useDate();
 
 const search = ref('');
@@ -245,21 +247,15 @@ function getColor(val1, val2) {
   else return '#F0F4C3' // yellow-lighten-4
 }
 
-const splittedURL = location.href.split('/')
-teamStore.teamId = +splittedURL[splittedURL.length-1]
-
-teamStore.getPlayers()
+teamStore.getPlayers(route.params.id)
 if (authStore.loggedIn && authStore.isCaptain) {
   teamStore.getReserve()
 }
 
 </script>
 
-
 <style>
-
 tbody tr :hover {
     cursor: unset;
 }
-
 </style>

@@ -7,7 +7,7 @@
         <div class="d-flex right">
           <side-bar 
             :no_brackets="navStore.selectedSeason.no_brackets"
-            :teams="homeStore.bracketedTeams"
+            :teams="teamStore.bracketedTeams"
             :lines="navStore.playoffLines"
           />
         </div>
@@ -19,15 +19,15 @@
 </template>
 
 <script setup>
-import { useHomeStore } from '@/stores/home.store';
+import { useTeamsStore } from '@/stores/teams.store';
 import { useNavBarStore } from '@/stores/navbar.store';
 
 const navStore = useNavBarStore(); 
-const homeStore = useHomeStore();
+const teamStore = useTeamsStore();
 
 const loadedSeason = localStorage.loadedSeason;
 if (loadedSeason !== navStore.seasonId || !localStorage.allTeams) {
-  homeStore.getTeams();
+  teamStore.getTeams();
   localStorage.loadedSeason = navStore.seasonId;
 }
 

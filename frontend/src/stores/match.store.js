@@ -12,11 +12,9 @@ export const useMatchStore = defineStore('match', () => {
         return authStore.isCaptain && authStore.teamId === matchData.value.away_team.id;
     })
 
-    async function getMatchData() {
+    async function getMatchData(matchIndex) {
         try {
-            const splittedUrl = location.href.split('/')
-            const index = splittedUrl[splittedUrl.length - 1]
-            const response = await fetch(baseUrl + index, {method: 'GET'});
+            const response = await fetch(baseUrl + matchIndex, {method: 'GET'});
             const payload = await response.json();
 
             matchData.value = payload;

@@ -23,8 +23,8 @@
           color='alert'
           :headers="headers"
           :search="search"
-          :items="homeStore.allTeams"
-          :loading="homeStore.loading"
+          :items="teamStore.allTeams"
+          :loading="teamStore.loading"
           no-data-text="Ei dataa :("
           items-per-page="-1"
         >
@@ -36,10 +36,9 @@
 </template>
 
 <script setup>
-import { useHomeStore } from '@/stores/home.store';
-import { useTeamStore } from '@/stores/team.store';
+import { useTeamsStore } from '@/stores/teams.store';
 
-const homeStore = useHomeStore();
+const teamStore = useTeamsStore();
 
 const search = ref('');
 const headers = [
@@ -53,12 +52,7 @@ const headers = [
 ];
 
 function handleRedirect(value, row) {
-  const teamStore = useTeamStore();
-  teamStore.teamId = row.item.id;
-  console.log(teamStore.teamId)
-  setTimeout(() => {
-    location.href = '/joukkueet/' + row.item.id;
-  }, 4000)
+  location.href = '/joukkueet/' + row.item.id;
 }
 
 </script>

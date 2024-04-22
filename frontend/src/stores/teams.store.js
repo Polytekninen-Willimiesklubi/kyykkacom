@@ -1,15 +1,18 @@
-import { useNavBarStore } from "./navbar.store";
+import { useNavBarStore } from "@/stores/navbar.store";
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
 
+// const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
 const baseUrl = 'http://localhost:8000/api/teams/'; // TODO: change this to .env variable
 const reserveUrl = 'http://localhost:8000/api/reserve/';
 
-export const useTeamStore = defineStore('joukkue', () => {
-    const teamId = ref(null);
+export const useTeamsStore = defineStore('joukkue', () => {
     const allTimeStats = ref({});
     const seasonsStats = ref({});
     const selectedSeasonId = ref(null);
     const unReservedPlayers = ref([]);
+    const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')));
+    const loading = ref(false);
+    const loaded = ref(false);
 
     const seasonStats = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
@@ -49,12 +52,66 @@ export const useTeamStore = defineStore('joukkue', () => {
         return Object.keys(seasonsStats.value).length && selectedSeasonId.value
             ? seasonsStats.value[selectedSeasonId.value].matches
             : [];
-    })
+    });
 
-    async function getPlayers() {
+    const bracketedTeams = computed(() => {
+        const navStore = useNavBarStore();
+        if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
+            return []
+        }
+        const returnedTeams = []
+        if (navStore.selectedSeason.no_brackets > 1) {
+            for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
+                returnedTeams.push([]);
+            }
+            allTeams.value.forEach(ele => {
+                returnedTeams[ele.bracket -1].push(ele);
+            });
+            return returnedTeams
+        } else {
+            return [allTeams.value]
+        }
+    });
+
+    const superWeekendBrackets = computed( () => {
+        const navStore = useNavBarStore();
+        if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
+            return []
+        }
+        const returnedTeams = []
+        if (noBrackets.value > 1) {
+            for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
+                returnedTeams.push([]);
+            }
+            allTeams.forEach(ele => {
+                returnedTeams[ele.super_weekend_bracket -1].push(ele);
+            });
+            return returnedTeams
+        } else {
+            return [allTeams]
+        }
+    });
+
+    async function getTeams() {
+        const navStore = useNavBarStore();
+        const question = '?season=' + navStore.seasonId + '&post_season=0'
+        try {
+            loading.value = true;
+            const response = await fetch(baseUrl + question, {method: 'GET'});
+            const payload = await response.json();
+            allTeams.value = payload;
+            localStorage.setItem('allTeams', JSON.stringify(allTeams.value));
+            loading.value = false;
+            loaded.value = true;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function getTeamPlayers(teamIndex) {
         const navStore = useNavBarStore();
 
-        const question = teamId.value + '/?seasons=' + navStore.seasonId; // TODO this doesen't need season id?
+        const question = teamIndex + '/?seasons=' + navStore.seasonId; // TODO this doesen't need season id?
         const response = await fetch(baseUrl + question, {method: 'GET'});
         const payload = await response.json();
 
@@ -115,16 +172,22 @@ export const useTeamStore = defineStore('joukkue', () => {
         }
     }
     return {
+        allTeams,
         teamId,
+        loading,
+        loaded,
         allTimeStats,
         seasonsStats,
         selectedSeasonId,
         unReservedPlayers,
         seasonStats,
         seasonPlayers,
+        bracketedTeams,
+        superWeekendBrackets,
         teamName,
         matches,
-        getPlayers,
+        getTeams,
+        getTeamPlayers,
         getReserve,
         reservePlayer,
     }

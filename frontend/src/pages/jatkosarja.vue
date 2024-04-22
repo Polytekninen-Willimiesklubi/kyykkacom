@@ -23,7 +23,7 @@
         :first_round="first_round"
         :first="first"
         :only_format="showFormat"
-        :bracket_placements="homeStore.bracketedTeams"
+        :bracket_placements="teamStore.bracketedTeams"
         :load_ended="load_ended"
       />
     </div>
@@ -31,16 +31,25 @@
 </template>
 
 <script setup>
-import { useMatchesStore } from '@/stores/matches.store'
-import { useNavBarStore } from '@/stores/navbar.store'
-import { useHomeStore } from '@/stores/home.store'
+import { useMatchesStore } from '@/stores/matches.store';
+import { useNavBarStore } from '@/stores/navbar.store';
+import { useTeamsStore } from '@/stores/teams.store';
 
-import cup_22 from '../tournament_templates/cup_template_22_teams.json'
-import cup_16 from '../tournament_templates/cup_template_16_teams.json'
-import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json'
-import cup_8 from '../tournament_templates/cup_template_8_teams.json'
-import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json'
-import cup_4 from '../tournament_templates/cup_template_4_teams.json'
+// import { definePage } from 'vue-router/auto';
+
+import cup_22 from '../tournament_templates/cup_template_22_teams.json';
+import cup_16 from '../tournament_templates/cup_template_16_teams.json';
+import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json';
+import cup_8 from '../tournament_templates/cup_template_8_teams.json';
+import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json';
+import cup_4 from '../tournament_templates/cup_template_4_teams.json';
+
+// definePage({
+//   meta: {
+//     layout: '@/layouts/tournament.vue'
+//   }
+// })
+
 
 const headers = [
   { text: 'Sij.', value: 'bracket_placement' },
@@ -70,13 +79,13 @@ const load_ended = ref(false);
 
 const navbarStore = useNavBarStore();
 const matchesStore = useMatchesStore();
-const homeStore = useHomeStore();
+const teamStore = useTeamsStore(); 
 
 matchesStore.getMatches();
-homeStore.getTeams();
+teamStore.getTeams();
 navbarStore.getSeasons();
 
-watch(() => [matchesStore.loaded, homeStore.loaded, navbarStore.loaded], ([matchesReady, teamsReady, seasonsReady]) => {
+watch(() => [matchesStore.loaded, teamStore.loaded, navbarStore.loaded], ([matchesReady, teamsReady, seasonsReady]) => {
   if (!matchesReady || !teamsReady || !navbarStore.selectedSeason.playoff_format) return;
 
   const json = seasons_mapping[navbarStore.selectedSeason.playoff_format]

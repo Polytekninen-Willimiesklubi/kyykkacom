@@ -40,17 +40,17 @@
 
 <script setup>
 import { usePlayerStore } from '@/stores/players.store';
-import { useHomeStore } from '@/stores/home.store'
+import { useTeamsStore } from '@/stores/teams.store'
 
-const homeStore = useHomeStore();
+const teamStore = useTeamsStore();
 const playerStore = usePlayerStore();
+
+playerStore.getPlayers();
+teamStore.getTeams();
 
 const search = ref('')
 const sortBy = ref(['rounds_total']);
 const sortDesc = ref(false);
-
-playerStore.getPlayers();
-const teams = homeStore.getTeams();
 
 const headers = [
   { title: 'Nimi', value: 'player_name', align: 'left'},
@@ -91,7 +91,6 @@ function custSort(items, index, isDescending) {
   })
   return items
 }
-
 
 </script>
 

@@ -1,4 +1,4 @@
-import { useHomeStore } from "./home.store";
+import { useTeamsStore } from "@/stores/teams.store";
 
 import cup_22 from '../tournament_templates/cup_template_22_teams.json';
 import cup_16 from '../tournament_templates/cup_template_16_teams.json';
@@ -37,13 +37,13 @@ export const useNavBarStore = defineStore('navbar', () => {
     })
 
     function setSelectedSeason(season) {
-        const homeStore = useHomeStore();
+        const teamStore = useTeamsStore();
 
         selectedSeason.value = season
         seasonId.value = season.value
         localStorage.setItem('seasonId', seasonId)
 
-        homeStore.getTeams();
+        teamStore.getTeams();
 
         // router.push('/').catch(() => { // TODO
         //     window.location.reload()

@@ -46,7 +46,7 @@
           <template #item = "{ item, index }">
             <tr
               class="v-data-table__tr v-data-table__tr"
-              :class="{'first-border': isFirst(index), 'second-border' : isSecond(index)}"
+              :class="{'first-border': isFirst(index), 'second-border': isSecond(index)}"
             >
               <td> {{ item.current_abbreviation }}</td>
               <td> {{ item.matches_played }}</td>
