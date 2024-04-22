@@ -1,7 +1,7 @@
 <template>
   <v-layout class="pt-5">
-    <div class="pr-10 pl-10">
-      <v-btn 
+    <div class="pr-10">
+      <v-btn
         class="mb-5"
         @click="showFormat = !showFormat"
         :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
@@ -31,7 +31,7 @@
 <route>
 {
   meta: {
-    layout: "tournament"
+    layout: "withoutSidebar"
   }
 }
 </route>

@@ -1,7 +1,7 @@
 <template>
   <v-app>
-    <v-main>
-      <NavBar/>
+    <NavBar/>
+    <v-main class="content">
       <v-layout>
         <router-view />
         <div class="d-flex right">

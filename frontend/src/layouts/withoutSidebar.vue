@@ -2,9 +2,9 @@
   these pages and shoud be rendered in the "page"- file -->
 <template>
   <v-app>
-    <v-main>
-      <NavBar/>
-      <v-layout>
+    <NavBar/>
+    <v-main class="content">
+      <v-layout class="pl-10">
         <router-view />
       </v-layout>
     </v-main>
@@ -27,5 +27,8 @@ if (loadedSeason !== navStore.seasonId || !localStorage.allTeams) {
 }
 
 </script>
-
-<style></style>
+<style scoped>
+.content {
+  width: 90%;
+}
+</style>

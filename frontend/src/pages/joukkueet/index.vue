@@ -1,6 +1,6 @@
 <template>
-  <v-layout>
-    <div class="d-flex auto">
+  <v-layout class="pt-5" aling="center">
+    <div class="flex-1-1-100">
       <v-card>
         <v-card-title>
           Joukkueet
@@ -34,7 +34,13 @@
     </div>
   </v-layout>
 </template>
-
+<route>
+{
+  meta: {
+    layout: "withoutSidebar"
+  }
+}
+</route>
 <script setup>
 import { useTeamsStore } from '@/stores/teams.store';
 
