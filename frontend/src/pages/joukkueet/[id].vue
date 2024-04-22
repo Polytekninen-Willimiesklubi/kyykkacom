@@ -171,19 +171,19 @@
 </template>
 
 <script setup>
-import { useTeamStore } from '@/stores/team.store';
+import { useTeamsStore } from '@/stores/teams.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useDate } from 'vuetify'
 import { useRoute } from 'vue-router/auto';
+
+const teamStore = useTeamsStore();
+const authStore = useAuthStore();
 
 const route = useRoute('/joukkueet/[id]');
 const date = useDate();
 
 const search = ref('');
 const panel = ref([0]);
-
-const teamStore = useTeamStore();
-const authStore = useAuthStore();
 
 const reserveHeaders = [
   { title: '#', key: 'player_number' },
@@ -247,7 +247,7 @@ function getColor(val1, val2) {
   else return '#F0F4C3' // yellow-lighten-4
 }
 
-teamStore.getPlayers(route.params.id)
+teamStore.getTeamPlayers(route.params.id)
 if (authStore.loggedIn && authStore.isCaptain) {
   teamStore.getReserve()
 }

@@ -12,6 +12,8 @@ export const useRoundStore = defineStore('round', () => {
         const round = ['first', 'second'];
         const index = roundNumber === '1' ? 0 : 1;
         const key = teamSide + '_' + round[index] + '_round_score'
+        const content = {}
+        content[key] = roundScore
 
         const requestOpt = {
             'method': 'PATCH',
@@ -19,7 +21,7 @@ export const useRoundStore = defineStore('round', () => {
                 'X-CSRFToken': getCookie('csrftoken')
             },
             'content-type': 'application/json',
-            'body': JSON.stringify({ key : roundScore }),
+            'body': JSON.stringify(content),
             withCredentials: true,
         };
 

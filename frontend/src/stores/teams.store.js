@@ -173,7 +173,6 @@ export const useTeamsStore = defineStore('joukkue', () => {
     }
     return {
         allTeams,
-        teamId,
         loading,
         loaded,
         allTimeStats,
