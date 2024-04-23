@@ -1,37 +1,37 @@
 <template>
-    <div class="d-flex" v-if="loaded_undefined">
-        <div align="center">
-            <h1>TBD</h1>
-        </div>
+  <div class="d-flex" v-if="loaded_undefined">
+    <div align="center">
+      <h1>TBD</h1>
     </div>
-    <v-layout v-else>
-        <div v-if="st_round.length" class="pr-10">
-            <div v-for="listItem in st_round" :key="listItem.name" class="pt-10">
-                <bracket :flat-tree="[listItem]">
-                    <template #player="{player}" >
-                        {{ !only_format ? player.name : player.template_name }}
-                    </template>
-                    <template #player-extension-bottom="{ match }">
-                        <div align="center">
-                            {{ match.other_info }}
-                        </div>
-                    </template>
-                </bracket>
+  </div>
+  <v-layout v-else>
+    <div v-if="st_round.length" class="pr-10">
+      <div v-for="listItem in st_round" :key="listItem.name" class="pt-10">
+        <bracket :flat-tree="[listItem]">
+          <template #player="{player}" >
+            {{ !only_format ? player.name : player.template_name }}
+          </template>
+          <template #player-extension-bottom="{ match }">
+            <div align="center">
+              {{ match.other_info }}
             </div>
-        </div>
-        <div class="d-flex">
-            <bracket :flat-tree="data">
-                <template #player="{player}" >
-                    {{ !only_format ? player.name : player.template_name }}
-                </template>
-                <template #player-extension-bottom="{ match }">
-                    <div align="center">
-                        {{ match.other_info }}
-                    </div>
-                </template>
-            </bracket>
+          </template>
+        </bracket>
+      </div>
+    </div>
+    <div class="d-flex">
+      <bracket :flat-tree="data">
+        <template #player="{player}" >
+          {{ !only_format ? player.name : player.template_name }}
+        </template>
+        <template #player-extension-bottom="{ match }">
+          <div align="center">
+            {{ match.other_info }}
           </div>
-    </v-layout>
+        </template>
+      </bracket>
+    </div>
+  </v-layout>
 </template>
 
 <script>
