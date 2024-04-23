@@ -6,24 +6,17 @@
           <b> Lohko {{ String.fromCharCode(65+index) }} </b>
         </v-card-subtitle>
         <v-divider />
-        <!-- note on :items="[...listItem]" here we make reduntant array just unpack it immediately,
-          because otherwise returns an 'expected an array' error. This might be caused by listItem
-          not being defined before the mouting happens (?) -->
-        <!-- v-model:sort-by="sortBy" TODO 
-        v-model:sort-desc="sortDesc"
-        v-model:sort-by="sortingType"
-        v-model:sort-desc="sortingDesc"
-        -->
         <v-data-table
           mobile-breakpoint="0"
           class="sidebar"
           :headers="headers"
-          :items="[...listItem]"
-          :sort-by="[{key: 'points_total', order:'desc'}]"
+          :items="listItem"
+          :sort-by="[{key: sortBy, order: sortDesc ? 'desc' : 'asc'}]"
           no-data-text="Ei dataa :("
           items-per-page="-1"
           density="compact"
         >
+          <!-- Tooltip and header bolding -->
           <template #headers="{ columns }">
             <tr>
               <template v-for="column in columns" :key="column.key">
@@ -42,6 +35,7 @@
               </template>
             </tr>
           </template>
+          <!-- Bolding and line drawing -->
           <template #item = "{ item, index }">
             <tr
               class="v-data-table__tr v-data-table__tr"
@@ -57,7 +51,7 @@
               </td>
             </tr>
           </template>
-          <template #bottom></template>
+          <template #bottom></template> <!-- This disables paginations menu -->
         </v-data-table>
       </v-col>
     </v-row>

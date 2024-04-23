@@ -2,8 +2,8 @@
   <v-app>
     <NavBar/>
     <v-main class="content">
-      <v-layout>
-        <router-view />
+      <v-layout class="pa-10">
+        <router-view class="pr-5"/>
         <div class="d-flex right">
           <side-bar 
             :no_brackets="navStore.selectedSeason.no_brackets"
@@ -34,8 +34,4 @@ if (loadedSeason !== navStore.seasonId || !localStorage.allTeams) {
 </script>
 
 <style>
-.right {
-    padding-right: 3em;
-    padding-top: 6em;
-}
 </style>

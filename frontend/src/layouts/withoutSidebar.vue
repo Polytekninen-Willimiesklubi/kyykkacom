@@ -4,7 +4,7 @@
   <v-app>
     <NavBar/>
     <v-main class="content">
-      <v-layout class="pl-10">
+      <v-layout class="pa-10">
         <router-view />
       </v-layout>
     </v-main>
@@ -28,7 +28,4 @@ if (loadedSeason !== navStore.seasonId || !localStorage.allTeams) {
 
 </script>
 <style scoped>
-.content {
-  width: 90%;
-}
 </style>

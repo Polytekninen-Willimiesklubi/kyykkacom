@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <div class="d-flex">
+    <div class="flex-1-1-100">
       <v-card>
         <v-card-title>
           <v-row>
@@ -39,7 +39,9 @@
           :item-class="itemRowBackground"
           no-data-text="Ei dataa :("
           :group-by="matchStore.selection !== 'Jatkosarja' 
-           ? [] : ['seriers']"
+           ? [] : [{key: 'seriers'}]"
+          density="compact"
+          items-per-page="20"
         >
         <template v-slot:[`item.match_time`]="{ item }">
           <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
@@ -58,12 +60,33 @@
             />
           </v-icon>
         </template>
-        <template v-slot:group.header="{items, isOpen, toggle}">
-          <th colspan="12" @click="toggle">
-            <v-icon :icon="isOpen ? 'mdi-minus' : 'mdi-plus'"/>
-            {{ items[0].type_name }}
-            {{ items[0].home_team.current_abbreviation}} vs. {{ items[0].away_team.current_abbreviation }}
-          </th>
+        <template #group-header="{item, columns, toggleGroup, isGroupOpen }">
+          <tr>
+            <td :colspan="columns.length">
+              <v-row align="center" justify="center">
+                <v-col cols="3" >
+                  <v-btn
+                    :icon="isGroupOpen(item) ? '$expand' : '$next'"
+                    size="small"
+                    variant="text"
+                    @click="toggleGroup(item)"
+                  />
+                  {{ item.items[0].raw.type_name }}
+                </v-col>
+                <v-spacer />
+                <v-col cols="2" align="center">
+                  {{ item.items[0].raw.home_team.current_abbreviation }}
+                </v-col>
+                <v-col cols="1" align="center">
+                  vs.
+                </v-col>
+                <v-col cols="2" align="center">
+                  {{ item.items[0].raw.away_team.current_abbreviation }}
+                </v-col>
+                <v-spacer />
+              </v-row>
+            </td>
+          </tr>
         </template>
         </v-data-table>
       </v-card>
