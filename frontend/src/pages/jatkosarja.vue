@@ -7,12 +7,13 @@
         :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
       />
       <side-bar
+        title="Runkosarja"
         :headers="headers"
         sort-by="bracket_placement"
         :sort-desc=false
-        :no_brackets="navStore.selectedSeason.no_brackets"
         :teams="teamStore.bracketedTeams"
         :lines="navStore.playoffLines"
+        :boldingKeys="['P', 'points_total']"
       />
     </div>
     <div class="d-flex">

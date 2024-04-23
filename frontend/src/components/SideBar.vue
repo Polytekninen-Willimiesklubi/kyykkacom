@@ -2,7 +2,7 @@
   <v-card :title="title">
     <v-row v-for="(listItem, index) in teams" :key="index">
       <v-col>
-        <v-card-subtitle v-if="no_brackets > 1">
+        <v-card-subtitle v-if="props.teams.length > 1">
           <b> Lohko {{ String.fromCharCode(65+index) }} </b>
         </v-card-subtitle>
         <v-divider />
@@ -22,7 +22,9 @@
               <template v-for="column in columns" :key="column.key">
                 <th class="v-data-table__td v-data-table__th">
                   <div class="v-data-table-header__content">
-                    <span :style="column.title === boldingkeys[0] ? 'font-weight:bold' : ''">
+                    <span :style="boldingKeys && 
+                      column.title === boldingKeys[0] ? 'font-weight:bold' : ''"
+                    >
                       {{ column.title }}
                     </span>
                   </div>
@@ -45,7 +47,8 @@
             >
               <td 
                 v-for="header in headers"
-                :style="header.key === boldingkeys[1] ? 'font-weight:bold' :''"
+                :style="boldingKeys && header.key === boldingKeys[1] 
+                  ? 'font-weight:bold' :''"
               >
                 {{ item[header.key] }}
               </td>
@@ -55,102 +58,40 @@
         </v-data-table>
       </v-col>
     </v-row>
-    <v-divider v-if="no_brackets > 1" />
+    <v-divider v-if="props.teams.length > 1" />
   </v-card>
 </template>
 
-<script>
-export default {
-  props: {
-    title: {
-      type: String,
-      default: 'Runkosarja'
-    },
-    headers: {
-      type: Array,
-      default () {
-        return [
-          { title: 'Joukkue', key: 'current_abbreviation',  sortable: false },
-          { title: 'O',       key: 'matches_played',        sortable: false,  tooltip: "Pelatut Ottelut"},
-          { title: 'V',       key: 'matches_won',           sortable: false,  tooltip: "Voitot"},
-          { title: 'T',       key: 'matches_tie',           sortable: false,  tooltip: "Tasapelit"},
-          { title: 'H',       key: 'matches_lost',          sortable: false,  tooltip: "Häviöt"},
-          { title: 'P',       key: 'points_total',          sortable: false,  tooltip: "Pisteet"},
-          { title: 'P/O',     key: 'points_average',        sortable: false,  tooltip: "Pistettä per Ottelu "},
-          { title: 'OKA',     key: 'match_average',         sortable: false,  tooltip: "Ottelu keskiarvo"}
-        ]
-      }
-    },
-    sortBy: {
-      type: String,
-      default: 'points_total'
-    },
-    sortDesc: {
-      type: Boolean,
-      default: true
-    },
-    super: {
-      type: Boolean,
-      default: false
-    },
-    no_brackets: { // This is expected if defaultData is False
-      type: Number,
-      default: 1
-    },
-    nonDefaultTeams: Array,
-    teams: Array,
-    lines: Array,
-    boldingkeys: {
-      type: Array,
-      default: ['P', 'points_total']
-    },
-  },
-  data () {
-    return {
-      sortingType: 'points_total',
-      sortingDesc: false,
-      season: false,
-      multible_brackets: false,
-      data: [],
-    }
-  },
-  methods: {
-    handleRedirect (index) {
-      location.href = '/joukkueet/' + index
-    },
-    isFirst(val) {
-      if (this.lines.length === 0) return false;
-      const index = this.no_brackets > 1 ? 1 : 0;
-      return this.lines.length > 1 && this.lines[index][0] === val+1
-    },
-    isSecond(val) {
-      if (this.lines.length === 0) return false;
-      const index = this.no_brackets > 1 ? 1 : 0;
-      return this.lines.length === 1 && this.lines[index][0] === val+1 ||
-            this.lines.length === 2 && this.lines[index][1] === val+1
-    }
-  }
-  // watch: {
-  //   nonDefaultTeams () {
-  //     if (this.no_brackets > 1) {
-  //       this.multible_brackets = true
-  //       for (let i = 0; i < this.no_brackets; i++) {
-  //         this.teams.push([])
-  //       }
-  //       const attr_string = this.super ? 'super_weekend_bracket' : 'bracket'
-  //       this.nonDefaultTeams.forEach(ele => {
-  //         this.teams[ele[attr_string] - 1].push(ele)
-  //       }, this)
-  //     } else {
-  //       this.teams = [this.nonDefaultTeams]
-  //       this.multible_brackets = false
-  //     }
-  //   }
-  // }
+<script setup>
+
+const props = defineProps({
+  title: String,
+  headers: Array,
+  teams: Array,
+  sortBy: String,
+  sortDesc: Boolean,
+  lines: Array,
+  boldingKeys: Array,
+})
+
+function handleRedirect(index) {
+  location.href = '/joukkueet/' + index
 }
+function isFirst(val) {
+  if (props.lines.length === 0) return false;
+  const index = props.teams.length > 1 ? 1 : 0;
+  return props.lines && props.lines.length > 1 && props.lines[index][0] === val+1
+}
+function isSecond(val) {
+  if (props.lines.length === 0) return false;
+  const index = props.teams.length > 1 ? 1 : 0;
+  return props.lines && props.lines.length === 1 && props.lines[index][0] === val+1 ||
+        props.lines.length === 2 && props.lines[index][1] === val+1
+}
+
 </script>
 
-<style>
+<style scoped>
 
 .first-border {
   border-bottom: 0.15rem dashed red !important;

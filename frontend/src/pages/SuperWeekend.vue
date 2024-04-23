@@ -11,8 +11,6 @@
         :headers="superSidebarHeaders"
         sortBy="super_weekend_bracket_placement"
         :sortDesc="false"
-        :no_brackets="superStore.noBrackets"
-        :super="true"
         :teams="superStore.bracketTeams"
         :lines="superStore.playoffLines"
       />
