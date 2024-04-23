@@ -1,21 +1,11 @@
 <template>
   <v-layout>
-    <v-flex auto>
+    <div class="d-flex auto">
       <admin />
-    </v-flex>
+    </div>
   </v-layout>
 </template>
 
-<script>
-import Admin from '../components/Admin.vue'
+<script></script>
 
-export default {
-  name: 'home',
-  components: {
-    Admin
-  }
-}
-</script>
-
-  <style>
-  </style>
+<style></style>

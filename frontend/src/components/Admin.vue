@@ -1,392 +1,396 @@
 <template>
-    <v-card elevation="1">
-        <v-tabs fixed-tabs color="red" v-model='tab'>
-            <v-tab :value="0">Runkosarja</v-tab>
-            <v-tab :value="1">SuperWeekend</v-tab>
+  <v-card elevation="1">
+    <v-tabs fixed-tabs color="red" v-model='tab'>
+      <v-tab :value="0">Runkosarja</v-tab>
+      <v-tab :value="1">SuperWeekend</v-tab>
+    </v-tabs>
+    <v-divider />
+    <v-window v-model="tab">
+      <v-window-item
+        :key="0"
+        :value="0"
+      >
+        <h2 class="pl-10">Ratkaise Runkosarja</h2>
+        <v-row>
+          <v-col v-for="(listItem, index) in this.teams" :key="index" :cols="2">
+            <v-card class="ml-10" elevated width="300px">
+              <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
+              <v-divider />
+              <draggable
+                class="v-item-group"
+                :list="listItem"
+                item-key="current_abbreviation"
+                style="padding: 1em;"
+              >
+                <div
+                  class="v-item"
+                  v-for="element in listItem"
+                  :key="element.current_abbreviation"
+                  style="border: solid; margin-bottom: 2px; border-width: 2px;"
+                >
+                  {{ element.order }}. {{ element.current_abbreviation }}
+                </div>
+              </draggable>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="3">
+            <v-card class="pl-2 ml-10">
+              <h3 class="pl-2">Runkosarja Voittaja</h3>
+              <v-select class="ma-2" width="300px"
+                label="Valitse"
+                v-model="selectValue"
+                :items="all_teams"
+                :item-text="item => item.current_abbreviation"
+                return-object
+              />
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-btn 
+          class="ma-4 ml-10" 
+          @click="validateResult(true)" 
+          color="x-large error"
+          text="Vahvista Runkosarjan tulos"  
+        />
+        <v-btn 
+          class="ma-4 ml-10" 
+          @click="validateWinner" 
+          color="x-large error"
+          text="Vahvista Runkosarjan Voittaja"
+        />
+      </v-window-item>
+      <v-window-item
+        :key="1"
+        :value="1"
+      >
+        <v-tabs fixed-tabs color="black" v-model='sub_tab'>
+          <v-tab :value="0">Joukkueet Lohkoihin</v-tab>
+          <v-tab :value="1">Syötä Otteluita</v-tab>
+          <v-tab :value="2">Ratkaise Lohkot</v-tab>
+          <v-tab :value="3">Seedaa Joukkueet</v-tab>
+          <v-tab :value="4">Ratkaise Voittaja</v-tab>
         </v-tabs>
-        <v-divider />
-        <v-window v-model="tab">
-            <v-window-item
-                :key="0"
-                :value="0">
-
-                <h2 class="pl-10">Ratkaise Runkosarja</h2>
+        <v-divider class="mb-2"/>
+        <v-window v-model="sub_tab">
+          <v-window-item
+            :key="0"
+            :value="0"
+          >
+            <h2 class="pl-10">Laita joukkueet Superin lohkoihin</h2>
+            <v-row>
+              <v-col cols="3">
+                <v-card class="ml-10" elevated width="300px">
+                  <v-card-title>Ei lohkoissa</v-card-title>
+                  <v-divider />
+                  <draggable
+                  class="v-item-group"
+                  group="people"
+                  :list="not_in_super"
+                  style="padding: 1em;"
+                  >
+                    <div
+                      class="v-item"
+                      v-for="element in not_in_super"
+                      :key="element.current_abbreviation"
+                      style="border: solid; margin-bottom: 2px; border-width: 2px;"
+                    >
+                      {{ element.current_abbreviation }}
+                    </div>
+                  </draggable>
+                </v-card>
+              </v-col>
+              <v-col cols="9">
                 <v-row>
-                    <v-col v-for="(listItem, index) in this.teams" :key="index" :cols="2">
-                        <v-card class="ml-10" elevated width="300px">
-                            <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
-                            <v-divider></v-divider>
-                            <draggable
-                                class="v-item-group"
-                                :list="listItem"
-                                item-key="current_abbreviation"
-                                style="padding: 1em;"
-                            >
-                                <div
-                                    class="v-item"
-                                    v-for="element in listItem"
-                                    :key="element.current_abbreviation"
-                                    style="border: solid; margin-bottom: 2px; border-width: 2px;"
-                                >
-                                    {{ element.order }}. {{ element.current_abbreviation }}
-                                </div>
-                            </draggable>
-                        </v-card>
-                    </v-col>
+                  <v-col v-for="(listItem, index) in this.super_teams" :key="index" :cols="4">
+                    <v-card class="ml-10" elevated width="300px">
+                      <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
+                      <v-divider />
+                      <draggable
+                        class="v-item-group"
+                        group="people"
+                        :list="listItem"
+                        item-key="current_abbreviation"
+                        style="padding: 1em;"
+                      >
+                        <div
+                          class="v-item"
+                          v-for="element in listItem"
+                          :key="element.current_abbreviation"
+                          style="border: solid; margin-bottom: 2px; border-width: 2px;"
+                        >
+                          {{ element.current_abbreviation }}
+                        </div>
+                      </draggable>
+                    </v-card>
+                  </v-col>
                 </v-row>
-                <v-row>
-                    <v-col cols="3">
-                        <v-card class="pl-2 ml-10">
-                            <h3 class="pl-2">Runkosarja Voittaja</h3>
-                            <v-select class="ma-2" width="300px"
-                            label="Valitse"
-                            v-model="selectValue"
-                            :items="all_teams"
-                            :item-text="item => item.current_abbreviation"
-                            return-object
-                            />
-                        </v-card>
-                    </v-col>
-                </v-row>
-                <v-btn 
-                  class="ma-4 ml-10" 
-                  @click="validateResult(true)" 
-                  color="x-large error"
-                  text="Vahvista Runkosarjan tulos"  
-                />
-                <v-btn 
-                  class="ma-4 ml-10" 
-                  @click="validateWinner" 
-                  color="x-large error"
-                  text="Vahvista Runkosarjan Voittaja"
-                />
-
-            </v-window-item>
-            <v-window-item
-                :key="1"
-                :value="1"
-            >
-                <v-tabs fixed-tabs color="black" v-model='sub_tab'>
-                    <v-tab :value="0">Joukkueet Lohkoihin</v-tab>
-                    <v-tab :value="1">Syötä Otteluita</v-tab>
-                    <v-tab :value="2">Ratkaise Lohkot</v-tab>
-                    <v-tab :value="3">Seedaa Joukkueet</v-tab>
-                    <v-tab :value="4">Ratkaise Voittaja</v-tab>
-                </v-tabs>
-                <v-divider class="mb-2"/>
-                <v-window v-model="sub_tab">
-                    <v-window-item
-                        :key="0"
-                        :value="0"
+              </v-col>
+            </v-row>
+            <v-btn
+              class="ma-4 ml-10"
+              @click="validateBrackets()"
+              text="Vahvista Superin lohkot"
+              color="error x-large"
+            />
+          </v-window-item>
+          <v-window-item
+            :key="1"
+            :value="1"
+          >
+            <h2 class="pl-10 pb-2">Syötä Superin otteluita</h2>
+            <v-form ref='matchSubmit' v-model="submitValid" @submit.prevent="submit" lazy-validation>
+              <v-row>
+                <v-col cols="3">
+                  <v-select class="ma-2" width="300px"
+                    label="Valitse pelityyppi"
+                    v-model="selectGametype"
+                    :rules="[v => !!v || 'Valitse pelityyppi!']"
+                    :items="game_types"
+                    :item-text="item => item.name"
+                    return-object
+                    outlined
+                  />
+                </v-col>
+                <v-col cols="1">
+                  <v-select class="ma-2"
+                    :items="Array.from(Array(10).keys())"
+                    v-model="field" label="Kenttä"
+                  />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="2">
+                  <v-menu
+                    ref="menu"
+                    v-model="menu"
+                    :close-on-content-click="false"
+                    v-model:return-value="selectDate"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                    outlined
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-combobox
+                        v-model="selectDate"
+                        label="Pelipäivä"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      />
+                    </template>
+                    <v-date-picker
+                      v-model="selectDate"
+                      no-title
+                      scrollable
+                      @click:date="$refs.menu.save(selectDate)"
+                    />
+                  </v-menu>
+                </v-col>
+                <v-col cols="2">
+                  <v-menu
+                    ref="menu_time"
+                    v-model="menu_time"
+                    :close-on-content-click="false"
+                    v-model:return-value="selectTime"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                    outlined
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-combobox
+                        v-model="selectTime"
+                        label="Peliaika"
+                        prepend-icon="mdi-clock"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      />
+                    </template>
+                    <v-time-picker
+                      v-model="selectTime"
+                      no-title
+                      format="24hr"
+                      scrollable
+                      color="red"
+                      :allowedMinutes="v => !(v % 5)"
+                      @click:minute="$refs.menu_time.save(selectTime)"
+                    />
+                  </v-menu>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="2">
+                  <v-select 
+                    class="ma-2"
+                    width="300px"
+                    label="Valitse kotijoukkue"
+                    v-model="selectHome"
+                    :rules="[v => !!v || 'Valitse Joukkue!']"
+                    :items="seedable_super_teams"
+                    :item-text="item => item.current_abbreviation"
+                    return-object
+                    outlined
+                  />
+                </v-col>
+                <v-col cols="2">
+                  <v-select
+                    class="ma-2"
+                    width="300px"
+                    label="Valitse vierasjoukkue"
+                    v-model="selectAway"
+                    :rules="[v => !!v || 'Valitse Joukkue!']"
+                    :items="seedable_super_teams"
+                    :item-text="item => item.current_abbreviation"
+                    return-object
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="2">
+                  <v-text-field 
+                    class="ma-2"
+                    v-model='homeScore'
+                    :rules="scoreRules"
+                    label="Koti joukkueen tulos"
+                    required
+                    outlined
+                  />
+                </v-col>
+                <v-col cols="2">
+                  <v-text-field 
+                    class="ma-2"
+                    v-model='awayScore'
+                    :rules="scoreRules"
+                    label="Vieras joukkueen tulos"
+                    required
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+              <v-btn 
+                type="submit" 
+                class="ma-2"
+                text="Syötä tulos"
+                color="error"
+              />
+            </v-form>
+          </v-window-item>
+          <v-window-item
+            :key="2"
+            :value="2"
+          >
+            <h2 class="pl-10">Ratkaise Superin Lohkot</h2>
+            <v-row>
+              <v-col v-for="(listItem, index) in this.super_teams" :key="index" :cols="3">
+                <v-card 
+                  class="ml-10" 
+                  elevated 
+                  width="300px"
+                >
+                  <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
+                  <v-divider />
+                  <draggable
+                    class="v-item-group"
+                    :list="listItem"
+                    item-key="current_abbreviation"
+                    style="padding: 1em;"
+                  >
+                    <div
+                    class="v-item"
+                    v-for="element in listItem"
+                    :key="element.current_abbreviation"
+                    style="border: solid; margin-bottom: 2px; border-width: 2px;"
                     >
-                        <h2 class="pl-10">Laita joukkueet Superin lohkoihin</h2>
-                        <v-row>
-                            <v-col cols="3">
-                                <v-card class="ml-10" elevated width="300px">
-                                    <v-card-title>Ei lohkoissa</v-card-title>
-                                    <v-divider />
-                                    <draggable
-                                        class="v-item-group"
-                                        group="people"
-                                        :list="not_in_super"
-                                        style="padding: 1em;"
-                                    >
-                                        <div
-                                            class="v-item"
-                                            v-for="element in not_in_super"
-                                            :key="element.current_abbreviation"
-                                            style="border: solid; margin-bottom: 2px; border-width: 2px;"
-                                        >
-                                        {{ element.current_abbreviation }}
-                                        </div>
-                                    </draggable>
-                                </v-card>
-                            </v-col>
-                            <v-col cols="9">
-                                <v-row>
-                                    <v-col v-for="(listItem, index) in this.super_teams" :key="index" :cols="4">
-                                        <v-card class="ml-10" elevated width="300px">
-                                            <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
-                                            <v-divider></v-divider>
-                                            <draggable
-                                                class="v-item-group"
-                                                group="people"
-                                                :list="listItem"
-                                                item-key="current_abbreviation"
-                                                style="padding: 1em;"
-                                            >
-                                                <div
-                                                    class="v-item"
-                                                    v-for="element in listItem"
-                                                    :key="element.current_abbreviation"
-                                                    style="border: solid; margin-bottom: 2px; border-width: 2px;"
-                                                >
-                                                    {{ element.current_abbreviation }}
-                                                </div>
-                                            </draggable>
-                                        </v-card>
-                                    </v-col>
-                                </v-row>
-                            </v-col>
-                        </v-row>
-                        <v-btn
-                          class="ma-4 ml-10"
-                          @click="validateBrackets()"
-                          text="Vahvista Superin lohkot"
-                          color="error x-large"
-                        />
-                    </v-window-item>
-                    <v-window-item
-                        :key="1"
-                        :value="1"
-                    >
-                        <h2 class="pl-10 pb-2">Syötä Superin otteluita</h2>
-                        <v-form ref='matchSubmit' v-model="submitValid" @submit.prevent="submit" lazy-validation>
-                            <v-row>
-                                <v-col cols="3">
-                                    <v-select class="ma-2" width="300px"
-                                        label="Valitse pelityyppi"
-                                        v-model="selectGametype"
-                                        :rules="[v => !!v || 'Valitse pelityyppi!']"
-                                        :items="game_types"
-                                        :item-text="item => item.name"
-                                        return-object
-                                        outlined
-                                    />
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-select class="ma-2"
-                                        :items="Array.from(Array(10).keys())"
-                                        v-model="field" label="Kenttä"
-                                    />
-
-                                </v-col>
-                            </v-row>
-                            <v-row>
-                                <v-col cols="2">
-                                    <v-menu
-                                        ref="menu"
-                                        v-model="menu"
-                                        :close-on-content-click="false"
-                                        v-model:return-value="selectDate"
-                                        transition="scale-transition"
-                                        offset-y
-                                        min-width="auto"
-                                        outlined
-                                    >
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-combobox
-                                                v-model="selectDate"
-                                                label="Pelipäivä"
-                                                prepend-icon="mdi-calendar"
-                                                readonly
-                                                v-bind="attrs"
-                                                v-on="on"
-                                            />
-                                        </template>
-                                        <v-date-picker
-                                            v-model="selectDate"
-                                            no-title
-                                            scrollable
-                                            @click:date="$refs.menu.save(selectDate)"
-                                        />
-                                    </v-menu>
-                                </v-col>
-                                <v-col cols="2">
-                                    <v-menu
-                                        ref="menu_time"
-                                        v-model="menu_time"
-                                        :close-on-content-click="false"
-                                        v-model:return-value="selectTime"
-                                        transition="scale-transition"
-                                        offset-y
-                                        min-width="auto"
-                                        outlined
-                                    >
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-combobox
-                                                v-model="selectTime"
-                                                label="Peliaika"
-                                                prepend-icon="mdi-clock"
-                                                readonly
-                                                v-bind="attrs"
-                                                v-on="on"
-                                            />
-                                        </template>
-                                        <v-time-picker
-                                            v-model="selectTime"
-                                            no-title
-                                            format="24hr"
-                                            scrollable
-                                            color="red"
-                                            :allowedMinutes="v => !(v % 5)"
-                                            @click:minute="$refs.menu_time.save(selectTime)"
-                                        />
-                                    </v-menu>
-                                </v-col>
-                            </v-row>
-                            <v-row>
-                                <v-col cols="2">
-                                    <v-select class="ma-2" width="300px"
-                                        label="Valitse kotijoukkue"
-                                        v-model="selectHome"
-                                        :rules="[v => !!v || 'Valitse Joukkue!']"
-                                        :items="seedable_super_teams"
-                                        :item-text="item => item.current_abbreviation"
-                                        return-object
-                                        outlined
-                                    />
-                                </v-col>
-
-                                <v-col cols="2">
-                                    <v-select class="ma-2" width="300px"
-                                        label="Valitse vierasjoukkue"
-                                        v-model="selectAway"
-                                        :rules="[v => !!v || 'Valitse Joukkue!']"
-                                        :items="seedable_super_teams"
-                                        :item-text="item => item.current_abbreviation"
-                                        return-object
-                                        outlined
-                                    />
-                                </v-col>
-                            </v-row>
-                            <v-row>
-                                <v-col cols="2">
-                                    <v-text-field class="ma-2"
-                                        v-model='homeScore'
-                                        :rules="scoreRules"
-                                        label="Koti joukkueen tulos"
-                                        required
-                                        outlined
-                                    />
-                                </v-col>
-                                <v-col cols="2">
-                                    <v-text-field class="ma-2"
-                                        v-model='awayScore'
-                                        :rules="scoreRules"
-                                        label="Vieras joukkueen tulos"
-                                        required
-                                        outlined
-                                    />
-                                </v-col>
-                            </v-row>
-                            <v-btn 
-                              type="submit" 
-                              class="ma-2"
-                              text="Syötä tulos"
-                              color="error"
-                            />
-                        </v-form>
-
-                    </v-window-item>
-                    <v-window-item
-                        :key="2"
-                        :value="2"
-                    >
-                        <h2 class="pl-10">Ratkaise Superin Lohkot</h2>
-                        <v-row>
-                            <v-col v-for="(listItem, index) in this.super_teams" :key="index" :cols="3">
-                                <v-card class="ml-10" elevated width="300px">
-                                    <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
-                                    <v-divider></v-divider>
-                                    <draggable
-                                        class="v-item-group"
-                                        :list="listItem"
-                                        item-key="current_abbreviation"
-                                        style="padding: 1em;"
-                                    >
-                                        <div
-                                            class="v-item"
-                                            v-for="element in listItem"
-                                            :key="element.current_abbreviation"
-                                            style="border: solid; margin-bottom: 2px; border-width: 2px;"
-                                        >
-                                            <v-row>
-                                                <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col>
-                                                <v-col align="right" cols="6">(OKa: {{ element.match_average }})</v-col>
-                                            </v-row>
-                                        </div>
-                                    </draggable>
-                                </v-card>
-                            </v-col>
-                        </v-row>
-                        <v-btn
-                          class="ma-4 ml-10 x-large"
-                          @click="validateResult(false)"
-                          text="Vahvista Superin lohko sijoitukset"
-                          color="error"
-                        />
-                    </v-window-item>
-                    <v-window-item
-                        :key="3"
-                        :value="3"
-                    >
-                        <h2 class="pl-10">Seedaa Superin jatkosarja</h2>
-                        <h3 class="pl-10 pt-3">HUOM! Tarkista seedaus numero formaatista (Kysy Totilta :D)</h3>
-                        <h3 class="pl-10 pt-1">Vain playoff seedauksella on väliä, eli ne jotka jää ulkopuolella voi olla miten lystää.</h3>
-
-                        <v-card class="ml-10" elevated width="400px">
-                            <draggable
-                                class="v-item-group"
-                                :list="seedable_super_teams"
-                                style="padding: 1em;"
-                            >
-                                <div
-                                    class="v-item"
-                                    v-for="element in seedable_super_teams"
-                                    :key="element.current_abbreviation"
-                                    style="border: solid; margin-bottom: 2px; border-width: 2px;"
-                                >
-                                    <v-row>
-                                        <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col>
-                                        <v-col align="right" cols="6"> (Sij. {{ element.super_weekend_bracket_placement }}) (OKa: {{ element.match_average }})</v-col>
-                                    </v-row>
-                                </div>
-                            </draggable>
-
-                        </v-card>
-                        <v-btn
-                          class="ma-4 ml-10 x-large"
-                          @click="validateSeeds()"
-                          text="Vahvista Superin Seedit"
-                          color="error"
-                        />
-                    </v-window-item>
-                    <v-window-item
-                        :key="4"
-                        :value="4"
-                    >
-                        <h2 class="pl-10">Valitse SuperWeekend voittaja</h2>
-                        <h3 class="pl-10 pt-3">Toistaiseksi automatiikka ei toimi, että finaalin tuloksen laitettua Superin tulisi tallennettua. Näin voittaja erikseen merkataan muistiin, vaikka superweekend turnaustaulussa voittaja näkyisikin</h3>
-                        <v-form v-model="submitValid" ref='superwinnerValid' @submit.prevent="validateSuperWinner" lazy-validation>
-                            <v-row>
-                                <v-col cols="3">
-                                    <v-select class="ma-4"
-                                        label="Valitse Superin voittaja"
-                                        v-model="superWinnerSelected"
-                                        :items="seedable_super_teams"
-                                        :item-text="item => item.current_abbreviation"
-                                        required
-                                        return-object
-                                        outlined
-                                    />
-                                </v-col>
-                            </v-row>
-                            <v-btn
-                              class="ma-8 x-large"
-                              type="submit"
-                              text="Vahvista Superin Voittaja"
-                              color="error"
-                            />
-                        </v-form>
-                    </v-window-item>
-                </v-window>
-
-            </v-window-item>
+                      <v-row>
+                        <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col>
+                        <v-col align="right" cols="6">(OKa: {{ element.match_average }})</v-col>
+                      </v-row>
+                    </div>
+                  </draggable>
+                </v-card>
+              </v-col>
+            </v-row>
+            <v-btn
+              class="ma-4 ml-10 x-large"
+              @click="validateResult(false)"
+              text="Vahvista Superin lohko sijoitukset"
+              color="error"
+            />
+          </v-window-item>
+          <v-window-item
+            :key="3"
+            :value="3"
+          >
+            <h2 class="pl-10">Seedaa Superin jatkosarja</h2>
+            <h3 class="pl-10 pt-3">HUOM! Tarkista seedaus numero formaatista (Kysy Totilta :D)</h3>
+            <h3 class="pl-10 pt-1">Vain playoff seedauksella on väliä, eli ne jotka jää ulkopuolella voi olla miten lystää.</h3>
+            <v-card class="ml-10" elevated width="400px">
+              <draggable
+                class="v-item-group"
+                :list="seedable_super_teams"
+                style="padding: 1em;"
+              >
+                <div
+                  class="v-item"
+                  v-for="element in seedable_super_teams"
+                  :key="element.current_abbreviation"
+                  style="border: solid; margin-bottom: 2px; border-width: 2px;"
+                >
+                  <v-row>
+                    <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col>
+                    <v-col align="right" cols="6"> (Sij. {{ element.super_weekend_bracket_placement }}) (OKa: {{ element.match_average }})</v-col>
+                  </v-row>
+                </div>
+              </draggable>
+            </v-card>
+            <v-btn
+              class="ma-4 ml-10 x-large"
+              @click="validateSeeds()"
+              text="Vahvista Superin Seedit"
+              color="error"
+            />
+          </v-window-item>
+          <v-window-item
+            :key="4"
+            :value="4"
+          >
+            <h2 class="pl-10">Valitse SuperWeekend voittaja</h2>
+            <h3 class="pl-10 pt-3">Toistaiseksi automatiikka ei toimi, että finaalin tuloksen laitettua Superin tulisi tallennettua. Näin voittaja erikseen merkataan muistiin, vaikka superweekend turnaustaulussa voittaja näkyisikin</h3>
+            <v-form v-model="submitValid" ref='superwinnerValid' @submit.prevent="validateSuperWinner" lazy-validation>
+              <v-row>
+                <v-col cols="3">
+                  <v-select 
+                    class="ma-4"
+                    label="Valitse Superin voittaja"
+                    v-model="superWinnerSelected"
+                    :items="seedable_super_teams"
+                    :item-text="item => item.current_abbreviation"
+                    required
+                    return-object
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+              <v-btn
+                class="ma-8 x-large"
+                type="submit"
+                text="Vahvista Superin Voittaja"
+                color="error"
+              />
+            </v-form>
+          </v-window-item>
         </v-window>
-        <v-card>
-        </v-card>
-    </v-card>
+      </v-window-item>
+    </v-window>
+    <!-- <v-card>
+    </v-card> -->
+  </v-card>
 </template>
 
 <script>
