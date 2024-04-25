@@ -10,8 +10,8 @@
             "type": 6,
             "id": 1,
             "next": 8,
-            "player1": { "id": "8", "name": "8. Seed (OKA)"},
-            "player2": { "id": "9", "name": "9. Seed (OKA)"}
+            "player1": { "id": "8", "name": "8. Seed"},
+            "player2": { "id": "9", "name": "9. Seed"}
         },
         {
             "other_info":"Yhteen voittoon",
@@ -19,8 +19,8 @@
             "type": 6,
             "id": 2,
             "next": 9,
-            "player1": { "id": "4", "name": "4. Seed (OKA)"},
-            "player2": { "id": "13", "name": "13. Seed(OKA)"}
+            "player1": { "id": "4", "name": "4. Seed"},
+            "player2": { "id": "13", "name": "13. Seed"}
         },
         {
             "other_info":"Yhteen voittoon",
@@ -28,8 +28,8 @@
             "type": 6,
             "id": 3,
             "next": 9,
-            "player1": { "id": "5", "name": "5. Seed (OKA)"},
-            "player2": { "id": "12", "name": "12. Seed(OKA)"}
+            "player1": { "id": "5", "name": "5. Seed"},
+            "player2": { "id": "12", "name": "12. Seed"}
         },
         {
             "other_info":"Yhteen voittoon",
@@ -37,8 +37,8 @@
             "type": 6,
             "id": 4,
             "next": 10,
-            "player1": { "id": "4", "name": "2. Seed (OKA)"},
-            "player2": { "id": "15", "name": "15. Seed(OKA)"}
+            "player1": { "id": "4", "name": "2. Seed"},
+            "player2": { "id": "15", "name": "15. Seed"}
         },
         {
             "other_info":"Yhteen voittoon",
@@ -46,8 +46,8 @@
             "type": 6,
             "id": 5,
             "next": 10,
-            "player1": { "id": "7", "name": "7. Seed (OKA)"},
-            "player2": { "id": "10", "name": "10. Seed(OKA)"}
+            "player1": { "id": "7", "name": "7. Seed"},
+            "player2": { "id": "10", "name": "10. Seed"}
         },
         {
             "other_info":"Yhteen voittoon",
@@ -55,8 +55,8 @@
             "type": 6,
             "id": 6,
             "next": 11,
-            "player1": { "id": "3", "name": "3. Seed (OKA)"},
-            "player2": { "id": "14", "name": "14. Seed(OKA)"}
+            "player1": { "id": "3", "name": "3. Seed"},
+            "player2": { "id": "14", "name": "14. Seed"}
         },
         {
             "other_info":"Yhteen voittoon",
@@ -64,8 +64,8 @@
             "type": 6,
             "id": 7,
             "next": 11,
-            "player1": { "id": "6", "name": "6. Seed (OKA)"},
-            "player2": { "id": "11", "name": "11. Seed(OKA)"}
+            "player1": { "id": "6", "name": "6. Seed"},
+            "player2": { "id": "11", "name": "11. Seed"}
         },
         {
             "other_info":"Yhteen voittoon",
@@ -73,7 +73,7 @@
             "type": 5,
             "id": 8,
             "next": 12,
-            "player1": { "id": "-1", "name": "1. Seed (OKA)"},
+            "player1": { "id": "-1", "name": "1. Seed"},
             "player2": { "id": "-2", "name": "Q8 (8. - 9.)"}
         },
         {

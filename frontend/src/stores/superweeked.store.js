@@ -41,9 +41,9 @@ export const useSuperStore = defineStore('superweekend', () => {
 
     const seededTeams = computed(() => {
         if (teams.value === null) return [];
-        const seeded = [];
+        const seeded = [[]];
         teams.value.forEach((team) => {
-            seeded.push([team.current_abbreviation, team.super_weekend_playoff_seed])
+            seeded[0].push([team.current_abbreviation, team.super_weekend_playoff_seed])
         })
         return seeded;
     })

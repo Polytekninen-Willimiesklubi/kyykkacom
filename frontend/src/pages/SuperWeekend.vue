@@ -22,8 +22,7 @@
         :first_round="false"
         :first="0"
         :only_format="showFormat"
-        :bracket_placements="superStore.bracketTeams"
-        :non_default_seeds="superStore.seededTeams"
+        :bracket_placements="superStore.seededTeams"
         :bronze="superStore.isBronze"
         :load_ended="superStore.loaded"
       />

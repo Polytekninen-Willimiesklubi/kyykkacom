@@ -46,53 +46,40 @@ const props = defineProps({
     only_format: Boolean,
     bracket_placements: Array,
     load_ended: Boolean,
-    non_default_seeds: Array,
     bronze: {
       type: Boolean,
       default: true
     }
 });
 
-const tmp_rounds = ref([{}, {}, {}, {}, {}, {}]);
+const playoffStages = [{}, {}, {}, {}, {}, {}];
 let rounds = [];
 const data = ref([]);
 const st_round = ref([]);
 const loaded_undefined = ref(false);
 
 function putTeamsPlayoffBracket() {
-  if (props.non_default_seeds !== undefined) { // Superweekend
-    props.non_default_seeds.forEach(ele => {
-      const [teamName, seed] = ele
-      const placementString = (seed).toString() + '. Seed'
+  props.bracket_placements.forEach((bracket, idx) => {
+    bracket.forEach(team => {
+      const [teamName, seed] = team
+      const seedString = props.bracket_placements.length >= 2
+          ? String.fromCharCode(65 + idx) + (seed).toString()
+          : (seed).toString() + '. Seed';
+      
       const found = rounds.find(ele => 
-           ele.player1.name.startsWith(placementString)
-        || ele.player2.name.startsWith(placementString)
+           ele.player1.name === seedString
+        || ele.player2.name === seedString
       );
-      // We assume no errors: First undefined found is also first not-qualified-to-playoffs team
-      if (found !== undefined){
-        const correctBracket = found.player1.name.startsWith(placementString) 
+
+      if (found){
+        const correctBracket = found.player1.name === seedString 
           ? found.player1 
           : found.player2
         correctBracket.name = teamName
       }
     })
-  } else {
-    props.bracket_placements.forEach((bracket, idx) => {
-      bracket.sort((a,b) => a.bracket_placement-b.bracket_placement)
-      for (let i = 0; i < bracket.length; i++) {
-        const placementString = props.bracket_placements.length >= 2
-          ? String.fromCharCode(65 + idx) + (i + 1).toString()
-          : (i + 1).toString() + '. Seed';
-        const found = rounds.find((ele) => 
-          ele.player1.name === placementString || ele.player2.name === placementString
-        )
-        // We assume no errors: First undefined found is also first not-qualified-to-playoffs team
-        if (found === undefined) break 
-        const correctBracket = found.player1.name === placementString ? found.player1 : found.player2 
-        correctBracket.name = bracket[i].current_abbreviation
-      }
-    })
-  }
+
+  })
 }
 
 function resolveGames() {
@@ -102,7 +89,7 @@ function resolveGames() {
   })
   playoff_games.forEach(ele => {
     if (ele.match_type >= 2 & ele.match_type < 10) {
-      const round = tmp_rounds.value[ele.match_type - 2]
+      const round = playoffStages[ele.match_type - 2]
       if (!(ele.seriers in round)) {
         round[ele.seriers] = {}
         round[ele.seriers][ele.home_team.current_abbreviation] = 0
@@ -116,11 +103,11 @@ function resolveGames() {
         ++round[ele.seriers][ele.away_team.current_abbreviation]
       } else {
         ++round[ele.seriers]['tie']
-
       }
     }
   })
 }
+
 function loadRounds() {
   if (props.rounds_parrent.length == 0) {
     loaded_undefined.value = true
@@ -133,6 +120,7 @@ function loadRounds() {
   })
   loaded_undefined.value = false
 }
+
 function splitFirstRound() {
   if (!props.first_round) {
     data.value = rounds
@@ -140,7 +128,7 @@ function splitFirstRound() {
   }
   const first_round_matches = rounds.filter(e => e.type == props.first)
   st_round = first_round_matches
-  const games = tmp_rounds.value[props.first - 2]
+  const games = playoffStages[props.first - 2]
   const winners = []
   for (const [key, el] of Object.entries(games)) {
     const match = st_round.find(e => e.player1.name == Object.keys(el)[0] || e.player2.name == Object.keys(el)[0])
@@ -148,13 +136,14 @@ function splitFirstRound() {
       console.log("Didn't find correct match. First round +  element: " + Object.keys(el))
       return
     }
-    const winner_team = el[match.player1.name] > el[match.player2.name] ? match.player1 : match.player2
-    const loser_team = el[match.player1.name] > el[match.player2.name] ? match.player2 : match.player1
-    const new_winner_team = structuredClone(winner_team)
-    new_winner_team.winner = null
-    winners.push(new_winner_team)
-    winner_team.winner = true
-    loser_team.winner = false
+    const [winner, loser] = el[match.player1.name] > el[match.player2.name] 
+        ? [match.player1, match.player2]
+        : [match.player2, match.player1];
+    const new_winner = structuredClone(winner)
+    new_winner.winner = null
+    winners.push(new_winner)
+    winner.winner = true
+    loser.winner = false
     match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
     if(el[match.tie]) {
       match.other_info += ' (T: ' + el[match.tie] +')'; 
@@ -173,7 +162,7 @@ function splitFirstRound() {
 }
 
 function resolvePlayoffs() {
-  const reversed_list = tmp_rounds.value.reverse()
+  const reversed_list = playoffStages.reverse()
   reversed_list.forEach((ele, i) => {
     for (const [key, el] of Object.entries(ele)) {
       if (props.first_round && props.first == 7 - i) { continue }
@@ -182,16 +171,18 @@ function resolvePlayoffs() {
         console.log("Didn't find correct match. type: " + 7 - i + ' element: ' + Object.keys(el))
         return
       }
-      if (el[match.player1.name] !== el[match.player2.name]) { // Not a tie
-        const winner = el[match.player1.name] > el[match.player2.name] ? match.player1 : match.player2
-        const loser = el[match.player1.name] > el[match.player2.name] ? match.player2 : match.player1
+      const [team1Wins, team2Wins] = [el[match.player1.name], el[match.player2.name]];
+      if (team1Wins !== team2Wins) {
+        const [winner, loser] = team1Wins > team2Wins
+          ? [match.player1, match.player2]
+          : [match.player2, match.player1];
         const new_winner = structuredClone(toRaw(winner))
         const new_loser = structuredClone(toRaw(loser))
         new_winner.winner = null
         new_loser.winner = null
         winner.winner = true
         loser.winner = false
-        match.other_info = el[match.player1.name].toString() + ' - ' + el[match.player2.name].toString()
+        match.other_info = team1Wins.toString() + ' - ' + team2Wins.toString()
         if(el[match.tie]) {
           match.other_info += ' (Ties: ' + el[match.tie] +')'; 
         }

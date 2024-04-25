@@ -23,7 +23,7 @@
         :first_round="first_round"
         :first="first"
         :only_format="showFormat"
-        :bracket_placements="teamStore.bracketedTeams"
+        :bracket_placements="teamStore.onlyPlacements"
         :load_ended="load_ended"
       />
     </div>

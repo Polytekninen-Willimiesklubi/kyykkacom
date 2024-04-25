@@ -73,6 +73,27 @@ export const useTeamsStore = defineStore('joukkue', () => {
         }
     });
 
+    const onlyPlacements = computed(() => {
+        const navStore = useNavBarStore();
+        if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
+            return []
+        }
+        const returnedTeams = []
+        if (navStore.selectedSeason.no_brackets > 1) {
+            for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
+                returnedTeams.push([]);
+            }
+            allTeams.value.forEach(ele => {
+                const tmp = !ele.bracket_placement ? 1 : ele.bracket_placement
+                returnedTeams[ele.bracket -1].push([ele.current_abbreviation, tmp]);
+            });
+            return returnedTeams
+        } else {
+            return [allTeams.value]
+        }
+    });
+
+
     // const superWeekendBrackets = computed( () => {
     //     const navStore = useNavBarStore();
     //     if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
@@ -182,6 +203,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
         seasonStats,
         seasonPlayers,
         bracketedTeams,
+        onlyPlacements,
         // superWeekendBrackets,
         teamName,
         matches,
