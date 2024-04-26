@@ -1,5 +1,6 @@
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
 import { useNavBarStore } from "./navbar.store";
+import { useTeamsStore } from './teams.store';
 
 import cup_22 from '../tournament_templates/cup_template_22_teams.json'
 import cup_16 from '../tournament_templates/cup_template_16_teams.json'
@@ -38,6 +39,7 @@ export const useSuperStore = defineStore('superweekend', () => {
     const dataLoaded = ref(false);
     const teamsLoaded = ref(false);
     const isBronze = ref(null);
+    const superId = ref(null);
 
     const seededTeams = computed(() => {
         if (teams.value === null) return [];
@@ -68,8 +70,22 @@ export const useSuperStore = defineStore('superweekend', () => {
                 a.super_weekend_bracket_placement - b.super_weekend_bracket_placement
             )
         );
+        allBrackets.forEach(
+            bracket => bracket.forEach((ele, index) => {ele.order = index + 1})
+        );
         return allBrackets;
     });
+
+    const flattenSuperTeams = computed(() => {
+        return bracketTeams.value.flat()
+    })
+
+    const notInSuper = computed(() => {
+        const teamStore = useTeamsStore();
+        teamStore.getTeams();
+        return teamStore.allTeams.filter(
+            ele => !bracketTeams.value.find(team => ele.id === team.id))
+    })
 
     const bracket = computed(() => {
         if (format.value === null) return [];
@@ -84,11 +100,13 @@ export const useSuperStore = defineStore('superweekend', () => {
     async function getData() {
         dataLoaded.value = false;
         const navStore = useNavBarStore();
-        const question = '?season=' + navStore.seasonId;
+        // const question = '?season=' + navStore.seasonId;
+        const question = '?season=24&super_weekend=1';
         const response = await fetch(baseUrl + question, {method : 'GET'});
         const payload = await response.json();
 
         noBrackets.value = payload.super_weekend_no_brackets;
+        superId.value = payload.id
         format.value = payload.super_weekend_playoff_format;
         if (!Object.keys(seasons_mapping).includes(format.value)) {
             dataLoaded.value = true;
@@ -119,10 +137,13 @@ export const useSuperStore = defineStore('superweekend', () => {
 
     return {
         noBrackets,
+        superId,
         format,
         teams,
         dataLoaded,
         teamsLoaded,
+        notInSuper,
+        flattenSuperTeams,
         isBronze,
         loaded,
         bracketTeams,

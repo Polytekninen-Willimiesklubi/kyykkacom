@@ -1,5 +1,5 @@
 <template>
-  <v-layout class="pt-5" aling="center">
+  <v-layout class="pt-5" align="center">
     <div class="flex-1-1-100">
       <v-card>
         <v-card-title>

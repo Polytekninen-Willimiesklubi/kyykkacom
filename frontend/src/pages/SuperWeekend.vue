@@ -38,8 +38,7 @@
 </route>
 <script setup>
 import { useMatchesStore } from '@/stores/matches.store';
-import { useSuperStore } from '@/stores/superweeked.store';
-import { superSidebarHeaders } from '@/stores/superweeked.store';
+import { superSidebarHeaders, useSuperStore } from '@/stores/superweekend.store';
 
 const showFormat = ref(false);
 

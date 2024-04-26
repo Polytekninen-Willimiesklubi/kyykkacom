@@ -59,7 +59,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
         if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
             return []
         }
-        const returnedTeams = []
+        let returnedTeams = [];
         if (navStore.selectedSeason.no_brackets > 1) {
             for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
                 returnedTeams.push([]);
@@ -67,10 +67,15 @@ export const useTeamsStore = defineStore('joukkue', () => {
             allTeams.value.forEach(ele => {
                 returnedTeams[ele.bracket -1].push(ele);
             });
-            return returnedTeams
         } else {
-            return [allTeams.value]
+            returnedTeams = [allTeams.value]
         }
+        returnedTeams.forEach(ele => {
+            ele.forEach((e, i) => {
+                e.order = i + 1
+            })
+        })
+        return returnedTeams
     });
 
     const onlyPlacements = computed(() => {
