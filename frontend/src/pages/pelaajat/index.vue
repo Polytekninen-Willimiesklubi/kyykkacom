@@ -1,6 +1,6 @@
 <template>
   <v-layout>
-    <div class="d-flex" auto>
+    <div class="flex-1-1-100">
       <v-card title="Pelaajat">
         <v-spacer />
         <v-text-field
@@ -16,11 +16,12 @@
           mobile-breakpoint="0"
           :headers="headers"
           @click:row="handleRedirect"
-          :sortDesc="sortDesc"
           :sortBy="sortBy"
           :items="playerStore.players"
           :search="search"
           no-data-text="Ei dataa :("
+          items-per-page="25"
+          density="compact"
         />
           <!-- <template
             bind:key="props.item.id"
@@ -49,22 +50,22 @@ playerStore.getPlayers();
 teamStore.getTeams();
 
 const search = ref('')
-const sortBy = ref(['rounds_total']);
+const sortBy = ref([{key: 'rounds_total', order:'desc'}]);
 const sortDesc = ref(false);
 
 const headers = [
-  { title: 'Nimi', value: 'player_name', align: 'left'},
-  { title: 'Joukkue', value: 'team.current_abbreviation', align: 'left'},
-  { title: 'E', value: 'rounds_total', align: 'center'},
-  { title: 'P', value: 'score_total', width: '1%', align: 'center' },
-  { title: 'PPH', value: 'score_per_throw', align: 'center' },
-  { title: 'SP',value: 'scaled_points',align: 'center'},
-  { title: 'SPH',value: 'scaled_points_per_throw',align: 'center'},
-  { title: 'kHP', value: 'avg_throw_turn', align: 'center'},
-  { title: 'H', value: 'pikes_total', align: 'center' },
-  { title: 'H%', value: 'pike_percentage', align: 'center'},
-  { title: 'VM', value: 'zeros_total', align: 'center'},
-  { title: 'JK', value: 'gteSix_total', align: 'center'}
+  { title: 'Nimi', key: 'player_name', align: 'left'},
+  { title: 'Joukkue', key: 'team.current_abbreviation', align: 'left'},
+  { title: 'E', key: 'rounds_total', align: 'center'},
+  { title: 'P', key: 'score_total', width: '1%', align: 'center' },
+  { title: 'PPH', key: 'score_per_throw', align: 'center' },
+  { title: 'SP',key: 'scaled_points',align: 'center'},
+  { title: 'SPH',key: 'scaled_points_per_throw',align: 'center'},
+  { title: 'kHP', key: 'avg_throw_turn', align: 'center'},
+  { title: 'H', key: 'pikes_total', align: 'center' },
+  { title: 'H%', key: 'pike_percentage', align: 'center'},
+  { title: 'VM', key: 'zeros_total', align: 'center'},
+  { title: 'JK', key: 'gteSix_total', align: 'center'}
 ];
 
 function handleRedirect (value, row) {
