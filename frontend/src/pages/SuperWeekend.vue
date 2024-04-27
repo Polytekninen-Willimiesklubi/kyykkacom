@@ -11,7 +11,7 @@
         :headers="superSidebarHeaders"
         sortBy="super_weekend_bracket_placement"
         :sortDesc="false"
-        :teams="superStore.bracketTeams"
+        :teams="superStore.bracketedTeams"
         :lines="superStore.playoffLines"
       />
     </div>
@@ -46,10 +46,6 @@ const matchesStore = useMatchesStore();
 const superStore = useSuperStore();
 
 superStore.getAllData();
-setTimeout(() => {
-
-  console.log(superStore.teams);
-}, 1000)
 
 </script>
 
