@@ -14,18 +14,27 @@
           >
             <h2 class="pl-10">Ratkaise Runkosarja</h2>
             <v-row>
-              <v-col v-for="(listItem, index) in teamStore.bracketedTeams" :key="index" cols="4">
-                <v-card class="ml-10" elevated width="300px">
+              <v-col 
+                v-for="(listItem, index) in adminStore.regularSeasonTeams" 
+                :key="index" 
+                cols="4"
+              >
+                <v-card 
+                  class="ml-10" 
+                  elevated 
+                  width="300px"
+                >
                   <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
                   <v-divider />
                   <draggable
-                    class="v-item-group"
+                    class="list-group"
                     :list="listItem"
                     style="padding: 1em;"
+                    item-key="current_abbreviation"
                   >
-                    <template #item="{ element }">
+                    <template #item="{ element, index }">
                       <div style="border: solid; margin-bottom: 2px; border-width: 2px;">
-                        {{ element.order }}. {{ element.current_abbreviation }}
+                        {{ index+1 }}. {{ element.current_abbreviation }}
                       </div>
                     </template>
                   </draggable>
@@ -84,33 +93,42 @@
                       <v-card-title>Ei lohkoissa</v-card-title>
                       <v-divider />
                       <draggable
-                        class="v-item-group"
+                        class="list-group"
                         group="people"
-                        :list="superStore.notInSuper"
+                        :list="adminStore.notInSuper"
                         style="padding: 1em;"
+                        item-key="current_abbreviation"
                       >
                         <template #item="{ element }">
-                          <div style="border: solid; margin-bottom: 2px; border-width: 2px;">
+                          <div
+                            class="list-group-item"
+                            style="border: solid; margin-bottom: 2px; border-width: 2px;"
+                          >
                             {{ element.current_abbreviation }}
                           </div>
                         </template>
                       </draggable>
+
                     </v-card>
                   </v-col>
                   <v-col cols="9">
                     <v-row>
-                      <v-col v-for="(listItem, index) in superStore.bracketedTeams" :key="index" :cols="4">
+                      <v-col v-for="(listItem, index) in adminStore.superWeekendTeams" :key="index" :cols="4">
                         <v-card class="ml-10" elevated width="300px">
                           <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
                           <v-divider />
                           <draggable
-                            class="v-item-group"
+                            class="list-group"
                             group="people"
                             :list="listItem"
                             style="padding: 1em;"
+                            item-key="current_abbreviation"
                           >
                             <template #item="{ element }">
-                              <div style="border: solid; margin-bottom: 2px; border-width: 2px;">
+                              <div
+                                class="list-group-item"
+                                style="border: solid; margin-bottom: 2px; border-width: 2px;"
+                              >
                                 {{ element.current_abbreviation }}
                               </div>
                             </template>
@@ -211,7 +229,7 @@
                         label="Valitse kotijoukkue"
                         v-model="homeSelect"
                         :rules="[v => !!v || 'Valitse Joukkue!']"
-                        :items="superStore.flattenSuperTeams"
+                        :items="adminStore.superWeekendTeams.flat()"
                         item-title="current_abbreviation"
                         return-object
                         outlined
@@ -224,7 +242,7 @@
                         label="Valitse vierasjoukkue"
                         v-model="awaySelect"
                         :rules="[v => !!v || 'Valitse Joukkue!']"
-                        :items="superStore.flattenSuperTeams"
+                        :items="adminStore.superWeekendTeams.flat()"
                         item-title="current_abbreviation"
                         return-object
                         outlined
@@ -267,7 +285,7 @@
               >
                 <h2 class="pl-10">Ratkaise Superin Lohkot</h2>
                 <v-row>
-                  <v-col v-for="(listItem, index) in superStore.bracketedTeams" :key="index" :cols="3">
+                  <v-col v-for="(listItem, index) in adminStore.superWeekendTeams" :key="index" :cols="3">
                     <v-card 
                       class="ml-10" 
                       elevated
@@ -276,13 +294,14 @@
                       <v-card-title>Lohko {{ String.fromCharCode(65+index) }} </v-card-title>
                       <v-divider />
                       <draggable
-                        class="v-item-group"
+                        class="list-group"
                         :list="listItem"
                         style="padding: 1em;"
+                        item-key="current_abbreviation"
                       >
-                        <template #item="{ element }">
+                        <template #item="{ element, index }">
                           <v-row style="border: solid; margin-bottom: 2px; border-width: 2px;">
-                            <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col>
+                            <v-col align="left" cols="6"> {{ index+1 }}. {{ element.current_abbreviation }} </v-col>
                             <v-col align="right" cols="6">(OKa: {{ element.match_average }})</v-col>
                           </v-row>
                         </template>
@@ -306,13 +325,14 @@
                 <h3 class="pl-10 pt-1">Vain playoff seedauksella on väliä, eli ne jotka jää ulkopuolella voi olla miten lystää.</h3>
                 <v-card class="ml-10" elevated width="400px">
                   <draggable
-                    class="v-item-group"
-                    :list="superStore.flattenSuperTeams"
+                    class="list-group"
+                    :list="adminStore.flattenSuperTeams"
                     style="padding: 1em;"
+                    item-key="current_abbreviation"
                   >
-                    <template #item="{ element }">                
+                    <template #item="{ element, index }">                
                       <v-row style="border: solid; margin-bottom: 2px; border-width: 2px;">
-                        <v-col align="left" cols="6"> {{ element.order }}. {{ element.current_abbreviation }} </v-col>
+                        <v-col align="left" cols="6"> {{ index+1 }}. {{ element.current_abbreviation }} </v-col>
                         <v-col align="right" cols="6"> (Sij. {{ element.super_weekend_bracket_placement }}) (OKa: {{ element.match_average }})</v-col>
                       </v-row>
                     </template>
@@ -343,7 +363,7 @@
                         class="ma-4"
                         label="Valitse Superin voittaja"
                         v-model="superWinnerSelected"
-                        :items="superStore.flattenSuperTeams"
+                        :items="adminStore.superWeekendTeams.flat()"
                         item-title="current_abbreviation"
                         required
                         return-object
@@ -386,8 +406,11 @@ const superStore = useSuperStore();
 const adminStore = useAdminStore();
 const navStore = useNavBarStore();
 
-teamStore.getTeams();
-superStore.getAllData();
+adminStore.getData();
+// teamStore.getTeams();
+// superStore.getAllData();
+
+const dragging = ref(false);
 
 const selectGameType = ref(null);
 const awayScore = ref(null);
@@ -422,8 +445,7 @@ selectTime.value = `${hour}:${minute}` // Current Time to nearest 30min
 /* Event functions i.e. button functionality */
 function validateResult(type) {
   if (!confirm('Oletko tyytyväinen tuloksiin?')) return;
-  const teams = type ? teamStore.bracketedTeams : superStore.bracketedTeams
-
+  const teams = type ? adminStore.regularSeasonTeams : adminStore.superWeekendTeams 
   const dataKey = type ? 'bracket_placement' : 'super_weekend_bracket_placement';
   teams.forEach(bracket => bracket.forEach(team => {
     let postData = {}
@@ -434,7 +456,7 @@ function validateResult(type) {
 
 function validateSeeds() {
   if (!confirm('Oletko tyytyväinen tuloksiin?')) return;
-  superStore.flattenSuperTeams.forEach(team => {
+  adminStore.superWeekendTeams.flat().forEach(team => {
     let postData = {super_weekend_playoff_seed : team.order}
     adminStore.patchTeamData(postData, team.id)
   })
@@ -448,13 +470,13 @@ function validateWinner() {
 
 function validateBrackets() {
   if (!confirm('Oletko tyytyväinen Superin lohkoihin?')) return 
-  superStore.bracketedTeams.forEach((bracket, index) => {
+  adminStore.superWeekendTeams.forEach((bracket, index) => {
     bracket.forEach((team) => {
       let postData = { super_weekend_bracket: index + 1 }
       adminStore.patchTeamData(postData, team.id)
     }, index)
   });
-  superStore.notInSuper.forEach(team => {
+  adminStore.notInSuper.forEach(team => {
     let postData = { super_weekend_bracket: null }
     adminStore.patchTeamData(postData, team.id)
   });
@@ -489,15 +511,4 @@ async function submit() {
 
   superStore.postMatch(postData)
 }
-// watch(() => {
-//   // teams () {
-//   //   this.teams.forEach((element) => element.forEach((ele, index) => ele.order = index + 1))
-//   // },
-//   // super_teams () {
-//   //   this.super_teams.forEach((element) => element.forEach((ele, index) => ele.order = index + 1))
-//   // },
-//   // superStore.flattenSuperTeams () {
-//   //   //this.superStore.flattenSuperTeams.forEach((element, index) => element.order = index + 1)
-//   // }
-// })
 </script>

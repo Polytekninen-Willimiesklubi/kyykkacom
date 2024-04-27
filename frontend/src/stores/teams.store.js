@@ -131,7 +131,9 @@ export const useTeamsStore = defineStore('joukkue', () => {
             loaded.value = true;
         } catch (error) {
             console.log(error);
+            return false
         }
+        return true
     }
 
     async function getTeamPlayers(teamIndex) {

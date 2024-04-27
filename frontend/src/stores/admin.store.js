@@ -24,6 +24,8 @@ const teamPatchUrl = 'api/kyykka_admin/team/update/';
 const superUrl = 'api/kyykka_admin/superweekend/';
 const matchUrl = 'api/kyykka_admin/match';
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
+import { useTeamsStore } from '@/stores/teams.store';
+import { useSuperStore } from '@/stores/superweekend.store';
 
 async function fetchWrapper(url, postData, method='PATCH') {
     const requestOpt = {
@@ -52,6 +54,10 @@ async function fetchWrapper(url, postData, method='PATCH') {
 }
 
 export const useAdminStore = defineStore('admin', () => {
+    const regularSeasonTeams = ref({});
+    const superWeekendTeams = ref({});
+    const notInSuper = ref({});
+    const flattenSuperTeams = ref({});
 
     function patchTeamData(postData, teamId) {
         const url = teamPatchUrl + teamId
@@ -67,7 +73,30 @@ export const useAdminStore = defineStore('admin', () => {
         fetchWrapper(matchUrl, postData, 'POST')
     }
 
+    /* 
+    * Gets data from teamStore superStore getters and save it to writible variable 
+    *    
+    */
+    async function getData() {
+        const teamStore = useTeamsStore();
+        const superStore = useSuperStore();
+        const promise1 = superStore.getAllData()
+        const promise2 = teamStore.getTeams();
+        
+        await Promise.all([promise1, promise2])
+        regularSeasonTeams.value = structuredClone(toRaw(teamStore.bracketedTeams).map(ele => ele.map(toRaw)));
+        superWeekendTeams.value = structuredClone(toRaw(superStore.bracketedTeams).map(ele => ele.map(toRaw)));
+        flattenSuperTeams.value = structuredClone(toRaw(superWeekendTeams.value).flat())
+        const jotain = teamStore.allTeams.filter(ele => !flattenSuperTeams.value.find(team => ele.id === team.id))
+        notInSuper.value = structuredClone(jotain.map(toRaw));
+    }
+
     return {
+        regularSeasonTeams,
+        superWeekendTeams,
+        flattenSuperTeams,
+        notInSuper,
+        getData,
         patchTeamData,
         patchSuperTeamWinner,
         postMatch,

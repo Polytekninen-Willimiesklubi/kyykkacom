@@ -54,7 +54,7 @@ export const useSuperStore = defineStore('superweekend', () => {
         return dataLoaded.value && teamsLoaded.value;
     });
 
-    const bracketTeams = computed(() => {
+    const bracketedTeams = computed(() => {
         if (teams.value === null || !teamsLoaded.value || !noBrackets.value) return [];
         const allBrackets = [];
         for (let i = 0; i < noBrackets.value; i++) {
@@ -75,17 +75,6 @@ export const useSuperStore = defineStore('superweekend', () => {
         );
         return allBrackets;
     });
-
-    const flattenSuperTeams = computed(() => {
-        return bracketTeams.value.flat()
-    })
-
-    const notInSuper = computed(() => {
-        const teamStore = useTeamsStore();
-        teamStore.getTeams();
-        return teamStore.allTeams.filter(
-            ele => !bracketTeams.value.find(team => ele.id === team.id))
-    })
 
     const bracket = computed(() => {
         if (format.value === null) return [];
@@ -132,7 +121,8 @@ export const useSuperStore = defineStore('superweekend', () => {
 
     async function getAllData() {
         getSuperTeams();
-        getData();
+        await getData();
+        return true;
     }
 
     return {
@@ -142,11 +132,9 @@ export const useSuperStore = defineStore('superweekend', () => {
         teams,
         dataLoaded,
         teamsLoaded,
-        notInSuper,
-        flattenSuperTeams,
         isBronze,
         loaded,
-        bracketTeams,
+        bracketedTeams,
         bracket,
         seededTeams,
         playoffLines,
