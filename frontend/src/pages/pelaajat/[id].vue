@@ -1,23 +1,24 @@
 <template>
   <v-layout>
-    <div class="d-flex">
+    <div class="flex-1-1-100">
       <v-card>
         <v-row>
           <v-col>
-            <v-card>
+            <v-card class="ma-2">
               <v-card-title align="center">{{playerStore.player.player_name}}</v-card-title>
               <v-data-table
                 mobile-breakpoint="0"
-                :headers="overallPlayerStats"
+                :headers="headerPlayerOverallStats"
                 class="allTimeStats"
                 :items="[playerStore.player]"
+                density="compact"
               >
                 <template #headers="{ columns }">
                   <tr class="allTimeHeaders">
                     <template v-for="column in columns" :key="column.key">
                       <td class="cursor-pointer" @click="chanceHeaderStat">
                         {{ column.title }}
-                        <v-tooltip
+                        <v-tooltip v-if="column.tooltip"
                           activator="parent"
                           location="bottom"
                           :text="column.tooltip"
@@ -33,14 +34,17 @@
         </v-row>
         <v-row>
           <v-col>
-            <v-card>
+            <v-card class="ma-2">
               <v-data-table
                 mobile-breakpoint="0"
                 class="seasonStats"
-                :headers="seasonStats"
-                height="200px"
+                :headers="headerPlayerSeasonStats"
+                height="20em"
                 no-data-text="Ei pelattuja kausia"
+                loading-text="Ladataaan kausia..."
                 :items="playerStore.player.stats_per_seasons"
+                :loading="playerStore.loadingPlayer"
+                density="compact"
                 fixed-header
               >
                 <!-- For god sakes is this the only way to make initial color happen???
@@ -72,17 +76,15 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-row>
+        <v-row class="ml-1 mr-1">
           <v-col cols="4">
-            <v-card>
-              <graph
-                id="chart"
-                title="Heittotuloksen jakauma"
-                :datasets="canvas1Data"
-                :labels="['0', '1', '2', '3', '4', '5', '≥6']"
-                type="bar"
-              />
-            </v-card>
+            <graph
+              id="chart"
+              title="Heittotuloksen jakauma"
+              :datasets="canvas1Data"
+              :labels="['0', '1', '2', '3', '4', '5', '≥6']"
+              type="bar"
+            />
           </v-col>
           <v-col cols="4">
             <graph
@@ -141,23 +143,23 @@
         <v-row>
           <v-col>
             <v-card>
-              <!-- TODO: loading -->
               <v-data-table
-                @click:row="handleRedirect"
                 mobile-breakpoint="0"
                 class="matchesClass"
-                no-data-text="Ei dataa :("
+                @click:row="handleRedirect"
                 :search="search"
                 :headers="matchHeaders"
                 :items="matchItems"
-                :custom-sort="throwSort"
+                :loading="playerStore.loadingPlayer"
+                no-data-text="Ei dataa :("
+                loading-text="Ladataan kausia..."
               >
                 <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
                   <tr>
                     <template v-for="column in columns" :key="column.key">
                       <td class="mr-2 cursor-pointer" @click="() => toggleSort(column)">
                         <span> {{ column.title }} </span>
-                        <v-tooltip
+                        <v-tooltip v-if="column.tooltip"
                           activator="parent"
                           location="bottom"
                           :text="column.tooltip"
@@ -197,6 +199,12 @@ import { useNavBarStore } from '@/stores/navbar.store';
 import { usePlayerStore } from '@/stores/players.store';
 import { useDate } from 'vuetify';
 import { useRoute } from 'vue-router/auto';
+import { 
+  headersPlayerPeriod,
+  headersPlayerGames,
+  headerPlayerOverallStats,
+  headerPlayerSeasonStats
+} from '@/stores/headers';
 
 const route = useRoute('/pelaajat/[id]');
 
@@ -221,81 +229,18 @@ const canvas2Data = ref([]);
 const canvas3Data = ref([]);
 
 const matchItems = ref([]);
-
-const headersPeriods = [
-  { title: 'Aika', key: 'match_time', tooltip: 'Pelausaika' },
-  { title: 'Vastustaja', key: 'opp_name', tooltip: 'Vastustaja joukkue' },
-  { title: 'Erä', key: 'period', tooltip: 'Pelin erä' },
-  { title: 'HP', key: 'turn',  tooltip: 'Heittopaikka' },
-  { title: '1', key: 'score_first', tooltip: '1. heitto (Kyykkää)' },
-  { title: '2', key: 'score_second', tooltip: '2. heitto (Kyykkää)' },
-  { title: '3', key: 'score_third', tooltip: '3. heitto (Kyykkää)' },
-  { title: '4', key: 'score_fourth', tooltip: '4. heitto (Kyykkää)' },
-  { title: 'Yht.', key: 'score_total', tooltip: 'Heitot Yhteensä (Kyykkää)' },
-  { title: 'KPH', key: 'score_average_round', tooltip: 'Kyykkää per Heitto' },
-  { title: 'OJ pis.', key: 'own_score_round', tooltip: 'Oman joukkueen pisteet' },
-  { title: 'V pis.', key: 'opp_score_round', tooltip: 'Vastustaja joukkueen pisteet' }
-];
-
-const matchHeaders = ref(headersPeriods);
-
-const headersGames = [
-  { title: 'Aika', key: 'match_time', tooltip: 'Pelausaika' },
-  { title: 'Vastustaja', key: 'opponent_name', tooltip: 'Vastustaja joukkue' },
-  { title: 'HP1', key: 'throw_turn_one', tooltip: '1. erän heittopaikka' },
-  { title: 'HP2', key: 'throw_turn_two', tooltip: '2. erän heittopaikka' },
-  { title: '1', key: 'score_first', tooltip: '1.erän 1.heitto (Kyykkää)' },
-  { title: '2', key: 'score_second', tooltip: '1.erän 2.heitto (Kyykkää)' },
-  { title: '3', key: 'score_third', tooltip: '1.erän 3.heitto (Kyykkää)' },
-  { title: '4', key: 'score_fourth', tooltip: '1.erän 4.heitto (Kyykkää)' },
-  { title: '5', key: 'score_fifth', tooltip: '2.erän 1.heitto (Kyykkää)' },
-  { title: '6', key: 'score_sixth', tooltip: '2.erän 2.heitto (Kyykkää)' },
-  { title: '7', key: 'score_seventh', tooltip: '2.erän 3.heitto (Kyykkää)' },
-  { title: '8', key: 'score_eighth', tooltip: '2.erän 4.heitto (Kyykkää)' },
-  { title: 'Yht.', key: 'score_total', tooltip: 'Poistetut kyykät Yhteensä (Kyykkää)' },
-  { title: 'KPH', key: 'score_average_match', tooltip: 'Kyykkää per Heitto' },
-  { title: 'OJ pis.', key: 'own_score', tooltip: 'Oman joukkueen pisteet' },
-  { title: 'V pis.', key: 'opponent_score', tooltip: 'Vastustaja joukkueen pisteet' }
-]
-const overallPlayerStats = [
-  { title: 'Kausi', key: 'season', tooltip: 'Kaikkien kausien tulokset', sortable: false },
-  { title: 'Kaudet', key: 'season_count', tooltip: 'Pelatut NKL kaudet', sortable: false },
-  { title: 'Erät', key: 'all_rounds_total', tooltip: 'Kaikki pelatut erät', sortable: false },
-  { title: 'Poistetut kyykät', key: 'all_score_total', tooltip: 'Kaikki poistetut kyykät', sortable: false },
-  { title: 'Heitot', key: 'all_throws_total', tooltip: 'Kaikki heitot', sortable: false },
-  { title: 'KPH', key: 'total_average_throw', tooltip: 'Kyykkää per Heitto', sortable: false },
-  { title: 'kHP', key: 'total_average_throw_turn', tooltip: 'Keskimääräinen heittopaikka', sortable: false },
-  { title: 'Hauet', key: 'all_pikes_total', tooltip: 'Kaikki Hauet (=Ohi heitot)', sortable: false },
-  { title: 'H%', key: 'total_pike_percentage', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot', sortable: false },
-  { title: 'VM', key: 'all_zeros_total', tooltip: 'Virkamiehet: Nollaheitot ilman haukia', sortable: false },
-  { title: 'VM%', key: 'total_zero_percentage', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot', sortable: false },
-  { title: 'JK', key: 'all_gteSix_total', tooltip: 'Joulukuuset: 6 tai paremmat heitot', sortable: false }
-]
-const seasonStats = [
-  { title: 'Kausi', key: 'season', tooltip: 'Pelikausi (vuosi)' },
-  { title: 'Joukkue', key: 'team_name', tooltip: 'Joukkue nimi' },
-  { title: 'Erät', key: 'rounds_total', tooltip: 'Kaikki pelatut erät' },
-  { title: 'Poistetut kyykät', key: 'score_total', tooltip: 'Kaikki poistetut kyykät' },
-  { title: 'Heitot', key: 'throws_total', tooltip: 'Kaikki heitot' },
-  { title: 'KPH', key: 'score_per_throw', tooltip: 'Kyykkää per Heitto' },
-  { title: 'kHP', key: 'avg_throw_turn', tooltip: 'Keskimääräinen heittopaikka' },
-  { title: 'Hauet', key: 'pikes_total', tooltip: 'Kaikki Hauet (=Ohi heitot)' },
-  { title: 'H%', key: 'pike_percentage', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
-  { title: 'VM', key: 'zeros_total', tooltip: 'Virkamiehet: Nollaheitot ilman haukia' },
-  { title: 'VM%', key: 'zero_percentage', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
-  { title: 'JK', key: 'gteSix_total', tooltip: 'Joulukuuset: 6 tai paremmat heitot' }
-]
+const matchHeaders = ref(headersPlayerPeriod);
 
 function filtterItems() {
   let arr
   if(sortGamesSwitch.value === 'Erittäin') {
     arr = playerStore.playerMatchesPerPeriod;
-    matchHeaders.value = headersPeriods
-
+    matchHeaders.value = headersPlayerPeriod
   } else {
     arr = playerStore.playerMatchesPerMatch;
-    matchHeaders.value = headersGames
+    matchHeaders.value = headersPlayerGames
   }
+
   const returning_arr = filterGamesSwitch.value === 'Kaikki kaudet'
     ? arr
     : arr.filter(ele => currentSelection.includes(ele.season));
@@ -376,42 +321,6 @@ function chanceHeaderStat(val) {
 
     columnCurrentSelection.push(head)
   }
-}
-function throwSort (items, index, isDescending) {
-  const customColumns = ['score_first', 'score_second', 'score_third', 'score_fourth',
-    'score_fifth', 'score_sixth', 'score_seventh', 'score_eighth']
-
-  function d (p1) {
-    switch (p1) {
-      case 0:
-        return -1
-      case 'e':
-        return 0
-      case 'h':
-        return -2
-      default:
-        return p1
-    }
-  }
-
-  items.sort((a, b) => {
-    if (!isNaN(customColumns.includes(index[0]))) {
-      const a1 = d(a[index[0]])
-      const b1 = d(b[index[0]])
-      if (!isDescending[0]) {
-        return a1 < b1 ? 1 : a1 === b1 ? 0 : -1
-      } else {
-        return a1 < b1 ? -1 : a1 === b1 ? 0 : 1
-      }
-    } else {
-      if (!isDescending[0]) {
-        return a[index[0]] > b[index[0]] ? 1 : -1
-      } else {
-        return a[index[0]] > b[index[0]] ? -1 : 1
-      }
-    }
-  })
-  return items
 }
 
 function chanceSeason (value) {
@@ -625,6 +534,10 @@ tbody tr :hover {
 
 .seasonStats tr {
   text-align: center;
+}
+
+.v-data-table-header__content {
+  justify-content: center;
 }
 
 </style>

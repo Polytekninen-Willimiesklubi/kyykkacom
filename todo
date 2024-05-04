@@ -2,7 +2,17 @@
     -on-off switch pisteet/kyykkät:
         -> Kyykät -> Pisteet
         -> Kyykät per heitto -> Pistettä per heitto
-    - NaN Arvot näkyy päälimmäisenä, jos sorttaa alimmat arvot
+    - NaN Arvot näkyy päällimmäisenä, jos sorttaa alimmat arvot
         -> En löytänyt ratkaisua vuetify puolelta (4.5.-24). Ei tue enään custom-sort funktiota koko taululle
     - Jos ei ole joukkueessa ja on 'vapaa agentti', niin näytä pelaaja sivulla
         -> Ei toimi, nyt koska backened tietääkseni heittää sen jos on vain joukkueessa
+
+(Yksittäinen) Pelaaja sivulla:
+    - Pelaajalle oma profiili (iso muutos vaatii backend tukea)
+    - Muokkaa matsien esittelytapaa niin, että heitot erottuvat paremmin
+    - STYLE: chips color ei näy matseissa
+    - Heittotulosjakaumassa pitäisi olla vaihtoehto normalisoituun jakaumaan
+    - 'Heittokeskiarvo heittopaikassa' voisi olla heittomäärä jotenkin näkyvissä per paikka
+    - 'Heittokeskiarvo heittopaikan' statsit voisi olla näkyvissä yksittäin kausistatseissa
+    
+    
