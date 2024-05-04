@@ -121,3 +121,15 @@ export const headerPlayerSeasonStats = [
     { title: 'VM%',              key: 'zero_percentage', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
     { title: 'JK',               key: 'gteSix_total',    tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
 ];
+
+/********** TEAMS PAGE **********/
+
+export const headersTeams = [
+    { title: 'Nimi',      key: 'current_name',         align: 'center' },
+    { title: 'Lyhenne',   key: 'current_abbreviation', align: 'center' },
+    { title: 'Ottelut',   key: 'matches_played',       align: 'center' },
+    { title: 'Voitot',    key: 'matches_won',          align: 'center' },
+    { title: 'Häviöt',    key: 'matches_lost',         align: 'center' },
+    { title: 'Tasurit',   key: 'matches_tie',          align: 'center' },
+    { title: 'Ottelu Ka', key: 'match_average',        align: 'center' }
+];  
