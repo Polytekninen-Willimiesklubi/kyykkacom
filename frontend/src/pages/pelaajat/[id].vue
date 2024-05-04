@@ -13,7 +13,7 @@
                 :items="[playerStore.player]"
               >
                 <template #headers="{ columns }">
-                  <tr align="center" class="allTimeHeaders">
+                  <tr class="allTimeHeaders">
                     <template v-for="column in columns" :key="column.key">
                       <td class="cursor-pointer" @click="chanceHeaderStat">
                         {{ column.title }}
