@@ -32,7 +32,7 @@ function throwSort(a, b) {
                 return p1
         }
     }
-    return d(b) - d(a)
+    return d(a) - d(b)
 }
 
 
@@ -46,12 +46,12 @@ export const headerPlayers = [
     { title: 'Joukkue', key: 'team.current_abbreviation', align: 'center',  width: '10%' },
     { title: 'E',       key: 'rounds_total'             , align: 'center',  tooltip: 'Pelatut Erät'},
     { title: 'K',       key: 'score_total'              , align: 'center',  tooltip: 'Poistetut Kyykät'},
-    { title: 'KPH',     key: 'score_per_throw'          , align: 'center',  tooltip: 'Kyykkää Per Heitto', sort: (a, b) => isStrNaN(b) - isStrNaN(a)},
+    { title: 'KPH',     key: 'score_per_throw'          , align: 'center',  tooltip: 'Kyykkää Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
     { title: 'SP',      key: 'scaled_points'            , align: 'center',  tooltip: 'Skaalatut Pisteet'},
-    { title: 'SPPH',    key: 'scaled_points_per_throw'  , align: 'center',  tooltip: 'Skaalatut Pisteet Per Heitto', sort: (a, b) => isStrNaN(b) - isStrNaN(a)},
-    { title: 'kHP',     key: 'avg_throw_turn'           , align: 'center',  tooltip: 'Keskimääräinen Heittopaikka',  sort: (a, b) => isStrNaN(b) - isStrNaN(a)},
+    { title: 'SPPH',    key: 'scaled_points_per_throw'  , align: 'center',  tooltip: 'Skaalatut Pisteet Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
+    { title: 'kHP',     key: 'avg_throw_turn'           , align: 'center',  tooltip: 'Keskimääräinen Heittopaikka',  sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
     { title: 'H',       key: 'pikes_total'              , align: 'center',  tooltip: 'Heitetyt Hauet (Ohi heitto)'},
-    { title: 'H%',      key: 'pike_percentage'          , align: 'center',  tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: (a, b) => isStrNaN(b) - isStrNaN(a)},
+    { title: 'H%',      key: 'pike_percentage'          , align: 'center',  tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
     { title: 'VM',      key: 'zeros_total'              , align: 'center',  tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)'},
     { title: 'JK',      key: 'gteSix_total'             , align: 'center',  tooltip: 'Joulukuuset (yli viiden kyykän heitot)'},
 ];
