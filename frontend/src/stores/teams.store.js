@@ -13,6 +13,8 @@ export const useTeamsStore = defineStore('joukkue', () => {
     const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')));
     const loading = ref(false);
     const loaded = ref(false);
+    const singleLoading = ref(false);
+    const reserveLoading = ref(false);
 
     const seasonStats = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
@@ -137,22 +139,31 @@ export const useTeamsStore = defineStore('joukkue', () => {
     }
 
     async function getTeamPlayers(teamIndex) {
+        singleLoading.value = true;
         const navStore = useNavBarStore();
 
         const question = teamIndex + '/?seasons=' + navStore.seasonId; // TODO this doesen't need season id?
         const response = await fetch(baseUrl + question, {method: 'GET'});
         const payload = await response.json();
-
+        
+        let recent_year = -1
         for (const [key, value] of Object.entries(payload)) {
             if (key === 'all_time') {
               allTimeStats.value = value;
             } else {
               seasonsStats.value[key] = value;
+              recent_year = Number(key) > recent_year ? Number(key) : recent_year
             }
         }
+        // Select the most recent year to single team page
+        console.log(recent_year);
+        selectedSeasonId.value = recent_year != -1 ? String(recent_year) : 'allTime'
+
+        singleLoading.value = false;
     }
 
     async function getReserve() {
+        reserveLoading.value = true;
         try {
             const response = await fetch(reserveUrl, {method: 'GET'});
             const payload = await response.json();
@@ -160,10 +171,13 @@ export const useTeamsStore = defineStore('joukkue', () => {
             unReservedPlayers.value = payload.filte((ele) => {ele.team.current_name !== ''}) 
         } catch (error) {
             console.log(error)
+        } finally {
+            reserveLoading.value = false;
         }
     }
 
     async function reservePlayer(player)  {
+
         const navStore = useNavBarStore();
         if (!confirm('Haluatko varmasti varata pelaajan "' + player.player_name + '"?')) {
             return
@@ -211,6 +225,8 @@ export const useTeamsStore = defineStore('joukkue', () => {
         seasonPlayers,
         bracketedTeams,
         onlyPlacements,
+        singleLoading,
+        reserveLoading,
         // superWeekendBrackets,
         teamName,
         matches,

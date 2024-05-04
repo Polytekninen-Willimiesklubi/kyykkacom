@@ -93,7 +93,7 @@ export const headersPlayerGames = [
 ];
 
 export const headerPlayerOverallStats = [
-    { title: '',                 key: 'season',                   sortable: false},
+    { title: '',                 key: 'season',                   sortable: false },
     { title: 'Kaudet',           key: 'season_count',             sortable: false },
     { title: 'Erät',             key: 'all_rounds_total',         sortable: false },
     { title: 'Kyykät',           key: 'all_score_total',          sortable: false },
@@ -133,3 +133,51 @@ export const headersTeams = [
     { title: 'Tasurit',   key: 'matches_tie',          align: 'center' },
     { title: 'Ottelu Ka', key: 'match_average',        align: 'center' }
 ];  
+
+/********** TEAM PAGE **********/
+
+export const headersTeamReserve = [
+    { title: 'Pelaajan nimi', key: 'player_name' },
+    { title: 'Varaa',         key: 'actions', align: 'left', sortable: false}
+];
+  
+export const headersTeamPlayers = [
+    { title: 'Nimi', key: 'player_name',             width: '20%',  align: 'left'},
+    { title: 'Erät', key: 'rounds_total',            width: '1%',   align: 'center', },
+    { title: 'K',    key: 'score_total',             width: '1%',   align: 'center', tooltip: 'Poistetut Kyykkät' },
+    { title: 'KPH',  key: 'score_per_throw',         width: '1%',   align: 'center', tooltip: 'Kyykkää per Heitto' },
+    { title: 'SP',   key: 'scaled_points',           width: '1%',   align: 'center', tooltip: 'Skaalatut Pisteet '},
+    { title: 'SPPH', key: 'scaled_points_per_throw', width: '1%',   align: 'center', tooltip: 'Skaalatut Pisteet per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
+    { title: 'kHP',  key: 'avg_throw_turn',          width: '1%',   align: 'center', tooltip: 'Keskimääräinen Heittopaikka',  sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
+    { title: 'H',    key: 'pikes_total',             width: '1%',   align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)'},
+    { title: 'H%',   key: 'pike_percentage',         width: '1%',   align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
+    { title: 'VM',   key: 'zeros_total',             width: '1%',   align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)'},
+    { title: 'JK',   key: 'gteSix_total',            width: '1%',   align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)'}
+];
+  
+export const headersTeamMatch = [
+    { title: 'Aika',        key: 'match_time',          align: 'center', tooltip: 'Pelausaika' },
+    { title: 'Tyyppi',      key: 'match_type',          align: 'center', tooltip: 'Peli Tyyppi' },
+    { title: 'Vastustaja',  key: 'opposite_team',       align: 'center', tooltip: 'Vastustaja joukkue' },
+    { title: 'OJ 1',        key: 'own_first',           align: 'center', tooltip: 'Oman Joukkueen 1. Erä',      width: '2%' },
+    { title: 'OJ 2',        key: 'own_second',          align: 'center', tooltip: 'Oman Joukkueen 2. Erä',      width: '2%' },
+    { title: 'V 1',         key: 'opp_first',           align: 'center', tooltip: 'Vastustaja Joukkueen 1. Erä', width: '2%' },
+    { title: 'V 2',         key: 'opp_second',          align: 'center', tooltip: 'Vastustaja Joukkueen 2. Erä', width: '2%' },
+    // { title: 'H+VM',        key: 'jotain',              align: 'center', tooltip: 'Yhteensä pelissä oman joukkueen heittämät nolla heitot'},
+    // { title: 'JK',          key: 'jotain',              align: 'center', tooltip: '(Joulukuusi) Yhteensä pelissä oman joukkueen heittämät "6 kyykkää tai enemmän"- heitot'},
+    { title: 'OJ pis.',     key: 'own_team_total',      align: 'center', tooltip: 'Oman joukkueen pisteet',      width: '2%' },
+    { title: 'VJ pis.',     key: 'opposite_team_total', align: 'center', tooltip: 'Vastustaja joukkueen pisteet', width: '2%' }
+];
+  
+export const headersTeamSeasonStats = [
+    { title: 'Poistetut Kyykät',    key: 'score_total' },
+    { title: 'Heitot',              key: 'throws_total' },
+    { title: 'Ottelut',             key: 'match_count' },
+    { title: 'Ottelu keskiarvo',    key: 'match_average' },
+    { title: 'Hauet',               key: 'pikes_total' },
+    { title: 'Haukiprosentti',      key: 'pike_percentage' },
+    { title: 'Nolla heitot',        key: 'zeros_total' },
+    { title: 'Nollaprosentti',      key: 'zero_percentage' },
+    { title: 'Nolla aloitukset',    key: 'zero_or_pike_first_throw_total' },
+    { title: 'Joulukuuset',         key: 'gteSix_total' } ,
+];
