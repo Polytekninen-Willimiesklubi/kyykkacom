@@ -1,0 +1,8 @@
+(Kaikki) Pelaajat sivulla: 
+    -on-off switch pisteet/kyykkät:
+        -> Kyykät -> Pisteet
+        -> Kyykät per heitto -> Pistettä per heitto
+    - NaN Arvot näkyy päälimmäisenä, jos sorttaa alimmat arvot
+        -> En löytänyt ratkaisua vuetify puolelta (4.5.-24). Ei tue enään custom-sort funktiota koko taululle
+    - Jos ei ole joukkueessa ja on 'vapaa agentti', niin näytä pelaaja sivulla
+        -> Ei toimi, nyt koska backened tietääkseni heittää sen jos on vain joukkueessa
