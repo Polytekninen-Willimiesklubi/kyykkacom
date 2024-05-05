@@ -17,79 +17,97 @@
     </template>
     <v-card
       title="Rekisteröityminen"
+      subtitle="Kaikki kentät pakollisia"
     >
-      <v-alert 
-        :value="store.alert" 
-        type="error" 
-        transition="scale-transition" 
-        outlined
+    <!-- :model-value="registerForm" -->
+    <!-- TODO JATKA TÄSTÄ register lähetys -->
+      <v-form
+        validate-on="submit"
+        :model-value="j"
+        ref="jotain"
       >
-        <b>Korjaa seuraava(t):</b>
-        <ul>
-          <li v-bind:key="error.id" v-for="error in store.errors.value">{{ error }}</li>
-        </ul>
-      </v-alert>
-      <v-container grid-list-md>
-        <v-layout wrap>
-          <v-layout row>
-            <div class="d-flex xs5 sm6 md4">
+        <v-container>
+          <v-row>
+            <v-col cols="6">
               <v-text-field 
                 color="red darken-1" 
                 v-model="store.credentials.first_name" 
-                label="Etunimi*" 
-                required
-              ></v-text-field>
-            </div>
-            <div class="d-flex xs5 sm6 md4 mr-5">
+                :rules="[v => !!v || 'Etunimi puuttuu.']"
+                label="Etunimi"
+              />
+            </v-col>
+            <v-col cols="6">
+              <!-- TODO api kysely onko username käytössä -->
+              <v-text-field 
+                color="red darken-1" 
+                v-model="store.credentials.username" 
+                :rules="[
+                  v => !!v || 'Sähköposti puuttuu.',
+                  v => store.validEmail(v) || 'Anna sähköposti mallia foo@bar.xyz.'
+                ]"
+                label="Sähköposti"
+                type="email"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
               <v-text-field 
                 color="red darken-1" 
                 v-model="store.credentials.last_name" 
-                label="Sukunimi*" 
-                required
-              ></v-text-field>
-            </div>
-            <div class="d-flex xs2 sm2 ml-5">
-              <v-select 
-                item-color="red" 
+                :rules="[v => !!v || 'Sukunimi puuttuu.']"
+                label="Sukunimi"
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                color="red darken-1"
+                v-model="store.credentials.password"
+                :rules="[
+                  v => !!v || 'Salasana puuttuu.',
+                  v => v.length >= 6 || 'Salasana pitää olla vähintään 6 merkkiä pitkä.'
+                ]"
+                label="Salasana"
+                type="password"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-spacer/>
+            <v-col cols="6">
+              <v-text-field
+                color="red darken-1"
+                v-model="store.credentials.password_check"
+                :rules="[
+                  v => !!v || 'Anna Salasana uudelleen.',
+                  () => store.credentials.password === store.credentials.password_check 
+                    || 'Salasanat eivät täsmää.',
+                ]"
+                label="Salasana uudelleen"
+                type="password"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-spacer/>
+            <v-col cols="3">
+              <v-btn
+                :loading="store.loading"
+                class="mb-2"
                 color="red darken-1" 
-                v-model="store.credentials.number" 
-                required 
-                :items="Array.from(Array(100).keys())"
-              ></v-select>
-            </div>
-          </v-layout>
-          <div class="d-flex xs12">
-            <v-text-field 
-              color="red darken-1" 
-              v-model="store.credentials.username" 
-              label="sähköposti*" 
-              type="email" 
-              required
-            ></v-text-field>
-          </div>
-          <div class="d-flex xs12">
-            <v-text-field
-              color="red darken-1"
-              v-model="store.credentials.password"
-              label="salasana*"
-              type="password"
-              required
-            ></v-text-field>
-            <v-text-field
-              color="red darken-1"
-              v-model="store.credentials.password_check"
-              label="salasana varmistus*"
-              type="password"
-              required
-            ></v-text-field>
-          </div>
-        </v-layout>
-      </v-container>
-      <small>*pakollinen kenttä</small>
-      <v-card-actions class=justify-center>
-        <v-btn color="red darken-1" text="Register" @click="store.checkForm()" />
-        <v-btn color="red darken-1" text="Close" @click="dialog = !dialog" />
-      </v-card-actions>
+                text="Register"
+                type="submit"
+                @click="jotain.isValid && store.register"
+                block
+              />
+            </v-col>
+            <v-col cols="3">
+              <v-btn color="red darken-1" text="Close" @click="dialog = false" />
+            </v-col>
+            <v-spacer/>
+          </v-row>
+        </v-container>
+      </v-form>
     </v-card>
   </v-dialog>
 </template>
@@ -99,7 +117,9 @@ import { useRegisterStore } from '@/stores/register.store';
 
 const store = useRegisterStore();
 
-const dialog = ref(false)
+const j = ref(null);
+const jotain = ref();
+const dialog = ref(false);
 
 </script>
 
