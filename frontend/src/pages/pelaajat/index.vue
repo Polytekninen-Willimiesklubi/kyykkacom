@@ -35,7 +35,7 @@
                   @click="() => toggleSort(column)"
                 >
                   <div class="v-data-table-header__content justify-center" align="center">
-                    <span> {{ column.title }} </span>
+                    {{ column.title }}
                     <v-tooltip v-if="column.tooltip"
                       activator="parent"
                       location="bottom"

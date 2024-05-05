@@ -85,6 +85,7 @@
                 loading-text="Ladataan Pelaajia..."
                 no-data-text="Ei pelaajia :("
                 hide-default-footer
+                density="compact"
               >
                 <!-- Header Tooltip -->
                 <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
@@ -166,18 +167,28 @@
                 loading-text="Ladataan otteluita..."
                 no-data-text="Ei pelattuja otteluita :("
                 :items="teamStore.matches"
+                density="compact"
               >
-                <template #headers="{ columns }">
-                  <tr class="allTimeHeaders">
+                <!-- Header Tooltip -->
+                <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
+                  <tr>
                     <template v-for="column in columns" :key="column.key">
-                      <td class="cursor-pointer" @click="chanceHeaderStat">
-                        {{ column.title }}
-                        <v-tooltip v-if="column.tooltip"
-                          activator="parent"
-                          location="bottom"
-                          :text="column.tooltip"
-                        />
-                      </td>
+                      <th
+                        class="v-data-table__td v-data-table__th cursor-pointer player-header"
+                        @click="() => toggleSort(column)"
+                      >
+                        <div class="v-data-table-header__content justify-center" align="center">
+                          {{ column.title }}
+                          <v-tooltip v-if="column.tooltip"
+                            activator="parent"
+                            location="bottom"
+                            :text="column.tooltip"
+                          />
+                          <template v-if="isSorted(column)">
+                            <v-icon :icon="getSortIcon(column)" />
+                          </template>
+                        </div>
+                      </th>
                     </template>
                   </tr>
                 </template>
@@ -187,14 +198,16 @@
                 <template #item.own_team_total="{ item }">
                   <v-chip 
                     :color="getColor(item.own_team_total, item.opposite_team_total)"
-                    :text="item.own_team_total"
-                  />
+                  >
+                    {{ item.own_team_total }}
+                  </v-chip>
                 </template>
                 <template #item.opposite_team_total="{ item }">
                   <v-chip
                     :color="getColor(item.opposite_team_total, item.own_team_total)"
-                    :text="item.opposite_team_total"
-                  />
+                  > 
+                    {{ item.opposite_team_total }} 
+                  </v-chip>
                 </template>
               </v-data-table>
             </v-expansion-panel-text>
