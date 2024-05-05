@@ -1,33 +1,31 @@
 <template>
-  <v-layout class="pt-5">
-    <div class="pr-10">
-      <v-btn
-        class="mb-5"
-        @click="showFormat = !showFormat"
-        :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
-      />
-      <side-bar
-        title="Runkosarja"
-        :headers="headers"
-        sort-by="bracket_placement"
-        :sort-desc=false
-        :teams="teamStore.bracketedTeams"
-        :lines="navStore.playoffLines"
-        :boldingKeys="['P', 'points_total']"
-      />
-    </div>
-    <div class="d-flex">
-      <tournament
-        :played_games="matchesStore.excludingSuperMatches"
-        :rounds_parrent="rounds"
-        :first_round="first_round"
-        :first="first"
-        :only_format="showFormat"
-        :bracket_placements="teamStore.onlyPlacements"
-        :load_ended="load_ended"
-      />
-    </div>
-  </v-layout>
+  <div class="pr-10">
+    <v-btn
+      class="mb-5"
+      @click="showFormat = !showFormat"
+      :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
+    />
+    <side-bar
+      title="Runkosarja"
+      :headers="headers"
+      sort-by="bracket_placement"
+      :sort-desc=false
+      :teams="teamStore.bracketedTeams"
+      :lines="navStore.playoffLines"
+      :boldingKeys="['P', 'points_total']"
+    />
+  </div>
+  <div class="d-flex">
+    <tournament
+      :played_games="matchesStore.excludingSuperMatches"
+      :rounds_parrent="rounds"
+      :first_round="first_round"
+      :first="first"
+      :only_format="showFormat"
+      :bracket_placements="teamStore.onlyPlacements"
+      :load_ended="load_ended"
+    />
+  </div>
 </template>
 <route>
 {

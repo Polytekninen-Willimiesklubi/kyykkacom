@@ -1,9 +1,7 @@
 <template>
-  <v-layout>
-    <v-row align="center" justify="center">
-      <h1><a class="rules__link" href="/static/saannot_2024.pdf" download="saannot_2024.pdf">NKL Säännöt (pdf)</a></h1>
-    </v-row>
-  </v-layout>
+  <v-row align="start" justify="center">
+    <h1><a class="rules__link" href="/static/saannot_2024.pdf" download="saannot_2024.pdf">NKL Säännöt (pdf)</a></h1>
+  </v-row>
 </template>
 
 <script setup></script>

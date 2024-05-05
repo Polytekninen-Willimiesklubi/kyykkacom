@@ -1,198 +1,196 @@
 <template>
-  <v-layout>
-    <div class="flex-1-1-100">
-      <v-card>
-        <v-row>
-          <v-col>
-            <v-card class="ma-2">
-              <v-card-title align="center">{{playerStore.player.player_name}}</v-card-title>
-              <v-data-table
-                mobile-breakpoint="0"
-                :headers="headerPlayerOverallStats"
-                class="allTimeStats"
-                :items="[playerStore.player]"
-                density="compact"
-              >
-                <template #headers="{ columns }">
-                  <tr class="allTimeHeaders">
-                    <template v-for="column in columns" :key="column.key">
-                      <td class="cursor-pointer" @click="chanceHeaderStat">
-                        {{ column.title }}
-                        <v-tooltip v-if="column.tooltip"
-                          activator="parent"
-                          location="bottom"
-                          :text="column.tooltip"
-                        />
-                      </td>
-                    </template>
-                  </tr>
-                </template>
-                <template #bottom></template> <!-- This hides the pagination controls-->
-              </v-data-table>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <v-card class="ma-2">
-              <v-data-table
-                mobile-breakpoint="0"
-                class="seasonStats"
-                :headers="headerPlayerSeasonStats"
-                height="20em"
-                no-data-text="Ei pelattuja kausia"
-                loading-text="Ladataaan kausia..."
-                :items="playerStore.player.stats_per_seasons"
-                :loading="playerStore.loadingPlayer"
-                density="compact"
-                fixed-header
-              >
-                <!-- For god sakes is this the only way to make initial color happen???
-                  tried so many ways: setup code watchers, onMounted. Always hits the 'no-data-text'
-                  problem
-                -->
-                <template #item = {item}>
-                  <tr
-                    :class="{'blue-row': initalColor(item.season)}"
-                    @click="chanceSeason"
-                  >
-                    <td> {{ item.season }}</td>
-                    <td> {{ item.team_name }}</td>
-                    <td> {{ item.rounds_total }}</td>
-                    <td> {{ item.score_total }}</td>
-                    <td> {{ item.throws_total }}</td>
-                    <td> {{ item.score_per_throw }}</td>
-                    <td> {{ item.avg_throw_turn }}</td>
-                    <td> {{ item.pikes_total }}</td>
-                    <td> {{ item.pike_percentage }}</td>
-                    <td> {{ item.zeros_total }}</td>
-                    <td> {{ item.zero_percentage }}</td>
-                    <td> {{ item.gteSix_total }}</td>
-                  </tr>
+  <div class="flex-1-1-100">
+    <v-card>
+      <v-row>
+        <v-col>
+          <v-card class="ma-2">
+            <v-card-title align="center">{{playerStore.player.player_name}}</v-card-title>
+            <v-data-table
+              mobile-breakpoint="0"
+              :headers="headerPlayerOverallStats"
+              class="allTimeStats"
+              :items="[playerStore.player]"
+              density="compact"
+            >
+              <template #headers="{ columns }">
+                <tr class="allTimeHeaders">
+                  <template v-for="column in columns" :key="column.key">
+                    <td class="cursor-pointer" @click="chanceHeaderStat">
+                      {{ column.title }}
+                      <v-tooltip v-if="column.tooltip"
+                        activator="parent"
+                        location="bottom"
+                        :text="column.tooltip"
+                      />
+                    </td>
+                  </template>
+                </tr>
+              </template>
+              <template #bottom></template> <!-- This hides the pagination controls-->
+            </v-data-table>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-card class="ma-2">
+            <v-data-table
+              mobile-breakpoint="0"
+              class="seasonStats"
+              :headers="headerPlayerSeasonStats"
+              height="20em"
+              no-data-text="Ei pelattuja kausia"
+              loading-text="Ladataaan kausia..."
+              :items="playerStore.player.stats_per_seasons"
+              :loading="playerStore.loadingPlayer"
+              density="compact"
+              fixed-header
+            >
+              <!-- For god sakes is this the only way to make initial color happen???
+                tried so many ways: setup code watchers, onMounted. Always hits the 'no-data-text'
+                problem
+              -->
+              <template #item = {item}>
+                <tr
+                  :class="{'blue-row': initalColor(item.season)}"
+                  @click="chanceSeason"
+                >
+                  <td> {{ item.season }}</td>
+                  <td> {{ item.team_name }}</td>
+                  <td> {{ item.rounds_total }}</td>
+                  <td> {{ item.score_total }}</td>
+                  <td> {{ item.throws_total }}</td>
+                  <td> {{ item.score_per_throw }}</td>
+                  <td> {{ item.avg_throw_turn }}</td>
+                  <td> {{ item.pikes_total }}</td>
+                  <td> {{ item.pike_percentage }}</td>
+                  <td> {{ item.zeros_total }}</td>
+                  <td> {{ item.zero_percentage }}</td>
+                  <td> {{ item.gteSix_total }}</td>
+                </tr>
 
-                </template>
-                <template #bottom></template> <!-- This hides the pagination controls-->
-              </v-data-table>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row class="ml-1 mr-1">
-          <v-col cols="4">
-            <graph
-              id="chart"
-              title="Heittotuloksen jakauma"
-              :datasets="canvas1Data"
-              :labels="['0', '1', '2', '3', '4', '5', '≥6']"
-              type="bar"
-            />
-          </v-col>
-          <v-col cols="4">
-            <graph
-              id="statGraph"
-              title="Statsin kehitys kausittain"
-              :datasets="canvas2Data"
-              :labels="canvas2Labels"
-              type="line"
-            />
-          </v-col>
-          <v-col cols="4">
-            <graph
-              id="kHP KPH"
-              title="Heittokeskiarvo heittopaikan mukaan"
-              :datasets="canvas3Data"
-              :labels="['1', '2', '3', '4']"
-              :horizontal=true
-              type="bar"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="2">
-            <v-switch
-              class='pl-2'
-              v-model="sortGamesSwitch"
-              true-value="Peleittäin"
-              false-value="Erittäin"
-              :label="`${sortGamesSwitch}`"
-              @update:modelValue="filtterItems"
-            />
-          </v-col>
-          <v-col cols="2">
-            <v-switch
-              v-model="filterGamesSwitch"
-              true-value="Valitut kaudet"
-              false-value="Kaikki kaudet"
-              :label="`${filterGamesSwitch}`"
-              @update:modelValue="filtterItems"
-            />
-          </v-col>
-          <v-spacer/>
-        </v-row>
-        <v-row>
-          <v-col cols="2">
-            <v-text-field
-              class='pl-2'
-              color="red"
-              v-model="search"
-              label="Etsi"
-              single-line
-              variant="outlined"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <v-card>
-              <v-data-table
-                mobile-breakpoint="0"
-                class="matchesClass"
-                @click:row="handleRedirect"
-                :search="search"
-                :headers="matchHeaders"
-                :items="matchItems"
-                :loading="playerStore.loadingPlayer"
-                no-data-text="Ei dataa :("
-                loading-text="Ladataan kausia..."
-              >
-                <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
-                  <tr>
-                    <template v-for="column in columns" :key="column.key">
-                      <td class="mr-2 cursor-pointer" @click="() => toggleSort(column)">
-                        <span> {{ column.title }} </span>
-                        <v-tooltip v-if="column.tooltip"
-                          activator="parent"
-                          location="bottom"
-                          :text="column.tooltip"
-                        />
-                        <template v-if="isSorted(column)">
-                          <v-icon :icon="getSortIcon(column)" />
-                        </template>
-                      </td>
-                    </template>
-                  </tr>
-                </template>
-                <template #item.match_time="{ item }">
-                  <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
-                </template>
-                <template #item.own_team_total="{ item }">
-                  <v-chip
-                    :color="getColor(item.own_team_total, item.opposite_team_total)"
-                    :text="item.own_team_total "
-                  />
-                </template>
-                <template #item.opposite_team_total="{ item }">
-                  <v-chip 
-                    :color="getColor(item.opposite_team_total, item.own_team_total)"
-                    :text="item.opposite_team_total "
-                  />
-                </template>
-              </v-data-table>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-card>
-    </div>
-  </v-layout>
+              </template>
+              <template #bottom></template> <!-- This hides the pagination controls-->
+            </v-data-table>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row class="ml-1 mr-1">
+        <v-col cols="4">
+          <graph
+            id="chart"
+            title="Heittotuloksen jakauma"
+            :datasets="canvas1Data"
+            :labels="['0', '1', '2', '3', '4', '5', '≥6']"
+            type="bar"
+          />
+        </v-col>
+        <v-col cols="4">
+          <graph
+            id="statGraph"
+            title="Statsin kehitys kausittain"
+            :datasets="canvas2Data"
+            :labels="canvas2Labels"
+            type="line"
+          />
+        </v-col>
+        <v-col cols="4">
+          <graph
+            id="kHP KPH"
+            title="Heittokeskiarvo heittopaikan mukaan"
+            :datasets="canvas3Data"
+            :labels="['1', '2', '3', '4']"
+            :horizontal=true
+            type="bar"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="2">
+          <v-switch
+            class='pl-2'
+            v-model="sortGamesSwitch"
+            true-value="Peleittäin"
+            false-value="Erittäin"
+            :label="`${sortGamesSwitch}`"
+            @update:modelValue="filtterItems"
+          />
+        </v-col>
+        <v-col cols="2">
+          <v-switch
+            v-model="filterGamesSwitch"
+            true-value="Valitut kaudet"
+            false-value="Kaikki kaudet"
+            :label="`${filterGamesSwitch}`"
+            @update:modelValue="filtterItems"
+          />
+        </v-col>
+        <v-spacer/>
+      </v-row>
+      <v-row>
+        <v-col cols="2">
+          <v-text-field
+            class='pl-2'
+            color="red"
+            v-model="search"
+            label="Etsi"
+            single-line
+            variant="outlined"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-card>
+            <v-data-table
+              mobile-breakpoint="0"
+              class="matchesClass"
+              @click:row="handleRedirect"
+              :search="search"
+              :headers="matchHeaders"
+              :items="matchItems"
+              :loading="playerStore.loadingPlayer"
+              no-data-text="Ei dataa :("
+              loading-text="Ladataan kausia..."
+            >
+              <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
+                <tr>
+                  <template v-for="column in columns" :key="column.key">
+                    <td class="mr-2 cursor-pointer" @click="() => toggleSort(column)">
+                      <span> {{ column.title }} </span>
+                      <v-tooltip v-if="column.tooltip"
+                        activator="parent"
+                        location="bottom"
+                        :text="column.tooltip"
+                      />
+                      <template v-if="isSorted(column)">
+                        <v-icon :icon="getSortIcon(column)" />
+                      </template>
+                    </td>
+                  </template>
+                </tr>
+              </template>
+              <template #item.match_time="{ item }">
+                <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
+              </template>
+              <template #item.own_team_total="{ item }">
+                <v-chip
+                  :color="getColor(item.own_team_total, item.opposite_team_total)"
+                  :text="item.own_team_total "
+                />
+              </template>
+              <template #item.opposite_team_total="{ item }">
+                <v-chip 
+                  :color="getColor(item.opposite_team_total, item.own_team_total)"
+                  :text="item.opposite_team_total "
+                />
+              </template>
+            </v-data-table>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-card>
+  </div>
 </template>
 <script setup>
 import { useNavBarStore } from '@/stores/navbar.store';

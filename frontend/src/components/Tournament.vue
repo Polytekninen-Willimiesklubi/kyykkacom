@@ -4,7 +4,7 @@
       <h1>TBD</h1>
     </div>
   </div>
-  <v-layout v-else>
+  <div v-else>
     <div v-if="st_round.length" class="pr-10">
       <div v-for="listItem in st_round" :key="listItem.name" class="pt-10">
         <bracket :flat-tree="[listItem]">
@@ -31,7 +31,7 @@
         </template>
       </bracket>
     </div>
-  </v-layout>
+  </div>
 </template>
 
 <script setup>
