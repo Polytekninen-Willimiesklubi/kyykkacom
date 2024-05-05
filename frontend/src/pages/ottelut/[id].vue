@@ -1,50 +1,68 @@
 <template>
-  <v-container grid-list-md>
+  <v-container class='pt-0' grid-list-md>
     <v-row>
       <v-col>
         <v-card v-if="dataReady">
-          <h3 class="text-md-left headline">
-            {{matchData.type_name}} kenttä <span v-if="matchData.field">{{matchData.field}}</span><span v-else>TBD</span>
-            <span style="float:right;">
-              {{ date.formatByString(date.date(matchData.match_time), 'yyyy-MM-dd HH:mm') }}
-            </span>
-          </h3>
           <v-row>
-            <v-col justify="center" align="center" class="ml-5">
+            <v-col>
+              <h3 class="text-md-left headline mt-1 ml-1 mr-1">
+                {{matchData.type_name}} kenttä 
+                <span v-if="matchData.field">
+                    {{matchData.field}}
+                </span>
+                <span v-else>TBD</span>
+                <span style="float:right;">
+                  {{ date.formatByString(date.date(matchData.match_time), 'yyyy-MM-dd HH:mm') }}
+                </span>
+              </h3>
+            </v-col>
+          </v-row>
+          <v-row justify="center" align="center">
+            <v-col class="ml-5">
               <figure>
-                <v-img src="@/assets/kyykkalogo120px.png"/>
-                <figcaption v-if="matchData.home_score_total">
-                  <br>
+                <v-img 
+                  src="@/assets/kyykkalogo120px.png"
+                  height="120px"
+                />
+                <figcaption 
+                  class="d-flex justify-center ma-2"
+                  v-if="matchData.home_score_total"
+                >
                   <v-chip
                     :color="`${getColor(matchData.home_score_total,
                       matchData.away_score_total)} lighten-2`"
-                    :text="matchData.home_score_total"
+                    :text=String(matchData.home_score_total)
                   />
                 </figcaption>
               </figure>
             </v-col>
-            <v-col justify="center" align="center">
+            <v-col class=''>
               <a :href="'/joukkueet/'+matchData.home_team.id">
                 {{matchData.home_team.current_name}}
               </a>
             </v-col>
-            <v-col justify="center" align="center">
+            <v-col>
               vs.
             </v-col>
-            <v-col justify="center" align="center">
+            <v-col>
               <a :href="'/joukkueet/'+matchData.away_team.id">
                 {{matchData.away_team.current_name}}
               </a>
             </v-col>
-            <v-col justify="center" align="center" class="mr-5">
+            <v-col class="mr-5">
               <figure>
-                <v-img src="@/assets/kyykkalogo120px.png"/>
-                <figcaption v-if="matchData.home_score_total">
-                  <br>
+                <v-img 
+                  src="@/assets/kyykkalogo120px.png"
+                  height="120px"
+                />
+                <figcaption 
+                  class="d-flex justify-center ma-2"
+                  v-if="matchData.home_score_total"
+                >
                   <v-chip
                     :color="`${getColor(matchData.away_score_total,
                       matchData.home_score_total)} lighten-2`"
-                    :text="matchData.away_score_total"
+                    :text=String(matchData.away_score_total)
                   />
                 </figcaption>
               </figure>

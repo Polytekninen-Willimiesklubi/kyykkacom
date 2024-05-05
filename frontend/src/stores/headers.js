@@ -181,3 +181,27 @@ export const headersTeamSeasonStats = [
     { title: 'Nolla aloitukset',    key: 'zero_or_pike_first_throw_total' },
     { title: 'Joulukuuset',         key: 'gteSix_total' } ,
 ];
+
+/********** MATCHES PAGE **********/
+
+export const headersMatches = [
+    { title: 'Aika',   key: 'match_time',           width: '20%', align: 'left'},
+    { title: 'Tyyppi', key: 'type_name',            width: '10%', align: 'center' },
+    { title: 'Kenttä', key: 'field',                width: '1%',  align: 'center' },
+    { title: 'Koti',   key: 'home_team.current_abbreviation',     align: 'center' },
+    { title: 'Vieras', key: 'away_team.current_abbreviation',     align: 'center' },
+    { title: '',       key: 'home_score_total',     width: '3%',  align: 'center' },
+    { title: 'Tulos',  key: 'dash',                 width: '1%',  align: 'center', sortable: false},
+    { title: '',       key: 'away_score_total',     width: '3%',  align: 'center' }
+];
+  
+export const headersMatchesPostSeason =  [
+    { key: 'data-table-group', width:'0px', sortable: false}, // This removes 'group-by' header -> https://github.com/vuetifyjs/vuetify/issues/17863
+    { title: 'Aika',   key: 'match_time',                     align: 'left' },
+    { title: 'Kenttä', key: 'field',            width: '1%',  align: 'center' },
+    { title: 'Koti',   key: 'home_team.current_abbreviation', align: 'center' },
+    { title: 'Vieras', key: 'away_team.current_abbreviation', align: 'center' },
+    { title: '',       key: 'home_score_total', width: '3%',  align: 'center' },
+    { title: 'Tulos',  key: 'dash',             width: '1%',  align: 'center', sortable: false },
+    { title: '',       key: 'away_score_total', width: '3%',  align: 'center' }
+];

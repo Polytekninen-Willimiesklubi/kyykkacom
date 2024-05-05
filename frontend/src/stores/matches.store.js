@@ -7,6 +7,7 @@ export const useMatchesStore = defineStore('matches', () => {
     const matches = ref([]);
     const selection = ref('Kaikki ottelut');
     const loaded = ref(false);
+    const loading = ref(false);
 
     const superWeekendMatches = computed(() => {
         return matches.value.filter((match) => match.match_type >= 31);
@@ -37,6 +38,7 @@ export const useMatchesStore = defineStore('matches', () => {
     });
 
     async function getMatches() {
+        loading.value = true;
         const navStore = useNavBarStore();
 
         const pelit = {
@@ -67,6 +69,7 @@ export const useMatchesStore = defineStore('matches', () => {
         });
         matches.value = payload;
         loaded.value = true;
+        loading.value = false;
     }
 
     return {

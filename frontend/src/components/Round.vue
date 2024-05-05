@@ -5,10 +5,11 @@
     <v-card-title class="pa-0 pl-3 pt-3">
       Erä {{props.roundNumber}}
       <v-spacer/>
-      <v-progress-circular 
-        :size="20" 
-        :width="2" 
-        indeterminate color="red" 
+      <v-progress-circular
+        :size="20"
+        :width="2"
+        color="red"
+        indeterminate
         v-if="loading"
       />
     </v-card-title>
@@ -22,8 +23,9 @@
             label
             small
             class="mr-2"
-            :text="roundScore"
-          />
+          >
+            {{ roundScore }}
+          </v-chip>
         </p>
       </v-card-text>
     </v-row>
@@ -110,9 +112,10 @@
 <script setup>
 
 const props = defineProps({
+    color: String,
     matchData: Object,
     roundNumber: String,
-    teamSide: String
+    teamSide: String,
 })
 
 const roundString = props.roundNumber === '1' ? 'first_round' : 'second_round';
@@ -187,7 +190,7 @@ td {
   text-align: center !important;
 }
 
-.centered-input >>> input {
+.centered-input :deep(input) {
   text-align: center
 }
 

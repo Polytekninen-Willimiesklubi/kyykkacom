@@ -18,3 +18,10 @@
 (Kaikki) Joukkueet sivulla:
     - Lisää statistiikkaa näkyviin, nyt aika turha sivu, kun kaikki tiedot (ja enemmän) on näkyvissä sivupalkissa
     - Ehkä mahdollisuus katsoa vain lohkottain ja jotain lohko statseja 
+
+(Yksittäinen) Joukkue sivulla:
+    - Tarkista ja korjaa kapteenin toiminnat
+
+(Kaikki) Ottelut sivulla:
+    - Headers ei pysy paikallaan, kun "Jatkosarja on valittu"
+    - Tarkista ja korjaa kapteenin toiminnat

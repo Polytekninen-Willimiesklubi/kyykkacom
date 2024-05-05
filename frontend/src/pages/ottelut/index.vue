@@ -14,6 +14,7 @@
                 v-model="matchStore.selection"
                 color="red" 
                 :items="selectionOptions" 
+                @update:model-value="updateFilter"
               />
             </v-col>
             <v-spacer />
@@ -28,22 +29,22 @@
             </v-col>
           </v-row>
         </v-card-title>
-        <!-- Todo: Loading -->
+        <!-- TODO :item-class="itemRowBackground" -->
         <v-data-table
           mobile-breakpoint="0"
-          :headers="matchStore.selection !== 'Jatkosarja' 
-            ? headers : postHeaders"
+          :headers="matchHeaders"
           :items="matchStore.selectedMatches"
           :search="search"
           @click:row="handleRedirect"
-          :item-class="itemRowBackground"
+          :loading="matchStore.loading"
+          loading-text="Ladataan otteluita..."
           no-data-text="Ei dataa :("
-          :group-by="matchStore.selection !== 'Jatkosarja' 
-           ? [] : [{key: 'seriers'}]"
+          :sort-by="[{key: 'match_time', order:'asc'}]"
+          :group-by="groupBy"
           density="compact"
           items-per-page="20"
         >
-        <template v-slot:[`item.match_time`]="{ item }">
+        <template #item.match_time = "{ item }">
           <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
           <v-icon 
             color="gray" 
@@ -51,12 +52,10 @@
             icon="info"
           >
             <v-tooltip 
+              v-if="checkValided(item)"
               activator='parent'
               text="Ottelu on validoimatta"
               bottom
-              v-if="!item.is_validated & 
-              (parseInt(item.home_team.id) === parseInt(authStore.teamId) 
-              || parseInt(item.away_team.id) === parseInt(authStore.teamId))" 
             />
           </v-icon>
         </template>
@@ -98,33 +97,18 @@
 import { useAuthStore } from '@/stores/auth.store';
 import { useMatchesStore } from '@/stores/matches.store';
 import { useDate } from 'vuetify';
+import {
+  headersMatches,
+  headersMatchesPostSeason,
+} from '@/stores/headers';
 
 const search = ref('');
+const matchHeaders = ref(null);
+const groupBy = ref(null);
 
 const authStore = useAuthStore();
 const matchStore = useMatchesStore();
 const date = useDate();
-
-const headers = [
-  { title: 'Aika', key: 'match_time', width: '20%', align: 'left'},
-  { title: 'Tyyppi', key: 'type_name', width: '10%', align: 'center' },
-  { title: 'Kenttä', key: 'field', width: '1%', align: 'center' },
-  { title: 'Koti', key: 'home_team.current_abbreviation', align: 'center' },
-  { title: 'Vieras', key: 'away_team.current_abbreviation', align: 'center' },
-  { title: '', key: 'home_score_total', width: '3%', align: 'center' },
-  { title: 'Tulos', key: 'dash', width: '1%', sortable: false, align: 'center' },
-  { title: '', key: 'away_score_total', width: '3%', align: 'center' }
-];
-
-const postHeaders =  [
-  { title: 'Aika', key: 'match_time', align: 'left' },
-  { title: 'Kenttä', key: 'field', aling: 'center' },
-  { title: 'Koti', key: 'home_team.current_abbreviation' },
-  { title: 'Vieras', key: 'away_team.current_abbreviation' },
-  { title: '', key: 'home_score_total', width: '3%', align: 'right' },
-  { title: 'Tulos', key: 'dash', width: '1%', sortable: false, align: 'center' },
-  { title: '', key: 'away_score_total', width: '3%', align: 'left' }
-];
 
 const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'SuperWeekend'];
 
@@ -149,7 +133,22 @@ function handleRedirect (value, row) {
   location.href = '/ottelut/' + row.item.id;
 }
 
+function updateFilter() {
+  matchHeaders.value = matchStore.selection === 'Jatkosarja'
+    ? headersMatchesPostSeason : headersMatches;
+
+  groupBy.value = matchStore.selection === 'Jatkosarja'
+    ? [{key: 'seriers'}] : [];
+}
+
+function checkValided(item) {
+  return !item.is_validated 
+    & (parseInt(item.home_team.id) === parseInt(authStore.teamId)
+    || parseInt(item.away_team.id) === parseInt(authStore.teamId))
+}
+
 matchStore.getMatches();
+updateFilter();
 
 </script>
 
