@@ -3,6 +3,7 @@ import { fetchNewToken, getCookie, useAuthStore } from '@/stores/auth.store';
 const baseUrl = 'http://localhost:8000/api/register/'; // TODO: change this to .env variable
 
 export const useRegisterStore = defineStore('register', () => {
+    // TODO Register alert and use it in register page
     const errors = ref([]);
     const response_errors = ref([]);
     const credentials = ref({});
@@ -10,15 +11,16 @@ export const useRegisterStore = defineStore('register', () => {
 
     async function register() {
       loading.value = true;
+      credentials.value['number'] = 99;
       fetchNewToken();
       try {
           const requestOpt = {
               'method': 'POST',
               'headers': {
-                  'X-CSRFToken': getCookie('csrftoken')
+                  'X-CSRFToken': getCookie('csrftoken'),
+                  'Content-Type': 'application/json',
               },
-              'content-type': 'application/json',
-              'body': JSON.stringify(credentials),
+              'body': JSON.stringify(credentials.value),
               withCredentials: true,
           };
           
@@ -30,13 +32,14 @@ export const useRegisterStore = defineStore('register', () => {
             return false;
           }
 
-          const isJson = response.headers?.get('content-type')?.includes('application/json');
+          const isJson = response.headers?.get('Content-Type')?.includes('application/json');
           const data = isJson ? await response.json() : null;
-
+          
+          
           if (data) {
+              console.log(data)
               const authStore = useAuthStore();
-              const payload = data.body;
-              authStore.changeLogin(payload.user.id, payload.role, null, payload.player_name);
+              authStore.changeLogin(data.user.id, data.role, null, data.user.player_name);
           }
           loading.value = false;
           return true;
@@ -44,6 +47,7 @@ export const useRegisterStore = defineStore('register', () => {
           console.log(error)
       } finally {
         loading.value = false;
+        return false;
       }
     }
 

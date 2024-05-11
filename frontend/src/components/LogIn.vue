@@ -15,17 +15,20 @@
         text="Kirjaudu"
       />
     </template>
-    <v-card
-      title="Kirjaudu sisään"
-    >
-      <v-alert
-        :model-value="authStore.alert"
-        type="info"
-        transition="scale-transition"
-        outlined
-        text="Invalid user credentials."
-      />
+    <v-card title="Kirjaudu sisään">
       <v-container>
+        <v-row>
+          <v-col>
+            <v-alert 
+              :model-value="authStore.alert" 
+              type="error" 
+              transition="scale-transition" 
+              outlined
+            >
+              <b>Kirjautuminen epäonnistui</b>
+            </v-alert>
+          </v-col>
+        </v-row>
         <v-row>
           <v-col cols="7">
             <v-text-field 

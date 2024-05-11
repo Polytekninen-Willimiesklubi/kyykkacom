@@ -37,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
     });
 
     async function logIn(again=false) {
+        alert.value = false;
         try {
             const requestOpt = {
                 'method': 'POST',
@@ -71,6 +72,7 @@ export const useAuthStore = defineStore('auth', () => {
 
                 return true
             } else if (response.status === 400) {
+                alert.value = true
                 return false
             }
             
@@ -98,11 +100,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     function logOut() {
-        userId.value = null
-        roleId.value = null
-        teamId.value = null
-        playerName.value = null
-        loggedIn.value = true
+        userId.value = null;
+        roleId.value = null;
+        teamId.value = null;
+        playerName.value = null;
+        loggedIn.value = false;
         localStorage.removeItem('userId')
         localStorage.removeItem('teamId')
         localStorage.removeItem('roleId')
@@ -110,16 +112,16 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('loggedIn', JSON.stringify(false))
     }
 
-    function changeLogin(userId, roleId, teamId, playeName, loginStatus=true) {
-        userId.value = userId
-        roleId.value = roleId
-        teamId.value = teamId
-        playerName.value = playeName
+    function changeLogin(id, role, team, player, loginStatus=true) {
+        userId.value = id
+        roleId.value = role
+        teamId.value = team
+        playerName.value = player
         loggedIn.value = loginStatus
-        localStorage.setItem('userId', JSON.stringify(userId));
-        localStorage.setItem('teamId', JSON.stringify(teamId));
-        localStorage.setItem('roleId', JSON.stringify(roleId));
-        localStorage.setItem('playerName', JSON.stringify(playeName));
+        localStorage.setItem('userId', JSON.stringify(id));
+        localStorage.setItem('teamId', JSON.stringify(team));
+        localStorage.setItem('roleId', JSON.stringify(role));
+        localStorage.setItem('playerName', JSON.stringify(player));
         localStorage.setItem('loggedIn', JSON.stringify(loginStatus));
     }
 

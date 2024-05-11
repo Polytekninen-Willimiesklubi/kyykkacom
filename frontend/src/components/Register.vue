@@ -19,14 +19,24 @@
       title="Rekisteröityminen"
       subtitle="Kaikki kentät pakollisia"
     >
-    <!-- :model-value="registerForm" -->
-    <!-- TODO JATKA TÄSTÄ register lähetys -->
       <v-form
         validate-on="submit"
-        :model-value="j"
+        @submit.prevent="awaitSubmitCheck(jotain)"
         ref="jotain"
       >
         <v-container>
+          <v-row>
+            <v-col>
+              <v-alert 
+                :model-value="alert" 
+                type="error" 
+                transition="scale-transition" 
+                outlined
+              >
+                <b>Jotain meni pieleen. Mahdollisesti email on jo käytössä.</b>
+              </v-alert>
+            </v-col>
+          </v-row>
           <v-row>
             <v-col cols="6">
               <v-text-field 
@@ -94,15 +104,18 @@
               <v-btn
                 :loading="store.loading"
                 class="mb-2"
-                color="red darken-1" 
+                color="red darken-1"
                 text="Register"
                 type="submit"
-                @click="jotain.isValid && store.register"
                 block
               />
             </v-col>
             <v-col cols="3">
-              <v-btn color="red darken-1" text="Close" @click="dialog = false" />
+              <v-btn 
+                color="red darken-1" 
+                text="Close" 
+                @click="dialog = false; alert = false" 
+              />
             </v-col>
             <v-spacer/>
           </v-row>
@@ -117,9 +130,18 @@ import { useRegisterStore } from '@/stores/register.store';
 
 const store = useRegisterStore();
 
-const j = ref(null);
 const jotain = ref();
 const dialog = ref(false);
+const alert = ref(false);
+
+async function awaitSubmitCheck() {
+  alert.value = false;
+  const { valid } = await jotain.value.validate();
+  if (valid) {
+    let jotain = await store.register();
+    alert.value = !jotain;
+  }
+}
 
 </script>
 
