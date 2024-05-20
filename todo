@@ -1,5 +1,5 @@
 (Kaikki) Pelaajat sivulla: 
-    -on-off switch pisteet/kyykkät:
+    - on-off switch pisteet/kyykkät
         -> Kyykät -> Pisteet
         -> Kyykät per heitto -> Pistettä per heitto
     - NaN Arvot näkyy päällimmäisenä, jos sorttaa alimmat arvot
@@ -9,7 +9,7 @@
 
 (Yksittäinen) Pelaaja sivulla:
     - Pelaajalle oma profiili (iso muutos vaatii backend tukea)
-    - Muokkaa matsien esittelytapaa niin, että heitot erottuvat paremmin
+    - Muokkaa matsien esittelytapaa niin, että heitot erottuvat selkeämmin
     - STYLE: chips color ei näy matseissa
     - Heittotulosjakaumassa pitäisi olla vaihtoehto normalisoituun jakaumaan
     - 'Heittokeskiarvo heittopaikassa' voisi olla heittomäärä jotenkin näkyvissä per paikka
@@ -25,3 +25,8 @@
 (Kaikki) Ottelut sivulla:
     - Headers ei pysy paikallaan, kun "Jatkosarja on valittu"
     - Tarkista ja korjaa kapteenin toiminnat
+
+Muuta:
+    - Piniat 'matches.store.js' ja 'match.store.js' voisi yhdistää
+    - fetchWrapper kaikille fetcheille poistaisi todella paljon koodia
+    - username api tarkistus rekistiröinnille

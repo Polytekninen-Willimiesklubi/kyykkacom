@@ -94,11 +94,13 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth.store';
 import { useMatchesStore } from '@/stores/matches.store';
+import { useNavBarStore } from '@/stores/navbar.store';
 import { useDate } from 'vuetify';
 import {
   headersMatches,
   headersMatchesPostSeason,
 } from '@/stores/headers';
+import { watch } from 'vue';
 
 const search = ref('');
 const matchHeaders = ref(null);
@@ -106,6 +108,7 @@ const groupBy = ref(null);
 
 const authStore = useAuthStore();
 const matchStore = useMatchesStore();
+const navStore = useNavBarStore();
 const date = useDate();
 
 const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'SuperWeekend'];
@@ -147,6 +150,10 @@ function checkValided(item) {
 
 matchStore.getMatches();
 updateFilter();
+
+watch(() => navStore.seasonId, (newId) => {
+  matchStore.getMatches();
+})
 
 </script>
 
