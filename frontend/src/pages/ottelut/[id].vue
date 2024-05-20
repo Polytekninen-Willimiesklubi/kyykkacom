@@ -135,13 +135,7 @@
     </v-row>
   </v-container>
 </template>
-<route>
-{
-  meta: {
-    layout: "withoutSidebar"
-  }
-}
-</route>
+
 <script setup>
 import { useMatchStore } from '@/stores/match.store';
 import { useAuthStore } from '@/stores/auth.store';
