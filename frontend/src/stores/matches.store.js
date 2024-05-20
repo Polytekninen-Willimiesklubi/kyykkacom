@@ -75,6 +75,7 @@ export const useMatchesStore = defineStore('matches', () => {
     return {
         matches,
         selection,
+        loading,
         loaded,
         superWeekendMatches,
         postSeasonMatches,
