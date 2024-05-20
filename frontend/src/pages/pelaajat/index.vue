@@ -58,9 +58,11 @@
 import { usePlayerStore } from '@/stores/players.store';
 import { useTeamsStore } from '@/stores/teams.store'
 import { headerPlayers } from '@/stores/headers'
+import { useNavBarStore } from '@/stores/navbar.store';
 
 const teamStore = useTeamsStore();
 const playerStore = usePlayerStore();
+const navStore = useNavBarStore();
 
 playerStore.getPlayers();
 teamStore.getTeams();
@@ -70,6 +72,10 @@ const search = ref('')
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.id
 }
+
+watch(() => navStore.seasonId, (newId) => {
+  playerStore.getPlayers();
+})
 
 </script>
 
