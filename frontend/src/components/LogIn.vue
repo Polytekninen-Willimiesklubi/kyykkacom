@@ -75,12 +75,4 @@ const dialog = ref(false);
 
 const authStore = useAuthStore();
 
-// if (localStorage.role_id && localStorage.user_id) {
-//   this.$session.set('role_id', localStorage.role_id)
-//   this.$session.set('user_id', localStorage.user_id)
-//   this.changeLogin(localStorage.player_name)
-// }
-// if (localStorage.csrfToken) {
-//   this.$session.set('csrf', localStorage.csrfToken)
-// }
 </script>
