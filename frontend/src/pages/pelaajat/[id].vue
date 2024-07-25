@@ -216,7 +216,7 @@ const currentSelection = [];
 const columnCurrentSelection = [];
 const columnColors =  ['KPH', '', '', '', ''];
 const colors = ['', '', '', '', ''];
-let jotain2 = false;
+let colorInitialized = false;
 
 const search = ref('')
 const sortGamesSwitch = ref('Erittäin');
@@ -233,10 +233,10 @@ function filtterItems() {
   let arr
   if(sortGamesSwitch.value === 'Erittäin') {
     arr = playerStore.playerMatchesPerPeriod;
-    matchHeaders.value = headersPlayerPeriod
+    matchHeaders.value = headersPlayerPeriod;
   } else {
     arr = playerStore.playerMatchesPerMatch;
-    matchHeaders.value = headersPlayerGames
+    matchHeaders.value = headersPlayerGames;
   }
 
   const returning_arr = filterGamesSwitch.value === 'Kaikki kaudet'
@@ -244,173 +244,180 @@ function filtterItems() {
     : arr.filter(ele => currentSelection.includes(ele.season));
 
   if (search.value == '') {
-    matchItems.value = returning_arr
-    return
+    matchItems.value = returning_arr;
+    return;
   }
   matchItems.value = returning_arr.filter(match => {
-    let found = false
+    let found = false;
     for (const key in match) {
-      if (key == 'id') { continue }
+      if (key == 'id') { continue; }
       const ele = typeof match[key] !== 'string' ? String(match[key]) : match[key]
       if (ele.toLowerCase().includes(search.value.toLowerCase())) {
-        found = true
-        break
+        found = true;
+        break;
       }
     }
-    return found
+    return found;
   })
 
 }
 
 function handleRedirect(value, row) {
-  location.href = '/ottelut/' + row.item.match_id
+  location.href = '/ottelut/' + row.item.match_id;
 }
 
 function getColor (val1, val2) {
-  if (val1 < val2) return '#C8E6C9' // green-lighten-4
-  else if (val1 > val2) return '#EF9A9A' // red-lighten-4
-  else return '#F0F4C3' // yellow-lighten-4
+  if (val1 < val2) return '#C8E6C9'; // green-lighten-4
+  else if (val1 > val2) return '#EF9A9A'; // red-lighten-4
+  else return '#F0F4C3'; // yellow-lighten-4
 }
 
 function chanceHeaderStat(val) {
-  const headerClassList = val.target.classList
-  const head = val.target.innerText
-  const headers = ['Erät', 'Poistetut kyykät', 'Heitot', 'KPH', 'kHP', 'Hauet', 'H%',
-    'Virkamiehet', 'VM' ,'VM%', 'JK']
-  const header_binds = ['rounds_total', 'score_total', 'throws_total', 'score_per_throw',
-    'avg_throw_turn', 'pikes_total', 'pike_percentage', 'zeros_total', 'zero_percentage', 'gteSix_total']
+  const headerClassList = val.target.classList;
+  const head = val.target.innerText;
+  const headers = [
+    'Erät', 'Poistetut kyykät', 'Heitot', 'KPH', 
+    'kHP', 'Hauet', 'H%', 'Virkamiehet',
+    'VM' ,'VM%', 'JK'
+  ];
+  const header_binds = [
+    'rounds_total', 'score_total', 'throws_total', 'score_per_throw',
+    'avg_throw_turn', 'pikes_total', 'pike_percentage', 'zeros_total', 
+    'zero_percentage', 'gteSix_total'
+  ];
 
-  if (!headers.includes(head)) { return }
+  if (!headers.includes(head)) { return; }
 
   if (columnCurrentSelection.includes(head)) {
-    let index = canvas2Data.value.map(ele => ele.label).indexOf(head)
-    canvas2Data.value.splice(index, 1)
+    let index = canvas2Data.value.map(ele => ele.label).indexOf(head);
+    canvas2Data.value.splice(index, 1);
 
-    canvas2Data.value = [...canvas2Data.value]
+    canvas2Data.value = [...canvas2Data.value];
 
-    index = columnCurrentSelection.indexOf(head)
-    columnCurrentSelection.splice(index, 1)
+    index = columnCurrentSelection.indexOf(head);
+    columnCurrentSelection.splice(index, 1);
 
-    index = columnColors.indexOf(head)
-    columnColors[index] = ''
-    headerClassList.remove(styles[index])
-  } else if (columnCurrentSelection.length == 5) {
-    // Do nothing
-  } else {
-    let index = columnColors.indexOf('')
-    const color = allColors[index]
-    headerClassList.add(styles[index])
+    index = columnColors.indexOf(head);
+    columnColors[index] = '';
+    headerClassList.remove(styles[index]);
+  } else if (columnCurrentSelection.length < 5) { // Only allow max 5 graphs
+    let index = columnColors.indexOf('');
+    const color = allColors[index];
+    headerClassList.add(styles[index]);
 
-    columnColors[index] = head
+    columnColors[index] = head;
 
-    const dat = []
-    index = headers.indexOf(head)
-    playerStore.player.stats_per_seasons.forEach(s => {
-      dat.push(s[header_binds[index]])
-    })
+    const stat_per_season = [];
+    index = headers.indexOf(head);
+    playerStore.player.stats_per_seasons.forEach(stats => {
+      stat_per_season.push(stats[header_binds[index]])
+    });
     canvas2Data.value.push({
       label: head,
-      data: dat,
+      data: stat_per_season,
       backgroundColor: color,
       borderColor: color,
-    })
+    });
 
-    canvas2Data.value = [...canvas2Data.value]
+    canvas2Data.value = [...canvas2Data.value];
 
-    columnCurrentSelection.push(head)
+    columnCurrentSelection.push(head);
   }
 }
 
 function chanceSeason (value) {
-  const headerClassList = value.target.tagName === "TD" ? value.target.parentNode.classList : value.target.classList;
+  const headerClassList = value.target.tagName === "TD" 
+    ? value.target.parentNode.classList 
+    : value.target.classList;
   const clickedSeason =  value.target.tagName === "TD" 
-    ? value.target.parentNode.children[0].innerText 
+    ? value.target.parentNode.children[0].innerText
     : value.target.children[0].innerText;
   if (currentSelection.includes(clickedSeason)) { // Remove clicked season from datas
-    let index = canvas1Data.value.map(e => e.label).indexOf('Kausi ' + clickedSeason)
-    canvas1Data.value.splice(index, 1)
-    canvas3Data.value.splice(index, 1) // Same index can be used to splice canvas3, because we always update both everywhere
+    let index = canvas1Data.value.map(e => e.label).indexOf('Kausi ' + clickedSeason);
+    canvas1Data.value.splice(index, 1);
+    canvas3Data.value.splice(index, 1); // Same index can be used to splice canvas3, because we always update both everywhere
     
-    canvas1Data.value = [...canvas1Data.value] // To make it reactive, we must make new array
-    canvas3Data.value = [...canvas3Data.value]
+    canvas1Data.value = [...canvas1Data.value]; // To make it reactive, we must make new array
+    canvas3Data.value = [...canvas3Data.value];
 
-    index = currentSelection.indexOf(clickedSeason)
-    currentSelection.splice(index, 1)
+    index = currentSelection.indexOf(clickedSeason);
+    currentSelection.splice(index, 1);
 
-    index = colors.indexOf(clickedSeason)
-    colors[index] = ''
-    headerClassList.remove(styles[index])
-  } else if (currentSelection.length == 5) { // Not removal, but the 'memory' is full
-    // Do nothing
-  } else { // Add clicked season
-    let tmp = playerStore.player.stats_per_seasons
-    let index = tmp.map(ele => ele.season).indexOf(clickedSeason)
-    const selected_season = tmp[index]
+    index = colors.indexOf(clickedSeason);
+    colors[index] = '';
+    headerClassList.remove(styles[index]);
+  } else if (currentSelection.length < 5) { // Add Clicked season, only allow max 5
+    let tmp = playerStore.player.stats_per_seasons;
+    let index = tmp.map(ele => ele.season).indexOf(clickedSeason);
+    const selected_season = tmp[index];
     
-    index = colors.indexOf('') // First valid color
-    colors[index] = clickedSeason
-    const color = allColors[index]
-    headerClassList.add(styles[index])
+    index = colors.indexOf(''); // First valid color
+    colors[index] = clickedSeason;
+    const color = allColors[index];
+    headerClassList.add(styles[index]);
 
     canvas1Data.value = [ ...canvas1Data.value,  // To make it reactive, we must make new array
-    {
-      label: 'Kausi ' + selected_season.season,
-      backgroundColor: color,
-      data: [
-        selected_season.zeros_total + selected_season.pikes_total,
-        selected_season.ones_total,
-        selected_season.twos_total,
-        selected_season.threes_total,
-        selected_season.fours_total,
-        selected_season.fives_total,
-        selected_season.gteSix_total
-      ]
-    }
-  ]
+      {
+        label: 'Kausi ' + selected_season.season,
+        backgroundColor: color,
+        data: [
+          selected_season.zeros_total + selected_season.pikes_total,
+          selected_season.ones_total,
+          selected_season.twos_total,
+          selected_season.threes_total,
+          selected_season.fours_total,
+          selected_season.fives_total,
+          selected_season.gteSix_total
+        ]
+      }
+    ]
 
     canvas3Data.value = [ ...canvas3Data.value,  // To make it reactive, we must make new array
-    {  
-      label: 'Kausi ' + selected_season.season,
-      backgroundColor: color,
-      data: [
-        selected_season.average_score_position_one,
-        selected_season.average_score_position_two,
-        selected_season.average_score_position_three,
-        selected_season.average_score_position_four
-      ]
-    }
-  ]
+      {  
+        label: 'Kausi ' + selected_season.season,
+        backgroundColor: color,
+        data: [
+          selected_season.average_score_position_one,
+          selected_season.average_score_position_two,
+          selected_season.average_score_position_three,
+          selected_season.average_score_position_four
+        ]
+      }
+    ];
 
-    currentSelection.push(clickedSeason)
+    currentSelection.push(clickedSeason);
   }
 }
 
-function initalColor(value) {
-  const tmp = playerStore.player.stats_per_seasons
-  let index = tmp.map(ele => ele.id).indexOf(navStore.seasonId)
-  // If the selected season is not in players history take the latest
-  index = (index === -1) ? tmp.length -1 : index
-  if(jotain2 || value !== currentSelection[0]) return false
-  jotain2 = true;
-  return true
+/**
+ * Returns True for one season index for to initially color one row in aggregated year stats
+ * @param {number} season Season index
+ * @returns {bool} True if season is first item in 'currentSelection' and only once else False 
+ */
+function initalColor(season) {
+  if(colorInitialized || season !== currentSelection[0]) {
+    return false;
+  }
+  colorInitialized = true;
+  return true;
 }
 
 playerStore.getPlayer(route.params.id);
 watch(() => playerStore.loadedData, () => {
   if (playerStore.loadedData === false) {
-    return
+    return;
   }
-  const jotain = playerStore.player.stats_per_seasons
-  if (jotain && jotain.length !== 0) {
-    let index = jotain.map(ele => ele.id).indexOf(navStore.seasonId)
+  const stats_per_seasons = playerStore.player.stats_per_seasons;
+  if (stats_per_seasons && stats_per_seasons.length !== 0) {
+    let index = stats_per_seasons.map(ele => ele.id).indexOf(navStore.seasonId);
     // If the selected season is not in players history take the latest
-    index = (index === -1) ? jotain.length -1 : index
-    const currentSelcSeason = jotain[index]
-    const seasonString = currentSelcSeason.season
+    index = (index === -1) ? stats_per_seasons.length -1 : index;
+    const currentSelcSeason = stats_per_seasons[index];
+    const seasonString = currentSelcSeason.season;
     
-    currentSelection.push(seasonString)
-    colors[0] = seasonString
-    columnCurrentSelection.push('KPH')
+    currentSelection.push(seasonString);
+    colors[0] = seasonString;
+    columnCurrentSelection.push('KPH');
   
     const init1 = {
       label: 'Kausi ' + currentSelcSeason.season,
@@ -424,18 +431,18 @@ watch(() => playerStore.loadedData, () => {
         currentSelcSeason.fives_total,
         currentSelcSeason.gteSix_total
       ]
-    }
-    const canvas2_data_tmp = []
-    for (const s of jotain) {
-      canvas2_data_tmp.push(s.score_per_throw)
-      canvas2Labels.value.push(s.season)
+    };
+    const canvas2_data_tmp = [];
+    for (const s of stats_per_seasons) {
+      canvas2_data_tmp.push(s.score_per_throw);
+      canvas2Labels.value.push(s.season);
     }
     const init2 = {
       label: 'KPH',
       backgroundColor: '#B3E5FC',
       borderColor: '#B3E5FC',
       data: canvas2_data_tmp
-    }
+    };
     
     const init3 = {
       label: 'Kausi ' + currentSelcSeason.season,
@@ -446,18 +453,18 @@ watch(() => playerStore.loadedData, () => {
         currentSelcSeason.average_score_position_three,
         currentSelcSeason.average_score_position_four
       ]
-    }
+    };
     canvas1Data.value = [init1];
     canvas2Data.value = [init2];
     canvas3Data.value = [init3];
   }
 
   // Initialize the selected allTime header color
-  const headerRow = document.getElementsByClassName('allTimeHeaders')[0]
+  const headerRow = document.getElementsByClassName('allTimeHeaders')[0];
   for (let i = 0; i < headerRow.childNodes.length; i++) {
-    const text = headerRow.childNodes[i].innerText
+    const text = headerRow.childNodes[i].innerText;
     if ( text === 'KPH' ) {
-      headerRow.childNodes[i].classList.add('blue-row')
+      headerRow.childNodes[i].classList.add('blue-row');
       break;
     }
   }
