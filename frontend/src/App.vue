@@ -11,9 +11,9 @@ import {useNavBarStore} from '@/stores/navbar.store';
 
 const store = useNavBarStore() 
 
-if (!store.seasonId) {
+if (!store.selectedSeason) {
   // Index starts at 1 : 2000
-  store.seasonId = new Date().getFullYear() - 2000 + 1;
+  store.setSelectedSeasonById(new Date().getFullYear() - 2000 + 1);
 }
 
 </script>

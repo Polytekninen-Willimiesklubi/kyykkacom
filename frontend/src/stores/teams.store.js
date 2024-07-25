@@ -207,7 +207,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
             
             const index = unReservedPlayers.value.findIndex(player => player.id === item.id);
             const player = unReservedPlayers.value.splice(index, 1);
-            seasonsStats[navStore.currentSeasonId].players.push(player);
+            seasonsStats[navStore.seasonId].players.push(player);
 
         } catch(error) {
             console.log(error)

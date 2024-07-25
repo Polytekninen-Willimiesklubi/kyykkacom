@@ -40,12 +40,6 @@ const headers = [
   { title: 'OKA',     key: 'match_average',         sortable: false,  tooltip: "Ottelu keskiarvo"}
 ];
 
-const loadedSeason = localStorage.loadedSeason;
-if (loadedSeason !== navStore.seasonId || !localStorage.allTeams) {
-  teamStore.getTeams();
-  localStorage.loadedSeason = navStore.seasonId;
-}
-
 </script>
 
 <style>
