@@ -55,10 +55,6 @@ import {
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement)
 
-import { useChartStore } from "@/stores/chart.store";
-
-const chartStore = useChartStore();
-
 const props = defineProps({
   id: String,
   width_px: String,
