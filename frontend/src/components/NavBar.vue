@@ -1,12 +1,16 @@
 <template>
-  <v-app-bar 
+  <v-app-bar
     style="z-index:2;" 
-    color="grey darken-3" 
+    color="grey darken-3"
     dark
   >
     <router-link
       to="/"
-      style="text-decoration: none; color:white; padding-right:2em; padding-left:1em;"
+      style="text-decoration: none;
+       color:white; 
+       padding-right:2em; 
+       padding-left:2em;
+      "
     >
       <img src="@/assets/kyykkalogo120px.png">
     </router-link>
@@ -123,6 +127,10 @@ if (!navStore.seasons.length) {
 </script>
 
 <style>
+.v-toolbar__content {
+  overflow: visible;
+}
+
 a {
   color: red;
   text-decoration: none;
