@@ -11,7 +11,7 @@
       <img src="@/assets/kyykkalogo120px.png">
     </router-link>
 
-    <template v-for="item in headers">
+    <template v-for="item in headersNavBar">
       <v-btn 
         class="hidden-md-and-down"
         :text="item.title"
@@ -65,7 +65,7 @@
       dark
     >
       <v-list :nav="true">
-        <template v-for="item in headers">
+        <template v-for="item in headersNavBar">
           <v-list-item 
             :to=item.route v-if="item.if_clause == undefined || item.if_clause"
             :prepend-icon="item.icon"
@@ -104,26 +104,18 @@
 <script setup>
 import { useNavBarStore } from '../stores/navbar.store';
 import { useAuthStore } from '../stores/auth.store';
+import { headersNavBar } from '@/stores/headers';
+
 
 const navStore = useNavBarStore();
 const userStore = useAuthStore();
 
 const drawer = ref(false);
 
-const headers = [ 
-  { title: 'Koti', route: '/', icon: 'mdi-home' },
-  { title: 'Ottelut', route: '/ottelut', icon: 'mdi-space-invaders' },
-  { title: 'Joukkueet', route: '/joukkueet', icon: 'mdi-emoticon-poop' },
-  { title: 'Pelaajat', route: '/pelaajat', icon: 'mdi-account-group' },
-  { 
-    title: 'Oma Joukkue', route: '/joukkueet/' + userStore.teamId, 
-    if_clause: userStore.loggedIn && userStore.teamId != 'null' && userStore.teamId, 
-    icon: 'mdi-account',
-  },
-  { title: 'Jatkosarja', route: '/jatkosarja', icon: 'mdi-bank' },
-  { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
-  { title: 'Info', route: '/info', icon: 'mdi-information-outline' }
-];
+// to Header add if-clause and id to the route
+let header = headersNavBar
+header[4]["if_clause"] = userStore.loggedIn && userStore.teamId != 'null' && userStore.teamId
+header[4]["route"] +=  userStore.teamId
 
 if (!navStore.seasons.length) {
   navStore.getSeasons();

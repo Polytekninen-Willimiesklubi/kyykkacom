@@ -152,6 +152,7 @@
               :loading="playerStore.loadingPlayer"
               no-data-text="Ei dataa :("
               loading-text="Ladataan kausia..."
+              density="compact"
             >
               <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
                 <tr>
@@ -276,7 +277,7 @@ function chanceHeaderStat(val) {
   const headerClassList = val.target.classList;
   const head = val.target.innerText;
   const headers = [
-    'Erät', 'Poistetut kyykät', 'Heitot', 'KPH', 
+    'Erät', 'Kyykät', 'Heitot', 'KPH', 
     'kHP', 'Hauet', 'H%', 'Virkamiehet',
     'VM' ,'VM%', 'JK'
   ];

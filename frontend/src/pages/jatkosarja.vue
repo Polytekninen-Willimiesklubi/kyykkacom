@@ -7,7 +7,7 @@
     />
     <side-bar
       title="Runkosarja"
-      :headers="headers"
+      :headers="headersPlayoff"
       sort-by="bracket_placement"
       :sort-desc=false
       :teams="teamStore.bracketedTeams"
@@ -39,6 +39,8 @@ import { useMatchesStore } from '@/stores/matches.store';
 import { useNavBarStore } from '@/stores/navbar.store';
 import { useTeamsStore } from '@/stores/teams.store';
 
+import { headersPlayoff } from '@/stores/headers'
+
 import cup_22 from '../tournament_templates/cup_template_22_teams.json';
 import cup_16 from '../tournament_templates/cup_template_16_teams.json';
 import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json';
@@ -46,16 +48,6 @@ import cup_8 from '../tournament_templates/cup_template_8_teams.json';
 import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json';
 import cup_4 from '../tournament_templates/cup_template_4_teams.json';
 
-const headers = [
-  { title: 'Sij.', key: 'bracket_placement' },
-  { title: 'Joukkue', key: 'current_abbreviation', sortable: false, width: '10%' },
-  { title: 'O', key: 'matches_played', sortable: false, width: '3%' },
-  { title: 'V', key: 'matches_won', sortable: false, width: '3%' },
-  { title: 'T', key: 'matches_tie', sortable: false, width: '3%' },
-  { title: 'H', key: 'matches_lost', sortable: false, width: '3%' },
-  { title: 'P', key: 'points_total', sortable: false, width: '3%' },
-  { title: 'OKA', key: 'match_average', sortable: false, width: '5%' }
-];
 
 const seasons_mapping = {
   1: cup_16,
@@ -65,7 +57,6 @@ const seasons_mapping = {
   5: cup_6,
   6: cup_12
 };
-
 
 const rounds = ref([]);
 const first_round = ref(false);

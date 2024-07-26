@@ -49,7 +49,7 @@
     <v-data-table 
       v-if="!show_input"
       mobile-breakpoint="0" 
-      :headers="headers"
+      :headers="headersRound"
       @click:row="handleRedirect"
       :items="data"
       no-data-text="Ei dataa :("
@@ -62,7 +62,7 @@
       v-else
       mobile-breakpoint="0" 
       v-model="select"
-      :headers="headers"
+      :headers="headersRound"
       :items="data"
       :items-per-page="4"
     >
@@ -110,6 +110,7 @@
 </template>
 
 <script setup>
+import { headersRound } from '@/stores/headers';
 
 const props = defineProps({
     color: String,
@@ -139,19 +140,6 @@ if (!props.matchData.is_validated) {
     show_input = (localStorage.role_id == 1)
   }
 }
-
-const headers = [
-  {
-    title: 'Pelaaja',
-    value: 'player.player_name',
-    width: '45%'
-  },
-  { title: 1, align: 'center', value: 'score_first', width: '10%' },
-  { title: 2, align: 'center', value: 'score_second', width: '10%' },
-  { title: 3, align: 'center', value: 'score_third', width: '10%' },
-  { title: 4, align: 'center', value: 'score_fourth', width: '10%' },
-  { title: 'Yht.', align: 'center', value: 'score_total', width: '5%' }
-]
 
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.player.id

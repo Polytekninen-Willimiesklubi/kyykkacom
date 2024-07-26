@@ -1,6 +1,4 @@
-import { getCookie, fetchNewToken } from '@/stores/auth.store';
 import { useNavBarStore } from "./navbar.store";
-import { useTeamsStore } from './teams.store';
 
 import cup_22 from '../tournament_templates/cup_template_22_teams.json'
 import cup_16 from '../tournament_templates/cup_template_16_teams.json'
@@ -22,15 +20,6 @@ const seasons_mapping = {
     6: cup_12,
     7: super_cup_15
 }
-
-export const superSidebarHeaders = [
-    { title: 'Sij.', key: 'super_weekend_bracket_placement' },
-    { title: 'Joukkue', key: 'current_abbreviation', sortable: false, width: '10%' },
-    { title: 'V', key: 'matches_won', sortable: false, width: '3%' },
-    { title: 'T', key: 'matches_tie', sortable: false, width: '3%' },
-    { title: 'H', key: 'matches_lost', sortable: false, width: '3%' },
-    { title: 'OKA', key: 'match_average', sortable: false, width: '5%' }
-];
 
 export const useSuperStore = defineStore('superweekend', () => {
     const noBrackets = ref(0);

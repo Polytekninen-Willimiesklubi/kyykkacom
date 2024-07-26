@@ -205,3 +205,64 @@ export const headersMatchesPostSeason =  [
     { title: 'Tulos',  key: 'dash',             width: '1%',  align: 'center', sortable: false },
     { title: '',       key: 'away_score_total', width: '3%',  align: 'center' }
 ];
+
+/********** PLAYOFF PAGE **********/
+
+export const headersPlayoff = [
+    { title: 'Sij.',    key: 'bracket_placement' },
+    { title: 'Joukkue', key: 'current_abbreviation', sortable: false, width: '10%' },
+    { title: 'O',       key: 'matches_played',       sortable: false, width: '3%' },
+    { title: 'V',       key: 'matches_won',          sortable: false, width: '3%' },
+    { title: 'T',       key: 'matches_tie',          sortable: false, width: '3%' },
+    { title: 'H',       key: 'matches_lost',         sortable: false, width: '3%' },
+    { title: 'P',       key: 'points_total',         sortable: false, width: '3%' },
+    { title: 'OKA',     key: 'match_average',        sortable: false, width: '5%' }
+];
+
+/********** SUPERWEEKEND PAGE **********/
+
+export const superSidebarHeaders = [
+    { title: 'Sij.',    key: 'super_weekend_bracket_placement' },
+    { title: 'Joukkue', key: 'current_abbreviation',    sortable: false, width: '10%' },
+    { title: 'V',       key: 'matches_won',             sortable: false, width: '3%' },
+    { title: 'T',       key: 'matches_tie',             sortable: false, width: '3%' },
+    { title: 'H',       key: 'matches_lost',            sortable: false, width: '3%' },
+    { title: 'OKA',     key: 'match_average',           sortable: false, width: '5%' }
+];
+
+/********** ROUND Component **********/
+
+export const headersRound = [
+    { title: 'Pelaaja',               value: 'player.player_name',  width: '45%' },
+    { title: 1,      align: 'center', value: 'score_first',         width: '10%' },
+    { title: 2,      align: 'center', value: 'score_second',        width: '10%' },
+    { title: 3,      align: 'center', value: 'score_third',         width: '10%' },
+    { title: 4,      align: 'center', value: 'score_fourth',        width: '10%' },
+    { title: 'Yht.', align: 'center', value: 'score_total',         width: '5%' }
+];
+
+/********** NAVBAR Component **********/
+
+export const headersNavBar = [
+    { title: 'Koti',         route: '/',             icon: 'mdi-home' },
+    { title: 'Ottelut',      route: '/ottelut',      icon: 'mdi-space-invaders' },
+    { title: 'Joukkueet',    route: '/joukkueet',    icon: 'mdi-emoticon-poop' },
+    { title: 'Pelaajat',     route: '/pelaajat',     icon: 'mdi-account-group' },
+    { title: 'Oma Joukkue',  route: '/joukkueet/',   icon: 'mdi-account'}, // Add if-clause and id to route in place of use   
+    { title: 'Jatkosarja',   route: '/jatkosarja',   icon: 'mdi-bank' },
+    { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
+    { title: 'Info',         route: '/info',         icon: 'mdi-information-outline' }
+];
+
+/********** SIDEBAR Component **********/
+
+export const headersDefaultSideBar = [
+    { title: 'Joukkue', key: 'current_abbreviation',  sortable: false },
+    { title: 'O',       key: 'matches_played',        sortable: false,  tooltip: "Pelatut Ottelut"},
+    { title: 'V',       key: 'matches_won',           sortable: false,  tooltip: "Voitot"},
+    { title: 'T',       key: 'matches_tie',           sortable: false,  tooltip: "Tasapelit"},
+    { title: 'H',       key: 'matches_lost',          sortable: false,  tooltip: "Häviöt"},
+    { title: 'P',       key: 'points_total',          sortable: false,  tooltip: "Pisteet"},
+    { title: 'P/O',     key: 'points_average',        sortable: false,  tooltip: "Pistettä per Ottelu "},
+    { title: 'OKA',     key: 'match_average',         sortable: false,  tooltip: "Ottelu keskiarvo"}
+];
