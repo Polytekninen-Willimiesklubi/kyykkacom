@@ -128,7 +128,7 @@ if (!navStore.seasons.length) {
 
 <style>
 .v-toolbar__content {
-  overflow: visible;
+  overflow: visible !important;
 }
 
 a {
