@@ -40,23 +40,7 @@ import { useNavBarStore } from '@/stores/navbar.store';
 import { useTeamsStore } from '@/stores/teams.store';
 
 import { headersPlayoff } from '@/stores/headers'
-
-import cup_22 from '../tournament_templates/cup_template_22_teams.json';
-import cup_16 from '../tournament_templates/cup_template_16_teams.json';
-import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json';
-import cup_8 from '../tournament_templates/cup_template_8_teams.json';
-import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json';
-import cup_4 from '../tournament_templates/cup_template_4_teams.json';
-
-
-const seasons_mapping = {
-  1: cup_16,
-  2: cup_8,
-  3: cup_4,
-  4: cup_22,
-  5: cup_6,
-  6: cup_12
-};
+import { seasonsMappings } from '../tournament_templates/index.js';
 
 const rounds = ref([]);
 const first_round = ref(false);
@@ -75,7 +59,7 @@ navStore.getSeasons();
 watch(() => [matchesStore.loaded, teamStore.loaded, navStore.loaded], ([matchesReady, teamsReady, seasonsReady]) => {
   if (!matchesReady || !teamsReady || !navStore.selectedSeason.playoff_format) return;
 
-  const json = seasons_mapping[navStore.selectedSeason.playoff_format]
+  const json = seasonsMappings[navStore.selectedSeason.playoff_format]
   rounds.value = navStore.selectedSeason.no_brackets === 1 ? json.one_bracket : json.two_bracket;
   first.value = json.first_round
   first_round.value = !!first.value

@@ -1,25 +1,8 @@
 import { useNavBarStore } from "./navbar.store";
-
-import cup_22 from '../tournament_templates/cup_template_22_teams.json'
-import cup_16 from '../tournament_templates/cup_template_16_teams.json'
-import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json'
-import cup_8 from '../tournament_templates/cup_template_8_teams.json'
-import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json'
-import cup_4 from '../tournament_templates/cup_template_4_teams.json'
-import super_cup_15 from '../tournament_templates/super_cup_template_15_teams.json'
+import { seasonsMappings } from '../tournament_templates/index'
 
 const baseUrl = 'http://localhost:8000/api/superweekend/'; // TODO: change this to .env variable
 const teamUrl = 'http://localhost:8000/api/teams/';
-
-const seasons_mapping = {
-    1: cup_16,
-    2: cup_8,
-    3: cup_4,
-    4: cup_22,
-    5: cup_6,
-    6: cup_12,
-    7: super_cup_15
-}
 
 export const useSuperStore = defineStore('superweekend', () => {
     const noBrackets = ref(0);
@@ -67,12 +50,12 @@ export const useSuperStore = defineStore('superweekend', () => {
 
     const bracket = computed(() => {
         if (format.value === null) return [];
-        return seasons_mapping[format.value].one_bracket;
+        return seasonsMappings[format.value].one_bracket;
     })
 
     const playoffLines = computed(() => {
         if (!format.value) return [];
-        return seasons_mapping[format.value].playoffLines
+        return seasonsMappings[format.value].playoffLines
     })
 
     async function getData() {
@@ -86,12 +69,12 @@ export const useSuperStore = defineStore('superweekend', () => {
         noBrackets.value = payload.super_weekend_no_brackets;
         superId.value = payload.id
         format.value = payload.super_weekend_playoff_format;
-        if (!Object.keys(seasons_mapping).includes(format.value)) {
+        if (!Object.keys(seasonsMappings).includes(format.value)) {
             dataLoaded.value = true;
             return
         }
 
-        isBronze.value = seasons_mapping[format].bronze;
+        isBronze.value = seasonsMappings[format].bronze;
 
         dataLoaded.value = true;
     }

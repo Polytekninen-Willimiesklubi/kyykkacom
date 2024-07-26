@@ -22,6 +22,7 @@
         :loading="playerStore.loading"
         :search="search"
         no-data-text="Ei dataa :("
+        loading-text="Ladataan pelaajia..."
         items-per-page="-1"
         density="compact"
       >
@@ -57,8 +58,9 @@
 <script setup>
 import { usePlayerStore } from '@/stores/players.store';
 import { useTeamsStore } from '@/stores/teams.store'
-import { headerPlayers } from '@/stores/headers'
 import { useNavBarStore } from '@/stores/navbar.store';
+
+import { headerPlayers } from '@/stores/headers'
 
 const teamStore = useTeamsStore();
 const playerStore = usePlayerStore();

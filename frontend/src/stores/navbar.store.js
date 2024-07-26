@@ -1,22 +1,5 @@
 import { useTeamsStore } from "@/stores/teams.store";
-
-import cup_22 from '../tournament_templates/cup_template_22_teams.json';
-import cup_16 from '../tournament_templates/cup_template_16_teams.json';
-import cup_12 from '../tournament_templates/cup_seeded_template_12_teams.json';
-import cup_8 from '../tournament_templates/cup_template_8_teams.json';
-import cup_6 from '../tournament_templates/cup_seeded_template_6_teams.json';
-import cup_4 from '../tournament_templates/cup_template_4_teams.json';
-import super_cup_15 from '../tournament_templates/super_cup_template_15_teams.json';
-
-const seasons_mapping = {
-    1: cup_16,
-    2: cup_8,
-    3: cup_4,
-    4: cup_22,
-    5: cup_6,
-    6: cup_12,
-    7: super_cup_15
-}
+import { seasonsMappings } from "@/tournament_templates";
 
 const baseUrl = 'http://localhost:8000/api/seasons' // TODO: change this to .env variable
 
@@ -36,8 +19,8 @@ export const useNavBarStore = defineStore('navbar', () => {
 
     const playoffLines = computed(() => {
         if (playoffFormat.value === undefined) return [];
-        if (seasons_mapping[playoffFormat.value] == undefined) return [];
-        return seasons_mapping[playoffFormat.value].playoffLines
+        if (seasonsMappings[playoffFormat.value] == undefined) return [];
+        return seasonsMappings[playoffFormat.value].playoffLines
     })
 
     function setSelectedSeasonById(id) {

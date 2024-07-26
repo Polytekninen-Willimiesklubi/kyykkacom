@@ -1,5 +1,3 @@
-import { useAuthStore } from '@/stores/auth.store';
-import { getCookie, fetchNewToken } from '@/stores/auth.store';
 import { useNavBarStore } from "./navbar.store";
 
 // const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
