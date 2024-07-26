@@ -39,7 +39,7 @@ import { useMatchesStore } from '@/stores/matches.store';
 import { useNavBarStore } from '@/stores/navbar.store';
 import { useTeamsStore } from '@/stores/teams.store';
 
-import { headersPlayoff } from '@/stores/headers'
+import { headersPlayoff } from '@/stores/headers';
 import { seasonsMappings } from '../tournament_templates/index.js';
 
 const rounds = ref([]);
@@ -50,19 +50,22 @@ const load_ended = ref(false);
 
 const navStore = useNavBarStore();
 const matchesStore = useMatchesStore();
-const teamStore = useTeamsStore(); 
+const teamStore = useTeamsStore();
 
+if (!navStore.selectedSeason) {
+  navStore.getSeasons();
+}
 matchesStore.getMatches();
 teamStore.getTeams();
-navStore.getSeasons();
+
 
 watch(() => [matchesStore.loaded, teamStore.loaded, navStore.loaded], ([matchesReady, teamsReady, seasonsReady]) => {
   if (!matchesReady || !teamsReady || !navStore.selectedSeason.playoff_format) return;
 
   const json = seasonsMappings[navStore.selectedSeason.playoff_format]
   rounds.value = navStore.selectedSeason.no_brackets === 1 ? json.one_bracket : json.two_bracket;
-  first.value = json.first_round
-  first_round.value = !!first.value
+  first.value = json.first_round;
+  first_round.value = !!first.value;
   load_ended.value = true;
 })
 
