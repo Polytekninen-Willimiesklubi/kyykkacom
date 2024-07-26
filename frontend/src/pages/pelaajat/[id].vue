@@ -278,7 +278,7 @@ function chanceHeaderStat(val) {
   const head = val.target.innerText;
   const headers = [
     'Erät', 'Kyykät', 'Heitot', 'KPH', 
-    'kHP', 'Hauet', 'H%', 'Virkamiehet',
+    'kHP', 'Hauet', 'H%',
     'VM' ,'VM%', 'JK'
   ];
   const header_binds = [
