@@ -4,7 +4,7 @@
     <v-main class="content">
       <v-layout class="pa-10">
         <router-view class="pr-5"/>
-        <div class="d-flex right">
+        <div class="d-flex right align-self-start">
           <side-bar
             title="Runkosarja"
             :headers="headersDefaultSideBar"
