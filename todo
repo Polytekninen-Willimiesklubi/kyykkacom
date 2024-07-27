@@ -11,7 +11,7 @@
     - Pelaajalle oma profiili (iso muutos vaatii backend tukea)
     - Muokkaa matsien esittelytapaa niin, että heitot erottuvat selkeämmin
     - STYLE: chips color ei näy matseissa
-    - Heittotulosjakaumassa pitäisi olla vaihtoehto normalisoituun jakaumaan
+    - Heittotulosjakauma hauet ja nollat eroteltu "stackked bar" tyyppiseksi (HUOM tätä on tutkittu ja erittäin hankala toteuttaa chart.js)
     - 'Heittokeskiarvo heittopaikassa' voisi olla heittomäärä jotenkin näkyvissä per paikka
     - 'Heittokeskiarvo heittopaikan' statsit voisi olla näkyvissä yksittäin kausistatseissa
 

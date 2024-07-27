@@ -80,9 +80,14 @@
           <graph
             id="chart"
             title="Heittotuloksen jakauma"
-            :datasets="canvas1Data"
+            :datasets="normalizedSwitch ? canvas1Data : canvas1DataNormalized"
             :labels="['0', '1', '2', '3', '4', '5', '≥6']"
             type="bar"
+          />
+          <v-btn
+            class="mt-2"
+            @click="normalizedSwitch = !normalizedSwitch"
+            :text="normalizedSwitch ? '01' : '%'"
           />
         </v-col>
         <v-col cols="4">
@@ -224,6 +229,8 @@ const sortGamesSwitch = ref('Erittäin');
 const filterGamesSwitch = ref('Kaikki kaudet');
 const canvas2Labels = ref([]);
 const canvas1Data = ref([]);
+const canvas1DataNormalized = ref([]);
+const normalizedSwitch = ref(false);
 const canvas2Data = ref([]);
 const canvas3Data = ref([]);
 
@@ -333,17 +340,20 @@ function chanceSeason (value) {
   const clickedSeason =  value.target.tagName === "TD" 
     ? value.target.parentNode.children[0].innerText
     : value.target.children[0].innerText;
+
   if (currentSelection.includes(clickedSeason)) { // Remove clicked season from datas
+    
     let index = canvas1Data.value.map(e => e.label).indexOf('Kausi ' + clickedSeason);
     canvas1Data.value.splice(index, 1);
+    canvas1DataNormalized.value.splice(index, 1);
     canvas3Data.value.splice(index, 1); // Same index can be used to splice canvas3, because we always update both everywhere
-    
     canvas1Data.value = [...canvas1Data.value]; // To make it reactive, we must make new array
     canvas3Data.value = [...canvas3Data.value];
+    canvas1DataNormalized.value = [...canvas1DataNormalized.value]
 
     index = currentSelection.indexOf(clickedSeason);
     currentSelection.splice(index, 1);
-
+    
     index = colors.indexOf(clickedSeason);
     colors[index] = '';
     headerClassList.remove(styles[index]);
@@ -356,6 +366,31 @@ function chanceSeason (value) {
     colors[index] = clickedSeason;
     const color = allColors[index];
     headerClassList.add(styles[index]);
+
+    const totalThrow = selected_season.zeros_total 
+                      + selected_season.pikes_total 
+                      + selected_season.ones_total 
+                      + selected_season.twos_total
+                      + selected_season.threes_total
+                      + selected_season.fours_total
+                      + selected_season.fives_total
+                      + selected_season.gteSix_total
+
+    canvas1DataNormalized.value = [ ...canvas1DataNormalized.value,
+      {
+        label: 'Kausi ' + selected_season.season,
+        backgroundColor: color,
+        data: [
+          Math.round((selected_season.zeros_total + selected_season.pikes_total) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.ones_total) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.twos_total) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.threes_total) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.fours_total) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.fives_total) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.gteSix_total) / totalThrow * 100 * 100 ) / 100,
+        ]
+      }
+    ];
 
     canvas1Data.value = [ ...canvas1Data.value,  // To make it reactive, we must make new array
       {
@@ -371,7 +406,7 @@ function chanceSeason (value) {
           selected_season.gteSix_total
         ]
       }
-    ]
+    ];
 
     canvas3Data.value = [ ...canvas3Data.value,  // To make it reactive, we must make new array
       {  
@@ -419,6 +454,29 @@ watch(() => playerStore.loadedData, () => {
     currentSelection.push(seasonString);
     colors[0] = seasonString;
     columnCurrentSelection.push('KPH');
+
+    const totalThrow = currentSelcSeason.zeros_total 
+                      + currentSelcSeason.pikes_total 
+                      + currentSelcSeason.ones_total 
+                      + currentSelcSeason.twos_total
+                      + currentSelcSeason.threes_total
+                      + currentSelcSeason.fours_total
+                      + currentSelcSeason.fives_total
+                      + currentSelcSeason.gteSix_total
+
+    const init1Normalized = {
+      label: 'Kausi ' + currentSelcSeason.season,
+      backgroundColor: '#B3E5FC',
+      data: [
+        Math.round((currentSelcSeason.zeros_total + currentSelcSeason.pikes_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.ones_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.twos_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.threes_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.fours_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.fives_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.gteSix_total) / totalThrow * 100 * 100 ) / 100,
+      ]
+    };
   
     const init1 = {
       label: 'Kausi ' + currentSelcSeason.season,
