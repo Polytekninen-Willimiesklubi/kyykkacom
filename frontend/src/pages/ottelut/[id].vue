@@ -30,7 +30,7 @@
                 >
                   <v-chip
                     :color="`${getColor(matchData.home_score_total,
-                      matchData.away_score_total)} lighten-2`"
+                      matchData.away_score_total)}`"
                     :text=String(matchData.home_score_total)
                   />
                 </figcaption>
@@ -60,8 +60,8 @@
                   v-if="matchData.home_score_total"
                 >
                   <v-chip
-                    :color="`${getColor(matchData.away_score_total,
-                      matchData.home_score_total)} lighten-2`"
+                    :color="getColor(matchData.away_score_total,
+                      matchData.home_score_total)"
                     :text=String(matchData.away_score_total)
                   />
                 </figcaption>
@@ -160,11 +160,11 @@ matchStore.getMatchData(route.params.id);
  */
 function getColor(teamScore, team2Score) {
   if (teamScore < team2Score) {
-    return 'green';
+    return 'green-accent-4';
   } else if (teamScore > team2Score) {
-    return 'red';
+    return 'red-accent-4';
   } else {
-    return 'yellow';
+    return 'yellow-accent-4';
   }
 }
 

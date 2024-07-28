@@ -1,8 +1,7 @@
 <template>
   <v-app-bar
     style="z-index:2;" 
-    color="grey darken-3"
-    dark
+    color="grey-darken-3"
   >
     <router-link
       to="/"

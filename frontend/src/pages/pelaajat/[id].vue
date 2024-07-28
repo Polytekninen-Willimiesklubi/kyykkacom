@@ -275,9 +275,9 @@ function handleRedirect(value, row) {
 }
 
 function getColor (val1, val2) {
-  if (val1 < val2) return '#C8E6C9'; // green-lighten-4
-  else if (val1 > val2) return '#EF9A9A'; // red-lighten-4
-  else return '#F0F4C3'; // yellow-lighten-4
+  if (val1 < val2) return 'green-accent-4';
+  else if (val1 > val2) return 'red-accent-4';
+  else return 'yellow-accent-4';
 }
 
 function chanceHeaderStat(val) {
