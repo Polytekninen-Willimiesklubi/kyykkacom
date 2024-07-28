@@ -11,7 +11,11 @@
         indexAxis: horizontal,
         scales: {
           y: {
-            beginAtZero: true
+            beginAtZero: true,
+            title: {
+              display: (props.yLabel !== undefined),
+              text: props.yLabel,
+            }
           }
         },
         plugins:{
@@ -66,7 +70,8 @@ const props = defineProps({
     default: false,
   },
   type: String,
-  datasets: Array
+  datasets: Array,
+  yLabel: String,
 })
 
 const horizontal = computed(() => {

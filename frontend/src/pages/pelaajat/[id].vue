@@ -80,14 +80,15 @@
           <graph
             id="chart"
             title="Heittotuloksen jakauma"
-            :datasets="normalizedSwitch ? canvas1Data : canvas1DataNormalized"
+            :datasets="normalizedSwitch ? canvas1DataNormalized : canvas1Data"
             :labels="['0', '1', '2', '3', '4', '5', '≥6']"
+            :yLabel="normalizedSwitch ? '%' : 'Kyykkää'"
             type="bar"
           />
           <v-btn
             class="mt-2"
             @click="normalizedSwitch = !normalizedSwitch"
-            :text="normalizedSwitch ? '01' : '%'"
+            :text="normalizedSwitch ? '%' : '01'"
           />
         </v-col>
         <v-col cols="4">
@@ -106,6 +107,7 @@
             :datasets="canvas3Data"
             :labels="['1', '2', '3', '4']"
             :horizontal=true
+            yLabel="Heittopaikka"
             type="bar"
           />
         </v-col>
@@ -513,6 +515,7 @@ watch(() => playerStore.loadedData, () => {
         currentSelcSeason.average_score_position_four
       ]
     };
+    canvas1DataNormalized.value = [init1Normalized]
     canvas1Data.value = [init1];
     canvas2Data.value = [init2];
     canvas3Data.value = [init3];
