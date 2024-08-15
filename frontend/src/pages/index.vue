@@ -15,6 +15,7 @@
     <div v-for="news in all_news">
       <NewsBox
         class="mb-5"
+        :writer="news.kirjoittaja"
         :title="news.otsikko"
         :text="news.text"
         :pvm="news.pvm"
