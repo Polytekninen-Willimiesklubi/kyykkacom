@@ -8,7 +8,7 @@
 				<v-spacer />
 				<v-col class="">
           <div class="d-flex justify-end">
-            <span class="text-h5 ">{{ props.pvm }}</span>
+            <span class="text-h5 ">{{ date.formatByString(date.date(props.date), 'dd.MM.yyyy') }}</span>
 					</div>
 				</v-col>
 			</v-row>
@@ -18,12 +18,12 @@
       <span>{{ props.writer }}</span>
     </template>
 	<div class="ma-5">
-		<span v-html="vipu ? props.text : jotain()"></span>
+		<span v-html="showAll ? props.text : jotain()"></span>
 		<a 
-			@click="vipu =  !vipu"
+			@click="showAll =  !showAll"
       class="more"
 		>
-      {{vipu ? "Näytä vähemmän" : "Näytä enemmän"}}
+      {{showAll ? "Näytä vähemmän" : "Näytä enemmän"}}
     </a>
 	</div>
 	</v-card>
@@ -31,18 +31,22 @@
 
 <script setup>
 
+import { useDate } from 'vuetify';
+
 const props = defineProps({
 	title: String,
 	text: String,
 	writer: String,
-	pvm: String,
+	date: String,
 });
+
+const date = useDate();
 
 const jotain = () => {
 	return props.text.split(" ").slice(0, 150).join(" ") + "...."
 }
 
-const vipu = ref(false);
+const showAll = ref(false);
 
 </script>
 

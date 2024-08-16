@@ -151,6 +151,7 @@ class Throw(models.Model):
 
 class News(models.Model):
     header = models.TextField()
+    writer = models.TextField()
     date = models.DateTimeField()
     text = models.TextField()
 

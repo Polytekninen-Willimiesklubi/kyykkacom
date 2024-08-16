@@ -36,6 +36,10 @@ export const useAuthStore = defineStore('auth', () => {
         return roleId.value === 1;
     });
 
+    const isSuperUser = computed(() => {
+        return roleId.value === 2;
+    })
+
     async function logIn(again=false) {
         alert.value = false;
         try {
@@ -134,6 +138,7 @@ export const useAuthStore = defineStore('auth', () => {
         alert,
         credentials,
         isCaptain,
+        isSuperUser,
         logIn,
         logOut,
         changeLogin,

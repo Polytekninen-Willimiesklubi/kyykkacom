@@ -43,7 +43,9 @@ def getPostseason(request):
 
 def getRole(user):
     try:
-        if user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain:
+        if user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_superuser:
+            role = '2'
+        elif user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain:
             role = '1'
         else:
             role = '0'
@@ -492,7 +494,6 @@ class KyykkaAdminMatchViewSet(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         try:
-
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -513,3 +514,23 @@ class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
+    
+class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
+    serializer_class = NewsSerializer
+    queryset = News.objects.all()
+
+    def get(self, request):
+        serializer = NewsSerializer(self.queryset, many=True)
+        return Response(serializer.data)
+    
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+    
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        success, message = serializer.save()
+        return Response({
+            'success': success,
+            'message': message,
+        })

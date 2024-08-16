@@ -8,14 +8,13 @@
 import vuetify from './vuetify';
 import pinia from '@/stores';
 import router from '@/router';
-import PrimeVue from 'primevue/config';
-import Editor from 'primevue/editor';
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 export function registerPlugins (app) {
   app
     .use(vuetify)
     .use(router)
     .use(pinia)
-    .use(PrimeVue)
-    .component('Editor', Editor)
+    .component('QuillEditor', QuillEditor)
 }

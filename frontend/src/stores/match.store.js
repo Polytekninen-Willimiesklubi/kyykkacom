@@ -36,9 +36,9 @@ export const useMatchStore = defineStore('match', () => {
         const requestOpt = {
             'method': 'POST',
             'headers': {
-                'X-CSRFToken': getCookie('csrftoken')
+                'X-CSRFToken': getCookie('csrftoken'),
+                'content-type': 'application/json',
             },
-            'content-type': 'application/json',
             'body': JSON.stringify({ is_validated : true }),
             withCredentials: true,
         };
