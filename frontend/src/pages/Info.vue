@@ -28,7 +28,7 @@
       <VuePdfEmbed 
         source="saannot_2024.pdf" 
         download="saannot_2024.pdf"
-        
+        :page="page"
         @loaded="(obj) => {pageCount = obj.numPages; page = 1;console.log(pageCount)}"
       />
     </v-col>

@@ -20,6 +20,7 @@
         v-if="item.title === 'Info'"
         :to="item.route"
         class="hidden-md-and-down"
+        append-icon="mdi-menu-down"
       >
         {{ item.title }}
         <v-menu
@@ -29,10 +30,16 @@
         >
           <v-list bg-color="grey-darken-3">
             <v-list-item>
-              <v-btn variant="text" text="joukkueet" to="/joukkueet"/>
+              <v-btn block variant="text" text="yleisiä ohjeita" to="/"/>
             </v-list-item>
             <v-list-item>
-              <v-btn variant="text" text="pelaajat" to="/pelaajat"/>
+              <v-btn block variant="text" text="säännöt" to="/"/>
+            </v-list-item>
+            <v-list-item>
+              <v-btn block variant="text" text="hall-of-fame" to="/"/>
+            </v-list-item>
+            <v-list-item>
+              <v-btn block variant="text" text="Muualla kyykkää" to="/"/>
             </v-list-item>
           </v-list>
         </v-menu>
