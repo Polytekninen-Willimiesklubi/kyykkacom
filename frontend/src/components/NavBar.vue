@@ -15,11 +15,33 @@
     </router-link>
 
     <template v-for="item in headersNavBar">
+      
+      <v-btn
+        v-if="item.title === 'Info'"
+        :to="item.route"
+        class="hidden-md-and-down"
+      >
+        {{ item.title }}
+        <v-menu
+          activator="parent"
+          :open-on-hover="true"
+          color="grey-darken-3"
+        >
+          <v-list bg-color="grey-darken-3">
+            <v-list-item>
+              <v-btn variant="text" text="joukkueet" to="/joukkueet"/>
+            </v-list-item>
+            <v-list-item>
+              <v-btn variant="text" text="pelaajat" to="/pelaajat"/>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-btn>
       <v-btn 
         class="hidden-md-and-down"
         :text="item.title"
         :to=item.route
-        v-if="item.if_clause === undefined && 
+        v-else-if="item.if_clause === undefined && 
         item.title != 'Koti' || item.if_clause"
       />
     </template>
