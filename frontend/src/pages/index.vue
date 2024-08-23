@@ -39,7 +39,7 @@
       </div>
     </div>
     <!-- <h1>Nationaali Kyykkä Liiga</h1> -->
-    <div v-for="news in all_news">
+    <div v-for="news in all_news.slice(2*(newsPage-1), 2*newsPage >= all_news.length ? undefined : 2*newsPage )">
       <NewsBox
         class="mb-5"
         :writer="news.writer"
@@ -48,6 +48,9 @@
         :date="news.date"
       />
     </div>
+    <v-card>
+      <v-pagination variant="outlined" :length="totalNewsPages" v-model="newsPage"/>
+    </v-card>
   </div>
 </template>
 
@@ -63,6 +66,8 @@ const newsText = ref('');
 const headline = ref('');
 const writer = ref('');
 
+const newsPage = ref(1);
+const totalNewsPages = ref(1);
 
 const response = await fetch("http://localhost:8000/api/news/", {'method': 'GET',});
 const payload = await response.json();
@@ -71,6 +76,8 @@ const all_news = payload.sort((a, b) => {
   return new Date(b.date) - new Date(a.date)
 })
 
+totalNewsPages.value = Math.ceil(all_news.length / 2)
+console.log(totalNewsPages.value);
 async function save() {
   const date = new Date();
   const day = date.getDate();
