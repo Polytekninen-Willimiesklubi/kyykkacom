@@ -13,7 +13,7 @@
                     <v-row>
                         <v-col cols="5">
                             <simple-table
-                                title="NKL TOP 4"
+                                title="Liiga mestaruus"
                                 :headers="headersHof"
                                 :items="data"
                             />
@@ -27,21 +27,21 @@
                         </v-col>
                         <v-col cols="3">
                             <simple-table
-                                title="NKL Runkosarja"
+                                title="Runkosarjan Voittaja"
                                 :headers="headersHof.slice(0,2)"
                                 :items="brackerWinners"
                             />
                         </v-col>
                         <v-col cols="5">
                             <simple-table
-                                title="NKL Henkkaricup"
+                                title="Henkkaricup"
                                 :headers="headersHof.slice(0,3)"
                                 :items="singleWinner"
                             />
                         </v-col>
                         <v-col cols="4">
                             <simple-table
-                                title="NKL Pariliiga"
+                                title="Parikyykkä liiga"
                                 :headers="headersHof.slice(0,3)"
                                 :items="pairWinners"
                             />
