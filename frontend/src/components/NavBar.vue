@@ -30,16 +30,16 @@
         >
           <v-list bg-color="grey-darken-3">
             <v-list-item>
-              <v-btn block variant="text" text="yleisiä ohjeita" to="/"/>
+              <v-btn block variant="text" text="yleisiä ohjeita" to="/info/yleista"/>
             </v-list-item>
             <v-list-item>
-              <v-btn block variant="text" text="säännöt" to="/"/>
+              <v-btn block variant="text" text="säännöt" to="/info/saannot"/>
             </v-list-item>
             <v-list-item>
-              <v-btn block variant="text" text="hall-of-fame" to="/"/>
+              <v-btn block variant="text" text="hall-of-fame" to="/info/hof"/>
             </v-list-item>
             <v-list-item>
-              <v-btn block variant="text" text="Muualla kyykkää" to="/"/>
+              <v-btn block variant="text" text="Muualla kyykkää" to="/info/links"/>
             </v-list-item>
           </v-list>
         </v-menu>
