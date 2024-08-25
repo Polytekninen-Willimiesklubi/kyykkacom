@@ -27,13 +27,12 @@
     />
   </div>
 </template>
-<route>
-{
-  meta: {
+
+<route lang="yaml">
+  meta:
     layout: "withoutSidebar"
-  }
-}
 </route>
+
 <script setup>
 import { useMatchesStore } from '@/stores/matches.store';
 import { useNavBarStore } from '@/stores/navbar.store';
