@@ -278,3 +278,16 @@ export const headersDefaultSideBar = [
     { title: 'P/O',     key: 'points_average',        sortable: false,  tooltip: "Pistettä per Ottelu "},
     { title: 'OKA',     key: 'match_average',         sortable: false,  tooltip: "Ottelu keskiarvo"}
 ];
+
+export const headersHof = [
+    { title: 'Kausi', key: 'year', align: 'center', sortable: false},
+    { title: '🏆', key: 'first', align: 'center', sortable: false, tooltip: '1. Sija'},
+    { title: '🥈', key: 'second', align: 'center', sortable: false, tooltip: '2. Sija'},
+    { title: '🥉', key: 'third', align: 'center', sortable: false, tooltip: '3. Sija'},
+    { title: '4.Sija', key: 'fourth', align: 'center', sortable: false},
+];
+
+export const headerHofPerson = [
+    {title: 'Vuosi', key: 'year', align:'center'}, 
+    {title: 'Nimi', key: 'name', align: 'center'},
+]
