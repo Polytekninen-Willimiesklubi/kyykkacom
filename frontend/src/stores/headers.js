@@ -279,6 +279,9 @@ export const headersDefaultSideBar = [
     { title: 'OKA',     key: 'match_average',         sortable: false,  tooltip: "Ottelu keskiarvo"}
 ];
 
+/********** Hall-of-fame Page **********/
+
+
 export const headersHof = [
     { title: 'Kausi', key: 'year', align: 'center', sortable: false},
     { title: '🏆', key: 'first', align: 'center', sortable: false, tooltip: '1. Sija'},
@@ -290,4 +293,10 @@ export const headersHof = [
 export const headerHofPerson = [
     {title: 'Vuosi', key: 'year', align:'center'}, 
     {title: 'Nimi', key: 'name', align: 'center'},
+]
+
+export const headerHofMisc = [
+    {title: 'Vuosi', key: 'year', align:'center'},
+    {title: 'Palkinto', key: 'name', align:'center'}, 
+    {title: 'Nimi', key: 'person', align: 'center'},
 ]
