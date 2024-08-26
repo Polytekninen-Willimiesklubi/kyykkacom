@@ -148,7 +148,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2020, 'name' : "?"},
         {'year': 2019, 'name' : "?"},
         {'year': 2018, 'name' : "?"},
-        {'year': 2017, 'name' : "?"},
+        {'year': 2017, 'name' : "Kuisma Närhi"},
         {'year': 2016, 'name' : "?"},
         {'year': 2015, 'name' : "?"},
         {'year': 2014, 'name' : "Harri Renkonen"},
@@ -176,7 +176,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2020, 'name' : "?"},
         {'year' : 2019, 'name' : "?"},
         {'year' : 2018, 'name' : "?"},
-        {'year' : 2017, 'name' : "?"},
+        {'year' : 2017, 'name' : "Jesse Meuronen"},
         {'year' : 2016, 'name' : "?"},
         {'year' : 2015, 'name' : "?"},
         {'year' : 2014, 'name' : "Anssi Tura"},
@@ -204,7 +204,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2020, 'name' : "?"},
         {'year' : 2019, 'name' : "?"},
         {'year' : 2018, 'name' : "?"},
-        {'year' : 2017, 'name' : "?"},
+        {'year' : 2017, 'name' : "Mikko 'Temmi' Kuusio"},
         {'year' : 2016, 'name' : "?"},
         {'year' : 2015, 'name' : "?"},
         {'year' : 2014, 'name' : "Petteri Westerholm"},
@@ -249,7 +249,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2020, 'name' : "?"},
         {'year' : 2019, 'name' : "?"},
         {'year' : 2018, 'name' : "?"},
-        {'year' : 2017, 'name' : "?"},
+        {'year' : 2017, 'name' : "Armi Rissanen"},
         {'year' : 2016, 'name' : "?"},
         {'year' : 2015, 'name' : "?"},
         {'year' : 2014, 'name' : "Tiina Viitanen"},
@@ -267,7 +267,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2020, 'name' : "?"},
         {'year' : 2019, 'name' : "?"},
         {'year' : 2018, 'name' : "?"},
-        {'year' : 2017, 'name' : "?"},
+        {'year' : 2017, 'name' : "Ville Kytömäki"},
         {'year' : 2016, 'name' : "?"},
         {'year' : 2015, 'name' : "?"},
         {'year' : 2014, 'name' : "Petteri Westerholm"},
@@ -295,7 +295,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2020, 'name' : "?"},
         {'year' : 2019, 'name' : "?"},
         {'year' : 2018, 'name' : "?"},
-        {'year' : 2017, 'name' : "?"},
+        {'year' : 2017, 'name' : "Petteri Westerholm"},
         {'year' : 2016, 'name' : "?"},
         {'year' : 2015, 'name' : "?"},
         {'year' : 2014, 'name' : "Petteri Westerholm"},
@@ -323,7 +323,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2020, 'name' : "?"},
         {'year' : 2019, 'name' : "?"},
         {'year' : 2018, 'name' : "?"},
-        {'year' : 2017, 'name' : "?"},
+        {'year' : 2017, 'name' : "Elmo Pärssinen"},
         {'year' : 2016, 'name' : "?"},
         {'year' : 2015, 'name' : "?"},
         {'year' : 2014, 'name' : "Niko Strömberg"},
@@ -367,6 +367,29 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2004, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Jussi Ahonen'}
     ]);
 
+    const sm = ref([
+        {'year': 2024, 'first' : 'MaHaLasKu', 'second' : 'DiSKO' },
+        {'year': 2023, 'first' : 'MaHaLasKu', 'second' : 'VSOP' },
+        {'year': 2022, 'first' : 'Booga', 'second' : "MaHaLasKu" },
+        {'year': 2021, 'first' : 'MaHaLasKu', 'second' : "Ei" },
+        {'year': 2020, 'first' : 'MaHaLasKu', 'second': "Ei (?)"},
+    ]);
+
+    const stars = ref([
+        {'year': 2024, 'first' : 'TBA', 'second' : 'TBA' },
+        {'year': 2023, 'first' : '⭐ Totti Sillanpää, Juho Sallasmaa', 'second' : '⭐ lassi onne, Veeti Sistonen' },
+        {'year': 2022, 'first' : '⭐ Sami Valjakka, Antti Koivulahti', 'second' : '⭐ Jarno Mikkola, Katja Rossi' },
+        {'year': 2021, 'first' : '⭐ Elmo Pärssinen, Outi Jaakkola', 'second' : '⭐ Jarno Mikkola, Vilma Rantanen' },
+        {'year': 2020, 'first' : '⭐ lassi onne, Markus Laitinen', 'second' : '⭐ Heikki Lohilahti, Juho Hautaniemi' },
+        {'year': 2019, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2018, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2017, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2016, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2015, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2014, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2013, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+    ])
+
     return {
         championship,
         superData,
@@ -385,6 +408,8 @@ export const useHofStore = defineStore('hof', () => {
         rookie,
         tree,
         misc,
+        sm,
+        stars
     }
 
 })
