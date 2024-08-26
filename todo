@@ -29,3 +29,6 @@ Muuta:
     - Piniat 'matches.store.js' ja 'match.store.js' voisi yhdistää
     - fetchWrapper kaikille fetcheille poistaisi todella paljon koodia
     - username api tarkistus rekistiröinnille
+
+Hall-of-fame:
+    -Tee joukkue nimistä yms. hyperlinkkejä

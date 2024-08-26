@@ -43,7 +43,7 @@
                     </v-row>
                 </v-tabs-window-item>
                 <v-tabs-window-item value="three">
-                    <v-card title="Informaatiota palkinnoista">
+                    <v-card>
                        <v-list lines="three">
                             <template v-for="i in info">
                                 <v-list-item
@@ -61,15 +61,6 @@
                             </template>
                        </v-list>
                     </v-card>
-                    <!-- <v-row>
-                        <v-col>
-                            <simple-table
-                                title="NKL Pariliiga"
-                                :headers="[{title: 'Vuosi', key: 'year'}, {title: 'Nimi', key: 'name'}]"
-                                :items="jaskanKarttu"
-                            />
-                        </v-col>
-                    </v-row> -->
                 </v-tabs-window-item>
             </v-tabs-window>
         </v-col>
@@ -117,10 +108,10 @@ const info = [
     {title: "Runkosarja Voittaja", subtitle: "Joukkue joka voittaa NKL runkosarjan jaetaan SEFE-malja. Joukkueen nimen lisäksi jalustaan kirjoitetaan myös joukkueen pelaajien nimet. Runkosarja on ollut joskus jaettuna kahteen eri lohkoon (-21, -23 ja -24), jolloin lohkon voittajien välillä on ollut 'Runkosarjafinaali', jonka voittaja on julistettu runkosarjan voittajaksi. SEFE-malja on ollut kierrossa ainakin vuodesta 2007 lähtien."},
     {title: "HenkkariCup", subtitle: "Tavallisesti NKL pudotuspelien lähettyvillä on pelattu HenkkariCup- turnaus. Nimensä veroisesti peli pelataan henkilökohtaisena pelinä, missä joukkue-kentän 20 tornin sijaan keskellä on 10 tornia ja per erä pelaajalla on käytettävissä 20 heittoa. Henkkaricup- turnaukseen osallistumisperuste vaihtelee vuosittain, usein henkkaria on pitänyt pelata ELO muotoisena x-määrän, joskus turnaukseen pääsee vain ilmottautumalla. Pokaaliin kirjoitetaan voittajan nimi. Turnaus on järjestetty 2010 lähtien. Turnaus on jäänyt järjestämättä kausina -15, -16 ja -21 (Korona)."},
     {title: "Parikyykkäliiga", subtitle: "Syksyllä pelattava Parikyykkäliiga pelataan henkkarimuotoisena kentän kyykkien osalta, mutta paripelinä. Pudotuspeli vaiheen voittajalle jaetaan Apila-pokaali. Apila-pokaalin kiertoon lahjoitti lassi onne. Liiga on järjestty vuodesta 2022 lähtien."},
-    {title: "Kyykkä Tähtien Kanssa", subtitle: "Kevytmielisempi-turnaus, missä NKL pelaaja ja NKL pelaamaton (fuksi) pelaavat parina. Järjestetään Syksyisin. Järjestty jo kauan."},
+    {title: "Kyykkä Tähtien Kanssa", subtitle: "Kevytmielisempi turnaus, missä NKL pelaaja ja NKL pelaamaton (fuksi) pelaavat parina. Järjestetään Syksyisin. Järjestty jo kauan."},
     {title: "SM-Kyykkä", subtitle: "Wappuna järjestettävä joukkuemuotoinen turnaus. 'S' nimessä viittaa Skinnarilaan, ei Suomeen. Kilpailu on järjestty ainakin vuodesta 2014. Tarkkaa vuotta ei nyt koodaja itse tiedä."},
     
-    {title: "Jaskan Karttu", subtitle: "Myönnettään henkilölle, joka on tehnyt jotain merkittävää lappeen Rantalaisen kyykän edistämiseksi. Kyseessä ei ole lähtökohtaisesti vuosittain jaettava palkinto.", hyperlink: "Jaskan muistolle", ref: "/info/jaska"},
+    {title: "Jaskan Karttu", subtitle: "Myönnettään henkilölle, joka on tehnyt jotain merkittävää lappeen Rantalaisen kyykän edistämiseksi. Kyseessä ei ole lähtökohtaisesti vuosittain jaettava palkinto. ", hyperlink: "Jaskan muistolle", ref: "/info/jaska"},
     {title: "KCK-Ahti - Pysti", subtitle: "Palkinto jaetaan vuosittain sellaiselle pelaajalle, joka päättyvän kauden aikana on huomionarvoisasti vaikuttanut edustamansa liigassa pelaavan joukkueen menestykseen erittäin jalolla haukienheiton saralla. Mitä kriittisemmässä paikassa, sitä parempi. ", hyperlink: "Julkilausuma", ref: '/info/ahti'},
     {title: "Vuoden kyykkääjä", subtitle: "Pelaaja, joka on osoittanut kauden aikana parasta urheiluhenkeä ja herrasmiesmäistä käytöstä yhdistettynä pelin hyvään tasoon"},
     {title: "Haukikuningas/-tar", subtitle: "Runsaasti tai erittäin runsaasti haukia kauden aikana heittänyt henkilö."},

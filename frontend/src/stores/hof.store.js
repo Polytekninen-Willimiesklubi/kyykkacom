@@ -45,7 +45,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2016, 'first' : 'Dra', 'second' : "?" },
         {'year': 2015, 'first' : 'Dra', 'second' : "?" },
         {'year': 2014, 'first' : 'ASS', 'second': 'GPK', 'third': 'VajaKK', 'fourth': 'MINT'},
-        {'year': 2013, 'first' : '?', 'second': '?', },
+        {'year': 2013, 'first' : 'Panikkosnaikkos', 'second': 'ASS', 'third': 'GPK', 'fourth': 'TS'},
         {'year': 2012, 'first' : '?', 'second': '?'},
         {'year': 2011, 'first' : 'ASS', 'second': 'HeMi'},
         {'year': 2010, 'first' : '?', 'second': '?'},
@@ -93,7 +93,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2017, 'first' : 'Ville Kytömäki', 'second': "?" },
         {'year': 2016, 'first' : '-', 'second': "-" },
         {'year': 2015, 'first' : '-', 'second': "-" },
-        {'year': 2014, 'first' : 'Juha Varis', 'second': "Petteri Westerholm (?)" },
+        {'year': 2014, 'first' : 'Juha Varis', 'second': "Petteri Westerholm", 'third': "Tiina Viitanen" },
         {'year': 2013, 'first' : 'Petteri Westerholm', 'second': "Anssi Tura (?)" },
         {'year': 2012, 'first' : 'Petteri Westerholm', 'second': "Juha Varis (?)" },
         {'year': 2011, 'first' : 'Petteri Westerholm', 'second': "?" },
@@ -382,12 +382,13 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2021, 'first' : '⭐ Elmo Pärssinen, Outi Jaakkola', 'second' : '⭐ Jarno Mikkola, Vilma Rantanen' },
         {'year': 2020, 'first' : '⭐ lassi onne, Markus Laitinen', 'second' : '⭐ Heikki Lohilahti, Juho Hautaniemi' },
         {'year': 2019, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
-        {'year': 2018, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2018, 'first' : '⭐ Elmo Pärssinen, Hanno Brander', 'second' : '⭐ ?, ?' },
         {'year': 2017, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
-        {'year': 2016, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2016, 'first' : '⭐ Petri Manninen, Elmo Pärssinen', 'second' : '⭐ ?, ?' },
         {'year': 2015, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
         {'year': 2014, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
         {'year': 2013, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
+        {'year': 2012, 'first' : '⭐ ?, ?', 'second' : '⭐ ?, ?' },
     ])
 
     return {
