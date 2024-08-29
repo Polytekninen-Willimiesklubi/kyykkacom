@@ -3,7 +3,8 @@
         :title="props.title"
         class="ma-5" 
         style="align-self: start;"
-    >        
+    >
+
         <v-data-table
             mobile-breakpoint="0"
             class="hof_table"
@@ -27,7 +28,7 @@
                     </template>
                 </tr>
             </template>
-            <template #bottom></template>
+            <template #bottom><slot name="bottom_legend"></slot></template>
         </v-data-table>
     </v-card>
 </template>

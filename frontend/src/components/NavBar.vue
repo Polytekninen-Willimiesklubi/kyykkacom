@@ -18,7 +18,6 @@
       
       <v-btn
         v-if="item.title === 'Info'"
-        :to="item.route"
         class="hidden-md-and-down"
         append-icon="mdi-menu-down"
       >

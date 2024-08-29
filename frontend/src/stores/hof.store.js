@@ -79,6 +79,13 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2009, 'first' : 'LMTVO' },
         {'year': 2008, 'first' : 'LMTVO' },
         {'year': 2007, 'first' : 'Dra' },
+        {'year': 2006, 'first' : 'ITKK*' },
+        {'year': 2005, 'first' : 'Dra*' },
+        {'year': 2004, 'first' : 'Dra*' },
+        {'year': 2003, 'first' : 'Dra*' },
+        {'year': 2002, 'first' : 'LMTVO*' },
+        {'year': 2001, 'first' : 'ITKK99*' },
+        {'year': 2000, 'first' : 'KCK / TPNMP*✞' },
     ]);
     
 
@@ -373,6 +380,14 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2022, 'first' : 'Booga', 'second' : "MaHaLasKu" },
         {'year': 2021, 'first' : 'MaHaLasKu', 'second' : "Ei" },
         {'year': 2020, 'first' : 'MaHaLasKu', 'second': "Ei (?)"},
+        {'year': 2019, 'first' : '?', 'second': "?"},
+        {'year': 2018, 'first' : '?', 'second': "?"},
+        {'year': 2017, 'first' : '?', 'second': "?"},
+        {'year': 2016, 'first' : '?', 'second': "?"},
+        {'year': 2015, 'first' : '?', 'second': "?"},
+        {'year': 2014, 'first' : '?', 'second': "?"},
+        {'year': 2013, 'first' : '?', 'second': "?"},
+
     ]);
 
     const stars = ref([
