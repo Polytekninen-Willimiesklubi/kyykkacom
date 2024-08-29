@@ -10,11 +10,12 @@
         />
     </v-card>
 </template>
-<!-- 
+
 <route lang="yaml">
     meta:
         layout: "withoutSidebar"
-</route> -->
+</route>
+
 
 <script setup>
 import VuePdfEmbed from 'vue-pdf-embed';

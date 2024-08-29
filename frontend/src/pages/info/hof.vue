@@ -77,9 +77,10 @@
     </v-row>
 
 </template>
+
 <route lang="yaml">
-meta:
-    layout: "withoutSidebar"
+    meta:
+        layout: "default"
 </route>
 
 <script setup>
