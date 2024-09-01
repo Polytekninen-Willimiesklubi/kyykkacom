@@ -7,9 +7,9 @@ from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_protect
 from django.utils.decorators import method_decorator
-from kyykka.models import (CurrentSeason, Match, Player, PlayersInTeam, Season, Team, 
+from backend.models import (CurrentSeason, Match, Player, PlayersInTeam, Season, Team, 
                            TeamsInSeason, Throw, User)
-from kyykka.serializers import *
+from backend.serializers import *
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated

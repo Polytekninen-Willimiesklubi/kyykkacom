@@ -3,7 +3,7 @@
 
 import csv, datetime
 from django.db import transaction
-from kyykka.models import Team, Match, CurrentSeason, TeamsInSeason
+from backend.models import Team, Match, CurrentSeason, TeamsInSeason
 
 def test_import():
     c = CurrentSeason.objects.first()

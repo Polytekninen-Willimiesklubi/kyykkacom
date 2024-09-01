@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from kyykka.models import SuperWeekend, Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, Player, TeamsInSeason, News
+from backend.models import SuperWeekend, Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, Player, TeamsInSeason, News
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.db.models import Count, Sum, F, Q, Case, Value, When, IntegerField

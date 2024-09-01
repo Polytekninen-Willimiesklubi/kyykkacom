@@ -4,7 +4,7 @@
 import csv
 from django.contrib.auth.models import User
 from django.db import transaction
-from kyykka.models import Team, PlayersInTeam, CurrentSeason, Season, Player
+from backend.models import Team, PlayersInTeam, CurrentSeason, Season, Player
 
 
 def murmeli():

@@ -25,6 +25,11 @@ CACHES = {
 INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
 MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
 
+CORS_ORIGIN_ALLOW_ALL=True
+CORS_ORIGIN_WHITELIST = ["localhost"]
+
+CORS_ALLOW_CREDENTIALS = True
+
 ADMINS = [('Ville', 'ville@rauko.la')]
 MAILER_LIST = ['vilde70@gmail.com']
 EMAIL_HOST = 'smtp.eu.mailgun.org'

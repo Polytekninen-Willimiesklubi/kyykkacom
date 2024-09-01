@@ -3,8 +3,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
-from kyykka.models import Season, CurrentSeason, Match, Team, Player, PlayersInTeam, Throw
-from kyykka.serializers import MatchListSerializer
+from backend.models import Season, CurrentSeason, Match, Team, Player, PlayersInTeam, Throw
+from backend.serializers import MatchListSerializer
 import datetime, json
 from django.test import override_settings
 

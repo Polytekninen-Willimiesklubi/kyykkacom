@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # For production generate a new SECRET_KEY, and init it in local_settings
-SECRET_KEY = ''
+SECRET_KEY = 'plaa'
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'kyykka.apps.KyykkaConfig',
+    'backend.apps.KyykkaConfig',
     'drf_yasg',
 ]
 
@@ -158,8 +158,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Set in local_settings
-# CORS_ORIGIN_ALLOW_ALL=True
-# CORS_ORIGIN_WHITELIST = ["localhost:8080"]
+CORS_ORIGIN_ALLOW_ALL=True
+CORS_ORIGIN_WHITELIST = ["localhost:8080"]
 
 CORS_ALLOW_CREDENTIALS = True
 ADMINS = []

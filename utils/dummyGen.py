@@ -2,7 +2,7 @@ import django
 from faker import Faker
 from tqdm import tqdm
 from django.contrib.auth.models import User
-from kyykka.models import Team, Season, PlayersInTeam, CurrentSeason, Match, Throw, Player
+from backend.models import Team, Season, PlayersInTeam, CurrentSeason, Match, Throw, Player
 import random, pytz
 
 fake = Faker('fi_FI')
