@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('kyykka', '0009_auto_20190402_2244'),
+        ('backend', '0009_auto_20190402_2244'),
     ]
 
     operations = [

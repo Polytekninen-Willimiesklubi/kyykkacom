@@ -7,18 +7,18 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('kyykka', '0017_auto_20231119_1504'),
+        ('backend', '0017_auto_20231119_1504'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='match',
             name='away_team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='away_matches', to='kyykka.teamsinseason'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='away_matches', to='backend.teamsinseason'),
         ),
         migrations.AlterField(
             model_name='match',
             name='home_team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='home_matches', to='kyykka.teamsinseason'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='home_matches', to='backend.teamsinseason'),
         ),
     ]
