@@ -1,7 +1,7 @@
 import { useTeamsStore } from "@/stores/teams.store";
 import { seasonsMappings } from "@/tournament_templates";
 
-const baseUrl = 'http://localhost:8000/api/seasons' // TODO: change this to .env variable
+const baseUrl = `${import.meta.env.VITE_API_URL}/api/seasons/`;
 
 export const useNavBarStore = defineStore('navbar', () => {
     const selectedSeason = ref(JSON.parse(localStorage.getItem('selectedSeason')));

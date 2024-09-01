@@ -1,7 +1,6 @@
 import { useNavBarStore } from "./navbar.store";
 
-// const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
-const baseUrl = 'http://localhost:8000/api/players/'; // TODO: change this to .env variable
+const baseUrl = `${import.meta.env.VITE_API_URL}/api/players/`;
 
 export const usePlayerStore = defineStore('players', () => {
     const loading = ref(false);

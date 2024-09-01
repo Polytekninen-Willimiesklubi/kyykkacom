@@ -1,9 +1,7 @@
-import { useAuthStore } from '@/stores/auth.store';
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
 
-// const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
-const baseUrl = 'http://localhost:8000/api/matches/'; // TODO: change this to .env variable
-const throwUrl = 'http://localhost:8000/api/throws/update/';
+const baseUrl = `${import.meta.env.VITE_API_URL}/api/matches/`;
+const throwUrl = `${import.meta.env.VITE_API_URL}/api/throws/update/`;
 
 export const useRoundStore = defineStore('round', () => {
     const loading = ref(false);

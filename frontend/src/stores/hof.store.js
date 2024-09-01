@@ -360,7 +360,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2024, 'name' : 'Vuoden ilmiö', 'person' : "KOFF"},
         {'year' : 2024, 'name' : "Vuoden kyykkacom", 'person' : "Totti Sillanpää"},
         {'year' : 2022, 'name' : "Vuoden Suurin Yllätys", 'person' : "SÄTKY ky:n pronssi"},
-        {'year' : 2022, 'name' : "Suurin sulaminen", 'person' : "LSP kolme viimeistä mailaa yhteen kyykkään haukia, johtaen häviöön TAI K-Mafian häviö sätkyä vastaan jatkosarjassa."},
+        {'year' : 2022, 'name' : "Suurin Sulaminen", 'person' : "LSP kolme viimeistä mailaa yhteen kyykkään haukia, johtaen häviöön TAI K-Mafian häviö sätkyä vastaan jatkosarjassa."},
         {'year' : 2022, 'name' : "Vuoden Heitto", 'person' : "Elmon kahdeksan kyykän poisto finaalin viimeisen ottelun viimeisessä erässä."},
         {'year' : 2022, 'name' : "Vuoden Pettymys", 'person' : "K-Mafia ei tyhjentänyt"},
         {'year' : 2022, 'name' : "Vuoden Onnekas", 'person' : "Atso Härkönen, kolme kappaletta kolmen kyykän kilkkejä yhden pelipäivän aikana. Myös Lassi."},

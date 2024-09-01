@@ -31,9 +31,9 @@ async function fetchWrapper(url, postData, method='PATCH') {
     const requestOpt = {
         'method': method,
         'headers': {
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCookie('csrftoken'),
+            'content-type': 'application/json',
         },
-        'content-type': 'application/json',
         'body': JSON.stringify(postData),
         withCredentials: true,
     }

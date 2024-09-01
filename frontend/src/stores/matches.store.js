@@ -1,7 +1,5 @@
 import { useNavBarStore } from "@/stores/navbar.store";
-// const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
-
-const baseUrl = 'http://localhost:8000/api/matches/'; // TODO: change this to .env variable
+const baseUrl = `${import.meta.env.VITE_API_URL}/api/matches/`;
 
 export const useMatchesStore = defineStore('matches', () => {
     const matches = ref([]);
@@ -41,7 +39,7 @@ export const useMatchesStore = defineStore('matches', () => {
         loading.value = true;
         const navStore = useNavBarStore();
 
-        const pelit = {
+        const pelit = { // FIXME move this away
           1: 'Runkosarja',
           2: 'Finaali',
           3: 'Pronssi',

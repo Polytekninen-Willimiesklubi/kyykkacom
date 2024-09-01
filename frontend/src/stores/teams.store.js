@@ -1,9 +1,8 @@
 import { useNavBarStore } from "@/stores/navbar.store";
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
 
-// const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
-const baseUrl = 'http://localhost:8000/api/teams/'; // TODO: change this to .env variable
-const reserveUrl = 'http://localhost:8000/api/reserve/';
+const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
+const reserveUrl = `${import.meta.env.VITE_API_URL}/api/reserve/`;
 
 export const useTeamsStore = defineStore('joukkue', () => {
     const allTimeStats = ref({});
@@ -123,6 +122,8 @@ export const useTeamsStore = defineStore('joukkue', () => {
     async function getTeams() {
         const navStore = useNavBarStore();
         const question = '?season=' + navStore.seasonId + '&post_season=0'
+        console.log(baseUrl);
+        console.log(import.meta.env.VITE_API_URL)
         try {
             loading.value = true;
             const response = await fetch(baseUrl + question, {method: 'GET'});

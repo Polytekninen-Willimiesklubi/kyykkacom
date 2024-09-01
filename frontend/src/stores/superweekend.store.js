@@ -1,8 +1,8 @@
 import { useNavBarStore } from "./navbar.store";
 import { seasonsMappings } from '../tournament_templates/index'
 
-const baseUrl = 'http://localhost:8000/api/superweekend/'; // TODO: change this to .env variable
-const teamUrl = 'http://localhost:8000/api/teams/';
+const baseUrl = `${import.meta.env.VITE_API_URL}/api/superweekend/'`;
+const teamUrl = `${import.meta.env.VITE_API_URL}/api/teams/'`;
 
 export const useSuperStore = defineStore('superweekend', () => {
     const noBrackets = ref(0);
