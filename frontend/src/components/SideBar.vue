@@ -11,7 +11,7 @@
           class="sidebar"
           :headers="headers"
           :items="listItem"
-          :sort-by="[{key: sortBy, order: sortDesc ? 'desc' : 'asc'}]"
+          :sort-by="sortBy"
           no-data-text="Ei dataa :("
           items-per-page="-1"
           density="compact"
@@ -68,8 +68,7 @@ const props = defineProps({
   title: String,
   headers: Array,
   teams: Array,
-  sortBy: String,
-  sortDesc: Boolean,
+  sortBy: Array,
   lines: Array,
   boldingKeys: Array,
 })
