@@ -520,7 +520,7 @@ class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
     queryset = News.objects.all()
 
     def get(self, request):
-        serializer = NewsSerializer(self.queryset, many=True)
+        serializer = NewsSerializer(self.queryset.all(), many=True)
         return Response(serializer.data)
     
     def patch(self, request, *args, **kwargs):

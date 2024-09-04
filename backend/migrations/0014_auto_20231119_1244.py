@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('backend', '0013_match_post_season'),
+        ('kyykka', '0013_match_post_season'),
     ]
 
     operations = [
@@ -43,9 +43,9 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('current_name', models.CharField(max_length=128, unique=True)),
                 ('current_abbreviation', models.CharField(max_length=15)),
-                ('players', models.ManyToManyField(through='backend.PlayersInTeam', to=settings.AUTH_USER_MODEL)),
-                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.season')),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.team')),
+                ('players', models.ManyToManyField(through='kyykka.PlayersInTeam', to=settings.AUTH_USER_MODEL)),
+                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='kyykka.season')),
+                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='kyykka.team')),
             ],
             options={
                 'unique_together': {('season', 'team')},
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='playersinteam',
             name='team_season',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='backend.teamsinseason'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='kyykka.teamsinseason'),
         ),
         migrations.AlterUniqueTogether(
             name='playersinteam',

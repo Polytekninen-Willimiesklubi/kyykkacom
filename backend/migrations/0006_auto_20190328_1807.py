@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('backend', '0005_player'),
+        ('kyykka', '0005_player'),
     ]
 
     operations = [

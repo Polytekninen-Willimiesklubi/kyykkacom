@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0019_auto_20231119_1734'),
+        ('kyykka', '0019_auto_20231119_1734'),
     ]
 
     operations = [
@@ -53,8 +53,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('super_weekend_no_brackets', models.IntegerField(blank=True, default=0, null=True)),
                 ('super_weekend_playoff_format', models.IntegerField(blank=True, choices=[(0, 'Ei vielä päätetty / Undefined'), (1, 'Kiinteä 16 joukkueen Cup'), (2, 'Kiinteä 8 joukkueen Cup'), (3, 'Kiinteä 4 joukkueen Cup'), (4, 'Kiinteä 22 joukkueen Cup'), (5, '1.Kierroksen Seedaus 6 joukkueen Cup'), (6, '1.Kierroksen Seedaus 12 joukkueen Cup'), (7, 'SuperWeekend OKA seedaus 15 joukkueen Cup')], default=0, null=True)),
-                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='backend.season')),
-                ('winner', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='backend.teamsinseason')),
+                ('season', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='kyykka.season')),
+                ('winner', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='kyykka.teamsinseason')),
             ],
         ),
     ]

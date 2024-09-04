@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('backend', '0002_auto_20190319_0910'),
+        ('kyykka', '0002_auto_20190319_0910'),
     ]
 
     operations = [
@@ -42,12 +42,12 @@ class Migration(migrations.Migration):
             model_name='match',
             name='away_team',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='away_matches',
-                                    to='backend.Team'),
+                                    to='kyykka.Team'),
         ),
         migrations.AlterField(
             model_name='match',
             name='home_team',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='home_matches',
-                                    to='backend.Team'),
+                                    to='kyykka.Team'),
         ),
     ]

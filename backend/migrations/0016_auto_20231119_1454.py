@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0015_teamsinseason_bracket'),
+        ('kyykka', '0015_teamsinseason_bracket'),
     ]
 
     operations = [
