@@ -46,7 +46,15 @@
       <v-btn 
         class="hidden-md-and-down"
         :text="item.title"
-        :to=item.route
+        :to="item.route + userStore.teamId"
+        v-else-if="item.title=='Oma Joukkue' 
+          && userStore.loggedIn && userStore.teamId != 'null' 
+          && userStore.teamId"
+      />
+      <v-btn 
+        class="hidden-md-and-down"
+        :text="item.title"
+        :to="item.route"
         v-else-if="item.if_clause === undefined && 
         item.title != 'Koti' || item.if_clause"
       />
@@ -76,9 +84,11 @@
     </div>
 
     <div class="hidden-md-and-down" v-if="userStore.loggedIn">
-      <span class="mr-5">{{ userStore.playerName }}</span>
-      <v-btn 
-        class="hidden-md-and-down"
+      <v-btn
+        :text="userStore.playerName"
+        :to="'/pelaajat/' + userStore.userId" 
+      />
+      <v-btn
         text="Kirjaudu Ulos"
         @click="userStore.logOut()" 
         :to="'/'"
@@ -118,7 +128,7 @@
           />
         </v-list-item>
       </v-list>
-      <template v-if="userStore.loggedIn" v-slot:prepend>
+      <template #prepend v-if="userStore.loggedIn">
         <v-list-item 
           :title="userStore.playerName"
           subtitle="Logged In"
@@ -142,11 +152,6 @@ const navStore = useNavBarStore();
 const userStore = useAuthStore();
 
 const drawer = ref(false);
-
-// to Header add if-clause and id to the route
-let header = headersNavBar
-header[4]["if_clause"] = userStore.loggedIn && userStore.teamId != 'null' && userStore.teamId
-header[4]["route"] +=  userStore.teamId
 
 if (!navStore.seasons.length) {
   navStore.getSeasons();
