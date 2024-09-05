@@ -45,7 +45,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2016, 'first' : 'Dra', 'second' : "?" },
         {'year': 2015, 'first' : 'Dra', 'second' : "?" },
         {'year': 2014, 'first' : 'ASS', 'second': 'GPK', 'third': 'VajaKK', 'fourth': 'MINT'},
-        {'year': 2013, 'first' : 'Panikkosnaikkos', 'second': 'ASS', 'third': 'GPK', 'fourth': 'TS'},
+        {'year': 2013, 'first' : 'Panis', 'second': 'ASS', 'third': 'GPK', 'fourth': 'TS'},
         {'year': 2012, 'first' : '?', 'second': '?'},
         {'year': 2011, 'first' : 'ASS', 'second': 'HeMi'},
         {'year': 2010, 'first' : '?', 'second': '?'},
