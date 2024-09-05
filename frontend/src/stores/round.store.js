@@ -1,7 +1,7 @@
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/api/matches/`;
-const throwUrl = `${import.meta.env.VITE_API_URL}/api/throws/update/`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/matches/`;
+const throwUrl = `${import.meta.env.VITE_API_URL}/throws/update/`;
 
 export const useRoundStore = defineStore('round', () => {
     const loading = ref(false);

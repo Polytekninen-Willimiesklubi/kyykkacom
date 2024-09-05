@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/stores/auth.store';
-const baseUrl = `${import.meta.env.VITE_API_URL}/api/matches/`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/matches/`;
 
 export const useMatchStore = defineStore('match', () => {
     const matchData = ref({'jotain' : 'moi'});

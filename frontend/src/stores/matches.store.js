@@ -1,5 +1,5 @@
 import { useNavBarStore } from "@/stores/navbar.store";
-const baseUrl = `${import.meta.env.VITE_API_URL}/api/matches/`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/matches/`;
 
 export const useMatchesStore = defineStore('matches', () => {
     const matches = ref([]);

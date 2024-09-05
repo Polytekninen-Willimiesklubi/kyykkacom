@@ -1,3 +1,10 @@
+const teamPatchUrl = `${import.meta.env.VITE_API_URL}/kyykka_admin/team/update/`;
+const superUrl = `${import.meta.env.VITE_API_URL}/kyykka_admin/superweekend/`;
+const matchUrl = `${import.meta.env.VITE_API_URL}/kyykka_admin/match`;
+import { getCookie, fetchNewToken } from '@/stores/auth.store';
+import { useTeamsStore } from '@/stores/teams.store';
+import { useSuperStore } from '@/stores/superweekend.store';
+
 export const gameTypes = [
     { name: 'Alkulohko', value: 31 },
     { name: 'Finaali', value: 32 },
@@ -20,12 +27,6 @@ export const checkScoreRules = [
     }
 ];
 
-const teamPatchUrl = 'api/kyykka_admin/team/update/';
-const superUrl = 'api/kyykka_admin/superweekend/';
-const matchUrl = 'api/kyykka_admin/match';
-import { getCookie, fetchNewToken } from '@/stores/auth.store';
-import { useTeamsStore } from '@/stores/teams.store';
-import { useSuperStore } from '@/stores/superweekend.store';
 
 async function fetchWrapper(url, postData, method='PATCH') {
     const requestOpt = {

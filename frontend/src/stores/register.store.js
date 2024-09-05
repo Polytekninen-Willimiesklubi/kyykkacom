@@ -1,6 +1,6 @@
 import { fetchNewToken, getCookie, useAuthStore } from '@/stores/auth.store';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/api/register/`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/register/`;
 
 export const useRegisterStore = defineStore('register', () => {
     // TODO Register alert and use it in register page

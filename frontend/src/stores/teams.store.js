@@ -1,8 +1,8 @@
 import { useNavBarStore } from "@/stores/navbar.store";
 import { getCookie, fetchNewToken } from '@/stores/auth.store';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/api/teams/`;
-const reserveUrl = `${import.meta.env.VITE_API_URL}/api/reserve/`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/teams/`;
+const reserveUrl = `${import.meta.env.VITE_API_URL}/reserve/`;
 
 export const useTeamsStore = defineStore('joukkue', () => {
     const allTimeStats = ref({});
