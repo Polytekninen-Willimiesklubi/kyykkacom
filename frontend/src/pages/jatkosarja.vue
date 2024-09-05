@@ -8,8 +8,7 @@
     <side-bar
       title="Runkosarja"
       :headers="headersPlayoff"
-      sort-by="bracket_placement"
-      :sort-desc=false
+      :sortBy="[{key: 'bracket_placement', order: 'asc'}]"
       :teams="teamStore.bracketedTeams"
       :lines="navStore.playoffLines"
       :boldingKeys="['P', 'points_total']"

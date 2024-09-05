@@ -8,8 +8,7 @@
     <side-bar
       title="Alkulohko"
       :headers="superSidebarHeaders"
-      sortBy="super_weekend_bracket_placement"
-      :sortDesc="false"
+      :sortBy="[{key: 'super_weekend_bracket_placement', order: 'asc'}]"
       :teams="superStore.bracketedTeams"
       :lines="superStore.playoffLines"
     />
