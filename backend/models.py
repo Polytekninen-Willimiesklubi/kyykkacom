@@ -106,17 +106,6 @@ class PlayersInTeam(models.Model):
     def __str__(self):
         return '%s %s %s %s' % (self.team_season.season.year, self.team_season.current_abbreviation, self.player.first_name, self.player.last_name)
 
-class PositionStats(models.Model):
-    postion = models.IntegerField(default=1)
-    throws = models.IntegerField(default=0)
-    misses = models.IntegerField(default=0)
-    vm_misses = models.IntegerField(default=0)
-    ones = models.IntegerField(default=0)
-    twos = models.IntegerField(default=0)
-    threes = models.IntegerField(default=0)
-    fours = models.IntegerField(default=0)
-    fives = models.IntegerField(default=0)
-    gte_six = models.IntegerField(default=0)
 
 class SeasonStats(models.Model):
     player = models.OneToOneField(PlayersInTeam, on_delete=models.DO_NOTHING)
@@ -127,11 +116,18 @@ class SeasonStats(models.Model):
     misses = models.IntegerField(default=0)
     vm_misses = models.IntegerField(default=0)
 
-    st_stats = models.OneToOneField(PositionStats, on_delete=models.DO_NOTHING, related_name="first_position")
-    nd_stats = models.OneToOneField(PositionStats, on_delete=models.DO_NOTHING, related_name="second_position")
-    rd_stats = models.OneToOneField(PositionStats, on_delete=models.DO_NOTHING, related_name="third_position")
-    th_stats = models.OneToOneField(PositionStats, on_delete=models.DO_NOTHING, related_name="fourth_position")
-
+class PositionStats(models.Model):
+    seasons_stats = models.ForeignKey(SeasonStats,  on_delete=models.DO_NOTHING)
+    position = models.IntegerField(default=1)
+    throws = models.IntegerField(default=0)
+    misses = models.IntegerField(default=0)
+    vm_misses = models.IntegerField(default=0)
+    ones = models.IntegerField(default=0)
+    twos = models.IntegerField(default=0)
+    threes = models.IntegerField(default=0)
+    fours = models.IntegerField(default=0)
+    fives = models.IntegerField(default=0)
+    gte_six = models.IntegerField(default=0)
 
 class Match(models.Model):
     season = models.ForeignKey(Season, on_delete=models.DO_NOTHING)
@@ -193,3 +189,17 @@ def match_post_save_handler(sender, instance, created, **kwargs):
                         throw_turn=turn,
                         throw_round=r
                     )
+
+
+@receiver(post_save, sender=PlayersInTeam)
+def player_post_save_handler(sender, instance, created, **kwargs):
+    if created and instance:
+        new_stats = SeasonStats.objects.create(
+            player=instance
+        )
+        # Making 4 postions
+        for pos in range(1,5):
+            PositionStats.objects.create(
+                season_stats=new_stats,
+                position=pos,
+            )
