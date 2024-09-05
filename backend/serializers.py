@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from backend.models import SuperWeekend, Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, Player, TeamsInSeason, News
+from backend.models import SuperWeekend, Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, TeamsInSeason, News
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.db.models import Count, Sum, F, Q, Case, Value, When, IntegerField
@@ -148,7 +148,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
         user.first_name = validated_data['first_name']
         user.last_name = validated_data['last_name']
         user.save()
-        Player.objects.create(user=user, number=validated_data['number'])
         msg = ""
         return True, msg, user
 
@@ -168,12 +167,6 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
 
     def get_player_name(self, obj):
         return obj.first_name + " " + obj.last_name
-
-    def get_player_number(self, obj):
-        try:
-            return obj.player.number
-        except:
-            return None
 
     def get_score_total(self, obj):
         season = self.context.get('season')
@@ -298,11 +291,10 @@ class UserSerializer(SharedPlayerSerializer):
 class ReserveListSerializer(SharedPlayerSerializer):
     player_name = serializers.SerializerMethodField()
     team = serializers.SerializerMethodField()
-    player_number = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'player_number', 'player_name', 'team')
+        fields = ('id', 'player_name', 'team')
 
 
 # TODO Figure a proper way to validate Unique Together between season and player

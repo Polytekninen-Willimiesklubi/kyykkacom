@@ -40,9 +40,6 @@ PLAYOFF_FORMAT = {
 
 PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
 
-class Player(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='player')
-    number = models.CharField(max_length=2, default=99)
 
 class Team(models.Model):
     name = models.CharField(max_length=128, unique=True)
@@ -109,17 +106,43 @@ class PlayersInTeam(models.Model):
     def __str__(self):
         return '%s %s %s %s' % (self.team_season.season.year, self.team_season.current_abbreviation, self.player.first_name, self.player.last_name)
 
+class PositionStats(models.Model):
+    postion = models.IntegerField(default=1)
+    throws = models.IntegerField(default=0)
+    misses = models.IntegerField(default=0)
+    vm_misses = models.IntegerField(default=0)
+    ones = models.IntegerField(default=0)
+    twos = models.IntegerField(default=0)
+    threes = models.IntegerField(default=0)
+    fours = models.IntegerField(default=0)
+    fives = models.IntegerField(default=0)
+    gte_six = models.IntegerField(default=0)
+
+class SeasonStats(models.Model):
+    player = models.OneToOneField(PlayersInTeam, on_delete=models.DO_NOTHING)
+    
+    periods = models.IntegerField(default=0) 
+    kyykat = models.IntegerField(default=0)
+    throws = models.IntegerField(default=0)
+    misses = models.IntegerField(default=0)
+    vm_misses = models.IntegerField(default=0)
+
+    st_stats = models.OneToOneField(PositionStats, on_delete=models.DO_NOTHING, related_name="first_position")
+    nd_stats = models.OneToOneField(PositionStats, on_delete=models.DO_NOTHING, related_name="second_position")
+    rd_stats = models.OneToOneField(PositionStats, on_delete=models.DO_NOTHING, related_name="third_position")
+    th_stats = models.OneToOneField(PositionStats, on_delete=models.DO_NOTHING, related_name="fourth_position")
+
 
 class Match(models.Model):
-    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    season = models.ForeignKey(Season, on_delete=models.DO_NOTHING)
     match_time = models.DateTimeField()
     field = models.IntegerField(blank=True, null=True)
     home_first_round_score = models.IntegerField(blank=True, null=True)
     home_second_round_score = models.IntegerField(blank=True, null=True)
     away_first_round_score = models.IntegerField(blank=True, null=True)
     away_second_round_score = models.IntegerField(blank=True, null=True)
-    home_team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name='home_matches')
-    away_team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name='away_matches')
+    home_team = models.ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, related_name='home_matches')
+    away_team = models.ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, related_name='away_matches')
     is_validated = models.BooleanField(default=False)
     post_season = models.BooleanField(default=False)
     match_type = models.IntegerField(blank=True, null=True, choices=MATCH_TYPES_TUPLES)
@@ -138,10 +161,10 @@ class Throw(models.Model):
     throw_turn determines players' throwing turn: 1, 2, 3 or 4.
     throw_number determines is it players' 1st, 2nd, 3rd or 4th throw.
     '''
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    player = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
-    team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE)
-    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    match = models.ForeignKey(Match, on_delete=models.DO_NOTHING)
+    player = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
+    team = models.ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING)
+    season = models.ForeignKey(Season, on_delete=models.DO_NOTHING)
     throw_round = models.IntegerField()
     throw_turn = models.IntegerField()
     score_first = models.CharField(max_length=2, null=True, blank=True, db_index=True)
