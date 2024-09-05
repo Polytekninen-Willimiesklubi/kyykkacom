@@ -3,13 +3,8 @@ import { getCookie } from '@/stores/auth.store';
 const baseUrl = `${import.meta.env.VITE_API_URL}/news/`;
 
 function getDateString() {
-    const date = new Date();
-    const day = date.getDate();
-    let month = date.getMonth() + 1;
-    month = Number(month) >= 10 ? month : '0' + month;
-    const year = Number(date.getFullYear());
-  
-    return `${day}.${month}.${year}`;
+    const date = new Date(Date.now());
+    return date.toISOString();
 }
 
 export const useNewsStore = defineStore('news', () => { 
@@ -47,10 +42,9 @@ export const useNewsStore = defineStore('news', () => {
             
             const payload = await response.json();
             // Sort news recent first
-            const kokeileNain = payload.sort((a, b) => {
+            allNews.value = payload.sort((a, b) => {
                 return new Date(b.date) - new Date(a.date)
             });
-            allNews.value = payload
             dataReady.value = true;
 
         } catch(e) {
@@ -64,7 +58,7 @@ export const useNewsStore = defineStore('news', () => {
     async function saveNews() {
         saving.value = true;
         saved.value = false;
-        savingError = false;
+        savingError.value = false;
         try {
             const response = await fetch(baseUrl, {
                 'method': 'POST',
@@ -80,11 +74,13 @@ export const useNewsStore = defineStore('news', () => {
                 }),
                 withCredentials: true,
               });
-            if (response.statusText == "ok") {
+            console.log(response.status);
+            if (response.status === 200) {
                 saved.value = true;
                 writer.value = "";
                 newsText.value = "";
                 headline.value = "";
+                getNews();
             } 
         } catch(e) {
             savingError.value = true;
@@ -104,6 +100,7 @@ export const useNewsStore = defineStore('news', () => {
         saved,
         newsText,
         headline,
+        writer,
         currentPageNro,
         currentPageContent,
         totalPages,

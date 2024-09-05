@@ -3,12 +3,14 @@
 		<template #title>
 			<v-row>
 				<v-col>
-          <span class="text-h5">{{ props.title }}</span>
+					<span class="text-h5">{{ props.title }}</span>
 				</v-col>
 				<v-spacer />
 				<v-col class="">
           <div class="d-flex justify-end">
-            <span class="text-h5 ">{{ date.formatByString(date.date(props.date), 'dd.MM.yyyy') }}</span>
+						<span class="text-h5 ">
+							{{ date.formatByString(date.date(props.date), 'dd.MM.yyyy') }}
+						</span>
 					</div>
 				</v-col>
 			</v-row>
@@ -18,10 +20,10 @@
       <span>{{ props.writer }}</span>
     </template>
 	<div class="ma-5">
-		<span v-html="showAll ? props.text : jotain()"></span>
-		<a 
-			@click="showAll =  !showAll"
-      class="more"
+		<span v-html="showAll | !smallText() ? props.text : smallText()"></span>
+		<a v-if="smallText()"
+			@click="showAll = !showAll"
+      		class="more"
 		>
       {{showAll ? "Näytä vähemmän" : "Näytä enemmän"}}
     </a>
@@ -42,7 +44,10 @@ const props = defineProps({
 
 const date = useDate();
 
-const jotain = () => {
+const smallText = () => {
+	if (props.text.length < 150) {
+		return null
+	}
 	return props.text.split(" ").slice(0, 150).join(" ") + "...."
 }
 

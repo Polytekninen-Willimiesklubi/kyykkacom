@@ -43,7 +43,7 @@ def getPostseason(request):
 
 def getRole(user):
     try:
-        if user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_superuser:
+        if user.is_superuser:
             role = '2'
         elif user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain:
             role = '1'
@@ -136,12 +136,12 @@ class LoginAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         login(request, user)
-        # role = getRole(user)
         try:
             current = CurrentSeason.objects.first().season
             player_in_team = PlayersInTeam.objects.filter(player=user, team_season__season=current).first()
             team_id = player_in_team.team_season.id # FIXME this needs to find current teams somehow if player is also captain of that team
-            role = '1' if player_in_team.is_captain else '0'
+            role = getRole(user)
+            # role = '1' if player_in_team.is_captain else '0'
         except (PlayersInTeam.DoesNotExist, AttributeError) as e:
             team_id = None
             role = '0'
@@ -527,10 +527,16 @@ class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
         return self.partial_update(request, *args, **kwargs)
     
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        success, message = serializer.save()
-        return Response({
-            'success': success,
-            'message': message,
-        })
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                'success': True,
+                'message': "Uusi uutinen onnistuneesti tehty!"
+            })
+        except Exception as e:
+            return Response({
+            'success': False,
+            'message': f'Something failed: {e}',
+            }, status=400)

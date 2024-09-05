@@ -8,7 +8,6 @@ export const useNavBarStore = defineStore('navbar', () => {
     const seasons = ref(JSON.parse(localStorage.getItem('allSeasons')));
 
     const seasonId = computed(() => {
-        console.log(selectedSeason.value);
         if (selectedSeason.value === null || selectedSeason.value.id === null) return undefined;
         return selectedSeason.value.id;
     })
