@@ -5,11 +5,11 @@ export function getCookie(name) {
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';')
         for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim()
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
-            break
-        }
+            const cookie = cookies[i].trim()
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+                break
+            }
         }
     }
     return cookieValue
@@ -80,18 +80,19 @@ export const useAuthStore = defineStore('auth', () => {
             }
             
             alert.value = false
-
-            userId.value = data.user.id
-            roleId.value = data.role
-            teamId.value = data.team_id
-            playerName.value = data.user.player_name
+            if (data) {
+                userId.value = data.user.id
+                roleId.value = data.role
+                teamId.value = data.team_id
+                playerName.value = data.user.player_name
+                // store user details local storage to keep user logged in between page refreshes
+                localStorage.setItem('userId', JSON.stringify(data.user.id));
+                localStorage.setItem('teamId', JSON.stringify(data.team_id));
+                localStorage.setItem('roleId', JSON.stringify(data.role));
+                localStorage.setItem('playerName', JSON.stringify(data.user.player_name));
+                localStorage.setItem('loggedIn', JSON.stringify(true));
+            }
             
-            // store user details local storage to keep user logged in between page refreshes
-            localStorage.setItem('userId', JSON.stringify(data.user.id));
-            localStorage.setItem('teamId', JSON.stringify(data.team_id));
-            localStorage.setItem('roleId', JSON.stringify(data.role));
-            localStorage.setItem('playerName', JSON.stringify(data.user.player_name));
-            localStorage.setItem('loggedIn', JSON.stringify(true));
 
             loggedIn.value = true
             return true
