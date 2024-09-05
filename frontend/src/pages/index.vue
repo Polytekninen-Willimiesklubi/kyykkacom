@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column">
+  <div class="d-flex flex-column" style="width: 100%;">
     <v-btn
       v-if="authStore.isSuperUser & !newsButton"
       text="Uusi uutinen"
@@ -46,11 +46,20 @@
           class="mb-2"
           @click="newsStore.saveNews()"
         />
+        <div class="success" v-if="newsStore.saved">
+          <v-icon
+            size="35px"
+            icon="mdi-check-box-outline"
+            color="green"
+          />
+          Onnistunut julkaisu!
+        </div>
       </div>
     </div>
     <!-- <h1>Nationaali Kyykkä Liiga</h1> -->
     <div v-for="news in newsStore.currentPageContent">
       <NewsBox
+        style="width: 100%;"
         class="mb-5"
         :writer="news.writer"
         :title="news.header"
@@ -81,5 +90,17 @@ const newsButton = ref(false);
 
 newsStore.getNews();
 
-
 </script>
+<style scoped>
+
+.success{
+  animation: fadeIn 5s;
+  visibility: hidden;
+}
+@keyframes fadeIn {
+  0% {opacity: 0; visibility: visible;}
+  10% {opacity: 1;}
+  100% {opacity: 0; visibility: hidden;}
+}
+
+</style>

@@ -32,11 +32,11 @@ export const useAuthStore = defineStore('auth', () => {
     const credentials = ref({});
 
     const isCaptain = computed(() => {
-        return roleId.value === 1;
+        return roleId.value == 1;
     });
 
     const isSuperUser = computed(() => {
-        return roleId.value === 2;
+        return roleId.value == 2;
     })
 
     async function logIn(again=false) {
