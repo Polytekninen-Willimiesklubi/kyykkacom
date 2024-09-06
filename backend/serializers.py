@@ -134,11 +134,10 @@ class CreateUserSerializer(serializers.ModelSerializer):
     username = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
     first_name = serializers.CharField(validators=[required], max_length=30)
     last_name = serializers.CharField(validators=[required], max_length=150)
-    number = serializers.IntegerField(validators=[required], min_value=0, max_value=99)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'number', 'first_name', 'last_name', 'password')
+        fields = ('id', 'username', 'first_name', 'last_name', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -281,11 +280,10 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
 
 class UserSerializer(SharedPlayerSerializer):
     player_name = serializers.SerializerMethodField()
-    player_number = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'player_name', 'player_number')
+        fields = ('id', 'player_name')
 
 
 class ReserveListSerializer(SharedPlayerSerializer):
@@ -334,7 +332,6 @@ class ReserveCreateSerializer(serializers.ModelSerializer):
 class PlayerListSerializer(SharedPlayerSerializer):
     team = serializers.SerializerMethodField()
     player_name = serializers.SerializerMethodField()
-    player_number = serializers.SerializerMethodField()
     score_total = serializers.SerializerMethodField()
     rounds_total = serializers.SerializerMethodField()
     pikes_total = serializers.SerializerMethodField()
@@ -386,7 +383,7 @@ class PlayerListSerializer(SharedPlayerSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'player_name', 'player_number', 'team', 'score_total', 'rounds_total',
+        fields = ('id', 'player_name', 'team', 'score_total', 'rounds_total',
                   'pikes_total', 'zeros_total', 'gteSix_total', 'throws_total', 'pike_percentage',
                   'score_per_throw', 'scaled_points', 'scaled_points_per_throw', 'avg_throw_turn', 'is_captain')
 
@@ -523,7 +520,6 @@ class PlayerDetailSerializer(SharedPlayerSerializer):
     id = serializers.SerializerMethodField()
     team = serializers.SerializerMethodField()
     player_name = serializers.SerializerMethodField()
-    player_number = serializers.SerializerMethodField()
     score_total = serializers.SerializerMethodField()
     match_count = serializers.SerializerMethodField()
     rounds_total = serializers.SerializerMethodField()
@@ -619,7 +615,7 @@ class PlayerDetailSerializer(SharedPlayerSerializer):
     class Meta:
         model = User
         fields = (
-            'season', 'id', 'team_name', 'player_name', 'player_number', 'team', 'score_total', 'match_count', 'rounds_total',
+            'season', 'id', 'team_name', 'player_name', 'team', 'score_total', 'match_count', 'rounds_total',
             'pikes_total', 'zeros_total', 'ones_total', 'twos_total', 'threes_total', 'fours_total',
             'fives_total', 'throws_total', 'gteSix_total', 'pike_percentage', 'zero_percentage',
             'score_per_throw', 'avg_throw_turn', 'matches', 'average_score_position_one', 'average_score_position_two',

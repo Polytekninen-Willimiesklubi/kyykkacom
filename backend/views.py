@@ -314,7 +314,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     if player['player_name'] not in players:
                         players[player['player_name']] = {
                             "id": player['id'],
-                            "player_number" : player['player_number'],
                             "score_total": 0,
                             "rounds_total": 0,
                             "pikes_total": 0,

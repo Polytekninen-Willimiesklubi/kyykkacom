@@ -107,7 +107,6 @@ class UserLogin(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CAPTAIN_ROLE, response.data["role"])
         self.assertEqual(team.id, response.data["team_id"])
-        self.assertEqual(user.player.number, response.data["user"]["player_number"])
         
     def test_login_user(self):
         USER_ROLE = "0"
