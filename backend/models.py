@@ -109,25 +109,40 @@ class PlayersInTeam(models.Model):
 
 class SeasonStats(models.Model):
     player = models.OneToOneField(PlayersInTeam, on_delete=models.DO_NOTHING)
-    
     periods = models.IntegerField(default=0) 
     kyykat = models.IntegerField(default=0)
     throws = models.IntegerField(default=0)
-    misses = models.IntegerField(default=0)
-    vm_misses = models.IntegerField(default=0)
+    pikes = models.IntegerField(default=0)
+    zeros = models.IntegerField(default=0)
+    gte_six = models.IntegerField(default=0)
+    scaled_points = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name_plural = 'Seasons Stats'
+
+    def __str__(self):
+        return f'{self.player.player.first_name} {self.player.player.last_name} {self.player.team_season.season.year}  {self.player.team_season.current_abbreviation}'
 
 class PositionStats(models.Model):
     seasons_stats = models.ForeignKey(SeasonStats,  on_delete=models.DO_NOTHING)
     position = models.IntegerField(default=1)
+    periods = models.IntegerField(default=0)
     throws = models.IntegerField(default=0)
-    misses = models.IntegerField(default=0)
-    vm_misses = models.IntegerField(default=0)
+    pikes = models.IntegerField(default=0)
+    zeros = models.IntegerField(default=0)
     ones = models.IntegerField(default=0)
     twos = models.IntegerField(default=0)
     threes = models.IntegerField(default=0)
     fours = models.IntegerField(default=0)
     fives = models.IntegerField(default=0)
     gte_six = models.IntegerField(default=0)
+    scaled_points = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name_plural = 'Positions Stats'
+
+    def __str__(self):
+        return f'{self.seasons_stats.player.player.first_name} {self.seasons_stats.player.player.last_name} {self.seasons_stats.player.team_season.season.year}  {self.seasons_stats.player.team_season.current_abbreviation} {self.position}'
 
 class Match(models.Model):
     season = models.ForeignKey(Season, on_delete=models.DO_NOTHING)
