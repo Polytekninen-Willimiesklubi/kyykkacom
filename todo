@@ -32,3 +32,12 @@ Muuta:
 
 Hall-of-fame:
     -Tee joukkue nimistä yms. hyperlinkkejä
+
+News:
+    -Admin can edit the news from frontpage
+
+Backend:
+    -admin action to add StatiscisStats if missing
+    -admin action extension -> show if completed action for recalculate 
+    -serializers.py -> Use Statistics instead calculate
+    
