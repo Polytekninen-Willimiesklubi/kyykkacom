@@ -14,6 +14,8 @@
     - 'Heittokeskiarvo heittopaikassa' voisi olla heittomäärä jotenkin näkyvissä per paikka
     - 'Heittokeskiarvo heittopaikan' statsit voisi olla näkyvissä yksittäin kausistatseissa
 
+    - BUGI: Kun Valittua kautta vaihtaa, niin filtterointi otteluissa ei muutu 
+
 (Kaikki) Joukkueet sivulla:
     - Lisää statistiikkaa näkyviin, nyt aika turha sivu, kun kaikki tiedot (ja enemmän) on näkyvissä sivupalkissa
     - Ehkä mahdollisuus katsoa vain lohkottain ja jotain lohko statseja 
@@ -29,6 +31,7 @@ Muuta:
     - Piniat 'matches.store.js' ja 'match.store.js' voisi yhdistää
     - fetchWrapper kaikille fetcheille poistaisi todella paljon koodia
     - username api tarkistus rekistiröinnille
+    - päivitä backend (python) kirjastoja -> Django on 2 major versiota takana.
 
 Hall-of-fame:
     -Tee joukkue nimistä yms. hyperlinkkejä

@@ -1,5 +1,6 @@
 # from django.contrib.admin import action
 from django.contrib import admin
+from django.db.models import QuerySet
 from backend.utils import (
     count_negative_values, 
     count_throw_results, 
@@ -42,11 +43,10 @@ class PositionsStatsInline(admin.TabularInline):
 
 class TeamsInSeasonAdmin(admin.ModelAdmin):
     inlines = (TeamsInSeasonInline,)
-class PlayersInTeamAdmin(admin.ModelAdmin):
-    inlines = (PlayersInTeamInline,)
 
 
-def recalculate_selected_stastics(modeladmin, request, queryset):
+def recalculate_selected_statistics(modeladmin, request, queryset):
+    # TODO Make responsive to send message if failed or success
     for selected in queryset.all():
         user = selected.player.player
         season = selected.player.team_season.season
@@ -96,19 +96,43 @@ def recalculate_selected_stastics(modeladmin, request, queryset):
             pos.gte_six = count_gte_six_throw_results(pos_throws)
             pos.scaled_points = calculate_scaled_points(pos_throws)
             pos.save()
+    
+
+def create_if_missing_and_recalculate_selected_statstics(modeladmin, request, queryset):
     # TODO Make responsive to send message if failed or success
+    for selected in queryset.all():
+        stats = SeasonStats.objects.filter(player=selected).first()
+        if not stats:
+            stats = SeasonStats.objects.create(player=selected)
+        stats = SeasonStats.objects.filter(player=selected) # This makes type QuarySet so it works with the function
+        recalculate_selected_statistics(None, None, stats)
+        
+def all_users_if_missing_and_recalculate_selected_statstics(modeladmin, request, queryset):
+    # TODO Make responsive to send message if failed or success
+    all_players_all_seasons = PlayersInTeam.objects.all()
+    create_if_missing_and_recalculate_selected_statstics(None, None, all_players_all_seasons)
 
-class AdminSeasonStats(admin.ModelAdmin):
+
+class TeamsInSeasonAdmin(admin.ModelAdmin):
+    inlines = (PlayersInTeamInline,)
+
+class SeasonStatsAdmin(admin.ModelAdmin):
     inlines = (PositionsStatsInline,)
-    actions = [recalculate_selected_stastics]
+    actions = [recalculate_selected_statistics]
 
-admin.site.register(TeamsInSeason, PlayersInTeamAdmin)
+class PlayersInTeamsAdmin(admin.ModelAdmin):
+    actions = [
+        create_if_missing_and_recalculate_selected_statstics,
+        all_users_if_missing_and_recalculate_selected_statstics,
+    ]
+
+admin.site.register(TeamsInSeason, TeamsInSeasonAdmin)
 admin.site.register(Team)
-admin.site.register(Season, TeamsInSeasonAdmin)
-admin.site.register(PlayersInTeam)
+admin.site.register(Season)
+admin.site.register(PlayersInTeam, PlayersInTeamsAdmin)
 admin.site.register(Match)
 admin.site.register(Throw)
 admin.site.register(CurrentSeason)
 admin.site.register(SuperWeekend)
-admin.site.register(SeasonStats, AdminSeasonStats)
+admin.site.register(SeasonStats, SeasonStatsAdmin)
 admin.site.register(PositionStats)
