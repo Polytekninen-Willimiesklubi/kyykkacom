@@ -1,6 +1,5 @@
 # from django.contrib.admin import action
 from django.contrib import admin
-from django.db.models import QuerySet
 from backend.utils import (
     count_negative_values, 
     count_throw_results, 

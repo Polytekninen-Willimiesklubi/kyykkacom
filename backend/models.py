@@ -218,3 +218,7 @@ def player_post_save_handler(sender, instance, created, **kwargs):
                 season_stats=new_stats,
                 position=pos,
             )
+
+@receiver(post_save, sender=Match)
+def player_post_save_handler(sender, instance, created, **kwargs):
+    pass

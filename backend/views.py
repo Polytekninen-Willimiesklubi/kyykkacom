@@ -1,20 +1,21 @@
 import json
 
-from django.contrib.auth import authenticate, login, logout
-from django.db.models import Count, Q, Sum
+from django.contrib.auth import login, logout
 from django.http import Http404, HttpResponse, JsonResponse
-from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_protect
-from django.utils.decorators import method_decorator
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import ensure_csrf_cookie
 from backend.models import (CurrentSeason, Match, PlayersInTeam, Season, Team, 
                            TeamsInSeason, Throw, User)
 from backend.serializers import *
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import status, viewsets
+from rest_framework.generics import  (
+    GenericAPIView
+
+)
+
 from rest_framework.mixins import UpdateModelMixin
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework_swagger.views import get_swagger_view
 from utils.caching import (cache_reset_key, getFromCache, reset_match_cache,
@@ -70,7 +71,7 @@ def ping(request):
     return JsonResponse({'result:': 'pong'})
 
 
-class IsCaptain(permissions.BasePermission):
+class IsCaptain(BasePermission):
     """
     Permission check to verify that user is captain in the right team.
     """
@@ -83,7 +84,7 @@ class IsCaptain(permissions.BasePermission):
             return False
 
 
-class IsCaptainForThrow(permissions.BasePermission):
+class IsCaptainForThrow(BasePermission):
     """
     Permission check to verify if user is captain in the right team for updaing throws
     """
@@ -100,7 +101,7 @@ class IsCaptainForThrow(permissions.BasePermission):
             return False
 
 
-class MatchDetailPermission(permissions.BasePermission):
+class MatchDetailPermission(BasePermission):
     """
     If patching is_validated, user needs to be captain of the away_team
     Else user needs to be captain of the away_team (patchin round scores)
@@ -115,14 +116,14 @@ class MatchDetailPermission(permissions.BasePermission):
             return request.user == obj.home_team.playersinteam_set.filter(team_season__season=CurrentSeason.objects.first().season,
                                                                           is_captain=True).first().player
 
-class IsSuperUserOrAdmin(permissions.BasePermission):
+class IsSuperUserOrAdmin(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return request.user.is_superuser or request.user.is_staff
 
 # @method_decorator(ensure_csrf_cookie, name='dispatch')
 # @method_decorator(csrf_protect, name='dispatch')
-class LoginAPI(generics.GenericAPIView):
+class LoginAPI(GenericAPIView):
     # TODO: Verify what happens if eg. two browsers are used, and session ends in other one. 
     """
     Creates session for user upon successful login
@@ -163,7 +164,7 @@ class LogoutAPI(APIView):
         return response
 
 
-class RegistrationAPI(generics.GenericAPIView):
+class RegistrationAPI(GenericAPIView):
     serializer_class = CreateUserSerializer
 
     def post(self, request, *args, **kwargs):
@@ -179,7 +180,7 @@ class RegistrationAPI(generics.GenericAPIView):
         })
 
 
-class ReservePlayerAPI(generics.GenericAPIView):
+class ReservePlayerAPI(GenericAPIView):
     serializer_class = ReserveCreateSerializer
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, IsCaptain]
@@ -421,7 +422,7 @@ class MatchDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ThrowAPI(generics.GenericAPIView, UpdateModelMixin):
+class ThrowAPI(GenericAPIView, UpdateModelMixin):
     serializer_class = ThrowSerializer
     queryset = Throw.objects.all()
     permission_classes = [IsAuthenticated, IsCaptain, IsCaptainForThrow]
@@ -430,7 +431,7 @@ class ThrowAPI(generics.GenericAPIView, UpdateModelMixin):
         cache_reset_key('all_teams')  # Updating throw score affects total score of team.
         return self.partial_update(request, *args, **kwargs)
     
-class SeasonsAPI(generics.GenericAPIView):
+class SeasonsAPI(GenericAPIView):
     queryset = Season.objects.all()
 
     def get(self, request):
@@ -449,7 +450,7 @@ class SeasonsAPI(generics.GenericAPIView):
 
         return Response((all_seasons, current_season))
     
-class SuperWeekendAPI(generics.GenericAPIView):
+class SuperWeekendAPI(GenericAPIView):
     queryset = SuperWeekend.objects.all()
 
     def get(self, request):
@@ -478,7 +479,7 @@ class SuperWeekendAPI(generics.GenericAPIView):
                 setToCache(key, super_weekends)
         return Response(super_weekends)
 
-class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
+class KyykkaAdminViewSet(GenericAPIView, UpdateModelMixin):
     serializer_class = TeamsInSeasonSerializer
     queryset = TeamsInSeason.objects.all()
     permission_classes = [IsSuperUserOrAdmin]
@@ -487,7 +488,7 @@ class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
         cache_reset_key('all_teams')
         return self.partial_update(request, *args, **kwargs)
     
-class KyykkaAdminMatchViewSet(generics.GenericAPIView):
+class KyykkaAdminMatchViewSet(GenericAPIView):
     serializer_class = AdminMatchSerializer
     permission_classes = [IsSuperUserOrAdmin]
 
@@ -506,7 +507,7 @@ class KyykkaAdminMatchViewSet(generics.GenericAPIView):
             'message': f'Something failed: {e}',
             }, status=400)
         
-class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
+class KyykkaAdminSuperViewSet(GenericAPIView, UpdateModelMixin):
     serializer_class = SuperWeekendSerializer
     queryset = SuperWeekend.objects.all()
     permission_classes = [IsSuperUserOrAdmin]
@@ -514,7 +515,7 @@ class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
     
-class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
+class NewsAPI(GenericAPIView, UpdateModelMixin):
     serializer_class = NewsSerializer
     queryset = News.objects.all()
 
