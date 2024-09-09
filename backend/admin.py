@@ -106,11 +106,6 @@ def create_if_missing_and_recalculate_selected_statstics(modeladmin, request, qu
             stats = SeasonStats.objects.create(player=selected)
         stats = SeasonStats.objects.filter(player=selected) # This makes type QuarySet so it works with the function
         recalculate_selected_statistics(None, None, stats)
-        
-def all_users_if_missing_and_recalculate_selected_statstics(modeladmin, request, queryset):
-    # TODO Make responsive to send message if failed or success
-    all_players_all_seasons = PlayersInTeam.objects.all()
-    create_if_missing_and_recalculate_selected_statstics(None, None, all_players_all_seasons)
 
 
 class TeamsInSeasonAdmin(admin.ModelAdmin):
@@ -123,7 +118,6 @@ class SeasonStatsAdmin(admin.ModelAdmin):
 class PlayersInTeamsAdmin(admin.ModelAdmin):
     actions = [
         create_if_missing_and_recalculate_selected_statstics,
-        all_users_if_missing_and_recalculate_selected_statstics,
     ]
 
 admin.site.register(TeamsInSeason, TeamsInSeasonAdmin)
