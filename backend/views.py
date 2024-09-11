@@ -218,14 +218,12 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
         key = 'all_players_' + str(season.year)
         all_players = getFromCache(key)
         if all_players is None:
-            self.queryset = self.queryset.filter(playersinteam__team_season__season=season)
-            serializer = PlayerListSerializer(self.queryset, many=True, context={'season': season})
-            all_players = serializer.data
+            qs = PlayersInTeam.objects.filter(team_season__season=season)
+            all_players = SimplePlayerSerializer(qs, many=True).data
             setToCache(key, all_players)
         return Response(all_players)
 
     def retrieve(self, request, pk=None):
-        season = getSeason(request)
         user = get_object_or_404(self.queryset, pk=pk)
         serializer = PlayerAllDetailSerializer(user)
         return Response(serializer.data)

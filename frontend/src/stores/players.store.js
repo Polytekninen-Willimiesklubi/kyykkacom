@@ -36,7 +36,7 @@ export const usePlayerStore = defineStore('players', () => {
         }
         
         for (const season of player.value.stats_per_seasons) {
-            for (const match of season.matches) {
+            for (const match of season.season_statistics.matches) {
               for (let i = 1; i < 3; i++) {
                 if (i == 1 & match.throw_turn_one != '-') {
                   var own_score = match.own_score_first

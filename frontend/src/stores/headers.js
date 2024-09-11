@@ -42,18 +42,18 @@ function throwSort(a, b) {
 /********** PLAYERS PAGE **********/
 
 export const headerPlayers = [
-    { title: 'Nimi',    key: 'player_name'              , align: 'left',    width: '30%' },
-    { title: 'Joukkue', key: 'team.current_abbreviation', align: 'center',  width: '10%' },
-    { title: 'E',       key: 'rounds_total'             , align: 'center',  tooltip: 'Pelatut Erät'},
-    { title: 'K',       key: 'score_total'              , align: 'center',  tooltip: 'Poistetut Kyykät'},
-    { title: 'KPH',     key: 'score_per_throw'          , align: 'center',  tooltip: 'Kyykkää Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
-    { title: 'SP',      key: 'scaled_points'            , align: 'center',  tooltip: 'Skaalatut Pisteet'},
-    { title: 'SPPH',    key: 'scaled_points_per_throw'  , align: 'center',  tooltip: 'Skaalatut Pisteet Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
-    { title: 'kHP',     key: 'avg_throw_turn'           , align: 'center',  tooltip: 'Keskimääräinen Heittopaikka',  sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
-    { title: 'H',       key: 'pikes_total'              , align: 'center',  tooltip: 'Heitetyt Hauet (Ohi heitto)'},
-    { title: 'H%',      key: 'pike_percentage'          , align: 'center',  tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
-    { title: 'VM',      key: 'zeros_total'              , align: 'center',  tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)'},
-    { title: 'JK',      key: 'gteSix_total'             , align: 'center',  tooltip: 'Joulukuuset (yli viiden kyykän heitot)'},
+    { title: 'Nimi',    key: 'player_name',                         align: 'left',    width: '30%' },
+    { title: 'Joukkue', key: 'team.current_abbreviation',           align: 'center',  width: '10%' },
+    { title: 'E',       key: 'season_statistics.periods',           align: 'center',  tooltip: 'Pelatut Erät'},
+    { title: 'K',       key: 'season_statistics.kyykat' ,           align: 'center',  tooltip: 'Poistetut Kyykät'},
+    { title: 'KPH',     key: 'season_statistics.score_per_throw',   align: 'center',  tooltip: 'Kyykkää Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
+    { title: 'SP',      key: 'season_statistics.scaled_points',     align: 'center',  tooltip: 'Skaalatut Pisteet'},
+    { title: 'SPPH',    key: 'season_statistics.avg_scaled_points', align: 'center',  tooltip: 'Skaalatut Pisteet Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
+    { title: 'kHP',     key: 'season_statistics.avg_throw_turn',    align: 'center',  tooltip: 'Keskimääräinen Heittopaikka',  sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
+    { title: 'H',       key: 'season_statistics.pikes',             align: 'center',  tooltip: 'Heitetyt Hauet (Ohi heitto)'},
+    { title: 'H%',      key: 'season_statistics.pike_percentage',   align: 'center',  tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: (a, b) => isStrNaN(a) - isStrNaN(b)},
+    { title: 'VM',      key: 'season_statistics.zeros',             align: 'center',  tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)'},
+    { title: 'JK',      key: 'season_statistics.gte_six',           align: 'center',  tooltip: 'Joulukuuset (yli viiden kyykän heitot)'},
 ];
 
 /********** PLAYER PAGE **********/
@@ -120,18 +120,18 @@ export const headerPlayerOverallStats = [
 ];
 
 export const headerPlayerSeasonStats = [
-    { title: 'Kausi',            key: 'season' },
-    { title: 'Joukkue',          key: 'team_name' },
-    { title: 'Erät',             key: 'rounds_total'},
-    { title: 'Kyykät',           key: 'score_total'},
-    { title: 'Heitot',           key: 'throws_total'},
-    { title: 'KPH',              key: 'score_per_throw', tooltip: 'Kyykkää per Heitto' },
-    { title: 'kHP',              key: 'avg_throw_turn',  tooltip: 'Keskimääräinen heittopaikka' },
-    { title: 'Hauet',            key: 'pikes_total',     tooltip: 'Kaikki Hauet (=Ohi heitot)' },
-    { title: 'H%',               key: 'pike_percentage', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
-    { title: 'VM',               key: 'zeros_total',     tooltip: 'Virkamiehet: Nollaheitot ilman haukia' },
-    { title: 'VM%',              key: 'zero_percentage', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
-    { title: 'JK',               key: 'gteSix_total',    tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
+    { title: 'Kausi',    key: 'season_statistics.season' },
+    { title: 'Joukkue',  key: 'season_statistics.team_name' },
+    { title: 'Erät',     key: 'season_statistics.periods'},
+    { title: 'Kyykät',   key: 'season_statistics.kyykat'},
+    { title: 'Heitot',   key: 'season_statistics.throws'},
+    { title: 'KPH',      key: 'season_statistics.score_per_throw',  tooltip: 'Kyykkää per Heitto' },
+    { title: 'kHP',      key: 'season_statistics.avg_throw_turn',   tooltip: 'Keskimääräinen heittopaikka' },
+    { title: 'Hauet',    key: 'season_statistics.pikes',            tooltip: 'Kaikki Hauet (=Ohi heitot)' },
+    { title: 'H%',       key: 'season_statistics.pike_percentage',  tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
+    { title: 'VM',       key: 'season_statistics.zeros',            tooltip: 'Virkamiehet: Nollaheitot ilman haukia' },
+    { title: 'VM%',      key: 'season_statistics.zero_percentage',  tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
+    { title: 'JK',       key: 'season_statistics.gte_six',          tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
 ];
 
 /********** TEAMS PAGE **********/

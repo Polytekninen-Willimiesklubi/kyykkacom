@@ -52,21 +52,21 @@
               -->
               <template #item = {item}>
                 <tr
-                  :class="{'blue-row': initalColor(item.season)}"
+                  :class="{'blue-row': initalColor(item.season_statistics.season)}"
                   @click="chanceSeason"
                 >
-                  <td> {{ item.season }}</td>
-                  <td> {{ item.team_name }}</td>
-                  <td> {{ item.rounds_total }}</td>
-                  <td> {{ item.score_total }}</td>
-                  <td> {{ item.throws_total }}</td>
-                  <td> {{ item.score_per_throw }}</td>
-                  <td> {{ item.avg_throw_turn }}</td>
-                  <td> {{ item.pikes_total }}</td>
-                  <td> {{ item.pike_percentage }}</td>
-                  <td> {{ item.zeros_total }}</td>
-                  <td> {{ item.zero_percentage }}</td>
-                  <td> {{ item.gteSix_total }}</td>
+                  <td> {{ item.season_statistics.season }}</td>
+                  <td> {{ item.season_statistics.team_name }}</td>
+                  <td> {{ item.season_statistics.periods }}</td>
+                  <td> {{ item.season_statistics.kyykat }}</td>
+                  <td> {{ item.season_statistics.throws }}</td>
+                  <td> {{ item.season_statistics.score_per_throw }}</td>
+                  <td> {{ item.season_statistics.avg_throw_turn }}</td>
+                  <td> {{ item.season_statistics.pikes }}</td>
+                  <td> {{ item.season_statistics.pike_percentage }}</td>
+                  <td> {{ item.season_statistics.zeros }}</td>
+                  <td> {{ item.season_statistics.zero_percentage }}</td>
+                  <td> {{ item.season_statistics.gte_six }}</td>
                 </tr>
 
               </template>
@@ -291,9 +291,9 @@ function chanceHeaderStat(val) {
     'VM' ,'VM%', 'JK'
   ];
   const header_binds = [
-    'rounds_total', 'score_total', 'throws_total', 'score_per_throw',
-    'avg_throw_turn', 'pikes_total', 'pike_percentage', 'zeros_total', 
-    'zero_percentage', 'gteSix_total'
+    'periods', 'kyykat', 'throws', 'score_per_throw',
+    'avg_throw_turn', 'pikes', 'pike_percentage', 'zeros', 
+    'zero_percentage', 'gte_six'
   ];
 
   if (!headers.includes(head)) { return; }
@@ -320,7 +320,7 @@ function chanceHeaderStat(val) {
     const stat_per_season = [];
     index = headers.indexOf(head);
     playerStore.player.stats_per_seasons.forEach(stats => {
-      stat_per_season.push(stats[header_binds[index]])
+      stat_per_season.push(stats.season_statistics[header_binds[index]])
     });
     canvas2Data.value.push({
       label: head,
@@ -361,35 +361,28 @@ function chanceSeason (value) {
     headerClassList.remove(styles[index]);
   } else if (currentSelection.length < 5) { // Add Clicked season, only allow max 5
     let tmp = playerStore.player.stats_per_seasons;
-    let index = tmp.map(ele => ele.season).indexOf(clickedSeason);
-    const selected_season = tmp[index];
+    let index = tmp.map(ele => ele.season_statistics.season).indexOf(clickedSeason);
+    const selected_season = tmp[index].season_statistics;
     
     index = colors.indexOf(''); // First valid color
     colors[index] = clickedSeason;
     const color = allColors[index];
     headerClassList.add(styles[index]);
 
-    const totalThrow = selected_season.zeros_total 
-                      + selected_season.pikes_total 
-                      + selected_season.ones_total 
-                      + selected_season.twos_total
-                      + selected_season.threes_total
-                      + selected_season.fours_total
-                      + selected_season.fives_total
-                      + selected_season.gteSix_total
+    const totalThrow = selected_season.throws 
 
     canvas1DataNormalized.value = [ ...canvas1DataNormalized.value,
       {
         label: 'Kausi ' + selected_season.season,
         backgroundColor: color,
         data: [
-          Math.round((selected_season.zeros_total + selected_season.pikes_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.ones_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.twos_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.threes_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.fours_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.fives_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.gteSix_total) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.zeros + selected_season.pikes) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.ones) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.twos) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.threes) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.fours) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.fives) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.gte_six) / totalThrow * 100 * 100 ) / 100,
         ]
       }
     ];
@@ -399,13 +392,13 @@ function chanceSeason (value) {
         label: 'Kausi ' + selected_season.season,
         backgroundColor: color,
         data: [
-          selected_season.zeros_total + selected_season.pikes_total,
-          selected_season.ones_total,
-          selected_season.twos_total,
-          selected_season.threes_total,
-          selected_season.fours_total,
-          selected_season.fives_total,
-          selected_season.gteSix_total
+          selected_season.zeros + selected_season.pikes,
+          selected_season.ones,
+          selected_season.twos,
+          selected_season.threes,
+          selected_season.fours,
+          selected_season.fives,
+          selected_season.gte_six
         ]
       }
     ];
@@ -447,36 +440,29 @@ watch(() => playerStore.loadedData, () => {
   }
   const stats_per_seasons = playerStore.player.stats_per_seasons;
   if (stats_per_seasons && stats_per_seasons.length !== 0) {
-    let index = stats_per_seasons.map(ele => ele.id).indexOf(navStore.seasonId);
+    let index = stats_per_seasons.map(ele => ele.season_statistics.id).indexOf(navStore.seasonId);
     // If the selected season is not in players history take the latest
     index = (index === -1) ? stats_per_seasons.length -1 : index;
-    const currentSelcSeason = stats_per_seasons[index];
+    const currentSelcSeason = stats_per_seasons[index].season_statistics;
     const seasonString = currentSelcSeason.season;
     
     currentSelection.push(seasonString);
     colors[0] = seasonString;
     columnCurrentSelection.push('KPH');
 
-    const totalThrow = currentSelcSeason.zeros_total 
-                      + currentSelcSeason.pikes_total 
-                      + currentSelcSeason.ones_total 
-                      + currentSelcSeason.twos_total
-                      + currentSelcSeason.threes_total
-                      + currentSelcSeason.fours_total
-                      + currentSelcSeason.fives_total
-                      + currentSelcSeason.gteSix_total
+    const totalThrow = currentSelcSeason.throws
 
     const init1Normalized = {
       label: 'Kausi ' + currentSelcSeason.season,
       backgroundColor: '#B3E5FC',
       data: [
-        Math.round((currentSelcSeason.zeros_total + currentSelcSeason.pikes_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.ones_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.twos_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.threes_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.fours_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.fives_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.gteSix_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.zeros + currentSelcSeason.pikes) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.ones) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.twos) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.threes) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.fours) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.fives) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.gte_six) / totalThrow * 100 * 100 ) / 100,
       ]
     };
   
@@ -484,19 +470,19 @@ watch(() => playerStore.loadedData, () => {
       label: 'Kausi ' + currentSelcSeason.season,
       backgroundColor: '#B3E5FC',
       data: [
-        currentSelcSeason.zeros_total + currentSelcSeason.pikes_total,
-        currentSelcSeason.ones_total,
-        currentSelcSeason.twos_total,
-        currentSelcSeason.threes_total,
-        currentSelcSeason.fours_total,
-        currentSelcSeason.fives_total,
-        currentSelcSeason.gteSix_total
+        currentSelcSeason.zeros + currentSelcSeason.pikes,
+        currentSelcSeason.ones,
+        currentSelcSeason.twos,
+        currentSelcSeason.threes,
+        currentSelcSeason.fours,
+        currentSelcSeason.fives,
+        currentSelcSeason.gte_six
       ]
     };
     const canvas2_data_tmp = [];
     for (const s of stats_per_seasons) {
-      canvas2_data_tmp.push(s.score_per_throw);
-      canvas2Labels.value.push(s.season);
+      canvas2_data_tmp.push(s.season_statistics.score_per_throw);
+      canvas2Labels.value.push(s.season_statistics.season);
     }
     const init2 = {
       label: 'KPH',
