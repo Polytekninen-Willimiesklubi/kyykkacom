@@ -15,7 +15,7 @@ from backend.models import (
 )
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from django.db.models import Count, Sum, F, Q, Case, Value, When, IntegerField
+from django.db.models import Count, Sum, F, Q, IntegerField
 from django.db import IntegrityError
 from django.db.models.functions import Cast, Substr
 

@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.conf.urls import include
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 from backend import views
@@ -48,3 +47,8 @@ router.register(r'players', views.PlayerViewSet, "player")
 router.register(r'teams', views.TeamViewSet)
 
 urlpatterns = router.urls + urlpatterns
+
+if settings.DEBUG:
+   print("toimii")
+   from debug_toolbar.toolbar import debug_toolbar_urls
+   urlpatterns += debug_toolbar_urls()
