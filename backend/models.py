@@ -1,6 +1,9 @@
-from typing import Any
+import typing as t
 from django.db import models
-from django.db.models import F, Q
+
+from django.db.models import (
+    Model, F, Q, TextField, DateTimeField, CharField, OneToOneField, IntegerField, ForeignKey, ManyToManyField, QuerySet
+)
 from django.db.models.constraints import UniqueConstraint, CheckConstraint
 from django.utils.timezone import now
 from django.contrib.auth.models import User
@@ -13,55 +16,55 @@ from backend.utils import (
 )
 
 
-class News(models.Model):
+class News(Model):
     """Simple news object. Contains information shown at the front-page.
     """
-    header = models.TextField(max_length=40)
-    writer = models.TextField(blank=True)
-    date = models.DateTimeField(default=now, editable=True)
-    text = models.TextField()
+    header = TextField(max_length=40)
+    writer = TextField(blank=True)
+    date = DateTimeField(default=now, editable=True)
+    text = TextField()
 
-class Player(models.Model):
+class Player(Model):
     """User accounts actual information. Works as a handle. This is done 
     to make possible to remove the account and leave statistics behind. 
     """
-    first_name = models.CharField(max_length=32, blank=False, default="")
-    last_name = models.CharField(max_length=32, blank=False, default="")
-    user = models.OneToOneField(User, null=True, blank=True) # Optional
+    first_name = CharField(max_length=32, blank=False, default="")
+    last_name = CharField(max_length=32, blank=False, default="")
+    user = OneToOneField(User, null=True, blank=True) # Optional
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
-class Team(models.Model):
+class Team(Model):
     """Team model that is consistent year-to-year basis. In effect allows to map all-time statistics
     """
-    name = models.CharField(max_length=128, unique=True, blank=False)
-    abbreviation = models.CharField(max_length=15, blank=False)
+    name = CharField(max_length=128, unique=True, blank=False)
+    abbreviation = CharField(max_length=15, blank=False)
 
     def __str__(self):
         return f"{self.abbreviation}"
 
-class Season(models.Model):
+class Season(Model):
     """Annual season model that defines season's year and superweekend information.
     """
-    year = models.IntegerField(primary_key=True)
-    super_weekend_no_brackets = models.IntegerField(default=0, blank=True, null=True)
-    super_weekend_playoff_format = models.IntegerField(
+    year = IntegerField(primary_key=True)
+    super_weekend_no_brackets = IntegerField(default=0, blank=True, null=True)
+    super_weekend_playoff_format = IntegerField(
         default=0, 
         blank=True, 
         null=True, 
         choices=SUPER_WEEKEND_MATCHES,
     )
-    super_weekend_winner = models.IntegerField('TeamsInSeason', blank=True, null=True)
+    super_weekend_winner = IntegerField('TeamsInSeason', blank=True, null=True)
 
     def __str__(self):
         return f"Kausi {self.year}"
     
-class CurrentSeason(models.Model):
+class CurrentSeason(Model):
     """Current Season model. One-to-one relationship with 'Season'-model.
     Only one season should be the "Current" at a time. 
     """
-    season = models.OneToOneField(Season, on_delete=models.CASCADE)
+    season = OneToOneField(Season, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name_plural = 'Current Season'
@@ -70,42 +73,48 @@ class CurrentSeason(models.Model):
         return 'Season %s' % (self.season.year)
 
 
-class Division(models.Model):
+class Division(Model):
     """Season's different seriers. 'Level' indicates the difference with in a year's season. 
     Includes information regarding brackets and playoff format
     """
-    season: Season = models.ForeignKey(Season, blank=False)
-    level = models.IntegerField(default=0, blank=False, choices=DIVISIONS)
-    no_brackets = models.IntegerField(default=1, blank=False)
-    playoff_format = models.IntegerField(default=0, blank=False, choices=PLAYOFF_FORMAT)
-    season_winner = models.OneToOneField(Team, blank=True, null=True)
-    bracket_stage_winner = models.OneToOneField(Team, blank=True, null=True)
-    teams = models.ManyToManyField(Team, through='TeamsInSeason')
+    season: Season = ForeignKey(Season, blank=False)
+    level = IntegerField(default=0, blank=False, choices=DIVISIONS)
+    no_brackets = IntegerField(default=1, blank=False)
+    playoff_format = IntegerField(default=0, blank=False, choices=PLAYOFF_FORMAT)
+    season_winner = OneToOneField('TeamsInSeason', blank=True, null=True)
+    bracket_stage_winner = OneToOneField('TeamsInSeason', blank=True, null=True)
 
     def __str__(self):
         return f"Kausi {self.season} {self.level}"
 
     class Meta:
         constraints = [
+            CheckConstraint(
+                condition=Q(season_winner__division=F('pk')) | Q(season_winner=None), 
+                name="winner_is_in_division"
+            ),
+            CheckConstraint(
+                condition=Q(bracket_stage_winner__division=F('pk')) | Q(bracket_stage_winner=None), 
+                name="bracket_winner_is_in_division"
+            ),
             UniqueConstraint('level', 'season', name="unique_division")
         ]
 
-class TeamsInSeason(models.Model):
+class TeamsInSeason(Model):
     """Teams in season. Breaks down Many-to-many relationship with 'Teams' and 'Season'. This also
     allows teams have different names between years but still have consitent all-time record.
     """
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    division = models.ForeignKey(Division, on_delete=models.CASCADE)
-    players = models.ManyToManyField(Player, through='PlayersInTeam')
-    captain = models.OneToOneField(Player, blank=True)
-    name =  models.CharField(max_length=128)
-    abbreviation = models.CharField(max_length=15)
-    bracket = models.IntegerField(blank=False, default=1)
-    bracket_placement = models.IntegerField(blank=True, null=True)  # Winner is marked with 0 
-    super_weekend_bracket = models.IntegerField(blank=True, null=True)
-    super_weekend_bracket_placement = models.IntegerField(blank=True, null=True)
-    super_weekend_playoff_seed = models.IntegerField(blank=True, null=True)
-
+    team = ForeignKey(Team, on_delete=models.CASCADE, related_name="season_teams")
+    division = ForeignKey(Division, on_delete=models.CASCADE, related_name="teams")
+    players = ManyToManyField(Player, through='PlayersInTeam', related_name="teams")
+    captain = OneToOneField(Player, blank=True)
+    name =  CharField(max_length=128)
+    abbreviation = CharField(max_length=15)
+    bracket = IntegerField(blank=False, default=1)
+    bracket_placement = IntegerField(blank=True, null=True)  # Winner is marked with 0 
+    super_weekend_bracket = IntegerField(blank=True, null=True)
+    super_weekend_bracket_placement = IntegerField(blank=True, null=True)
+    super_weekend_playoff_seed = IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.abbreviation} {self.division.season.year}'
@@ -128,7 +137,7 @@ class TeamsInSeason(models.Model):
         unique_together = ('season', 'team')
         ordering = ("bracket", "bracket_placement")
 
-class PlayersInTeam(models.Model):
+class PlayersInTeam(Model):
     """Breaks Many-to-Many relationship to One-to-Many with `TeamsInSeason` and `Player` models.
     The model is needed for tracking possible player transfer within season.   
 
@@ -137,9 +146,9 @@ class PlayersInTeam(models.Model):
     `active`-field shall imply what player instance is currently in use.
     NOTE: This mighty be place to use `PlayerInSeason` kind a of relationship
     """
-    team_in_season = models.ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, null=True)
-    player = models.ForeignKey(Player, on_delete=models.DO_NOTHING, null=True, related_name="all_teams")
-    stats = models.OneToOneField('SeasonStats', on_delete=models.DO_NOTHING, null=True)
+    team_in_season = ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, null=True)
+    player = ForeignKey(Player, on_delete=models.DO_NOTHING, null=True, related_name="all_teams")
+    stats = OneToOneField('SeasonStats', on_delete=models.DO_NOTHING, null=True)
     active = models.BooleanField(default=True)
     
     def __str__(self):
@@ -165,7 +174,7 @@ class PlayersInTeam(models.Model):
             UniqueConstraint('team_in_season', 'player', name="unique_player")
         ]
 
-class TransferRecord(models.Model):
+class Transfer(Model):
     """Contains all the transfer logs within seasons barring 
     the initial reservations in the begin of season.
 
@@ -174,15 +183,14 @@ class TransferRecord(models.Model):
     Quarantine period, if it's deemed apporiate by admin with "can_play_from" field.
     TODO: Player ---?
     """
-    timestamp = models.DateTimeField(default=now, editable=True, blank=False)
-    player = models.ForeignKey(Player, on_delete=models.DO_NOTHING, blank=False)
-    from_team = models.ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, blank=True, null=True)
-    to_team = models.ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, blank=True, null=True)
-    can_play_from = models.DateTimeField(default=now, editable=True, blank=True)
+    timestamp = DateTimeField(default=now, editable=True, blank=False)
+    player_in_team = ForeignKey(PlayersInTeam, on_delete=models.DO_NOTHING, blank=False)
+    to_team = ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, blank=False, null=False)
+    can_play_from = DateTimeField(default=now, editable=True, blank=True)
 
     def __str__(self):
         return (
-                f"{self.player_in_team.player} {self.from_team.abbreviation} -> "
+                f"{self.player_in_team.player} {self.player_in_team.team_in_season.abbreviation} -> "
                 f"{self.to_team.abbreviation}"
             )
     
@@ -205,7 +213,7 @@ class TransferRecord(models.Model):
             CheckConstraint(name="not_same", check=~Q(from_team=F("to_team")))
         ]
 
-class Match(models.Model):
+class Match(Model):
     """Models one NKL match. 
     
     NOTE for dev: Match type choises comes from hardcoded list. Model+ForeignKey could be 
@@ -216,27 +224,29 @@ class Match(models.Model):
     Matches link together (in playoffs) with 'Seriers'-field.
 
     """
-    division = models.ForeignKey(Division, on_delete=models.DO_NOTHING, related_name="matches")
-    match_time = models.DateTimeField()
-    field = models.IntegerField(blank=True, null=True)
-    home_first_round_score = models.IntegerField(blank=True, null=True)
-    home_second_round_score = models.IntegerField(blank=True, null=True)
-    away_first_round_score = models.IntegerField(blank=True, null=True)
-    away_second_round_score = models.IntegerField(blank=True, null=True)
-    home_team = models.ForeignKey(
+    division = ForeignKey(Division, on_delete=models.DO_NOTHING, related_name="matches")
+    seriers = ForeignKey('Seriers', null=True, on_delete=models.DO_NOTHING, related_name="matches")
+    home_team = ForeignKey(
         TeamsInSeason, 
+        null=True,
         on_delete=models.DO_NOTHING,
         related_name='home_matches'
     )
-    away_team = models.ForeignKey(
+    away_team = ForeignKey(
         TeamsInSeason,
+        null=True,
         on_delete=models.DO_NOTHING,
         related_name='away_matches'
     )
+    match_time = DateTimeField()
+    field = IntegerField(blank=True, null=True)
+    home_first_round_score = IntegerField(blank=True, null=True)
+    home_second_round_score = IntegerField(blank=True, null=True)
+    away_first_round_score = IntegerField(blank=True, null=True)
+    away_second_round_score = IntegerField(blank=True, null=True)
     is_validated = models.BooleanField(default=False)
     post_season = models.BooleanField(default=False)
-    match_type = models.IntegerField(blank=True, null=True, choices=MATCH_TYPES)
-    seriers = models.IntegerField(null=True, default=1)
+    match_type = IntegerField(blank=True, null=True, choices=MATCH_TYPES)
 
     def __str__(self):
         return f"{self.match_time.strftime("%m/%d/%Y, %H:%M")} | {self.home_team} - {self.away_team}"
@@ -263,7 +273,7 @@ class Match(models.Model):
         verbose_name_plural = 'Matches'
 
 
-class Throw(models.Model):
+class Throw(Model):
     """Set of 4 throws. Represents one player's one round throws in a match. There should be 4 
     of these in a round per team and in total 16 (2 rounds x 4 players x 2 teams). 
     
@@ -273,17 +283,17 @@ class Throw(models.Model):
 
     Saving the model should automaticly update Season Statistics and Position Statistics
     """
-    match = models.ForeignKey(Match, on_delete=models.DO_NOTHING, related_name="throws")
-    player = models.ForeignKey(PlayersInTeam, null=True, on_delete=models.DO_NOTHING, related_name="throws")
-    team = models.ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, related_name="all_throws")
-    throw_round = models.IntegerField(db_index=True)
-    throw_turn = models.IntegerField(db_index=True)
-    score_first = models.CharField(max_length=2, null=True, blank=True)
-    score_second = models.CharField(max_length=2, null=True, blank=True)
-    score_third = models.CharField(max_length=2, null=True, blank=True)
-    score_fourth = models.CharField(max_length=2, null=True, blank=True)
+    match = ForeignKey(Match, on_delete=models.DO_NOTHING, related_name="throws")
+    player = ForeignKey(PlayersInTeam, null=True, on_delete=models.DO_NOTHING, related_name="throws")
+    team = ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, related_name="all_throws")
+    throw_round = IntegerField(db_index=True)
+    throw_turn = IntegerField(db_index=True)
+    score_first = CharField(max_length=2, null=True, blank=True)
+    score_second = CharField(max_length=2, null=True, blank=True)
+    score_third = CharField(max_length=2, null=True, blank=True)
+    score_fourth = CharField(max_length=2, null=True, blank=True)
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super(Throw, self).__init__(*args, **kwargs)
         self.__position = ['score_first', 'score_second', 'score_third', 'score_fourth']
         self.__orginal_player = None
@@ -390,24 +400,24 @@ class Throw(models.Model):
 
         super().save(**kwargs)
 
-class SeasonStats(models.Model):
+class SeasonStats(Model):
     """Season Statistics for player with One-to-one relationship. This is summary model and should 
     sum of all `PositionStats` instances that have this key. `PositionStats` should be created only 
     when it's needed to avoid reduntant zero rows.
     """
-    player = models.OneToOneField(PlayersInTeam, primary_key=True, on_delete=models.DO_NOTHING)
-    periods = models.IntegerField(default=0)
-    kyykat = models.IntegerField(default=0)
-    throws = models.IntegerField(default=0)
-    pikes = models.IntegerField(default=0)
-    zeros = models.IntegerField(default=0)
-    ones = models.IntegerField(default=0)
-    twos = models.IntegerField(default=0)
-    threes = models.IntegerField(default=0)
-    fours = models.IntegerField(default=0)
-    fives = models.IntegerField(default=0)
-    gte_six = models.IntegerField(default=0)
-    scaled_points = models.IntegerField(default=0)
+    player = OneToOneField(PlayersInTeam, primary_key=True, on_delete=models.DO_NOTHING)
+    periods = IntegerField(default=0)
+    kyykat = IntegerField(default=0)
+    throws = IntegerField(default=0)
+    pikes = IntegerField(default=0)
+    zeros = IntegerField(default=0)
+    ones = IntegerField(default=0)
+    twos = IntegerField(default=0)
+    threes = IntegerField(default=0)
+    fours = IntegerField(default=0)
+    fives = IntegerField(default=0)
+    gte_six = IntegerField(default=0)
+    scaled_points = IntegerField(default=0)
 
     class Meta:
         verbose_name_plural = 'Seasons Stats'
@@ -416,29 +426,29 @@ class SeasonStats(models.Model):
         return (
             f"{self.player.player.first_name} "
             f"{self.player.player.last_name} "
-            f"{self.player.team_season.season.year} "
-            f"{self.player.team_season.current_abbreviation}"
+            f"{self.player.team_in_season.division.season.year} "
+            f"{self.player.team_in_season.abbreviation}"
         )
 
-class PositionStats(models.Model):
+class PositionStats(Model):
     """Position spesific statistics. Only if player has played in the position, only then should
     a dataclass of this be created. This is to avoid reduntant zero rows. This data should be 
     updated when saving `Throws` class. 
     """
-    seasons_stats = models.ForeignKey(SeasonStats, on_delete=models.DO_NOTHING)
-    position = models.IntegerField(default=1)
-    periods = models.IntegerField(default=0)
-    kyykat = models.IntegerField(default=0)
-    throws = models.IntegerField(default=0)
-    pikes = models.IntegerField(default=0)
-    zeros = models.IntegerField(default=0)
-    ones = models.IntegerField(default=0)
-    twos = models.IntegerField(default=0)
-    threes = models.IntegerField(default=0)
-    fours = models.IntegerField(default=0)
-    fives = models.IntegerField(default=0)
-    gte_six = models.IntegerField(default=0)
-    scaled_points = models.IntegerField(default=0)
+    seasons_stats = ForeignKey(SeasonStats, on_delete=models.DO_NOTHING)
+    position = IntegerField(default=1)
+    periods = IntegerField(default=0)
+    kyykat = IntegerField(default=0)
+    throws = IntegerField(default=0)
+    pikes = IntegerField(default=0)
+    zeros = IntegerField(default=0)
+    ones = IntegerField(default=0)
+    twos = IntegerField(default=0)
+    threes = IntegerField(default=0)
+    fours = IntegerField(default=0)
+    fives = IntegerField(default=0)
+    gte_six = IntegerField(default=0)
+    scaled_points = IntegerField(default=0)
 
     def __str__(self):
         return (
@@ -451,27 +461,73 @@ class PositionStats(models.Model):
         verbose_name_plural = 'Positions Stats'
 
 
-class Seriers(models.Model):
-    """TODO make a doctstring"""
-    seriers_type = models.IntegerField(blank=True, null=True, choices=MATCH_TYPES)
-    matches_to_win = models.IntegerField(blank=False, default=2)
-    team_A = models.ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
-    team_B = models.ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
-    winner = models.ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
-    matches = models.ManyToManyField(Match, through='MatchesInSeriers') # This is for convinience ('Related manager')
+class Seriers(Model):
+    """Connects different `Match` instances to e.g. one playoff seriers. Matches should be carefully
+    dated so that the order of the matches is conserved.
 
+    Creates automatically the matches that are at least needed to win the seriers (`matches_to_win`)
+    The match is missing the dates and field data. In the case where these are templated to the website
+    and no actual teams are known, change to the fields `team_A` or `team_B` shall change the matches
+    teams automatically IF the field was empty before.
+    
+    """
+    division = ForeignKey(Division, blank=False, null=False, on_delete=models.DO_NOTHING)
+    team_A = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
+    team_B = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
+    winner = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
+    seriers_type = IntegerField(blank=True, null=True, choices=MATCH_TYPES)
+    matches_to_win = IntegerField(blank=False, default=2)
+
+    def __init__(self, *args, **kwargs) -> None:
+        super(Seriers, self).__init__(*args, **kwargs)
+        self.__original_team_A = None
+        self.__original_team_B = None
 
     def save(self, **kwargs):
-        # TODO Make this do automatically at least matches_to_win amount of games if created.
+        if self._state.adding is True:
+            post_season = self.seriers_type not in [1, 10, 20]
+            Match.objects.bulk_create(
+                [
+                    Match(
+                        division=self.division,
+                        seriers=self,
+                        time="",
+                        home_team=self.team_A if i % 2 else self.team_B,
+                        away_team=self.team_B if i % 2 else self.team_A, 
+                        post_season=post_season,
+                        match_type=self.seriers_type,
+                    ) for i in range(1, self.matches_to_win+1)
+                ]
+            )
+        else:
+            matches: t.Iterable[Match] = self.matches.all().order_by("pk")
+            if self.__original_team_A is None and self.team_A is not None:
+                for i, match in enumerate(matches, 1):
+                    if i % 2:
+                        match.home_team = self.team_A
+                    else:
+                        match.away_team = self.team_A
+
+            if self.__original_team_B is None and self.team_B is not None:
+                for i, match in enumerate(matches, 1):
+                    if i % 2:
+                        match.home_team = self.team_B
+                    else:
+                        match.away_team = self.team_B
+
         super().save(**kwargs)
 
     class Meta:
         constraints = [
-            # Forbid team playing against itself
-            CheckConstraint(name="not_same", check=~Q(team_A=F("team_B")))
-        ]
+            CheckConstraint(condition=~Q(team_A=F("team_B")), name="not_same"),
+            CheckConstraint(condition=Q(matches_to_win__gte=1), name="to_win_gte_1"),
+            CheckConstraint(
+                condition=Q(team_A__division=F('division')) | Q(team_A=None), 
+                name="correct_division_team_A"
+            ),
+            CheckConstraint(
+                condition=Q(team_B__division=F('division')) | Q(team_B=None),
+                  name="correct_division_team_B"
+            ),
 
-class MatchesInSeriers(models.Model):
-    """TODO make a doctstring"""
-    seriers = models.ForeignKey(Seriers, on_delete=models.DO_NOTHING, blank=False)
-    match = models.OneToOneField(Match, primary_key=True, on_delete=models.DO_NOTHING, blank=False)
+        ]
