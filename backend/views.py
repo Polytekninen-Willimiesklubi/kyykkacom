@@ -4,9 +4,37 @@ from django.contrib.auth import login, logout
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
-from backend.models import (CurrentSeason, Match, PlayersInTeam, Season, Team, 
-                           TeamsInSeason, Throw, User)
-from backend.serializers import *
+from backend.models import (
+    CurrentSeason, 
+    Match, 
+    PlayersInTeam, 
+    Season, 
+    Team, 
+    TeamsInSeason, 
+    Throw, 
+    User, 
+    News
+)
+from backend.serializers import (
+    LoginUserSerializer,
+    UserSerializer,
+    CreateUserSerializer,
+    ReserveCreateSerializer,
+    ReserveListSerializer,
+    SimplePlayerSerializer,
+    PlayerAllDetailSerializer,
+    TeamListSerializer,
+    TeamListSuperWeekendSerializer,
+    TeamDetailSerializer,
+    MatchListSerializer,
+    MatchDetailSerializer,
+    MatchScoreSerializer,
+    ThrowSerializer,
+    SeasonSerializer,
+    TeamsInSeasonSerializer,
+    AdminMatchSerializer,
+    NewsSerializer,
+)
 from rest_framework import status, viewsets
 from rest_framework.generics import  (
     GenericAPIView
@@ -55,7 +83,7 @@ def getRole(user):
             role = '1'
         else:
             role = '0'
-    except PlayersInTeam.DoesNotExist as e:
+    except PlayersInTeam.DoesNotExist:
         role = '0'
     return role
 
@@ -85,7 +113,7 @@ class IsCaptain(BasePermission):
             if request.user.is_superuser:
                 return True
             return request.user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain
-        except PlayersInTeam.DoesNotExist as e:
+        except PlayersInTeam.DoesNotExist:
             return False
 
 
@@ -101,7 +129,7 @@ class IsCaptainForThrow(BasePermission):
                 team_season__season=CurrentSeason.objects.first().season,
                 is_captain=True
             ).first().player
-        except AttributeError as e:
+        except AttributeError:
             print('has_object_permission', request.user.id, obj)
             return False
 
@@ -148,7 +176,7 @@ class LoginAPI(GenericAPIView):
             team_id = player_in_team.team_season.id # FIXME this needs to find current teams somehow if player is also captain of that team
             role = getRole(user)
             # role = '1' if player_in_team.is_captain else '0'
-        except (PlayersInTeam.DoesNotExist, AttributeError) as e:
+        except (PlayersInTeam.DoesNotExist, AttributeError):
             team_id = None
             role = '0'
         response = Response({
@@ -244,8 +272,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         season = getSeason(request)
         post_season = getPostseason(request)
         super_weekend = getSuper(request)
-        if post_season == None:
-            if super_weekend == None:
+        if post_season is None:
+            if super_weekend is None:
                 key = 'all_teams_' + str(season.year)
                 all_teams = getFromCache(key)
                 if all_teams is None:
@@ -262,7 +290,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     all_teams = serializer.data
                     setToCache(key, all_teams)
     
-        elif post_season == False:
+        elif post_season is False:
             key = f'all_teams_{season.year}_regular_season'
             all_teams = getFromCache(key)
             if all_teams is None:
@@ -270,7 +298,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 serializer = TeamListSerializer(self.queryset, many=True, context={'season': season, 'post_season': False})
                 all_teams = serializer.data
                 setToCache(key, all_teams)
-        elif post_season == True:
+        elif post_season is True:
             raise NotImplementedError
         return Response(all_teams)
 
