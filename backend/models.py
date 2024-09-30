@@ -2,7 +2,16 @@ import typing as t
 from django.db import models
 
 from django.db.models import (
-    Model, F, Q, TextField, DateTimeField, CharField, OneToOneField, IntegerField, ForeignKey, ManyToManyField, QuerySet
+    F, 
+    Q,
+    Model,
+    TextField,
+    DateTimeField,
+    CharField,
+    OneToOneField,
+    IntegerField,
+    ForeignKey,
+    ManyToManyField,
 )
 from django.db.models.constraints import UniqueConstraint, CheckConstraint
 from django.utils.timezone import now
@@ -30,7 +39,7 @@ class Player(Model):
     """
     first_name = CharField(max_length=32, blank=False, default="")
     last_name = CharField(max_length=32, blank=False, default="")
-    user = OneToOneField(User, null=True, blank=True) # Optional
+    user = OneToOneField(User, null=True, blank=True, ) # Optional
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -112,9 +121,6 @@ class TeamsInSeason(Model):
     abbreviation = CharField(max_length=15)
     bracket = IntegerField(blank=False, default=1)
     bracket_placement = IntegerField(blank=True, null=True)  # Winner is marked with 0 
-    super_weekend_bracket = IntegerField(blank=True, null=True)
-    super_weekend_bracket_placement = IntegerField(blank=True, null=True)
-    super_weekend_playoff_seed = IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.abbreviation} {self.division.season.year}'
@@ -531,3 +537,19 @@ class Seriers(Model):
             ),
 
         ]
+
+class TeamsInSuperWeekend(Model):
+    """One-to-one field to reduce reduntant null columns in `TeamsInSeason` -table. Includes
+    SuperWeekend format related information.
+    """
+    teams_in_season = OneToOneField(TeamsInSeason, primary_key=True, on_delete=models.DO_NOTHING)
+    super_weekend_bracket = IntegerField(blank=True, null=True)
+    super_weekend_bracket_placement = IntegerField(blank=True, null=True)
+    super_weekend_playoff_seed = IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return (
+            f"{self.teams_in_season.division.season.year} "
+            f"{self.teams_in_season.abbreviation} "
+            f"Lohko: {self.super_weekend_bracket}"
+        )
