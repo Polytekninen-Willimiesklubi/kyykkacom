@@ -16,7 +16,6 @@ from backend.models import (
     Throw, 
     CurrentSeason, 
     TeamsInSeason, 
-    SuperWeekend,
     SeasonStats,
     PositionStats,
 )
@@ -126,6 +125,5 @@ admin.site.register(PlayersInTeam, PlayersInTeamsAdmin)
 admin.site.register(Match)
 admin.site.register(Throw)
 admin.site.register(CurrentSeason)
-admin.site.register(SuperWeekend)
 admin.site.register(SeasonStats, SeasonStatsAdmin)
 admin.site.register(PositionStats)

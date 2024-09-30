@@ -18,8 +18,13 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_swagger.views import get_swagger_view
-from utils.caching import (cache_reset_key, getFromCache, reset_match_cache,
-                           setToCache, reset_player_cache)
+from utils.caching import (
+    cache_reset_key,
+    getFromCache,
+    reset_match_cache,
+    setToCache,
+    reset_player_cache
+)
 
 schema_view = get_swagger_view(title='NKL API')
 
@@ -448,34 +453,34 @@ class SeasonsAPI(GenericAPIView):
 
         return Response((all_seasons, current_season))
     
-class SuperWeekendAPI(GenericAPIView):
-    queryset = SuperWeekend.objects.all()
+# class SuperWeekendAPI(GenericAPIView):
+#     queryset = SuperWeekend.objects.all()
 
-    def get(self, request):
-        try:
-            season_id = request.query_params.get('season')
-            if season_id:
-                season = Season.objects.get(id=season_id)
-            else:
-                raise Season.DoesNotExist
-        except (Season.DoesNotExist, ValueError):
-            season = None
-        if season is None:
-            key = 'all_superweekends'
-            super_weekends = getFromCache(key)
+#     def get(self, request):
+#         try:
+#             season_id = request.query_params.get('season')
+#             if season_id:
+#                 season = Season.objects.get(id=season_id)
+#             else:
+#                 raise Season.DoesNotExist
+#         except (Season.DoesNotExist, ValueError):
+#             season = None
+#         if season is None:
+#             key = 'all_superweekends'
+#             super_weekends = getFromCache(key)
 
-            if super_weekends is None:
-                super_weekends = SuperWeekendSerializer(self.queryset.all(), many=True).data
-                setToCache(key, super_weekends)
-        else:
-            key = f'superweekend_{str(season.year)}'
-            super_weekends = getFromCache(key)
+#             if super_weekends is None:
+#                 super_weekends = SuperWeekendSerializer(self.queryset.all(), many=True).data
+#                 setToCache(key, super_weekends)
+#         else:
+#             key = f'superweekend_{str(season.year)}'
+#             super_weekends = getFromCache(key)
 
-            if super_weekends is None:
-                self.queryset = self.queryset.get(season=season)
-                super_weekends = SuperWeekendSerializer(self.queryset).data
-                setToCache(key, super_weekends)
-        return Response(super_weekends)
+#             if super_weekends is None:
+#                 self.queryset = self.queryset.get(season=season)
+#                 super_weekends = SuperWeekendSerializer(self.queryset).data
+#                 setToCache(key, super_weekends)
+#         return Response(super_weekends)
 
 class KyykkaAdminViewSet(GenericAPIView, UpdateModelMixin):
     serializer_class = TeamsInSeasonSerializer
@@ -505,13 +510,13 @@ class KyykkaAdminMatchViewSet(GenericAPIView):
             'message': f'Something failed: {e}',
             }, status=400)
         
-class KyykkaAdminSuperViewSet(GenericAPIView, UpdateModelMixin):
-    serializer_class = SuperWeekendSerializer
-    queryset = SuperWeekend.objects.all()
-    permission_classes = [IsSuperUserOrAdmin]
+# class KyykkaAdminSuperViewSet(GenericAPIView, UpdateModelMixin):
+#     serializer_class = SuperWeekendSerializer
+#     queryset = SuperWeekend.objects.all()
+#     permission_classes = [IsSuperUserOrAdmin]
 
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
+#     def patch(self, request, *args, **kwargs):
+#         return self.partial_update(request, *args, **kwargs)
     
 class NewsAPI(GenericAPIView, UpdateModelMixin):
     serializer_class = NewsSerializer

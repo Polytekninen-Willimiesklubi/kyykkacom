@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from backend.models import (
-    SuperWeekend, 
     Team, 
     Season, 
     PlayersInTeam, 
@@ -1005,11 +1004,6 @@ class TeamsInSeasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamsInSeason
         fields = ('id', 'bracket_placement', 'super_weekend_bracket', 'super_weekend_bracket_placement', 'super_weekend_playoff_seed')
-
-class SuperWeekendSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SuperWeekend
-        fields = ('id', 'season', 'winner', 'super_weekend_no_brackets', 'super_weekend_playoff_format')
 
 class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
     matches_won = serializers.SerializerMethodField()

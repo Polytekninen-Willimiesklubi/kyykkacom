@@ -39,7 +39,7 @@ class Player(Model):
     """
     first_name = CharField(max_length=32, blank=False, default="")
     last_name = CharField(max_length=32, blank=False, default="")
-    user = OneToOneField(User, null=True, blank=True, ) # Optional
+    user = OneToOneField(User, null=True, blank=True, on_delete=models.DO_NOTHING) # Optional
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -86,26 +86,18 @@ class Division(Model):
     """Season's different seriers. 'Level' indicates the difference with in a year's season. 
     Includes information regarding brackets and playoff format
     """
-    season: Season = ForeignKey(Season, blank=False)
+    season: Season = ForeignKey(Season, blank=False, on_delete=models.DO_NOTHING)
     level = IntegerField(default=0, blank=False, choices=DIVISIONS)
     no_brackets = IntegerField(default=1, blank=False)
     playoff_format = IntegerField(default=0, blank=False, choices=PLAYOFF_FORMAT)
-    season_winner = OneToOneField('TeamsInSeason', blank=True, null=True)
-    bracket_stage_winner = OneToOneField('TeamsInSeason', blank=True, null=True)
+    season_winner = OneToOneField('TeamsInSeason', blank=True, null=True, on_delete=models.DO_NOTHING, related_name="division_winner")
+    bracket_stage_winner = OneToOneField('TeamsInSeason', blank=True, null=True, on_delete=models.DO_NOTHING, related_name="bracket_stage_winner")
 
     def __str__(self):
         return f"Kausi {self.season} {self.level}"
 
     class Meta:
         constraints = [
-            CheckConstraint(
-                condition=Q(season_winner__division=F('pk')) | Q(season_winner=None), 
-                name="winner_is_in_division"
-            ),
-            CheckConstraint(
-                condition=Q(bracket_stage_winner__division=F('pk')) | Q(bracket_stage_winner=None), 
-                name="bracket_winner_is_in_division"
-            ),
             UniqueConstraint('level', 'season', name="unique_division")
         ]
 
@@ -116,7 +108,7 @@ class TeamsInSeason(Model):
     team = ForeignKey(Team, on_delete=models.CASCADE, related_name="season_teams")
     division = ForeignKey(Division, on_delete=models.CASCADE, related_name="teams")
     players = ManyToManyField(Player, through='PlayersInTeam', related_name="teams")
-    captain = OneToOneField(Player, blank=True)
+    captain = OneToOneField(Player, blank=True, on_delete=models.DO_NOTHING)
     name =  CharField(max_length=128)
     abbreviation = CharField(max_length=15)
     bracket = IntegerField(blank=False, default=1)
@@ -140,7 +132,7 @@ class TeamsInSeason(Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        unique_together = ('season', 'team')
+        unique_together = ('division', 'team')
         ordering = ("bracket", "bracket_placement")
 
 class PlayersInTeam(Model):
@@ -202,22 +194,15 @@ class Transfer(Model):
     
     def save(self, **kwargs):
         # deactivate former and activate current team player_in_team model
-        former_handle = PlayersInTeam.objects.get(team_in_season=self.from_team, player=self.player)
-        former_handle.active = False
-        former_handle.save()
+        self.player_in_team.active = False
+        self.player_in_team.save()
         PlayersInTeam.objects.update_or_create(
             team_in_season=self.to_team,
-            player=self.player,
+            player=self.player_in_team.player,
             default={"active" : True},
             crete_defaults={"active": True}
         )
         super().save(**kwargs)
-
-    class Meta:
-        constraints = [
-            # Forbid transfer A to A
-            CheckConstraint(name="not_same", check=~Q(from_team=F("to_team")))
-        ]
 
 class Match(Model):
     """Models one NKL match. 
@@ -255,7 +240,7 @@ class Match(Model):
     match_type = IntegerField(blank=True, null=True, choices=MATCH_TYPES)
 
     def __str__(self):
-        return f"{self.match_time.strftime("%m/%d/%Y, %H:%M")} | {self.home_team} - {self.away_team}"
+        return f"{self.match_time.strftime('%m/%d/%Y, %H:%M')} | {self.home_team} - {self.away_team}"
 
     def save(self, **kwargs):
         # Make the throws if saved Match is new (created)
@@ -478,9 +463,9 @@ class Seriers(Model):
     
     """
     division = ForeignKey(Division, blank=False, null=False, on_delete=models.DO_NOTHING)
-    team_A = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
-    team_B = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
-    winner = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING)
+    team_A = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING, related_name="A_teams")
+    team_B = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING, related_name="B_teams")
+    winner = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING, related_name="winner")
     seriers_type = IntegerField(blank=True, null=True, choices=MATCH_TYPES)
     matches_to_win = IntegerField(blank=False, default=2)
 
@@ -525,17 +510,8 @@ class Seriers(Model):
 
     class Meta:
         constraints = [
-            CheckConstraint(condition=~Q(team_A=F("team_B")), name="not_same"),
+            CheckConstraint(condition=~Q(team_A=F("team_B")), name="seriers_not_same_team"),
             CheckConstraint(condition=Q(matches_to_win__gte=1), name="to_win_gte_1"),
-            CheckConstraint(
-                condition=Q(team_A__division=F('division')) | Q(team_A=None), 
-                name="correct_division_team_A"
-            ),
-            CheckConstraint(
-                condition=Q(team_B__division=F('division')) | Q(team_B=None),
-                  name="correct_division_team_B"
-            ),
-
         ]
 
 class TeamsInSuperWeekend(Model):
