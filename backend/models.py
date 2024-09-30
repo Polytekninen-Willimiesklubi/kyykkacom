@@ -39,7 +39,7 @@ class Player(Model):
     """
     first_name = CharField(max_length=32, blank=False, default="")
     last_name = CharField(max_length=32, blank=False, default="")
-    user = OneToOneField(User, null=True, blank=True, on_delete=models.DO_NOTHING) # Optional
+    user = OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE) # Optional
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -86,12 +86,12 @@ class Division(Model):
     """Season's different seriers. 'Level' indicates the difference with in a year's season. 
     Includes information regarding brackets and playoff format
     """
-    season: Season = ForeignKey(Season, blank=False, on_delete=models.DO_NOTHING)
+    season: Season = ForeignKey(Season, blank=False, on_delete=models.CASCADE)
     level = IntegerField(default=0, blank=False, choices=DIVISIONS)
     no_brackets = IntegerField(default=1, blank=False)
     playoff_format = IntegerField(default=0, blank=False, choices=PLAYOFF_FORMAT)
-    season_winner = OneToOneField('TeamsInSeason', blank=True, null=True, on_delete=models.DO_NOTHING, related_name="division_winner")
-    bracket_stage_winner = OneToOneField('TeamsInSeason', blank=True, null=True, on_delete=models.DO_NOTHING, related_name="bracket_stage_winner")
+    season_winner = OneToOneField('TeamsInSeason', blank=True, null=True, on_delete=models.CASCADE, related_name="division_winner")
+    bracket_stage_winner = OneToOneField('TeamsInSeason', blank=True, null=True, on_delete=models.CASCADE, related_name="bracket_stage_winner")
 
     def __str__(self):
         return f"Kausi {self.season} {self.level}"
@@ -108,7 +108,7 @@ class TeamsInSeason(Model):
     team = ForeignKey(Team, on_delete=models.CASCADE, related_name="season_teams")
     division = ForeignKey(Division, on_delete=models.CASCADE, related_name="teams")
     players = ManyToManyField(Player, through='PlayersInTeam', related_name="teams")
-    captain = OneToOneField(Player, blank=True, on_delete=models.DO_NOTHING)
+    captain = OneToOneField(Player, blank=True, on_delete=models.CASCADE)
     name =  CharField(max_length=128)
     abbreviation = CharField(max_length=15)
     bracket = IntegerField(blank=False, default=1)
@@ -144,9 +144,9 @@ class PlayersInTeam(Model):
     `active`-field shall imply what player instance is currently in use.
     NOTE: This mighty be place to use `PlayerInSeason` kind a of relationship
     """
-    team_in_season = ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, null=True)
-    player = ForeignKey(Player, on_delete=models.DO_NOTHING, null=True, related_name="all_teams")
-    stats = OneToOneField('SeasonStats', on_delete=models.DO_NOTHING, null=True)
+    team_in_season = ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
+    player = ForeignKey(Player, on_delete=models.CASCADE, null=True, related_name="all_teams")
+    stats = OneToOneField('SeasonStats', on_delete=models.CASCADE, null=True)
     active = models.BooleanField(default=True)
     
     def __str__(self):
@@ -182,8 +182,8 @@ class Transfer(Model):
     TODO: Player ---?
     """
     timestamp = DateTimeField(default=now, editable=True, blank=False)
-    player_in_team = ForeignKey(PlayersInTeam, on_delete=models.DO_NOTHING, blank=False)
-    to_team = ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, blank=False, null=False)
+    player_in_team = ForeignKey(PlayersInTeam, on_delete=models.CASCADE, blank=False)
+    to_team = ForeignKey(TeamsInSeason, on_delete=models.CASCADE, blank=False, null=False)
     can_play_from = DateTimeField(default=now, editable=True, blank=True)
 
     def __str__(self):
@@ -215,18 +215,18 @@ class Match(Model):
     Matches link together (in playoffs) with 'Seriers'-field.
 
     """
-    division = ForeignKey(Division, on_delete=models.DO_NOTHING, related_name="matches")
-    seriers = ForeignKey('Seriers', null=True, on_delete=models.DO_NOTHING, related_name="matches")
+    division = ForeignKey(Division, on_delete=models.CASCADE, related_name="matches")
+    seriers = ForeignKey('Seriers', null=True, on_delete=models.CASCADE, related_name="matches")
     home_team = ForeignKey(
         TeamsInSeason, 
         null=True,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         related_name='home_matches'
     )
     away_team = ForeignKey(
         TeamsInSeason,
         null=True,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         related_name='away_matches'
     )
     match_time = DateTimeField()
@@ -274,9 +274,9 @@ class Throw(Model):
 
     Saving the model should automaticly update Season Statistics and Position Statistics
     """
-    match = ForeignKey(Match, on_delete=models.DO_NOTHING, related_name="throws")
-    player = ForeignKey(PlayersInTeam, null=True, on_delete=models.DO_NOTHING, related_name="throws")
-    team = ForeignKey(TeamsInSeason, on_delete=models.DO_NOTHING, related_name="all_throws")
+    match = ForeignKey(Match, on_delete=models.CASCADE, related_name="throws")
+    player = ForeignKey(PlayersInTeam, null=True, on_delete=models.CASCADE, related_name="throws")
+    team = ForeignKey(TeamsInSeason, on_delete=models.CASCADE, related_name="all_throws")
     throw_round = IntegerField(db_index=True)
     throw_turn = IntegerField(db_index=True)
     score_first = CharField(max_length=2, null=True, blank=True)
@@ -396,7 +396,7 @@ class SeasonStats(Model):
     sum of all `PositionStats` instances that have this key. `PositionStats` should be created only 
     when it's needed to avoid reduntant zero rows.
     """
-    player = OneToOneField(PlayersInTeam, primary_key=True, on_delete=models.DO_NOTHING)
+    player = OneToOneField(PlayersInTeam, primary_key=True, on_delete=models.CASCADE)
     periods = IntegerField(default=0)
     kyykat = IntegerField(default=0)
     throws = IntegerField(default=0)
@@ -426,7 +426,7 @@ class PositionStats(Model):
     a dataclass of this be created. This is to avoid reduntant zero rows. This data should be 
     updated when saving `Throws` class. 
     """
-    seasons_stats = ForeignKey(SeasonStats, on_delete=models.DO_NOTHING)
+    seasons_stats = ForeignKey(SeasonStats, on_delete=models.CASCADE)
     position = IntegerField(default=1)
     periods = IntegerField(default=0)
     kyykat = IntegerField(default=0)
@@ -462,10 +462,10 @@ class Seriers(Model):
     teams automatically IF the field was empty before.
     
     """
-    division = ForeignKey(Division, blank=False, null=False, on_delete=models.DO_NOTHING)
-    team_A = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING, related_name="A_teams")
-    team_B = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING, related_name="B_teams")
-    winner = ForeignKey(TeamsInSeason, null=True, on_delete=models.DO_NOTHING, related_name="winner")
+    division = ForeignKey(Division, blank=False, null=False, on_delete=models.CASCADE)
+    team_A = ForeignKey(TeamsInSeason, null=True, on_delete=models.CASCADE, related_name="A_teams")
+    team_B = ForeignKey(TeamsInSeason, null=True, on_delete=models.CASCADE, related_name="B_teams")
+    winner = ForeignKey(TeamsInSeason, null=True, on_delete=models.CASCADE, related_name="winner")
     seriers_type = IntegerField(blank=True, null=True, choices=MATCH_TYPES)
     matches_to_win = IntegerField(blank=False, default=2)
 
@@ -518,7 +518,7 @@ class TeamsInSuperWeekend(Model):
     """One-to-one field to reduce reduntant null columns in `TeamsInSeason` -table. Includes
     SuperWeekend format related information.
     """
-    teams_in_season = OneToOneField(TeamsInSeason, primary_key=True, on_delete=models.DO_NOTHING)
+    teams_in_season = OneToOneField(TeamsInSeason, primary_key=True, on_delete=models.CASCADE)
     super_weekend_bracket = IntegerField(blank=True, null=True)
     super_weekend_bracket_placement = IntegerField(blank=True, null=True)
     super_weekend_playoff_seed = IntegerField(blank=True, null=True)
