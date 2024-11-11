@@ -108,7 +108,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
     
     const pairWinners = ref([
-        {'year': 2024, 'first' : 'TBA', 'second': "TBA"},
+        {'year': 2024, 'first' : 'Totti Sillanpää, Oskari Ekholm', 'second': "Eemil Ivars, Olli Aula"},
         {'year': 2023, 'first' : 'Erik Kuitunen, Totti Sillanpää', 'second': "Mikko 'Temmi' Kuusio, Pasi Kortelainen"},
         {'year': 2023, 'first' : 'Erik Kuitunen, Jarno Mikkola', 'second': "Totti Sillanpää, Veikka Immonen"},
         {'year': 2022, 'first' : 'Lassi Onne, Elmo Pärssinen', 'second': "Jarno Mikkola, Totti Sillanpää"},
@@ -391,7 +391,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const stars = ref([
-        {'year': 2024, 'first' : 'TBA', 'second' : 'TBA' },
+        {'year': 2024, 'first' : '⭐ Sami Valjakka, Lauri Sorsa', 'second' : '⭐ Eino Auvinen, Matias Ylätalo' },
         {'year': 2023, 'first' : '⭐ Totti Sillanpää, Juho Sallasmaa', 'second' : '⭐ lassi onne, Veeti Sistonen' },
         {'year': 2022, 'first' : '⭐ Sami Valjakka, Antti Koivulahti', 'second' : '⭐ Jarno Mikkola, Katja Rossi' },
         {'year': 2021, 'first' : '⭐ Elmo Pärssinen, Outi Jaakkola', 'second' : '⭐ Jarno Mikkola, Vilma Rantanen' },
