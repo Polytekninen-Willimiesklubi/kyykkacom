@@ -59,7 +59,7 @@
             </span><br />
             
             <div class="text-h6 mt-2 mb-2">Talvella</div>
-            <li class="ml-5">Jos lunta on satanut kevyesti kentän päälle, voi olla parempi tampata lumi kenttään kiinni vetäen lumikolalla kyykkälaatikko (tai vapaaehtoinen teekkaria/ihmistä).</li>
+            <li class="ml-5">Jos lunta on satanut kevyesti kentän päälle, voi olla parempi tampata lumi kenttään kiinni vetäen lumikolalla kyykkälaatikkoa (tai vapaaehtoista teekkaria/ihmistä).</li>
             <li class="ml-5">Älä turhaan raavi kenttää lanalla. Lisää mielummin lunta kolalla ja poista ylimääräinen</li>
 
 
