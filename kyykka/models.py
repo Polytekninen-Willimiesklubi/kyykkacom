@@ -152,7 +152,7 @@ class Throw(models.Model):
 
 class News(models.Model):
     header = models.TextField()
-    writer = models.TextField()
+    writer = models.TextField(default="Anon")
     date = models.DateTimeField()
     text = models.TextField()
 
