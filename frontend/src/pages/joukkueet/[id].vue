@@ -216,6 +216,11 @@
   </div>
 </template>
 
+<route lang="yaml">
+  meta:
+      layout: "withoutSidebar"
+</route>
+
 <script setup>
 import { useTeamsStore } from '@/stores/teams.store';
 import { useAuthStore } from '@/stores/auth.store';
