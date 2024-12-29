@@ -48,15 +48,17 @@
         :text="item.title"
         :to="item.route + userStore.teamId"
         v-else-if="item.title=='Oma Joukkue' 
-          && userStore.loggedIn && userStore.teamId != 'null' 
-          && userStore.teamId"
+          && userStore.loggedIn && userStore.teamId != 'null'"
       />
       <v-btn 
         class="hidden-md-and-down"
         :text="item.title"
         :to="item.route"
-        v-else-if="item.if_clause === undefined && 
-        item.title != 'Koti' || item.if_clause"
+        v-else-if="
+        item.if_clause === undefined 
+        && item.title != 'Koti' 
+        && item.title != 'Oma Joukkue' 
+        || item.if_clause"
       />
     </template>
 
