@@ -117,6 +117,12 @@ export const useHofStore = defineStore('hof', () => {
     const jaskanKarttu = ref([
         {'year': 2024, 'name' : 'Lassi Onne'},
         {'year': 2022, 'name' : 'Heikki Lohilahti'},
+        {'year': 2016, 'name' : 'Anssi Tura'},
+        {'year': 2012, 'name' : 'Paavo Leinonen'},
+        {'year': 2011, 'name' : 'Juha Varis'},
+        {'year': 2010, 'name' : "Mikko 'Temmi' Kuusio"},
+        {'year': 2009, 'name' : 'Tero Turtianen'},
+
     ]);
     
     const KCKAhti = ref([
@@ -379,7 +385,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2023, 'first' : 'MaHaLasKu', 'second' : 'VSOP' },
         {'year': 2022, 'first' : 'Booga', 'second' : "MaHaLasKu" },
         {'year': 2021, 'first' : 'MaHaLasKu', 'second' : "Ei" },
-        {'year': 2020, 'first' : 'MaHaLasKu', 'second': "Ei (?)"},
+        {'year': 2020, 'first' : 'MaHaLasKu', 'second': "Ei"},
         {'year': 2019, 'first' : '?', 'second': "?"},
         {'year': 2018, 'first' : '?', 'second': "?"},
         {'year': 2017, 'first' : '?', 'second': "?"},
