@@ -9,7 +9,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
     const seasonsStats = ref({});
     const selectedSeasonId = ref(null);
     const unReservedPlayers = ref([]);
-    const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')));
+    const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')) ? JSON.parse(localStorage.getItem('allTeams')) : []);
     const loading = ref(false);
     const loaded = ref(false);
     const singleLoading = ref(false);

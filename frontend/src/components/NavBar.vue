@@ -155,7 +155,7 @@ const userStore = useAuthStore();
 
 const drawer = ref(false);
 
-if (!navStore.seasons.length) {
+if (navStore.seasons && !navStore.seasons.length) {
   navStore.getSeasons();
 }
 </script>

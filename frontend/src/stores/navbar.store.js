@@ -1,11 +1,11 @@
 import { useTeamsStore } from "@/stores/teams.store";
 import { seasonsMappings } from "@/tournament_templates";
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/seasons/`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/seasons`;
 
 export const useNavBarStore = defineStore('navbar', () => {
-    const selectedSeason = ref(JSON.parse(localStorage.getItem('selectedSeason')));
-    const seasons = ref(JSON.parse(localStorage.getItem('allSeasons')));
+    const selectedSeason = ref(JSON.parse(localStorage.getItem('selectedSeason')) ? JSON.parse(localStorage.getItem('selectedSeason')) : []);
+    const seasons = ref(JSON.parse(localStorage.getItem('allSeasons')) ? JSON.parse(localStorage.getItem('allSeasons')) : []);
 
     const seasonId = computed(() => {
         if (selectedSeason.value === null || selectedSeason.value.id === null) return undefined;
@@ -22,8 +22,15 @@ export const useNavBarStore = defineStore('navbar', () => {
         return seasonsMappings[playoffFormat.value].playoffLines
     })
 
-    function setSelectedSeasonById(id) {
+    async function setSelectedSeasonById(id) {
         const teamStore = useTeamsStore();
+        if (seasons.value === null) {
+            await getSeasons();
+            console.log("jotain")
+            console.log(seasons.value)
+
+        }
+        console.log(seasons.value)
         selectedSeason.value = seasons.value.find(element => element.id == id)
         localStorage.setItem('selectedSeason', JSON.stringify(selectedSeason.value))
         teamStore.getTeams();
