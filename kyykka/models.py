@@ -82,6 +82,7 @@ class TeamsInSeason(models.Model):
 
     class Meta:
         unique_together = ('season', 'team')
+        ordering = ("bracket", "bracket_placement")
 
     def __str__(self):
         return f'{self.current_abbreviation} {self.season.year}'
@@ -151,6 +152,7 @@ class Throw(models.Model):
 
 class News(models.Model):
     header = models.TextField()
+    writer = models.TextField(default="Anon")
     date = models.DateTimeField()
     text = models.TextField()
 

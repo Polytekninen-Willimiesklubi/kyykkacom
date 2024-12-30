@@ -1,51 +1,21 @@
-import '@babel/polyfill';
-import "vuetify/dist/vuetify.min.css";
-import Vue from 'vue';
-import Vuetify from 'vuetify';
-import App from './App.vue';
-import router from './router';
-import VueResource from 'vue-resource';
-import VueSession from 'vue-session';
-import VueMoment from 'vue-moment';
-import VueLuxon from 'vue-luxon';
-import 'material-design-icons-iconfont/dist/material-design-icons.css';
+/**
+ * main.js
+ *
+ * Bootstraps Vuetify and other plugins then mounts the App`
+ */
 
-Vue.config.productionTip = false;
+// Plugins
+import { registerPlugins } from '@/plugins'
 
-export const eventBus = new Vue();
+// Components
+import App from './App.vue'
 
-Vue.use(VueResource);
-Vue.use(VueSession);
-Vue.use(VueLuxon);
-Vue.use(VueMoment)
-Vue.use(Vuetify);
+// Composables
+import { createApp } from 'vue'
+import './index.css'
 
- Vue.http.options.root = 'https://kyykka.com'
-// Vue.http.options.root = 'http://localhost:8000'
+const app = createApp(App)
 
-Vue.mixin({
-    methods: {
-        getCookie: function (name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-    }
-})
+registerPlugins(app)
 
-new Vue({
-    vuetify: new Vuetify(),
-    router,
-    render: function (h) {
-        return h(App);
-    }
-}).$mount('#app');
+app.mount('#app')

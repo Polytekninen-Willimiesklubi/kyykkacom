@@ -1,140 +1,78 @@
 <template>
   <v-dialog v-model="dialog" persistent width="600px">
-    <template v-slot:activator="{on}">
-      <v-btn class="hidden-lg-and-up mb-5 ml-1" width="100%" v-on="on">Log In</v-btn>
-      <v-btn class="hidden-md-and-down" v-on="on">Log in</v-btn>
+    <template #activator="{ props: activatorProps }">
+      <v-btn
+        @click="dialog = !dialog"
+        v-bind="activatorProps"
+        text="Kirjaudu"
+        class="hidden-lg-and-up mb-5 ml-1" 
+        width="100%"
+      />
+      <v-btn
+        @click="dialog = !dialog"
+        v-bind="activatorProps"
+        class="hidden-md-and-down"
+        text="Kirjaudu"
+      />
     </template>
-    <v-card>
-      <v-card-title>
-        <span class="headline">Log In</span>
-      </v-card-title>
-      <v-card-text>
-        <v-alert
-          :value="alert"
-          type="info"
-          transition="scale-transition"
-          outlined
-        >Invalid user credentials.</v-alert>
-        <v-container grid-list-md>
-          <v-layout wrap>
-            <v-flex xs12>
-              <v-text-field v-model="credentials.username" color="red darken-1" label="Email*" required></v-text-field>
-            </v-flex>
-            <v-flex xs12>
-              <v-text-field
-                v-model="credentials.password"
-                label="Password*"
-                type="password"
-                color="red darken-1"
-                required
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
+    <v-card title="Kirjaudu sisään">
+      <v-container>
+        <v-row>
+          <v-col>
+            <v-alert 
+              :model-value="authStore.alert" 
+              type="error" 
+              transition="scale-transition" 
+              outlined
+            >
+              <b>Kirjautuminen epäonnistui</b>
+            </v-alert>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="7">
+            <v-text-field 
+              v-model="authStore.credentials.username" 
+              color="red darken-1" 
+              label="Sähköposti" 
+              required
+            />
+          </v-col>
+          <v-spacer />
+          <v-col cols="5">
+            <v-text-field
+              v-model="authStore.credentials.password"
+              label="Salasana"
+              type="password"
+              color="red darken-1"
+              required
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+      <template #actions>
+        <v-container>  
+          <v-btn
+            color="red darken-1" 
+            text="Kirjaudu" 
+            @click="authStore.logIn()"
+          />
+          <v-btn
+            color="red darken-1"
+            text="Sulje"
+            @click="dialog = !dialog, authStore.alert = false"
+          />
         </v-container>
-        <small>*indicates required field</small>
-      </v-card-text>
-      <v-card-actions class=justify-center>
-        <v-btn color="red darken-1" text @click="login">Log in</v-btn>
-        <v-btn color="red darken-1" text @click="dialog = false, alert=false">Close</v-btn>
-      </v-card-actions>
+      </template>
     </v-card>
   </v-dialog>
 </template>
 
-<script>
-import { eventBus } from '../main';
+<script setup>
+import { useAuthStore } from '@/stores/auth.store';
 
-export default {
-    name: 'LogIn',
-    data: () => ({
-        dialog: false,
-        alert: false,
-        valid: true,
-        loading: false,
-        credentials: {}
-    }),
-    methods: {
-        changeLogin(username) {
-            eventBus.$emit('loginChanged', username);
-        },
-        login() {
-            this.$session.start();
-            this.$http
-                .post('api/login/', this.credentials, {
-                    headers: {
-                        'X-CSRFToken': this.getCookie('csrftoken')
-                    },
-                  'withCredentials': true,
-                })
-                .then(function(response) {
-                    if (response.status === 200) {
-                        this.dialog = !this.dialog;
-                        this.alert = false;
+const dialog = ref(false);
 
-                        localStorage.role_id = response.body.role;
-                        localStorage.user_id = response.body.user.id;
-                        localStorage.team_id = response.body.team_id
-                        localStorage.player_name = response.body.user.player_name;
+const authStore = useAuthStore();
 
-                        this.$session.set('role_id', response.body.role);
-                        this.$session.set('user_id', response.body.user.id);
-                        this.changeLogin(response.body.user.player_name);
-                    }
-                    },
-                    response => {
-                        this.alert = !this.alert;
-                          if (response.status == 403) {
-                            this.$http
-                              .get('api/csrf/', {'withCredentials': true})
-                              .then(function(response) {
-                                  if (response.status === 200) {
-                                    this.$http
-                                        .post('api/login/', this.credentials, {
-                                            headers: {
-                                                'X-CSRFToken': this.getCookie('csrftoken')
-                                            },
-                                          'withCredentials': true,
-                                        })
-                                        .then(function(response) {
-                                            if (response.status === 200) {
-                                                this.dialog = !this.dialog;
-                                                this.alert = false;
-
-                                                localStorage.role_id = response.body.role;
-                                                localStorage.user_id = response.body.user.id;
-                                                localStorage.team_id = response.body.team_id
-                                                localStorage.player_name = response.body.user.player_name;
-
-                                                this.$session.set('role_id', response.body.role);
-                                                this.$session.set('user_id', response.body.user.id);
-                                                this.changeLogin(response.body.user.player_name);
-                                            }
-                                            },
-                                            response => {
-                                                this.alert = !this.alert;
-                                            }).catch(function(response) {
-                                                console.log(response);
-                                          });
-                                  }
-                              });
-  
-                        }
-
-                    }).catch(function(response) {
-                        console.log(response);
-                  });
-            }
-    },
-    mounted() {
-      if (localStorage.role_id && localStorage.user_id) {
-        this.$session.set('role_id', localStorage.role_id);
-        this.$session.set('user_id', localStorage.user_id);
-        this.changeLogin(localStorage.player_name)
-      }
-      if (localStorage.csrfToken) {
-        this.$session.set('csrf', localStorage.csrfToken);
-      }
-
-    }
-};
 </script>

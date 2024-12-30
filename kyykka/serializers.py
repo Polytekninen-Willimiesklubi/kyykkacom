@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from kyykka.models import SuperWeekend, Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, Player, TeamsInSeason
+from kyykka.models import SuperWeekend, Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, Player, TeamsInSeason, News
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.db.models import Count, Sum, F, Q, Case, Value, When, IntegerField
@@ -1371,4 +1371,9 @@ class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
 class AdminMatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Match
+        fields = '__all__'
+
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
         fields = '__all__'

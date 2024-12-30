@@ -43,7 +43,9 @@ def getPostseason(request):
 
 def getRole(user):
     try:
-        if user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain:
+        if user.is_superuser:
+            role = '2'
+        elif user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain:
             role = '1'
         else:
             role = '0'
@@ -134,12 +136,12 @@ class LoginAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         login(request, user)
-        # role = getRole(user)
         try:
             current = CurrentSeason.objects.first().season
             player_in_team = PlayersInTeam.objects.filter(player=user, team_season__season=current).first()
             team_id = player_in_team.team_season.id # FIXME this needs to find current teams somehow if player is also captain of that team
-            role = '1' if player_in_team.is_captain else '0'
+            role = getRole(user)
+            # role = '1' if player_in_team.is_captain else '0'
         except (PlayersInTeam.DoesNotExist, AttributeError) as e:
             team_id = None
             role = '0'
@@ -492,7 +494,6 @@ class KyykkaAdminMatchViewSet(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         try:
-
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -513,3 +514,29 @@ class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
+    
+class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
+    serializer_class = NewsSerializer
+    queryset = News.objects.all()
+
+    def get(self, request):
+        serializer = NewsSerializer(self.queryset.all(), many=True)
+        return Response(serializer.data)
+    
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+    
+    def post(self, request):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                'success': True,
+                'message': "Uusi uutinen onnistuneesti tehty!"
+            })
+        except Exception as e:
+            return Response({
+            'success': False,
+            'message': f'Something failed: {e}',
+            }, status=400)

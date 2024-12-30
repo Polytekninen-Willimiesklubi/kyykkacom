@@ -1,35 +1,33 @@
 <template>
-  <v-app class="app">
-    <nav-bar class="mb-5"></nav-bar>
-    <v-main transition="slide-x-transition" class="content pa-0 mx-auto">
-      <router-view></router-view>
+  <v-app>
+    <v-main>
+      <router-view />
     </v-main>
   </v-app>
-</template>
+ </template>
 
-<script>
-import NavBar from '@/components/NavBar';
+<script setup>
+import {useNavBarStore} from '@/stores/navbar.store';
 
-if (!sessionStorage.season_id) {
+const store = useNavBarStore() 
+
+if (!store.selectedSeason) {
   // Index starts at 1 : 2000
-  sessionStorage.season_id = new Date().getFullYear() - 2000 + 1;
+  store.setSelectedSeasonById(new Date().getFullYear() - 2000 + 1);
 }
 
-export default {
-    name: 'App',
-    components: {
-        NavBar
-    }
-};
 </script>
 
-<style scoped>
-.content {
-    width: 90%;
+<style>
+
+#app {
+    background: url('./src/assets/kyykka_background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    --v-theme-background: rgba(0,0,0,0) !important;
+  }
+  
+.v-application {
+  --v-theme-background: rgba(0,0,0,0) !important;
 }
 
-.app {
-    background-color: transparent;
-    overflow: hidden;
-}
 </style>

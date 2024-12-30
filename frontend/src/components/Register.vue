@@ -1,172 +1,148 @@
 <template>
   <v-dialog v-model="dialog" persistent max-width="600px">
-    <template v-slot:activator="{on}">
-      <v-btn class="hidden-lg-and-up ml-1" width="100%" v-on="on">Register</v-btn>
-      <v-btn class="hidden-md-and-down" v-on="on">Register</v-btn>
+    <template v-slot:activator="{ props: activatorProps }">
+      <v-btn
+        @click="dialog = !dialog"
+        text="Register"
+        v-bind="activatorProps"
+        class="hidden-lg-and-up ml-1" 
+        width="100%"
+      />
+      <v-btn
+        @click="dialog = !dialog"
+        text="Register"
+        class="hidden-md-and-down" 
+        v-bind="activatorProps"
+      />
     </template>
-    <v-card>
-      <v-card-title>
-        <span class="headline">Rekisteröityminen</span>
-      </v-card-title>
-      <v-card-text>
-        <v-alert :value="alert" type="error" transition="scale-transition" outlined>
-          <b>Korjaa seuraava(t):</b>
-          <ul>
-            <li v-bind:key="error.id" v-for="error in errors">{{ error }}</li>
-          </ul>
-        </v-alert>
-        <v-container grid-list-md>
-          <v-layout wrap>
-            <v-layout row>
-              <v-flex xs5 sm6 md4>
-                <v-text-field color="red darken-1" v-model="credentials.first_name" label="Etunimi*" required></v-text-field>
-              </v-flex>
-              <v-flex xs5 sm6 md4 mr-5>
-                <v-text-field color="red darken-1" v-model="credentials.last_name" label="Sukunimi*" required></v-text-field>
-              </v-flex>
-              <v-flex xs2 sm2 ml-5>
-                <v-select item-color="red" color="red darken-1" v-model="credentials.number" required :items="numbers"></v-select>
-              </v-flex>
-            </v-layout>
-            <v-flex xs12>
-              <v-text-field color="red darken-1" v-model="credentials.username" label="sähköposti*" type="email" required></v-text-field>
-            </v-flex>
-            <v-flex xs12>
+    <v-card
+      title="Rekisteröityminen"
+      subtitle="Kaikki kentät pakollisia"
+    >
+      <v-form
+        validate-on="submit"
+        @submit.prevent="awaitSubmitCheck(jotain)"
+        ref="jotain"
+      >
+        <v-container>
+          <v-row>
+            <v-col>
+              <v-alert 
+                :model-value="alert" 
+                type="error" 
+                transition="scale-transition" 
+                outlined
+              >
+                <b>Jotain meni pieleen. Mahdollisesti email on jo käytössä.</b>
+              </v-alert>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
+              <v-text-field 
+                color="red darken-1" 
+                v-model="store.credentials.first_name" 
+                :rules="[v => !!v || 'Etunimi puuttuu.']"
+                label="Etunimi"
+              />
+            </v-col>
+            <v-col cols="6">
+              <!-- TODO api kysely onko username käytössä -->
+              <v-text-field 
+                color="red darken-1" 
+                v-model="store.credentials.username" 
+                :rules="[
+                  v => !!v || 'Sähköposti puuttuu.',
+                  v => store.validEmail(v) || 'Anna sähköposti mallia foo@bar.xyz.'
+                ]"
+                label="Sähköposti"
+                type="email"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
+              <v-text-field 
+                color="red darken-1" 
+                v-model="store.credentials.last_name" 
+                :rules="[v => !!v || 'Sukunimi puuttuu.']"
+                label="Sukunimi"
+              />
+            </v-col>
+            <v-col cols="6">
               <v-text-field
                 color="red darken-1"
-                v-model="credentials.password"
-                label="salasana*"
+                v-model="store.credentials.password"
+                :rules="[
+                  v => !!v || 'Salasana puuttuu.',
+                  v => v.length >= 6 || 'Salasana pitää olla vähintään 6 merkkiä pitkä.'
+                ]"
+                label="Salasana"
                 type="password"
-                required
-              ></v-text-field>
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-spacer/>
+            <v-col cols="6">
               <v-text-field
                 color="red darken-1"
-                v-model="credentials.password_check"
-                label="salasana varmistus*"
+                v-model="store.credentials.password_check"
+                :rules="[
+                  v => !!v || 'Anna Salasana uudelleen.',
+                  () => store.credentials.password === store.credentials.password_check 
+                    || 'Salasanat eivät täsmää.',
+                ]"
+                label="Salasana uudelleen"
                 type="password"
-                required
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-spacer/>
+            <v-col cols="3">
+              <v-btn
+                :loading="store.loading"
+                class="mb-2"
+                color="red darken-1"
+                text="Register"
+                type="submit"
+                block
+              />
+            </v-col>
+            <v-col cols="3">
+              <v-btn 
+                color="red darken-1" 
+                text="Close" 
+                @click="dialog = false; alert = false" 
+              />
+            </v-col>
+            <v-spacer/>
+          </v-row>
         </v-container>
-        <small>*pakollinen kenttä</small>
-      </v-card-text>
-      <v-card-actions class=justify-center>
-        <v-btn color="red darken-1" text @click="checkForm">Register</v-btn>
-        <v-btn color="red darken-1" text @click="dialog = false">Close</v-btn>
-      </v-card-actions>
+      </v-form>
     </v-card>
   </v-dialog>
 </template>
 
-<script>
-import { eventBus } from '../main';
+<script setup>
+import { useRegisterStore } from '@/stores/register.store';
 
-export default {
-    name: 'Register',
-    data: () => ({
-        dialog: false,
-        alert: false,
-        errors: [],
-        response_errors: [],
-        credentials: {},
-        numbers: []
-    }),
-    methods: {
-        register() {
-            this.$http.get('api/csrf', {'withCredentials': true});
-            this.$http
-                .post('api/register/', this.credentials, {
-                  headers: {
-                    'X-CSRFToken': this.getCookie('csrftoken')
-                  },
-                  'withCredentials': true,        
-                  })
-                .then(function(response) {
-                    this.dialog = false;
-                    this.alert = false;
+const store = useRegisterStore();
 
-                    localStorage.role_id = response.body.role;
-                    localStorage.user_id = response.body.user.id;
-                    localStorage.player_name = response.body.user.player_name;
-                    this.changeLogin();
-                })
-                .catch(function(response) {
-                    this.response_errors = response.body;
-                    this.checkForm();
-                    switch(response.status) {
-                      case 403:
-                        this.$http
-                          .get('api/csrf', {'withCredentials': true})
-                          .then(function(response) {
-                              if (response.status === 200) {
-                                  this.$http.patch(post_url, post_data, {
-                                  headers: {
-                                    'X-CSRFToken': this.getCookie('csrftoken')
-                                  },
-                                    'withCredentials': true,
-                                  }).then(function(response) {
-                                    localStorage.role_id = response.body.role;
-                                    localStorage.user_id = response.body.user.id;
-                                    localStorage.player_name = response.body.user.player_name;
-                                  })
-                              }
-                          });
-                    }
-                });
-        },
-        checkForm() {
-            this.errors = []
+const jotain = ref();
+const dialog = ref(false);
+const alert = ref(false);
 
-            if (!this.alert) {
-                this.alert = !this.alert;
-            }
+async function awaitSubmitCheck() {
+  alert.value = false;
+  const { valid } = await jotain.value.validate();
+  if (valid) {
+    let jotain = await store.register();
+    alert.value = !jotain;
+  }
+}
 
-            if (this.response_errors.username == 'This field must be unique.') {
-              this.errors.push('Sähköposti on jo käytössä.')
-            }
-
-            if (!this.credentials.first_name) {
-                this.errors.push('Etunimi puuttuu.');
-            }
-            if (!this.credentials.last_name) {
-                this.errors.push('Sukunimi puuttuu.');
-            }
-            if (!this.credentials.username) {
-                this.errors.push('Email puuttuu.');
-            } else if (!this.validEmail(this.credentials.username)) {
-                this.errors.push('Anna sähköposti mallia foo@bar.xyz.');
-            }
-            if (!this.credentials.password) {
-                this.errors.push('Salasana puuttuu.');
-            }
-            if (!this.credentials.number && this.credentials.number != 0) {
-              this.errors.push('Pelaajanumero puuttuu.');
-            }
-
-            if (this.credentials.password !== this.credentials.password_check) {
-              this.errors.push('Salasanat eivät täsmää.')
-            }
-
-            if (this.errors.length == 0) {
-                this.register();
-            }
-        },
-        changeLogin(username) {
-            eventBus.$emit(
-                'loginChanged',
-                this.credentials.first_name + ' ' + this.credentials.last_name
-            );
-        },
-        validEmail(email) {
-            var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            return re.test(email);
-        }
-    },
-    mounted() {
-        this.numbers = Array.from(Array(100).keys());
-    }
-};
 </script>
 
 <style scoped>

@@ -1,0 +1,43 @@
+(Kaikki) Pelaajat sivulla: 
+    - on-off switch pisteet/kyykkät
+        -> Kyykät -> Pisteet
+        -> Kyykät per heitto -> Pistettä per heitto
+    - NaN Arvot näkyy päällimmäisenä, jos sorttaa alimmat arvot
+        -> En löytänyt ratkaisua vuetify puolelta (4.5.-24). Ei tue enään custom-sort funktiota koko taululle
+    - Jos ei ole joukkueessa ja on 'vapaa agentti', niin näytä pelaaja sivulla
+        -> Ei toimi, nyt koska backened tietääkseni heittää sen jos on vain joukkueessa
+
+(Yksittäinen) Pelaaja sivulla:
+    - Pelaajalle oma profiili (iso muutos vaatii backend tukea)
+    - Muokkaa matsien esittelytapaa niin, että heitot erottuvat selkeämmin
+    - Heittotulosjakauma hauet ja nollat eroteltu "stackked bar" tyyppiseksi (HUOM tätä on tutkittu ja erittäin hankala toteuttaa chart.js)
+    - 'Heittokeskiarvo heittopaikassa' voisi olla heittomäärä jotenkin näkyvissä per paikka
+    - 'Heittokeskiarvo heittopaikan' statsit voisi olla näkyvissä yksittäin kausistatseissa
+
+(Kaikki) Joukkueet sivulla:
+    - Lisää statistiikkaa näkyviin, nyt aika turha sivu, kun kaikki tiedot (ja enemmän) on näkyvissä sivupalkissa
+    - Ehkä mahdollisuus katsoa vain lohkottain ja jotain lohko statseja 
+
+(Yksittäinen) Joukkue sivulla:
+    - Tarkista ja korjaa kapteenin toiminnat
+
+(Kaikki) Ottelut sivulla:
+    - Headers ei pysy paikallaan, kun "Jatkosarja on valittu"
+    - Tarkista ja korjaa kapteenin toiminnat
+
+Muuta:
+    - Piniat 'matches.store.js' ja 'match.store.js' voisi yhdistää
+    - fetchWrapper kaikille fetcheille poistaisi todella paljon koodia
+    - username api tarkistus rekistiröinnille
+
+Hall-of-fame:
+    -Tee joukkue nimistä yms. hyperlinkkejä
+
+News:
+    -Admin can edit the news from frontpage
+
+Backend:
+    -admin action to add StatiscisStats if missing
+    -admin action extension -> show if completed action for recalculate 
+    -serializers.py -> Use Statistics instead calculate
+    

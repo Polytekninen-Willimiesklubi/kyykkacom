@@ -1,49 +1,49 @@
 {
     "name": "frontend",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "private": true,
+    "type": "module",
     "scripts": {
-        "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
-        "lint": "vue-cli-service lint"
+        "dev": "vite",
+        "build": "vite build",
+        "serve": "vite preview --port 4137",
+        "lint": "eslint --fix ."
     },
     "dependencies": {
-        "@babel/polyfill": "^7.12.1",
-        "ag-charts-vue": "^8.1.0",
-        "ag-grid-vue": "^30.1.0",
-        "autoprefixer": "^10.4.16",
-        "chart.js": "^4.4.0",
-        "chokidar": "^3.5.3",
-        "luxon": "^3.4.3",
-        "material-design-icons-iconfont": "^6.1.1",
-        "moment": "^2.29.1",
-        "postcss": "^8.4.30",
-        "serialize-javascript": "^4.0.0",
-        "tailwindcss": "^3.3.3",
-        "update": "^0.7.4",
-        "vue": "^2.6.12",
-        "vue-loader": "^15.9.5",
-        "vue-luxon": "^0.10.0",
-        "vue-moment": "^4.1.0",
-        "vue-resource": "^1.5.1",
-        "vue-router": "^3.4.8",
-        "vue-session": "^1.0.0",
-        "vue-tournament-bracket": "^2.1.4",
-        "vuedraggable": "^2.24.3",
-        "vuetify": "^2.3.16"
+        "@mdi/font": "^7.4.47",
+        "@vueup/vue-quill": "^1.2.0",
+        "core-js": "^3.36.1",
+        "quill": "^2.0.2",
+        "roboto-fontface": "^0.10.0",
+        "vite-plugin-pages": "^0.32.3",
+        "vue": "^3.4.21",
+        "vue-chartjs": "^5.3.1",
+        "vue-pdf-embed": "^2.1.0",
+        "vue-tournament-bracket": "^3.0.0",
+        "vuedraggable": "^4.1.0",
+        "vuetify": "^3.6.13"
     },
     "devDependencies": {
-        "@vue/cli-service": "^5.0.8",
-        "vue-template-compiler": "^2.6.12"
-    },
-    "postcss": {
-        "plugins": {
-            "autoprefixer": {}
-        }
-    },
-    "browserslist": [
-        "> 1%",
-        "last 2 versions",
-        "not ie <= 10"
-    ]
+        "@date-io/luxon": "^3.0.0",
+        "@vitejs/plugin-vue": "^5.0.4",
+        "autoprefixer": "^10.4.19",
+        "eslint": "^8.57.0",
+        "eslint-config-standard": "^17.1.0",
+        "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-promise": "^6.1.1",
+        "eslint-plugin-vue": "^9.24.0",
+        "luxon": "^3.4.4",
+        "pinia": "^2.1.7",
+        "postcss": "^8.4.38",
+        "sass": "^1.74.1",
+        "tailwindcss": "^3.4.3",
+        "unplugin-auto-import": "^0.17.5",
+        "unplugin-fonts": "^1.1.1",
+        "unplugin-vue-components": "^0.26.0",
+        "unplugin-vue-router": "^0.10.7",
+        "vite": "^5.2.8",
+        "vite-plugin-vue-layouts": "^0.11.0",
+        "vite-plugin-vuetify": "^2.0.3",
+        "vue-router": "^4.4.3"
+    }
 }
