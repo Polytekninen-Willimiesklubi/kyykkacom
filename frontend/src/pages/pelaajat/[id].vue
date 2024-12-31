@@ -44,6 +44,7 @@
               :items="playerStore.player.stats_per_seasons"
               :loading="playerStore.loadingPlayer"
               density="compact"
+              items-per-page="-1"
               fixed-header
             >
               <!-- For god sakes is this the only way to make initial color happen???
