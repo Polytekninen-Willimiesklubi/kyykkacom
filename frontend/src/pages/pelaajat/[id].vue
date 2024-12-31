@@ -40,7 +40,7 @@
               :headers="headerPlayerSeasonStats"
               height="20em"
               no-data-text="Ei pelattuja kausia"
-              loading-text="Ladataaan kausia..."
+              loading-text="Ladataan kausia..."
               :items="playerStore.player.stats_per_seasons"
               :loading="playerStore.loadingPlayer"
               density="compact"
