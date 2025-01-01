@@ -116,7 +116,7 @@
           <v-expansion-panels>
             <v-expansion-panel
               title="Varaa pelaajia"
-              v-if="authStore.isCaptain"
+              v-if="authStore.isCaptain | authStore.isSuperUser"
             >
               <v-expansion-panel-text>
                 <v-text-field 
@@ -157,11 +157,19 @@
         </v-expansion-panel>
         <v-expansion-panel title="Ottelut">
           <v-expansion-panel-text>
+            <v-text-field 
+                class="mb-10 mt-0" 
+                style="width: 50%;"
+                color="red"
+                v-model="matchSearch"
+                label="Etsi Otteluja"
+                single-line
+              />
             <v-data-table 
               mobile-breakpoint="0"
               @click:row="handleRedirectMatches"
               color='alert'
-              :search="search"
+              :search="matchSearch"
               :headers="headersTeamMatch"
               :loading="teamStore.singleLoading"
               loading-text="Ladataan otteluita..."
@@ -241,6 +249,7 @@ const route = useRoute('/joukkueet/[id]');
 const date = useDate();
 
 const search = ref('');
+const matchSearch = ref('');
 const panel = ref([0]);
 
 
@@ -259,7 +268,7 @@ function getColor(val1, val2) {
 }
 
 teamStore.getTeamPlayers(route.params.id)
-if (authStore.loggedIn && authStore.isCaptain) {
+if (authStore.loggedIn && (authStore.isCaptain | authStore.isSuperUser)) {
   teamStore.getReserve()
 }
 
