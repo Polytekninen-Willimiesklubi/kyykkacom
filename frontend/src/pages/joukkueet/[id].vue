@@ -84,6 +84,7 @@
               loading-text="Ladataan Pelaajia..."
               no-data-text="Ei pelaajia :("
               hide-default-footer
+              items-per-page="-1"
               density="compact"
             >
               <!-- Header Tooltip -->
