@@ -169,7 +169,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
             const response = await fetch(reserveUrl, {method: 'GET'});
             const payload = await response.json();
     
-            unReservedPlayers.value = payload.filte((ele) => {ele.team.current_name !== ''}) 
+            unReservedPlayers.value = payload.filter((ele) => {ele.team.current_name !== ''}) 
         } catch (error) {
             console.log(error)
         } finally {
