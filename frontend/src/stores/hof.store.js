@@ -335,7 +335,7 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2021, 'name' : "-"},
         {'year' : 2020, 'name' : "?"},
         {'year' : 2019, 'name' : "?"},
-        {'year' : 2018, 'name' : "?"},
+        {'year' : 2018, 'name' : "Vilppu Penttilä"},
         {'year' : 2017, 'name' : "Elmo Pärssinen"},
         {'year' : 2016, 'name' : "?"},
         {'year' : 2015, 'name' : "?"},
