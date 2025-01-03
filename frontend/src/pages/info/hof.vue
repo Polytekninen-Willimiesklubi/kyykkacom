@@ -65,7 +65,7 @@
                                     </template>
                                     <template #subtitle="{ subtitle }">
                                         <span class="item_subtitle">{{ subtitle }}</span>
-                                        <a href="/info/jaska" class="a_link">{{ i.hyperlink }}</a>
+                                        <a :href=i.ref class="a_link">{{ i.hyperlink }}</a>
                                     </template>
                                 </v-list-item>
                             </template>
