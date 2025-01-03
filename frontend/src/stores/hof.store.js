@@ -179,6 +179,8 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2002, 'name' : "Sampo Kokkonen"},
         {'year': 2001, 'name' : "Sampo Kokkonen"},
         {'year': 2000, 'name' : "?"},
+        {'year': 1999, 'name' : "Tero Turtiainen"},
+        {'year': 1998, 'name' : "-"},
     ]);
     
     const last = ref([
@@ -235,6 +237,8 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2002, 'name' : "Juha Varis"},
         {'year': 2001, 'name' : "Saku Ruottinen"},
         {'year': 2000, 'name' : "?"},
+        {'year': 1999, 'name' : "Jaakko Akkanen"},
+        {'year': 1998, 'name' : "-"},
     ]);
     
     const man = ref([
@@ -298,6 +302,8 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2002, 'name' : "Juha Varis"},
         {'year': 2001, 'name' : "Tero Turtiainen"},
         {'year': 2000, 'name' : "?"},
+        {'year': 1999, 'name' : "-"},
+        {'year': 1998, 'name' : "-"},
     ]);
     
     const playoffBest = ref([
@@ -326,6 +332,8 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2002, 'name' : "Joni Kämäräinen"},
         {'year': 2001, 'name' : "Mika Alitalo"},
         {'year': 2000, 'name' : "?"},
+        {'year': 1999, 'name' : "Jaakko Akkanen"},
+        {'year': 1998, 'name' : "-"},
     ]);
     
     const rookie = ref([
@@ -354,6 +362,8 @@ export const useHofStore = defineStore('hof', () => {
         {'year': 2002, 'name' : "Janne Matikainen"},
         {'year': 2001, 'name' : "Sami Hämäläinen"},
         {'year': 2000, 'name' : "?"},
+        {'year': 1999, 'name' : "Riku Kemppainen"},
+        {'year': 1998, 'name' : "-"},
     ]);
     
     const tree = ref([
@@ -377,7 +387,14 @@ export const useHofStore = defineStore('hof', () => {
         {'year' : 2005, 'name': 'Illan Tähti', 'person': "Mikko 'Temmi' Kuusio"},
         {'year' : 2005, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Mikko Raatikainen'},
         {'year' : 2004, 'name': 'Illan Tähti', 'person': 'Katja Talvirinne'},
-        {'year' : 2004, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Jussi Ahonen'}
+        {'year' : 2004, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Jussi Ahonen'},
+
+        {'year' : 1999, 'name': 'Vuoden tuomari', 'person': 'Ossi Hämäläinen'},
+        {'year' : 1999, 'name': 'Herrasmiespelaaja', 'person': 'Jarkko Sonninen'},
+        {'year' : 1999, 'name': 'Kuvauksellisin pelaaja', 'person': 'Janne Pulli'},
+        {'year' : 1999, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Marko Parviainen'},
+        {'year' : 1999, 'name': 'Finaalien MVP', 'person': 'Riku Kemppainen'}
+
     ]);
 
     const sm = ref([
