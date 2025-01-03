@@ -1,5 +1,5 @@
 from django.contrib import admin
-from kyykka.models import Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, TeamsInSeason, SuperWeekend
+from kyykka.models import Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, TeamsInSeason, SuperWeekend, News
 
 
 # Register your models here.
@@ -29,3 +29,4 @@ admin.site.register(Match)
 admin.site.register(Throw)
 admin.site.register(CurrentSeason)
 admin.site.register(SuperWeekend)
+admin.site.register(News)
