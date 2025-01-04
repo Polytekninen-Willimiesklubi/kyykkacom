@@ -156,6 +156,11 @@ class News(models.Model):
     date = models.DateTimeField()
     text = models.TextField()
 
+    class Meta:
+        verbose_name_plural = 'News'
+
+    def __str__(self):
+        return f"{self.date.strftime('%d-%m-%y')} {self.header}"
 
 @receiver(post_save, sender=Match)
 def match_post_save_handler(sender, instance, created, **kwargs):
