@@ -82,7 +82,7 @@ class TeamsInSeason(models.Model):
 
     class Meta:
         unique_together = ('season', 'team')
-        ordering = ("bracket", "bracket_placement")
+        ordering = ("-season", "bracket", "bracket_placement")
 
     def __str__(self):
         return f'{self.current_abbreviation} {self.season.year}'
