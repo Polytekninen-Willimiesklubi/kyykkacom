@@ -82,7 +82,7 @@ class TeamsInSeason(models.Model):
 
     class Meta:
         unique_together = ('season', 'team')
-        ordering = ("bracket", "bracket_placement")
+        ordering = ("-season", "bracket", "bracket_placement")
 
     def __str__(self):
         return f'{self.current_abbreviation} {self.season.year}'
@@ -149,6 +149,9 @@ class Throw(models.Model):
     score_third = models.CharField(max_length=2, null=True, blank=True, db_index=True)
     score_fourth = models.CharField(max_length=2, null=True, blank=True, db_index=True)
 
+    def __str__(self):
+        return f"{self.match.home_team.current_abbreviation} vs. {self.match.away_team.current_abbreviation} | {MATCH_TYPES[self.match.match_type]} | {self.throw_round}. erä {self.throw_turn}. Heittopaikka"
+
 
 class News(models.Model):
     header = models.TextField()
@@ -156,6 +159,11 @@ class News(models.Model):
     date = models.DateTimeField()
     text = models.TextField()
 
+    class Meta:
+        verbose_name_plural = 'News'
+
+    def __str__(self):
+        return f"{self.date.strftime('%d-%m-%y')} {self.header}"
 
 @receiver(post_save, sender=Match)
 def match_post_save_handler(sender, instance, created, **kwargs):

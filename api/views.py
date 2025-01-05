@@ -44,13 +44,13 @@ def getPostseason(request):
 def getRole(user):
     try:
         if user.is_superuser:
-            role = '2'
+            role = 2
         elif user.playersinteam_set.get(team_season__season=CurrentSeason.objects.first().season).is_captain:
-            role = '1'
+            role = 1
         else:
-            role = '0'
+            role = 0
     except PlayersInTeam.DoesNotExist as e:
-        role = '0'
+        role = 0
     return role
 
 def getSuper(request):
@@ -144,7 +144,7 @@ class LoginAPI(generics.GenericAPIView):
             # role = '1' if player_in_team.is_captain else '0'
         except (PlayersInTeam.DoesNotExist, AttributeError) as e:
             team_id = None
-            role = '0'
+            role = 0
         response = Response({
             'success': True,
             'user': UserSerializer(user).data,

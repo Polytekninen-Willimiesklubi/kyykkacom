@@ -1,5 +1,5 @@
 from django.contrib import admin
-from kyykka.models import Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, TeamsInSeason, SuperWeekend
+from kyykka.models import Team, Season, PlayersInTeam, Match, Throw, CurrentSeason, TeamsInSeason, SuperWeekend, News
 
 
 # Register your models here.
@@ -16,16 +16,22 @@ class TeamsInSeasonInline(admin.TabularInline):
     model = TeamsInSeason
     extra = 1
 
+class ThrowsInMatchInline(admin.TabularInline):
+    model = Throw
+
 class TeamsInSeasonAdmin(admin.ModelAdmin):
     inlines = (TeamsInSeasonInline,)
 class PlayersInTeamAdmin(admin.ModelAdmin):
     inlines = (PlayersInTeamInline,)
+class ThrowsAdmin(admin.ModelAdmin):
+    inlines = (ThrowsInMatchInline,)
 
 admin.site.register(TeamsInSeason, PlayersInTeamAdmin)
 admin.site.register(Team)
-admin.site.register(Season)
+admin.site.register(Season, TeamsInSeasonAdmin)
 admin.site.register(PlayersInTeam)
 admin.site.register(Match)
 admin.site.register(Throw)
 admin.site.register(CurrentSeason)
 admin.site.register(SuperWeekend)
+admin.site.register(News)

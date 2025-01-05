@@ -2,22 +2,20 @@
 
 <template>
   <v-card>
-    <v-card-title class="pa-0 pl-3 pt-3">
-      Erä {{props.roundNumber}}
-      <v-spacer/>
-      <v-progress-circular
-        :size="20"
-        :width="2"
-        color="red"
-        indeterminate
-        v-if="loading"
-      />
-    </v-card-title>
-    <v-row v-if="!show_input" row wrap>
-      <v-card-text v-if="roundScore || roundScore == '0'">
-        <p>
-          {{teamName}}
-          <v-chip
+    <v-card-title class="pa-0 pl-3 pt-3 pb-3">
+      <v-row>
+        <v-col cols="2">
+          Erä {{ props.roundNumber }}
+        </v-col>
+        <v-spacer />
+        <v-col cols="8" style="text-align:center">
+          {{ teamName }}
+        </v-col>
+        <v-col
+          cols="2"
+          style="text-align:right; padding-right: 1em;"
+        >
+          <v-chip v-if="!showInput && (roundScore || roundScore == '0')"
             style="float:right;"
             :color="color"
             label
@@ -26,28 +24,19 @@
           >
             {{ roundScore }}
           </v-chip>
-        </p>
-      </v-card-text>
-    </v-row>
-    <v-divider />
-    <v-row v-if="show_input" row wrap>
-      <v-card-text v-if="loaded">
-        <p>
-          {{teamName}}
-          <v-text-field 
-            @input="roundScore()" 
-            style="width:10%; float:right;" 
+          <v-text-field v-else-if="showInput"
+            @input="roundStore.patchRoundScore(props.teamSide, props.roundNumber, roundScore)" 
             v-model="roundScore" 
             class="centered-input" 
-            label="total" 
+            label="Tulos" 
             maxlength="3"
           />
-        </p>
-      </v-card-text>
-    </v-row>
+        </v-col>
+      </v-row>
+    </v-card-title>
     <!-- TODO loading -->
     <v-data-table 
-      v-if="!show_input"
+      v-if="!showInput"
       mobile-breakpoint="0" 
       :headers="headersRound"
       @click:row="handleRedirect"
@@ -69,40 +58,36 @@
       <template v-slot:headers class="text-xs-center"></template>
       <template v-slot:item="props" >
         <tr>
-          <!-- <td :ref="'id_'+props.index">{{selected[props.index].player.id}}</td> -->
           <td>
             <v-select 
               item-color="red"
               color="red"
               v-model="selected[props.index].player.player_name"
-              @change="loadPlayer($event, props.index)" 
               class="text-center pr-1" 
-              placeholder="Select player" 
+              placeholder="Valitse pelaaja" 
               :items="players"
               item-title="player_name"
+              @update:model-value="roundStore.updateThrower(selected[props.index])"
               single-line
             />
           </td>
-          <td v-for="i in ['first', 'second', 'third', 'fourth']">
+          <td v-for="throwString in ['first', 'second', 'third', 'fourth']">
             <v-text-field 
               color="red"
-              v-model="selected[props.index]['score_'+ i]"
-              :ref="i+'_throw_'+props.index"
               class="centered-input"
               maxlength="2"
-              @input="sumTotal(props.index)"
+              v-model="selected[props.index]['score_'+ throwString]"
+              @input="
+                roundStore.updateThrowScore('score_'+ throwString, selected[props.index]);
+                updateThrowTotal(selected[props.index])
+              "
               @keypress="isNumber($event)"
             />
           </td>
-          <td 
-            class="centered-input" 
-            style="font-size:18px" 
-            :ref="'throw_sum_'+props.index"
-          >
+          <td class="centered-input" style="font-size:18px">
             {{selected[props.index]['score_total']}}
           </td>
         </tr>
-        
       </template>
       <template #bottom></template> <!-- This hides the pagination controls-->
     </v-data-table>
@@ -111,38 +96,46 @@
 
 <script setup>
 import { headersRound } from '@/stores/headers';
+import { useRoundStore } from '@/stores/round.store'
 
 const props = defineProps({
     color: String,
     matchData: Object,
     roundNumber: String,
     teamSide: String,
-})
+});
+
+const roundStore = useRoundStore();
 
 const roundString = props.roundNumber === '1' ? 'first_round' : 'second_round';
 
 const data = props.matchData[roundString][props.teamSide];
-const roundScore = props.matchData[props.teamSide + '_' + roundString + '_score'];
-const players = props.matchData[props.teamSide+'_team'].players
-const teamName = props.matchData[props.teamSide+'_team'].current_abbreviation
+const roundScore = ref(props.matchData[props.teamSide + '_' + roundString + '_score']);
+const players = props.matchData[props.teamSide+'_team'].players;
+const teamName = props.matchData[props.teamSide+'_team'].current_abbreviation;
 
-const select = [];
-const tmp_selected = [];
+const select = ref([]);
+const selected = ref([]);
+const showInput = ref(false);
 
 data.forEach(function (item) {
-  tmp_selected.push(item)
+  selected.value.push(item)
 })
-const selected = tmp_selected;
-const loaded = true;
-let show_input
-if (!props.matchData.is_validated) {
-  if (localStorage.team_id == props.matchData.home_team.id) {
-    show_input = (localStorage.role_id == 1)
-  }
+
+if (
+  !props.matchData.is_validated
+  && localStorage.teamId == props.matchData.home_team.id 
+  && (localStorage.roleId == 1 || localStorage.roleId == 2)
+) {
+  showInput.value = true;
+} else {
+  showInput.value = false;
 }
 
 function handleRedirect (value, row) {
-  location.href = '/pelaajat/' + row.item.player.id
+  if (row.item.player.id !== undefined) {
+    location.href = '/pelaajat/' + row.item.player.id;
+  }
 }
 
 function isNumber(evt) {
@@ -157,20 +150,29 @@ function isNumber(evt) {
   }
 }
 
-function loadPlayer(player, index) {
-  // Finds the selected player object from the dataset and sets it's id to the id field.
-  const obj = props.matchData[props.teamSide + '_team'].players.find(o => o.player_name === player)
-  this.$refs['id_' + index].innerHTML = obj.id
-  select = []
-  sumTotal(index)
+function updateThrowTotal(throwerObject) {
+  throwerObject["score_total"] = 0
+  
+  for (let order of ["first", "second", "third", "fourth"]) {
+    let score = throwerObject[`score_${order}`];
+    let number;
+    if (score.toLowerCase() === "h" || score.toLowerCase() === "e" ) {
+      number = 0
+    } else {
+      number = (!isNaN(parseInt(score))) ? parseInt(score) : 0;
+    }
+    throwerObject["score_total"] += number
+  }
 }
+
 </script>
 
 <style scoped>
 p {
   margin-bottom: 0;
   padding-bottom: 0;
-  margin-left: .7em;
+  margin-left: 0.5em;
+  font-size: large;
 }
 
 td {
