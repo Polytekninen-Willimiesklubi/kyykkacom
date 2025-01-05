@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore, getCookie } from '@/stores/auth.store';
 const baseUrl = `${import.meta.env.VITE_API_URL}/matches/`;
 
 export const useMatchStore = defineStore('match', () => {
@@ -32,7 +32,7 @@ export const useMatchStore = defineStore('match', () => {
         const index = splittedUrl[splittedUrl.length - 1]
 
         const requestOpt = {
-            'method': 'POST',
+            'method': 'PATCH',
             'headers': {
                 'X-CSRFToken': getCookie('csrftoken'),
                 'content-type': 'application/json',

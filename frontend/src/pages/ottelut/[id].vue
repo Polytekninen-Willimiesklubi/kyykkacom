@@ -129,7 +129,7 @@
           text="vahvista"
           @click="matchStore.validateClick()" 
           color="error"
-          v-if="dataReady && authStore.isCaptain" 
+          v-if="dataReady && isAwayCaptain && !matchData.is_validated"
         />
       </v-col>
     </v-row>
@@ -138,18 +138,14 @@
 
 <script setup>
 import { useMatchStore } from '@/stores/match.store';
-import { useAuthStore } from '@/stores/auth.store';
 import { useDate } from 'vuetify';
 import { useRoute } from 'vue-router/auto';
 
-const authStore = useAuthStore();
 const matchStore = useMatchStore();
-
 const route = useRoute('/ottelut/[id]');
 const date = useDate();
 
 const {matchData, dataReady, isAwayCaptain} = storeToRefs(matchStore);
-
 matchStore.getMatchData(route.params.id);
 
 /**
@@ -167,7 +163,6 @@ function getColor(teamScore, team2Score) {
     return 'yellow-accent-4';
   }
 }
-
 </script>
 
 <style scoped>
