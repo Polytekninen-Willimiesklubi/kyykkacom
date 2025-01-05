@@ -44,9 +44,9 @@ export const useRoundStore = defineStore('round', () => {
       patchRequest({[throwString]: throwObject[throwString]}, reqUrl)
     }
 
-    async function updateThrower(throwObject) {
-      const reqUrl = throwUrl + throwObject.id + "/"
-      patchRequest({"player": throwObject.player.id}, reqUrl)
+    async function updateThrower(throwObjectId, playerId) {
+      const reqUrl = throwUrl + throwObjectId + "/"
+      patchRequest({"player": playerId}, reqUrl)
     }
 
     return {

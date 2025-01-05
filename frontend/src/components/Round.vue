@@ -62,12 +62,13 @@
             <v-select 
               item-color="red"
               color="red"
-              v-model="selected[props.index].player.player_name"
+              v-model="selected[props.index].player"
               class="text-center pr-1" 
-              placeholder="Valitse pelaaja" 
+              placeholder="Valitse pelaaja"
               :items="players"
               item-title="player_name"
-              @update:model-value="roundStore.updateThrower(selected[props.index])"
+              item-value="id"
+              @update:model-value="(playerId) => roundStore.updateThrower(selected[props.index].id, playerId)"
               single-line
             />
           </td>
@@ -119,7 +120,10 @@ const selected = ref([]);
 const showInput = ref(false);
 
 data.forEach(function (item) {
-  selected.value.push(item)
+  if (Object.keys(item.player).length === 0) {
+    item.player = null;
+  }
+  selected.value.push(item);
 })
 
 if (
@@ -156,7 +160,7 @@ function updateThrowTotal(throwerObject) {
   for (let order of ["first", "second", "third", "fourth"]) {
     let score = throwerObject[`score_${order}`];
     let number;
-    if (score.toLowerCase() === "h" || score.toLowerCase() === "e" ) {
+    if (score === null || score.toLowerCase() === "h" || score.toLowerCase() === "e" ) {
       number = 0
     } else {
       number = (!isNaN(parseInt(score))) ? parseInt(score) : 0;
