@@ -1124,7 +1124,7 @@ class Match2ListSerializer(serializers.ModelSerializer):
             6 : "Neljännesvälierä",
             7 : "Kahdeksannesvälierä",
             10 : "Runkosarjafinaali",
-            20 : "Jumbofinaali",
+            20 : "Liiga Putoamiskarsinta",
             31: "SuperWeekend: Alkulohko",
             32: "SuperWeekend: Finaali",
             33: "SuperWeekend: Pronssi",
