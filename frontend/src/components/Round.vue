@@ -122,7 +122,6 @@ data.forEach(function (item) {
   selected.value.push(item)
 })
 
-console.log(selected)
 if (
   !props.matchData.is_validated
   && localStorage.teamId == props.matchData.home_team.id 
