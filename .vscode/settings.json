@@ -1,0 +1,8 @@
+{
+    "editor.rulers" : [100],
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.ruff": "explicit",
+        "source.organizeImports.ruff": "explicit",
+    }
+}
