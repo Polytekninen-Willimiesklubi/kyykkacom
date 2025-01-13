@@ -1,8 +1,13 @@
 {
-    "editor.rulers" : [100],
+    "editor.rulers": [
+        100
+    ],
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.fixAll.ruff": "explicit",
         "source.organizeImports.ruff": "explicit",
-    }
+    },
+    "gitlens.advanced.blame.customArguments": [
+        "--ignore-revs-file .git-blame-ignore-revs",
+    ]
 }
