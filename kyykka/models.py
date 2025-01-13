@@ -167,19 +167,23 @@ class Throw(models.Model):
     player = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    throw_round = models.IntegerField()
-    throw_turn = models.IntegerField()
-    score_first = models.CharField(max_length=2, null=True, blank=True, db_index=True)
-    score_second = models.CharField(max_length=2, null=True, blank=True, db_index=True)
-    score_third = models.CharField(max_length=2, null=True, blank=True, db_index=True)
-    score_fourth = models.CharField(max_length=2, null=True, blank=True, db_index=True)
+    throw_round = models.IntegerField(db_index=True)
+    throw_turn = models.IntegerField(db_index=True)
+    score_first = models.CharField(max_length=2, null=True, blank=True)
+    score_second = models.CharField(max_length=2, null=True, blank=True)
+    score_third = models.CharField(max_length=2, null=True, blank=True)
+    score_fourth = models.CharField(max_length=2, null=True, blank=True)
 
     def __str__(self):
+        match_name = (
+            MATCH_TYPES[self.match.match_type]
+            if self.match.match_type in MATCH_TYPES
+            else "Ei valittu"
+        )
         return (
             f"{self.match.home_team.current_abbreviation} vs. "
             f"{self.match.away_team.current_abbreviation} | "
-            f"{MATCH_TYPES[self.match.match_type]} | "
-            f"{self.team.current_abbreviation} | "
+            f"{match_name} | {self.team.current_abbreviation} | "
             f"{self.throw_round}. erä {self.throw_turn}. Heittopaikka"
         )
 
