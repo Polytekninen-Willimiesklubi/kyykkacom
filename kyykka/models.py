@@ -175,7 +175,13 @@ class Throw(models.Model):
     score_fourth = models.CharField(max_length=2, null=True, blank=True, db_index=True)
 
     def __str__(self):
-        return f"{self.match.home_team.current_abbreviation} vs. {self.match.away_team.current_abbreviation} | {MATCH_TYPES[self.match.match_type]} | {self.throw_round}. erä {self.throw_turn}. Heittopaikka"
+        return (
+            f"{self.match.home_team.current_abbreviation} vs. "
+            f"{self.match.away_team.current_abbreviation} | "
+            f"{MATCH_TYPES[self.match.match_type]} | "
+            f"{self.team.current_abbreviation} | "
+            f"{self.throw_round}. erä {self.throw_turn}. Heittopaikka"
+        )
 
 
 class News(models.Model):
