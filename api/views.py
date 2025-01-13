@@ -11,11 +11,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_swagger.views import get_swagger_view
 
+import kyykka.serializers as serializers
 from kyykka.models import (
     CurrentSeason,
     Match,
+    News,
     PlayersInTeam,
     Season,
+    SuperWeekend,
     Team,
     TeamsInSeason,
     Throw,
@@ -159,17 +162,16 @@ class IsSuperUserOrAdmin(permissions.BasePermission):
         return request.user.is_superuser or request.user.is_staff
 
 
-# @method_decorator(ensure_csrf_cookie, name='dispatch')
-# @method_decorator(csrf_protect, name='dispatch')
 class LoginAPI(generics.GenericAPIView):
-    # TODO: Verify what happens if eg. two browsers are used, and session ends in other one.
     """
-    Creates session for user upon successful login
+    Creates session for user upon successful login.
+    This is per instance based. Logout in other
+    browser does not end login session in other one.
     Set sessionid and CSRF to cookies
     Return User, role and team_id
     """
 
-    serializer_class = LoginUserSerializer
+    serializer_class = serializers.LoginUserSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -190,7 +192,7 @@ class LoginAPI(generics.GenericAPIView):
         response = Response(
             {
                 "success": True,
-                "user": UserSerializer(user).data,
+                "user": serializer.UserSerializer(user).data,
                 "role": role,
                 "team_id": team_id,
             }
@@ -208,7 +210,7 @@ class LogoutAPI(APIView):
 
 
 class RegistrationAPI(generics.GenericAPIView):
-    serializer_class = CreateUserSerializer
+    serializer_class = serializers.CreateUserSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -219,21 +221,21 @@ class RegistrationAPI(generics.GenericAPIView):
             {
                 "success": success,
                 "message": message,
-                "user": UserSerializer(user).data,
+                "user": serializers.UserSerializer(user).data,
                 "role": "0",
             }
         )
 
 
 class ReservePlayerAPI(generics.GenericAPIView):
-    serializer_class = ReserveCreateSerializer
+    serializer_class = serializers.ReserveCreateSerializer
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated, IsCaptain]
 
     def get(self, request):
         season = getSeason(request)
         queryset = User.objects.filter(is_superuser=False).order_by("first_name")
-        serializer = ReserveListSerializer(
+        serializer = serializers.ReserveListSerializer(
             queryset, many=True, context={"season": season}
         )
         return Response(serializer.data)
@@ -274,7 +276,7 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
             self.queryset = self.queryset.filter(
                 playersinteam__team_season__season=season
             )
-            serializer = PlayerListSerializer(
+            serializer = serializers.PlayerListSerializer(
                 self.queryset, many=True, context={"season": season}
             )
             all_players = serializer.data
@@ -282,9 +284,9 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(all_players)
 
     def retrieve(self, request, pk=None):
-        season = getSeason(request)
+        # season = getSeason(request)
         user = get_object_or_404(self.queryset, pk=pk)
-        serializer = PlayerAllDetailSerializer(user)
+        serializer = serializers.PlayerAllDetailSerializer(user)
         return Response(serializer.data)
 
 
@@ -299,13 +301,13 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         season = getSeason(request)
         post_season = getPostseason(request)
         super_weekend = getSuper(request)
-        if post_season == None:
-            if super_weekend == None:
+        if post_season is None:
+            if super_weekend is None:
                 key = "all_teams_" + str(season.year)
                 all_teams = getFromCache(key)
                 if all_teams is None:
                     self.queryset = self.queryset.filter(season=season).distinct()
-                    serializer = TeamListSerializer(
+                    serializer = serializers.TeamListSerializer(
                         self.queryset, many=True, context={"season": season}
                     )
                     all_teams = serializer.data
@@ -317,25 +319,25 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     self.queryset = self.queryset.filter(
                         season=season, super_weekend_bracket__gte=1
                     ).distinct()
-                    serializer = TeamListSuperWeekendSerializer(
+                    serializer = serializers.TeamListSuperWeekendSerializer(
                         self.queryset, many=True, context={"season": season}
                     )
                     all_teams = serializer.data
                     setToCache(key, all_teams)
 
-        elif post_season == False:
+        elif post_season is False:
             key = f"all_teams_{season.year}_regular_season"
             all_teams = getFromCache(key)
             if all_teams is None:
                 self.queryset = self.queryset.filter(season=season).distinct()
-                serializer = TeamListSerializer(
+                serializer = serializers.TeamListSerializer(
                     self.queryset,
                     many=True,
                     context={"season": season, "post_season": False},
                 )
                 all_teams = serializer.data
                 setToCache(key, all_teams)
-        elif post_season == True:
+        elif post_season is True:
             raise NotImplementedError
         return Response(all_teams)
 
@@ -365,7 +367,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 throws = Throw.objects.filter(match__is_validated=True, team=one_season)
                 season = one_season.season
                 context = {"season": season, "throws": throws}
-                one_serializer = TeamDetailSerializer(one_season, context=context)
+                one_serializer = serializers.TeamDetailSerializer(
+                    one_season, context=context
+                )
                 response_data[season.year] = one_serializer.data
                 response_data["all_time"]["score_total"] += one_serializer.data[
                     "score_total"
@@ -520,7 +524,7 @@ class MatchList(APIView):
                     self.queryset = self.queryset.filter(
                         season=season, post_season=post_season, match_type__lte=29
                     )
-                serializer = MatchListSerializer(
+                serializer = serializers.MatchListSerializer(
                     self.queryset, many=True, context={"season": season}
                 )
                 all_matches = serializer.data
@@ -532,7 +536,7 @@ class MatchList(APIView):
                 self.queryset = self.queryset.filter(
                     season=season, match_type__gte=32
                 ).filter(match_type__lte=39)
-                serializer = MatchListSerializer(
+                serializer = serializers.MatchListSerializer(
                     self.queryset, many=True, context={"season": season}
                 )
                 all_matches = serializer.data
@@ -553,7 +557,9 @@ class MatchDetail(APIView):
     def get(self, request, pk):
         season = getSeason(request)
         match = get_object_or_404(self.queryset, pk=pk)
-        serializer = MatchDetailSerializer(match, context={"season": season})
+        serializer = serializers.MatchDetailSerializer(
+            match, context={"season": season}
+        )
         return Response(serializer.data)
 
     def patch(self, request, pk, format=None):
@@ -562,7 +568,9 @@ class MatchDetail(APIView):
         self.check_object_permissions(request, match)
         # Update user session (so that it wont expire..)
         request.session.modified = True
-        serializer = MatchScoreSerializer(match, data=request.data, partial=True)
+        serializer = serializers.MatchScoreSerializer(
+            match, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             player_ids = (
@@ -576,7 +584,7 @@ class MatchDetail(APIView):
 
 
 class ThrowAPI(generics.GenericAPIView, UpdateModelMixin):
-    serializer_class = ThrowSerializer
+    serializer_class = serializers.ThrowSerializer
     queryset = Throw.objects.all()
     permission_classes = [IsAuthenticated, IsCaptain, IsCaptainForThrow]
 
@@ -594,14 +602,16 @@ class SeasonsAPI(generics.GenericAPIView):
         key = "all_seasons"
         all_seasons = getFromCache(key)
         if all_seasons is None:
-            all_seasons = SeasonSerializer(self.queryset.all(), many=True).data
+            all_seasons = serializers.SeasonSerializer(
+                self.queryset.all(), many=True
+            ).data
             setToCache(key, all_seasons)
 
         key = "current_season"
         current_season = getFromCache(key)
         if current_season is None:
             current = CurrentSeason.objects.first().season
-            current_season = SeasonSerializer(current).data
+            current_season = serializers.SeasonSerializer(current).data
             setToCache(key, current_season)
 
         return Response((all_seasons, current_season))
@@ -624,7 +634,7 @@ class SuperWeekendAPI(generics.GenericAPIView):
             super_weekends = getFromCache(key)
 
             if super_weekends is None:
-                super_weekends = SuperWeekendSerializer(
+                super_weekends = serializers.SuperWeekendSerializer(
                     self.queryset.all(), many=True
                 ).data
                 setToCache(key, super_weekends)
@@ -634,13 +644,13 @@ class SuperWeekendAPI(generics.GenericAPIView):
 
             if super_weekends is None:
                 self.queryset = self.queryset.get(season=season)
-                super_weekends = SuperWeekendSerializer(self.queryset).data
+                super_weekends = serializers.SuperWeekendSerializer(self.queryset).data
                 setToCache(key, super_weekends)
         return Response(super_weekends)
 
 
 class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
-    serializer_class = TeamsInSeasonSerializer
+    serializer_class = serializers.TeamsInSeasonSerializer
     queryset = TeamsInSeason.objects.all()
     permission_classes = [IsSuperUserOrAdmin]
 
@@ -650,7 +660,7 @@ class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
 
 
 class KyykkaAdminMatchViewSet(generics.GenericAPIView):
-    serializer_class = AdminMatchSerializer
+    serializer_class = serializers.AdminMatchSerializer
     permission_classes = [IsSuperUserOrAdmin]
 
     def post(self, request, *args, **kwargs):
@@ -670,7 +680,7 @@ class KyykkaAdminMatchViewSet(generics.GenericAPIView):
 
 
 class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
-    serializer_class = SuperWeekendSerializer
+    serializer_class = serializers.SuperWeekendSerializer
     queryset = SuperWeekend.objects.all()
     permission_classes = [IsSuperUserOrAdmin]
 
@@ -679,11 +689,11 @@ class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
 
 
 class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
-    serializer_class = NewsSerializer
+    serializer_class = serializers.NewsSerializer
     queryset = News.objects.all()
 
     def get(self, request):
-        serializer = NewsSerializer(self.queryset.all(), many=True)
+        serializer = serializers.NewsSerializer(self.queryset.all(), many=True)
         return Response(serializer.data)
 
     def patch(self, request, *args, **kwargs):
