@@ -890,8 +890,12 @@ class UserMatchSerializer(serializers.ModelSerializer):
                 if r.score_fourth is not None and r.score_fourth.isnumeric()
                 else 0
             )
-            no_throws = (r.score_first == "e") + (r.score_second == "e")
-            +(r.score_third == "e") + (r.score_fourth == "e")
+            no_throws = (
+                (r.score_first == "e")
+                + (r.score_second == "e")
+                + (r.score_third == "e")
+                + (r.score_fourth == "e")
+            )
 
             scores = score_format(
                 [r.score_first, r.score_second, r.score_third, r.score_fourth]
