@@ -13,6 +13,7 @@
         </v-col>
         <v-spacer />
       </v-row>
+      <!-- :custom-key-sort="customSorts" -->
       <v-data-table
         mobile-breakpoint="0"
         :headers="headerPlayers"
@@ -25,7 +26,7 @@
         loading-text="Ladataan pelaajia..."
         items-per-page="-1"
         density="compact"
-      >
+        >
         <!-- Header Tooltip -->
         <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
           <tr>
@@ -74,6 +75,17 @@ const search = ref('')
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.id
 }
+
+// TODO 
+// Inverses the order of which is first: desc or asc
+// const customSorts = {
+//   score_per_throw: (item1, item2, isDesc) => {
+//     console.log(isDesc)
+//     a = item1 == "NaN" ? -1 : item1
+//     b = item2 == "NaN" ? -1 : item2
+//     return b - a
+//   }
+// }
 
 watch(() => navStore.seasonId, (newId) => {
   playerStore.getPlayers();
