@@ -29,7 +29,6 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2000, 'first': 'ITKK99', 'second': 'KCK', 'third': 'SMS', 'fourth': 'TPNMP' },
         { 'year': 1999, 'first': 'TPNMP', 'second': '?', 'third': '?', 'fourth': '?' },
         { 'year': 1998, 'first': 'PKMM', 'second': '?', 'third': '?', 'fourth': '?' },
-        { 'year': 1997, 'first': '?', 'second': '?', 'third': '?', 'fourth': '?' },
     ]);
 
 
@@ -38,7 +37,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
         { 'year': 2022, 'first': 'MaHaLasKu', 'second': "Ei" },
         { 'year': 2021, 'first': 'MaHaLasKu', 'second': "Dra" },
-        { 'year': 2020, 'first': 'Dra', 'second': "Darts (?)" },
+        { 'year': 2020, 'first': 'Dra', 'second': "Ei" },
         { 'year': 2019, 'first': 'Dra', 'second': "Darts" },
         { 'year': 2018, 'first': 'Darts', 'second': "YÖK" },
         { 'year': 2017, 'first': 'Dra', 'second': "?" },
