@@ -85,18 +85,14 @@ export const useTeamsStore = defineStore('joukkue', () => {
             return []
         }
         const returnedTeams = []
-        if (navStore.selectedSeason.no_brackets > 1) {
-            for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
-                returnedTeams.push([]);
-            }
-            allTeams.value.forEach(ele => {
-                const tmp = !ele.bracket_placement ? 1 : ele.bracket_placement
-                returnedTeams[ele.bracket - 1].push([ele.current_abbreviation, tmp]);
-            });
-            return returnedTeams
-        } else {
-            return [allTeams.value]
+        for (let i = 0; i < navStore.selectedSeason.no_brackets; i++) {
+            returnedTeams.push([]);
         }
+        allTeams.value.forEach(ele => {
+            const tmp = !ele.bracket_placement ? 1 : ele.bracket_placement
+            returnedTeams[ele.bracket - 1].push([ele.current_abbreviation, tmp]);
+        });
+        return returnedTeams
     });
 
 

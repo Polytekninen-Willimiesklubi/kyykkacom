@@ -4,8 +4,8 @@
       <h1>TBD</h1>
     </div>
   </div>
-  <div v-else>
-    <div v-if="st_round.length" class="pr-10">
+  <div v-else class="d-flex">
+    <div v-if="st_round.length" class="pr-10 pt-11">
       <div v-for="listItem in st_round" :key="listItem.name" class="pt-10">
         <bracket :flat-tree="[listItem]">
           <template #player="{player}" >
@@ -127,11 +127,11 @@ function splitFirstRound() {
     return
   }
   const first_round_matches = rounds.filter(e => e.type == props.first)
-  st_round = first_round_matches
+  st_round.value = first_round_matches
   const games = playoffStages[props.first - 2]
   const winners = []
   for (const [key, el] of Object.entries(games)) {
-    const match = st_round.find(e => e.player1.name == Object.keys(el)[0] || e.player2.name == Object.keys(el)[0])
+    const match = st_round.value.find(e => e.player1.name == Object.keys(el)[0] || e.player2.name == Object.keys(el)[0])
     if (match === undefined) {
       console.log("Didn't find correct match. First round +  element: " + Object.keys(el))
       return
@@ -139,7 +139,7 @@ function splitFirstRound() {
     const [winner, loser] = el[match.player1.name] > el[match.player2.name] 
         ? [match.player1, match.player2]
         : [match.player2, match.player1];
-    const new_winner = structuredClone(winner)
+    const new_winner = structuredClone(toRaw(winner))
     new_winner.winner = null
     winners.push(new_winner)
     winner.winner = true
