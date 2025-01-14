@@ -481,6 +481,8 @@ class PlayerListSerializer(SharedPlayerSerializer):
             )
             .aggregate(Sum("scaled_points"))["scaled_points__sum"]
         )
+        if not self.scaled_points:
+            self.scaled_points = 0
         return self.scaled_points
 
     def get_scaled_points_per_throw(self, obj):
