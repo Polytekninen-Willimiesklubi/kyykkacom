@@ -7,6 +7,7 @@
         <div class="d-flex right align-self-start">
           <side-bar
             title="Runkosarja"
+            class="hidden-md-and-down"
             :headers="headersDefaultSideBar"
             :sort-by="[{key:'bracket_placement', order: 'asc'}, {key:'points_total', order: 'desc'}]"
             :teams="teamStore.bracketedTeams"

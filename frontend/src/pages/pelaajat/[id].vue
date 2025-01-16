@@ -54,7 +54,7 @@
               <template #item = {item}>
                 <tr
                   :class="{'blue-row': initalColor(item.season)}"
-                  @click="chanceSeason"
+                  @click="(val) => {chanceSeason(val); filtterItems();}"
                 >
                   <td> {{ item.season }}</td>
                   <td> {{ item.team_name }}</td>

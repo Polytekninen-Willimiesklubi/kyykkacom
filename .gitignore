@@ -1,40 +1,21 @@
 *.pyc
+*/__pycache__
 *.sqlite3
-*.swp
-*~
-*.vscode
 .venv*
 *.log
-
 *.sql
-static_files
-mysql
 
-.DS_Store
 node_modules
 /dist
-/frontend/dist
 
-/vuetify-project
 # local env files
-.env.local
-.env.*.local
+local_settings.py
+settings_local.py
 
 # Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw*
-local_settings.py
-.idea
 
 # Django production files
 /static

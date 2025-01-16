@@ -7,7 +7,7 @@
 				</v-col>
 				<v-spacer />
 				<v-col class="">
-          <div class="d-flex justify-end">
+          			<div class="d-flex justify-end">
 						<span class="text-h5 ">
 							{{ date.formatByString(date.date(props.date), 'dd.MM.yyyy') }}
 						</span>
@@ -45,10 +45,10 @@ const props = defineProps({
 const date = useDate();
 
 const smallText = () => {
-	if (props.text.length < 150) {
+	if (props.text.split(" ").length < 150) {
 		return null
 	}
-	return props.text.split(" ").slice(0, 150).join(" ") + "...."
+	return props.text.split(" ").slice(0, 150).join(" ") + " ... "
 }
 
 const showAll = ref(false);

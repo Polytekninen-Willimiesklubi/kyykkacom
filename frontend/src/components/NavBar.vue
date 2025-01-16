@@ -100,48 +100,46 @@
     <v-spacer />
     <v-app-bar-nav-icon class="hidden-lg-and-up mr-4" @click.stop="drawer = !drawer"/>
   </v-app-bar>
-    <v-navigation-drawer
-      v-model="drawer"
-      location="right"
-      absolute
-      temporary
-      dark
-    >
-      <v-list :nav="true">
-        <template v-for="item in headersNavBar">
-          <v-list-item 
-            :to=item.route v-if="item.if_clause == undefined || item.if_clause"
-            :prepend-icon="item.icon"
-            :title="item.title"  
-          />
-        </template>
-
-        <v-list-item>
-          <div class="pa-2" v-if="!userStore.loggedIn">
-            <log-in />
-            <register />
-          </div>
-          <v-btn v-else
-            text="Log out"
-            style="position:absolute;"
-            @click="userStore.logOut()"
-            :to="'/'"
-            width="95%"
-          />
-        </v-list-item>
-      </v-list>
-      <template #prepend v-if="userStore.loggedIn">
+  <v-navigation-drawer
+    v-model="drawer"
+    :location="$vuetify.display.mobile ? 'right' : undefined"
+    temporary
+  >
+    <v-list :nav="true">
+      <template v-for="item in headersNavBar">
         <v-list-item 
-          :title="userStore.playerName"
-          subtitle="Logged In"
-          two-line
-        >
-          <v-avatar
-            image="https://www.robertharding.com/watermark.php?type=preview&im=RF/RH_RF/VERTICAL/1112-5071"
-          />
-        </v-list-item>
+          :to=item.route v-if="item.if_clause == undefined || item.if_clause"
+          :prepend-icon="item.icon"
+          :title="item.title"  
+        />
       </template>
-    </v-navigation-drawer>
+
+      <v-list-item>
+        <div class="pa-2" v-if="!userStore.loggedIn">
+          <log-in />
+          <register />
+        </div>
+        <v-btn v-else
+          text="Log out"
+          style="position:absolute;"
+          @click="userStore.logOut()"
+          :to="'/'"
+          width="95%"
+        />
+      </v-list-item>
+    </v-list>
+    <template #prepend v-if="userStore.loggedIn">
+      <v-list-item 
+        :title="userStore.playerName"
+        subtitle="Logged In"
+        two-line
+      >
+        <v-avatar
+          image="https://www.robertharding.com/watermark.php?type=preview&im=RF/RH_RF/VERTICAL/1112-5071"
+        />
+      </v-list-item>
+    </template>
+  </v-navigation-drawer>
 </template>
 
 <script setup>
@@ -163,6 +161,10 @@ if (navStore.seasons && !navStore.seasons.length) {
 <style>
 .v-toolbar__content {
   overflow: visible !important;
+}
+
+body {
+  overflow: hidden;
 }
 
 a {

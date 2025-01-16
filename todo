@@ -4,8 +4,11 @@
         -> Kyykät per heitto -> Pistettä per heitto
     - NaN Arvot näkyy päällimmäisenä, jos sorttaa alimmat arvot
         -> En löytänyt ratkaisua vuetify puolelta (4.5.-24). Ei tue enään custom-sort funktiota koko taululle
+            -> custom-sort-key voi spesifioida mitkä sarakeet sortataan ja millä tavalla.
     - Jos ei ole joukkueessa ja on 'vapaa agentti', niin näytä pelaaja sivulla
         -> Ei toimi, nyt koska backened tietääkseni heittää sen jos on vain joukkueessa
+
+    - KPH pitäisi palautta 'NaN'
 
 (Yksittäinen) Pelaaja sivulla:
     - Pelaajalle oma profiili (iso muutos vaatii backend tukea)
