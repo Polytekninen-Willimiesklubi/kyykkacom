@@ -16,6 +16,10 @@ export const useNavBarStore = defineStore('navbar', () => {
         return selectedSeason.value.playoff_format;
     })
 
+    const noBrackets = computed(() => {
+        return selectedSeason.value.no_brackets;
+    })
+
     const playoffLines = computed(() => {
         if (playoffFormat.value === undefined) return [];
         if (seasonsMappings[playoffFormat.value] == undefined) return [];
@@ -47,19 +51,19 @@ export const useNavBarStore = defineStore('navbar', () => {
         try {
             let payload = null;
             if (!localStorage.allSeasons) {
-                var response = await fetch(baseUrl, {method: 'GET'});
+                var response = await fetch(baseUrl, { method: 'GET' });
                 payload = await response.json();
             }
-            const allSeasons = payload !== null 
-                ? payload[0] 
+            const allSeasons = payload !== null
+                ? payload[0]
                 : JSON.parse(localStorage.getItem('allSeasons'));
 
             allSeasons.sort((x, y) => { // This makes the current year top most
-                if (x.name < y.name) { 
+                if (x.name < y.name) {
                     return 1;
-                } else if (x.name > y.name) { 
+                } else if (x.name > y.name) {
                     return -1;
-                } else { 
+                } else {
                     return 0;
                 }
             })
@@ -68,17 +72,18 @@ export const useNavBarStore = defineStore('navbar', () => {
             localStorage.setItem('selectedSeason', JSON.stringify(selectedSeason.value))
             seasons.value = allSeasons;
             localStorage.setItem('allSeasons', JSON.stringify(allSeasons));
-            
+
 
         } catch (error) {
             console.log(error);
-            seasons.value = {error};
+            seasons.value = { error };
         }
     }
     return {
         selectedSeason,
         seasons,
         seasonId,
+        noBrackets,
         playoffFormat,
         playoffLines,
         setSelectedSeason,

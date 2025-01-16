@@ -16,7 +16,22 @@
               @update:model-value="updateFilter"
             />
           </v-col>
-          <v-spacer />
+          <v-col cols="2" v-if="matchStore.selection === 'Runkosarja' || matchStore.selection === 'Kaikki ottelut' && navStore.noBrackets >= 2">
+            <template v-for="(num, index) in navStore.noBrackets">
+              <v-btn 
+                :text="`Lohko ${String.fromCharCode(65+index)}`"
+                @click="matchStore.setSelectedBracket(index)"
+              />
+            </template>
+          </v-col>
+          <v-col cols="2">
+            <v-btn 
+              text="Tänään"
+            />
+            <v-btn 
+              text="Viikolla"
+            />
+          </v-col>
           <v-col cols="4">
             <v-text-field 
               color="red" 
@@ -111,7 +126,7 @@ const matchStore = useMatchesStore();
 const navStore = useNavBarStore();
 const date = useDate();
 
-const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'SuperWeekend'];
+const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'Pudotuspelit', 'SuperWeekend'];
 
 function itemRowBackground(item) {
   // Handles the backround color of row items
@@ -141,6 +156,11 @@ function updateFilter() {
   groupBy.value = matchStore.selection === 'Jatkosarja'
     ? [{key: 'seriers'}] : [];
 }
+
+function showOnlyBracketGames(bracket) {
+
+}
+
 
 function checkValided(item) {
   return !item.is_validated 
