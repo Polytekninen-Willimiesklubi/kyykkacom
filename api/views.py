@@ -192,7 +192,7 @@ class LoginAPI(generics.GenericAPIView):
         response = Response(
             {
                 "success": True,
-                "user": serializer.UserSerializer(user).data,
+                "user": serializers.UserSerializer(user).data,
                 "role": role,
                 "team_id": team_id,
             }
