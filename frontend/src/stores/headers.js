@@ -4,11 +4,11 @@
 
 /**
  * Checks if given value is 'NaN'. Should be used in cases where there is only postive values.
- * @param {number} value Given value to check 'NaN'
+ * @param {number | string} value Given value to check 'NaN'
  * @returns {number} Negative value if True else orginal value
 */
 function isStrNaN(value) {
-    return value === 'NaN' ? -2 : value
+    return value === 'NaN' ? -2 : Number(value)
 }
 
 /** 
