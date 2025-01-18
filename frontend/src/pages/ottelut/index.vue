@@ -88,19 +88,25 @@
         items-per-page="20"
       >
       <template #item.match_time = "{ item }">
-        <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
-        <v-icon 
-          color="gray" 
-          class="mr-3"
-          icon="info"
-        >
-          <v-tooltip 
-            v-if="checkValided(item)"
-            activator='parent'
-            text="Ottelu on validoimatta"
-            bottom
-          />
-        </v-icon>
+        <v-row>
+          <v-col cols="10">
+            <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span> 
+          </v-col>
+          <v-col cols="2">
+            <template v-if="checkValided(item)">
+              <v-tooltip
+                activator='parent'
+                text="Ottelu on validoimatta"
+                location="right"
+              />
+              <v-icon
+                color="grey"
+                icon="mdi-information"
+              />
+            </template>
+          </v-col>
+        </v-row>
+
       </template>
       <template #group-header="{item, columns, toggleGroup, isGroupOpen }">
         <tr>
@@ -189,9 +195,8 @@ function updateFilter() {
 
 
 function checkValided(item) {
-  return !item.is_validated 
-    && (parseInt(item.home_team.id) === parseInt(authStore.teamId)
-    || parseInt(item.away_team.id) === parseInt(authStore.teamId))
+  console.log(item.away_score_total, item.away_score_total !== null)
+  return !item.is_validated && item.away_score_total !== null && item.home_score_total !== null
 }
 
 matchStore.getMatches();
