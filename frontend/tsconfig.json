@@ -2,6 +2,9 @@
     "compilerOptions": {
         "outDir": "./dummy",
         "target": "ES6",
+        "types": [
+            "vite/client"
+        ],
         "lib": [
             "ES6"
         ],
