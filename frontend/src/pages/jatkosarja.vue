@@ -33,7 +33,7 @@
 </route>
 
 <script setup>
-import { useMatchesStore } from '@/stores/matches.store';
+import useMatchesStore from '@/stores/matches.store';
 import { useNavBarStore } from '@/stores/navbar.store';
 import { useTeamsStore } from '@/stores/teams.store';
 
