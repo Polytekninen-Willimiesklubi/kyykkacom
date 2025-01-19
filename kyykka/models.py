@@ -164,7 +164,7 @@ class Throw(models.Model):
     """
 
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    player = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    player = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     throw_round = models.IntegerField(db_index=True)
