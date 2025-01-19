@@ -56,8 +56,9 @@
         :to="item.route"
         v-else-if="
         item.if_clause === undefined 
-        && item.title != 'Koti' 
-        && item.title != 'Oma Joukkue' 
+        && item.title !== 'Koti' 
+        && item.title !== 'Oma Joukkue'
+        && item.title !== 'Runkosarja'
         || item.if_clause"
       />
     </template>
