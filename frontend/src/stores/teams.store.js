@@ -79,6 +79,25 @@ export const useTeamsStore = defineStore('joukkue', () => {
         return returnedTeams
     });
 
+    const secondStageBrackets = computed(() => {
+        const navStore = useNavBarStore();
+        if (navStore.selectedSeason.playoff_format !== 8 || allTeams.value.length === 0) {
+            return [[], [], []]
+        }
+        let returnedTeams = [[], [], []];
+        allTeams.value.forEach(ele => {
+            if (ele.second_stage_bracket !== null) {
+                returnedTeams[ele.second_stage_bracket - 1].push(ele);
+            } 
+        });
+        returnedTeams.forEach((ele, i) => {
+            ele.forEach((e, j) => {
+                e.order = j + 1 + i * 12
+            })
+        })
+        return returnedTeams
+    });
+
     const onlyPlacements = computed(() => {
         const navStore = useNavBarStore();
         if (navStore.selectedSeason.no_brackets === 0 || allTeams.value.length === 0) {
@@ -221,6 +240,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
         onlyPlacements,
         singleLoading,
         reserveLoading,
+        secondStageBrackets,
         // superWeekendBrackets,
         teamName,
         matches,

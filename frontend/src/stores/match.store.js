@@ -1,8 +1,8 @@
-import { useAuthStore, getCookie } from '@/stores/auth.store';
+import { useAuthStore, getCookie, fetchNewToken } from '@/stores/auth.store';
 const baseUrl = `${import.meta.env.VITE_API_URL}/matches/`;
 
 export const useMatchStore = defineStore('match', () => {
-    const matchData = ref({'jotain' : 'moi'});
+    const matchData = ref({});
     const dataReady = ref(false);
     
     const isAwayCaptain = computed(() => {
@@ -46,7 +46,7 @@ export const useMatchStore = defineStore('match', () => {
             if (!response.ok && response.status === 403) {
                 fetchNewToken();
                 requestOpt.headers['X-CSRFToken'] = getCookie('csrftoken');
-                const secondResponse = await fetch(reserveUrl + question, requestOpt);
+                const secondResponse = await fetch(baseUrl + index, requestOpt);
                 if (!secondResponse.ok) {
                     console.log("Patch request was denied: " + secondResponse);
                 }

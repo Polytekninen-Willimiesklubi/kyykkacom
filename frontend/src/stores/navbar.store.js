@@ -11,21 +11,27 @@ export const useNavBarStore = defineStore('navbar', () => {
     const seasonId = computed(() => {
         if (selectedSeason.value === null || selectedSeason.value.id === null) return undefined;
         return selectedSeason.value.id;
-    })
+    });
 
     const playoffFormat = computed(() => {
         return selectedSeason.value.playoff_format;
-    })
+    });
 
     const noBrackets = computed(() => {
         return selectedSeason.value.no_brackets;
-    })
+    });
 
     const playoffLines = computed(() => {
         if (playoffFormat.value === undefined) return [];
         if (seasonsMappings[playoffFormat.value] == undefined) return [];
         return seasonsMappings[playoffFormat.value].playoffLines
-    })
+    });
+
+    const secondStagePlayoffLines = computed(() => {
+        if (playoffFormat.value === undefined) return [];
+        if (seasonsMappings[playoffFormat.value] == undefined) return [];
+        return seasonsMappings[playoffFormat.value].second_playofflines
+    });
 
     async function setSelectedSeasonById(id) {
         const teamStore = useTeamsStore();
@@ -87,6 +93,7 @@ export const useNavBarStore = defineStore('navbar', () => {
         noBrackets,
         playoffFormat,
         playoffLines,
+        secondStagePlayoffLines,
         setSelectedSeason,
         setSelectedSeasonById,
         getSeasons,

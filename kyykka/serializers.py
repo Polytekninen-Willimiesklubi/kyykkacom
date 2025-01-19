@@ -1213,6 +1213,7 @@ class TeamListSerializer(serializers.ModelSerializer):
             "score_total",
             "bracket",
             "bracket_placement",
+            "second_stage_bracket"
         )
 
 

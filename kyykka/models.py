@@ -13,6 +13,8 @@ MATCH_TYPES = {
     5: "Puolivälierä",
     6: "Neljännesvälierä",
     7: "Kahdeksannesvälierä",
+    8: "2. Kierros",
+    9: "1. Kierros",
     10: "Runkosarjafinaali",
     20: "Jumbofinaali",
     31: "SuperWeekend: Alkulohko",
@@ -35,6 +37,7 @@ PLAYOFF_FORMAT = {
     5: "1.Kierroksen Seedaus 6 joukkueen Cup",
     6: "1.Kierroksen Seedaus 12 joukkueen Cup",
     7: "SuperWeekend OKA seedaus 15 joukkueen Cup",
+    8: "Kiinteä 30 joukkueen Cup"
 }
 
 PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
@@ -84,6 +87,7 @@ class TeamsInSeason(models.Model):
     bracket_placement = models.IntegerField(
         blank=True, null=True
     )  # Winner of the Bracket stage is marked with 0
+    second_stage_bracket = models.IntegerField(blank=True, null=True)
     super_weekend_bracket = models.IntegerField(null=True)
     super_weekend_bracket_placement = models.IntegerField(blank=True, null=True)
     super_weekend_playoff_seed = models.IntegerField(blank=True, null=True)

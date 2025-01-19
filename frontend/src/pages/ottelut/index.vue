@@ -131,7 +131,7 @@
             >
               <v-tooltip
                 activator='parent'
-                text="Koti joukkue ei ole syöttänyt lopputulosta"
+                text="Kotijoukkue ei ole syöttänyt lopputulosta"
                 location="right"
               />
               <v-icon
