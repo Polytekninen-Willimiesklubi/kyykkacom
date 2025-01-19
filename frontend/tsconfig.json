@@ -8,6 +8,7 @@
         "lib": [
             "ES6"
         ],
+        "resolveJsonModule": true,
         "checkJs": true,
         "allowJs": true,
         "skipLibCheck": true,
