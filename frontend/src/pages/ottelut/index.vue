@@ -16,7 +16,10 @@
                 @update:model-value="updateFilter"
               />
             </v-col>
-            <v-col cols="3" v-if="(matchStore.selection === 'Runkosarja' || matchStore.selection === 'Kaikki ottelut') && navStore.noBrackets >= 2"> 
+            <v-col cols="3" v-if="(
+                matchStore.selection === 'Runkosarja' || matchStore.selection === 'Kaikki ottelut'
+              ) && navStore.noBrackets >= 2"
+            > 
             <v-btn-toggle
               v-model="toggleMultiple"
               variant="outlined"
@@ -72,7 +75,6 @@
             </v-col>
           </v-row>
       </v-card-title>
-      <!-- TODO :item-class="itemRowBackground" -->
       <v-data-table
         :mobile-breakpoint=0
         :headers="matchHeaders"
@@ -84,6 +86,7 @@
         :no-data-text="!search || !matchStore.selectedMatches ? 'Ei dataa :(' : 'Ei hakutuloksia :('"
         :sort-by="[{key: 'match_time', order:'asc'}]"
         :group-by="groupBy"
+        :row-props="itemRowBackground"
         density="compact"
         items-per-page="20"
       >
@@ -93,7 +96,10 @@
             <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span> 
           </v-col>
           <v-col cols="2">
-            <template v-if="checkValided(item)">
+            <template v-if="!item.is_validated 
+              && item.away_score_total !== null 
+              && item.home_score_total !== null"
+            >
               <v-tooltip
                 activator='parent'
                 text="Ottelu on validoimatta"
@@ -102,6 +108,35 @@
               <v-icon
                 color="grey"
                 icon="mdi-information"
+              />
+            </template>
+            <template v-else-if="(authStore.isCaptain || authStore.isSuperUser)
+              && item.home_team.id === authStore.teamId 
+              && (item.away_score_total === null || item.home_score_total === null)"
+            >
+              <v-tooltip
+                activator='parent'
+                text="Syötä ottelun tulos"
+                location="right"
+              />
+              <v-icon
+                color="grey"
+                icon="mdi-alert"
+              />
+            </template>
+            <template v-else-if="(authStore.isCaptain || authStore.isSuperUser)
+              && new Date() > new Date(item.match_time)
+              && item.away_team.id === authStore.teamId
+              && (item.away_score_total === null || item.home_score_total === null)"
+            >
+              <v-tooltip
+                activator='parent'
+                text="Koti joukkue ei ole syöttänyt lopputulosta"
+                location="right"
+              />
+              <v-icon
+                color="grey"
+                icon="mdi-timer-sand"
               />
             </template>
           </v-col>
@@ -164,22 +199,21 @@ const date = useDate();
 
 const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'Pudotuspelit', 'SuperWeekend'];
 
-// function itemRowBackground(item) {
-//   // Handles the backround color of row items
-//   const matchDate = moment(item.match_time).format('YYYY-MM-DD HH:MM')
-//   const currentTime = moment(Date.now()).format('YYYY-MM-DD HH:MM')
-
-//   if (!this.team_id) {
-//     return
-//   }
-
-//   return !item.is_validated && matchDate < currentTime 
-//     && (
-//       parseInt(item.home_team.id) === parseInt(this.team_id) 
-//       || parseInt(item.away_team.id) === parseInt(this.team_id)
-//     )
-//     ? 'row__background__style_1' : 'row__background__style_2';
-// }
+/**
+ * @description Checks match list rows if background needs to change to alert captain.
+ * @param row Single row from datatable, should contain `match_time`, `home_team.id` and `away_team.id` attribute.
+ * @returns {object} Object with class string. Should point scoped style in this file
+ */
+function itemRowBackground(row) {
+  if (!authStore.teamId || !(authStore.isCaptain || authStore.isSuperUser)) {
+    return {class: 'actions_not_needed'};
+  }
+  if (row.item.is_validated || new Date(row.item.match_time) > new Date()) {
+    return {class: 'actions_not_needed'};
+  }
+  return row.item.home_team.id === authStore.teamId || row.item.away_team.id === authStore.teamId
+    ? {class: 'captain_actions_needed'} : {class: 'actions_not_needed'};
+}
 
 function handleRedirect (value, row) {
   location.href = '/ottelut/' + row.item.id;
@@ -193,12 +227,6 @@ function updateFilter() {
     ? [{key: 'seriers'}] : [];
 }
 
-
-function checkValided(item) {
-  console.log(item.away_score_total, item.away_score_total !== null)
-  return !item.is_validated && item.away_score_total !== null && item.home_score_total !== null
-}
-
 matchStore.getMatches();
 updateFilter();
 
@@ -209,11 +237,11 @@ watch(() => navStore.seasonId, (newId) => {
 </script>
 
 <style>
-.row__background__style_1 {
-  background-color: rgba(195, 20, 20, 0.781) !important;
+.captain_actions_needed {
+  background-color: #EF9A9A !important;
 }
 
-.row__background__style_2 {
+.actions_not_needed {
   background-color: white;
 }
 </style>
