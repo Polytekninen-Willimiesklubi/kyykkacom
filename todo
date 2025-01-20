@@ -26,7 +26,6 @@
 
 (Kaikki) Ottelut sivulla:
     - Headers ei pysy paikallaan, kun "Jatkosarja on valittu"
-    - Tarkista ja korjaa kapteenin toiminnat
 
 Muuta:
     - Piniat 'matches.store.js' ja 'match.store.js' voisi yhdistää

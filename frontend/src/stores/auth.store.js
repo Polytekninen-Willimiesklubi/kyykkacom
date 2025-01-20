@@ -16,14 +16,14 @@ export function getCookie(name) {
 }
 
 export async function fetchNewToken() {
-    await fetch('api/csrf/', {withCredentials: true})
+    await fetch('api/csrf/', { withCredentials: true })
 }
 
 export const useAuthStore = defineStore('auth', () => {
     const userId = ref(JSON.parse(localStorage.getItem("userId")));
     const roleId = ref(JSON.parse(localStorage.getItem('roleId')));
     const teamId = ref(JSON.parse(localStorage.getItem('teamId')));
-    const playerName = ref(JSON.parse(localStorage.getItem('playerName')) );
+    const playerName = ref(JSON.parse(localStorage.getItem('playerName')));
     const loggedIn = ref(JSON.parse(localStorage.getItem('loggedIn')));
 
     const alert = ref(false);
@@ -32,14 +32,14 @@ export const useAuthStore = defineStore('auth', () => {
     const credentials = ref({});
 
     const isCaptain = computed(() => {
-        return roleId.value == 1;
+        return roleId.value === 1;
     });
 
     const isSuperUser = computed(() => {
-        return roleId.value == 2;
+        return roleId.value === 2;
     })
 
-    async function logIn(again=false) {
+    async function logIn(again = false) {
         alert.value = false;
         try {
             const requestOpt = {
@@ -48,15 +48,15 @@ export const useAuthStore = defineStore('auth', () => {
                     'X-CSRFToken': getCookie('csrftoken'),
                     'Content-Type': 'application/json',
                 },
-                'body' : JSON.stringify(credentials.value),
+                'body': JSON.stringify(credentials.value),
                 'withCredentials': true,
             };
-            
+
             const response = await fetch(baseUrl, requestOpt)
-            
+
             const isJson = response.headers?.get('content-type')?.includes('application/json');
             const data = isJson ? await response.json() : null;
-            
+
             if ([401, 403].includes(response.status) && user) {
                 // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
                 if (again) {
@@ -78,7 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
                 alert.value = true
                 return false
             }
-            
+
             alert.value = false
             if (data) {
                 userId.value = data.user.id
@@ -92,7 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
                 localStorage.setItem('playerName', JSON.stringify(data.user.player_name));
                 localStorage.setItem('loggedIn', JSON.stringify(true));
             }
-            
+
 
             loggedIn.value = true
             return true
@@ -116,7 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('loggedIn', JSON.stringify(false))
     }
 
-    function changeLogin(id, role, team, player, loginStatus=true) {
+    function changeLogin(id, role, team, player, loginStatus = true) {
         userId.value = id
         roleId.value = role
         teamId.value = team

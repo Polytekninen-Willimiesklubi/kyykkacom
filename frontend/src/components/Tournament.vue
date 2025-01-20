@@ -39,20 +39,20 @@ import Bracket from 'vue-tournament-bracket'
 
 const props = defineProps({
   type: Number,
-    played_games: Array,
-    rounds_parrent: Array,
-    first_round: Boolean,
-    first: Number,
-    only_format: Boolean,
-    bracket_placements: Array,
-    load_ended: Boolean,
-    bronze: {
-      type: Boolean,
-      default: true
-    }
+  played_games: Array,
+  rounds_parrent: Array,
+  first_round: Boolean,
+  first: Number,
+  only_format: Boolean,
+  bracket_placements: Array,
+  load_ended: Boolean,
+  bronze: {
+    type: Boolean,
+    default: true
+  }
 });
 
-const playoffStages = [{}, {}, {}, {}, {}, {}];
+const playoffStages = [{}, {}, {}, {}, {}, {}, {}];
 let rounds = [];
 const data = ref([]);
 const st_round = ref([]);

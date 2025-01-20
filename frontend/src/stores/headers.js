@@ -4,11 +4,11 @@
 
 /**
  * Checks if given value is 'NaN'. Should be used in cases where there is only postive values.
- * @param {float} value Given value to check 'NaN'
- * @returns {float} Negative value if True else orginal value
+ * @param {number | string} value Given value to check 'NaN'
+ * @returns {number} Negative value if True else orginal value
 */
 function isStrNaN(value) {
-    return value === 'NaN' ? -2 : value
+    return value === 'NaN' ? -2 : Number(value)
 }
 
 /** 
@@ -265,7 +265,7 @@ export const headersNavBar = [
     { title: 'Runkosarja', route: '/runkosarja', icon: 'mdi-format-list-numbered' },
     { title: 'Pelaajat', route: '/pelaajat', icon: 'mdi-account-group' },
     { title: 'Oma Joukkue', route: '/joukkueet/', icon: 'mdi-account' }, // Add if-clause and id to route in place of use   
-    { title: 'Jatkosarja', route: '/jatkosarja', icon: 'mdi-bank' },
+    { title: 'Pudotuspelit', route: '/jatkosarja', icon: 'mdi-bank' },
     { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
     { title: 'Info', route: '/info', icon: 'mdi-information-outline' }
 ];

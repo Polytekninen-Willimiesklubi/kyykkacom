@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "outDir": "./dummy",
+        "target": "ES6",
+        "types": [
+            "vite/client"
+        ],
+        "lib": [
+            "ES6"
+        ],
+        "resolveJsonModule": true,
+        "checkJs": true,
+        "allowJs": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node",
+        "strictNullChecks": true,
+        "allowSyntheticDefaultImports": true
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "include": [
+        "index.js",
+        "lib/**/*.js",
+        "test/**/*.js"
+    ]
+}

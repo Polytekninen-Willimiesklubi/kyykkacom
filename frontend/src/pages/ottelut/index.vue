@@ -2,61 +2,146 @@
   <div class="flex-1-1-100">
     <v-card>
       <v-card-title>
-        <v-row>
-          <v-col cols="12">
-            Ottelut
+          <v-row>
+            <v-col>
+              Ottelut
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="3">
+              <v-select 
+                v-model="matchStore.selection"
+                color="red" 
+                :items="selectionOptions" 
+                @update:model-value="updateFilter"
+              />
+            </v-col>
+            <v-col cols="3" v-if="(
+                matchStore.selection === 'Runkosarja' || matchStore.selection === 'Kaikki ottelut'
+              ) && navStore.noBrackets >= 2"
+            > 
+            <v-btn-toggle
+              v-model="toggleMultiple"
+              variant="outlined"
+              divided
+              multiple
+            >
+              <template v-for="(num, index) in navStore.noBrackets">
+                <v-btn
+                  :text="`Lohko ${String.fromCharCode(65+index)}`"
+                  @click="matchStore.setSelectedBracket(index);"
+                />
+              </template>
+            </v-btn-toggle>
           </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="4">
-            <v-select 
-              v-model="matchStore.selection"
-              color="red" 
-              :items="selectionOptions" 
-              @update:model-value="updateFilter"
-            />
-          </v-col>
-          <v-spacer />
-          <v-col cols="4">
-            <v-text-field 
-              color="red" 
-              v-model="search" 
-              label="Search" 
-              single-line 
-              hide-details 
-            />
-          </v-col>
-        </v-row>
+          <v-spacer v-else/>
+            <v-col cols="3">
+              <v-row>
+                <v-col cols="12" align="center" class="pa-0">
+                  <v-btn-toggle 
+                    v-model="matchStore.timeFilterMode"
+                    density="compact"
+                    variant="outlined"
+                    divided
+                  >
+                    <!-- There might be a bug in vuetify: if value is 0-1 it will higlight 
+                        button from the other group as it's 
+                    -->
+                    <v-btn size="small" text="Tänään" :value="3"/>
+                    <v-btn size="small" text="Viikolla" :value="4"/>
+                  </v-btn-toggle>
+                </v-col>
+                <v-col cols="12" align="center" class="pa-0">
+                  <v-btn-toggle 
+                    v-model="matchStore.timeFilterMode"
+                    density="compact"
+                    variant="outlined"
+                    divided
+                  >
+                    <v-btn size="small" text="Huomenna" :value="5"/>
+                    <v-btn size="small" text="Ensi viikolla" :value="6"/>
+                  </v-btn-toggle>
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field 
+                color="red" 
+                v-model="search" 
+                label="Search" 
+                single-line 
+                hide-details 
+              />
+            </v-col>
+          </v-row>
       </v-card-title>
-      <!-- TODO :item-class="itemRowBackground" -->
       <v-data-table
-        mobile-breakpoint="0"
+        :mobile-breakpoint=0
         :headers="matchHeaders"
         :items="matchStore.selectedMatches"
         :search="search"
         @click:row="handleRedirect"
         :loading="matchStore.loading"
         loading-text="Ladataan otteluita..."
-        no-data-text="Ei dataa :("
+        :no-data-text="!search || !matchStore.selectedMatches ? 'Ei dataa :(' : 'Ei hakutuloksia :('"
         :sort-by="[{key: 'match_time', order:'asc'}]"
         :group-by="groupBy"
+        :row-props="itemRowBackground"
         density="compact"
         items-per-page="20"
       >
       <template #item.match_time = "{ item }">
-        <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
-        <v-icon 
-          color="gray" 
-          class="mr-3"
-          icon="info"
-        >
-          <v-tooltip 
-            v-if="checkValided(item)"
-            activator='parent'
-            text="Ottelu on validoimatta"
-            bottom
-          />
-        </v-icon>
+        <v-row>
+          <v-col cols="10">
+            <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span> 
+          </v-col>
+          <v-col cols="2">
+            <template v-if="!item.is_validated 
+              && item.away_score_total !== null 
+              && item.home_score_total !== null"
+            >
+              <v-tooltip
+                activator='parent'
+                text="Ottelu on validoimatta"
+                location="right"
+              />
+              <v-icon
+                color="grey"
+                icon="mdi-information"
+              />
+            </template>
+            <template v-else-if="(authStore.isCaptain || authStore.isSuperUser)
+              && item.home_team.id === authStore.teamId 
+              && (item.away_score_total === null || item.home_score_total === null)"
+            >
+              <v-tooltip
+                activator='parent'
+                text="Syötä ottelun tulos"
+                location="right"
+              />
+              <v-icon
+                color="grey"
+                icon="mdi-alert"
+              />
+            </template>
+            <template v-else-if="(authStore.isCaptain || authStore.isSuperUser)
+              && new Date() > new Date(item.match_time)
+              && item.away_team.id === authStore.teamId
+              && (item.away_score_total === null || item.home_score_total === null)"
+            >
+              <v-tooltip
+                activator='parent'
+                text="Kotijoukkue ei ole syöttänyt lopputulosta"
+                location="right"
+              />
+              <v-icon
+                color="grey"
+                icon="mdi-timer-sand"
+              />
+            </template>
+          </v-col>
+        </v-row>
+
       </template>
       <template #group-header="{item, columns, toggleGroup, isGroupOpen }">
         <tr>
@@ -93,7 +178,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth.store';
-import { useMatchesStore } from '@/stores/matches.store';
+import useMatchesStore from '@/stores/matches.store';
 import { useNavBarStore } from '@/stores/navbar.store';
 import { useDate } from 'vuetify';
 import {
@@ -105,29 +190,29 @@ import { watch } from 'vue';
 const search = ref('');
 const matchHeaders = ref(null);
 const groupBy = ref(null);
+const toggleMultiple = ref([]);
 
 const authStore = useAuthStore();
 const matchStore = useMatchesStore();
 const navStore = useNavBarStore();
 const date = useDate();
 
-const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'SuperWeekend'];
+const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'Pudotuspelit', 'SuperWeekend'];
 
-function itemRowBackground(item) {
-  // Handles the backround color of row items
-  const matchDate = moment(item.match_time).format('YYYY-MM-DD HH:MM')
-  const currentTime = moment(Date.now()).format('YYYY-MM-DD HH:MM')
-
-  if (!this.team_id) {
-    return
+/**
+ * @description Checks match list rows if background needs to change to alert captain.
+ * @param row Single row from datatable, should contain `match_time`, `home_team.id` and `away_team.id` attribute.
+ * @returns {object} Object with class string. Should point scoped style in this file
+ */
+function itemRowBackground(row) {
+  if (!authStore.teamId || !(authStore.isCaptain || authStore.isSuperUser)) {
+    return {class: 'actions_not_needed'};
   }
-
-  return !item.is_validated & matchDate < currentTime 
-    & (
-      parseInt(item.home_team.id) === parseInt(this.team_id) 
-      || parseInt(item.away_team.id) === parseInt(this.team_id)
-    )
-    ? 'row__background__style_1' : 'row__background__style_2';
+  if (row.item.is_validated || new Date(row.item.match_time) > new Date()) {
+    return {class: 'actions_not_needed'};
+  }
+  return row.item.home_team.id === authStore.teamId || row.item.away_team.id === authStore.teamId
+    ? {class: 'captain_actions_needed'} : {class: 'actions_not_needed'};
 }
 
 function handleRedirect (value, row) {
@@ -142,12 +227,6 @@ function updateFilter() {
     ? [{key: 'seriers'}] : [];
 }
 
-function checkValided(item) {
-  return !item.is_validated 
-    & (parseInt(item.home_team.id) === parseInt(authStore.teamId)
-    || parseInt(item.away_team.id) === parseInt(authStore.teamId))
-}
-
 matchStore.getMatches();
 updateFilter();
 
@@ -158,11 +237,11 @@ watch(() => navStore.seasonId, (newId) => {
 </script>
 
 <style>
-.row__background__style_1 {
-  background-color: rgba(195, 20, 20, 0.781) !important;
+.captain_actions_needed {
+  background-color: #EF9A9A !important;
 }
 
-.row__background__style_2 {
+.actions_not_needed {
   background-color: white;
 }
 </style>

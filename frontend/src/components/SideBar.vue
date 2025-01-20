@@ -1,13 +1,20 @@
 <template>
-  <v-card :title="title">
+  <v-card>
+    <v-card-title>
+      <v-row>
+        <v-col cols="7">{{ props.title }}</v-col>
+        <v-col cols="5" align="right"><slot name="button"></slot></v-col>
+      </v-row>
+    </v-card-title>
     <v-row v-for="(listItem, index) in teams" :key="index">
       <v-col>
         <v-card-subtitle v-if="props.teams.length > 1">
-          <b> Lohko {{ String.fromCharCode(65+index) }} </b>
+          <b v-if="!props.second_stage"> Lohko {{ String.fromCharCode(65+index) }} </b>
+          <b v-else> {{ secondStageNames[index] }} Lohko</b>
         </v-card-subtitle>
         <v-divider />
         <v-data-table
-          mobile-breakpoint="0"
+          :mobile-breakpoint=0
           class="sidebar"
           :headers="headers"
           :items="listItem"
@@ -63,7 +70,7 @@
 </template>
 
 <script setup>
-
+const secondStageNames = ["Ylempi", "Keskimmäinen", "Alempi"];
 const props = defineProps({
   title: String,
   headers: Array,
@@ -71,6 +78,7 @@ const props = defineProps({
   sortBy: Array,
   lines: Array,
   boldingKeys: Array,
+  second_stage: Boolean,
 })
 
 function handleRedirect(index) {

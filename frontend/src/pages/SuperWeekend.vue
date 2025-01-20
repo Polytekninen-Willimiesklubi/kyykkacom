@@ -33,7 +33,7 @@
 </route>
 
 <script setup>
-import { useMatchesStore } from '@/stores/matches.store';
+import useMatchesStore from '@/stores/matches.store';
 import { useSuperStore } from '@/stores/superweekend.store';
 import { superSidebarHeaders } from '@/stores/headers'
 
