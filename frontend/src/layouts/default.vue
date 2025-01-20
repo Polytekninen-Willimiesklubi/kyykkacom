@@ -13,7 +13,8 @@
                 :headers="headersDefaultSideBar"
                 :sort-by="[
                   (navStore.selectedSeason.playoff_format === 8 ? {} : {key:'bracket_placement', order: 'asc'}),
-                  {key:'points_total', order: 'desc'}
+                  {key:'points_total', order: 'desc'},
+                  {key: 'match_average', order: 'asc'}
                 ]"
                 :teams="teamStore.bracketedTeams"
                 :lines="navStore.playoffLines"
