@@ -88,7 +88,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
         allTeams.value.forEach(ele => {
             if (ele.second_stage_bracket !== null) {
                 returnedTeams[ele.second_stage_bracket - 1].push(ele);
-            } 
+            }
         });
         returnedTeams.forEach((ele, i) => {
             ele.forEach((e, j) => {
@@ -218,9 +218,9 @@ export const useTeamsStore = defineStore('joukkue', () => {
                 }
             }
 
-            const index = unReservedPlayers.value.findIndex(player => player.id === item.id);
-            const player = unReservedPlayers.value.splice(index, 1);
-            seasonsStats[navStore.seasonId].players.push(player);
+            const index = unReservedPlayers.value.findIndex(item => player.id === item.id);
+            const reservedPlayer = unReservedPlayers.value.splice(index, 1);
+            seasonsStats[navStore.seasonId].players.push(reservedPlayer);
 
         } catch (error) {
             console.log(error)
