@@ -76,7 +76,7 @@
           <v-expansion-panel-text>
             <v-data-table 
               class="mt-5"
-              mobile-breakpoint="0"
+              :mobile-breakpoint=0
               :headers="headersTeamPlayers"
               @click:row="handleRedirect"
               :items="teamStore.seasonPlayers"
@@ -116,7 +116,7 @@
           <v-expansion-panels>
             <v-expansion-panel
               title="Varaa pelaajia"
-              v-if="authStore.isCaptain | authStore.isSuperUser"
+              v-if="authStore.isCaptain || authStore.isSuperUser"
             >
               <v-expansion-panel-text>
                 <v-text-field 
@@ -128,7 +128,7 @@
                   single-line
                 />
                 <v-data-table 
-                  mobile-breakpoint="0"
+                  :mobile-breakpoint=0
                   :search="search"
                   :items="teamStore.unReservedPlayers"
                   :headers="headersTeamReserve"
@@ -166,7 +166,7 @@
                 single-line
               />
             <v-data-table 
-              mobile-breakpoint="0"
+              :mobile-breakpoint=0
               @click:row="handleRedirectMatches"
               color='alert'
               :search="matchSearch"
@@ -268,7 +268,7 @@ function getColor(val1, val2) {
 }
 
 teamStore.getTeamPlayers(route.params.id)
-if (authStore.loggedIn && (authStore.isCaptain | authStore.isSuperUser)) {
+if (authStore.loggedIn && (authStore.isCaptain || authStore.isSuperUser)) {
   teamStore.getReserve()
 }
 
