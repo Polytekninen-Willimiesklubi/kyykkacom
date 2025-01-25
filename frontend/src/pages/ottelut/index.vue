@@ -220,10 +220,10 @@ function handleRedirect (value, row) {
 }
 
 function updateFilter() {
-  matchHeaders.value = matchStore.selection === 'Jatkosarja'
+  matchHeaders.value = matchStore.selection === 'Pudotuspelit'
     ? headersMatchesPostSeason : headersMatches;
 
-  groupBy.value = matchStore.selection === 'Jatkosarja'
+  groupBy.value = matchStore.selection === 'Pudotuspelit'
     ? [{key: 'seriers'}] : [];
 }
 
