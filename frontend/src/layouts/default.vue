@@ -55,10 +55,18 @@
         </Transition>
         <Transition name="openbutton">
           <div v-if="!showSidebar" class="pr-5">
-            <v-fab
-              icon="mdi-format-list-numbered"
-              @click="showSidebar = true"
-            />
+            <v-tooltip
+              location="left"
+              text="Avaa Sarjataulukko"
+            >
+              <template #activator="{ props }">
+                <v-fab
+                  v-bind="props"
+                  icon="mdi-format-list-numbered"
+                  @click="showSidebar = true"
+                />
+              </template>
+            </v-tooltip>
           </div>
         </Transition>
       </v-layout>

@@ -5,20 +5,22 @@
         <v-col cols="6">{{ props.title }}</v-col>
         <v-col cols="5" align="right"><slot name="button"></slot></v-col>
         <v-col cols="1" align="right" class="close_button">
-          <v-icon
-            color="red"
-            size="small"
-            icon="mdi-window-close"
-            density="compact"
-            @click="$emit('closeSidebar', false)"
-            rounded
+          <v-tooltip
+            location="top"
+            text="Sulje Taulukko"
           >
-            <v-tooltip
-              activator="parent"
-              location="top"
-              text="Sulje Taulukko"
-            />
-          </v-icon>
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                color="red"
+                size="small"
+                icon="mdi-window-close"
+                density="compact"
+                @click="$emit('closeSidebar', false)"
+                rounded
+              />
+            </template>
+          </v-tooltip>
         </v-col>
       </v-row>
     </v-card-title>
