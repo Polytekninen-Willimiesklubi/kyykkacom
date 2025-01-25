@@ -20,7 +20,7 @@
       <span>{{ props.writer }}</span>
     </template>
 	<div class="ma-5">
-		<span v-html="showAll | !smallText() ? props.text : smallText()"></span>
+		<span v-html="showAll || !smallText() ? props.text : smallText()"></span>
 		<a v-if="smallText()"
 			@click="showAll = !showAll"
       		class="more"

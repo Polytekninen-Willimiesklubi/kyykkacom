@@ -2,15 +2,31 @@
   <v-card>
     <v-card-title>
       <v-row>
-        <v-col cols="7">{{ props.title }}</v-col>
+        <v-col cols="6">{{ props.title }}</v-col>
         <v-col cols="5" align="right"><slot name="button"></slot></v-col>
+        <v-col cols="1" align="right" class="close_button">
+          <v-icon
+            color="red"
+            size="small"
+            icon="mdi-window-close"
+            density="compact"
+            @click="$emit('closeSidebar', false)"
+            rounded
+          >
+            <v-tooltip
+              activator="parent"
+              location="top"
+              text="Sulje Taulukko"
+            />
+          </v-icon>
+        </v-col>
       </v-row>
     </v-card-title>
     <v-row v-for="(listItem, index) in teams" :key="index">
       <v-col>
         <v-card-subtitle v-if="props.teams.length > 1">
-          <b v-if="!props.second_stage"> Lohko {{ String.fromCharCode(65+index) }} </b>
-          <b v-else> {{ secondStageNames[index] }} Lohko</b>
+          <b v-if="!props.second_stage">Lohko {{ String.fromCharCode(65+index) }}</b>
+          <b v-else>{{ secondStageNames[index] }} Lohko</b>
         </v-card-subtitle>
         <v-divider />
         <v-data-table
@@ -114,6 +130,10 @@ function isSecond(val) {
 
 .sidebar .v-data-table-header__content {
   display: grid; /* Hack to get to make header center align. 'text-align' don't work*/
+}
+
+.close_button {
+  padding: 0;
 }
 
 </style>

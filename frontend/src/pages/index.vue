@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column" style="width: 100%;">
     <v-btn
-      v-if="authStore.isSuperUser & !newsButton"
+      v-if="authStore.isSuperUser && !newsButton"
       text="Uusi uutinen"
       width="150px"
       class="mb-2"
@@ -9,10 +9,9 @@
     />
     <div 
       class="d-flex flex-column"
-      v-if="authStore.isSuperUser & newsButton"
+      v-if="authStore.isSuperUser && newsButton"
     >
       <QuillEditor
-        v-model:content="newsStore.newsText"
         :content=newsStore.newsText
         contentType="html" 
         theme="snow" 
