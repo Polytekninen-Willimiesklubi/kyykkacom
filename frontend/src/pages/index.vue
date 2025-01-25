@@ -78,16 +78,18 @@
 </template>
 
 <script setup>
-// TODO move to 'store'
 import { useAuthStore } from '@/stores/auth.store';
 import { useNewsStore } from '@/stores/news.store';
+import { useTeamsStore } from '@/stores/teams.store';
 
 
+const teamsStore = useTeamsStore();
 const authStore = useAuthStore();
 const newsStore = useNewsStore();
 const newsButton = ref(false);
 
 newsStore.getNews();
+teamsStore.getTeams();
 
 </script>
 <style scoped>
