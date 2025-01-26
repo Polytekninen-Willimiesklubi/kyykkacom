@@ -8,6 +8,7 @@ from rest_framework.validators import UniqueValidator
 
 from kyykka.models import (
     CurrentSeason,
+    ExtraBracketStagePlacement,
     Match,
     News,
     Player,
@@ -1108,6 +1109,7 @@ class TeamListSerializer(serializers.ModelSerializer):
     points_total = serializers.SerializerMethodField()
     match_average = serializers.SerializerMethodField()
     points_average = serializers.SerializerMethodField()
+    first_bracket_placement = serializers.SerializerMethodField()
 
     def count_match_results(self, obj):
         results_home = obj.home_matches.filter(
@@ -1123,6 +1125,10 @@ class TeamListSerializer(serializers.ModelSerializer):
             results_away = results_away.filter(
                 post_season=self.context.get("post_season")
             )
+
+        if self.context.get("only_first_stage") is True:
+            results_home = results_home.filter(match_type=1)
+            results_away = results_away.filter(match_type=1)
 
         results_home = results_home.annotate(
             home=F("home_first_round_score") + F("home_second_round_score"),
@@ -1197,6 +1203,13 @@ class TeamListSerializer(serializers.ModelSerializer):
         throws = Throw.objects.filter(match__is_validated=True, team=obj, season=season)
         return count_score_total(obj, season, throws, key="team")
 
+    def get_first_bracket_placement(self, obj):
+        seq = ExtraBracketStagePlacement.objects.filter(team_in_season=obj, stage=1)
+        if len(seq):
+            return seq[0].placement
+        else:
+            return None
+
     class Meta:
         model = TeamsInSeason
         fields = (
@@ -1214,6 +1227,7 @@ class TeamListSerializer(serializers.ModelSerializer):
             "bracket",
             "bracket_placement",
             "second_stage_bracket",
+            "first_bracket_placement",
         )
 
 

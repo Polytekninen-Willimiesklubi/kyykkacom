@@ -75,7 +75,6 @@ export default defineStore('matches', () => {
             ele.type_name = pelit[ele.match_type];
             ele.dash = '-';
         });
-        console.log(payload)
         matches.value = payload;
         loaded.value = true;
         loading.value = false;

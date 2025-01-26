@@ -16,7 +16,8 @@ MATCH_TYPES = {
     8: "2. Kierros",
     9: "1. Kierros",
     10: "Runkosarjafinaali",
-    20: "Jumbofinaali",
+    11: "Jatkosarja",
+    20: "Putoamiskarsinta",
     31: "SuperWeekend: Alkulohko",
     32: "SuperWeekend: Finaali",
     33: "SuperWeekend: Pronssi",
@@ -37,7 +38,7 @@ PLAYOFF_FORMAT = {
     5: "1.Kierroksen Seedaus 6 joukkueen Cup",
     6: "1.Kierroksen Seedaus 12 joukkueen Cup",
     7: "SuperWeekend OKA seedaus 15 joukkueen Cup",
-    8: "Kiinteä 30 joukkueen Cup"
+    8: "Kiinteä 30 joukkueen Cup",
 }
 
 PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
@@ -88,13 +89,17 @@ class TeamsInSeason(models.Model):
         blank=True, null=True
     )  # Winner of the Bracket stage is marked with 0
     second_stage_bracket = models.IntegerField(blank=True, null=True)
-    super_weekend_bracket = models.IntegerField(null=True)
+    super_weekend_bracket = models.IntegerField(blank=True, null=True)
     super_weekend_bracket_placement = models.IntegerField(blank=True, null=True)
     super_weekend_playoff_seed = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        unique_together = ("season", "team")
         ordering = ("-season", "bracket", "bracket_placement")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["season", "team"], name="unique_team_season"
+            )
+        ]
 
     def __str__(self):
         return f"{self.current_abbreviation} {self.season.year}"
@@ -190,6 +195,31 @@ class Throw(models.Model):
             f"{match_name} | {self.team.current_abbreviation} | "
             f"{self.throw_round}. erä {self.throw_turn}. Heittopaikka"
         )
+
+
+class ExtraBracketStagePlacement(models.Model):
+    """Records the placements of teams in non-last bracket stage, if there are more than 1 stage.
+
+    This can be merged to `TeamsInSeason` model if this format becomes frequent. This is done in
+    this way to avoid mostly empty column in said model.
+
+    Could also include other other placements aswell. (SuperWeekend + last stage + playoff)
+    """
+
+    team_in_season = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE)
+    placement = models.IntegerField(null=True, blank=True)
+    stage = models.IntegerField(null=True)
+
+    def __str__(self):
+        return f"{self.team_in_season.season} : {self.team_in_season.current_abbreviation} : {self.stage}. vaihe: {self.placement}. Sija"
+
+    class Meta:
+        ordering = ("team_in_season", "stage", "placement")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["team_in_season", "stage"], name="unique_team_stage"
+            )
+        ]
 
 
 class News(models.Model):

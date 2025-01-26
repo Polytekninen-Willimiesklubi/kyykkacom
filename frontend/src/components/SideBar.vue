@@ -4,17 +4,17 @@
       <v-row>
         <v-col cols="6">{{ props.title }}</v-col>
         <v-col cols="5" align="right"><slot name="button"></slot></v-col>
-        <v-col cols="1" align="right" class="close_button">
+        <v-col cols="1" align="right" class="close_button" v-if="!disable_close">
           <v-tooltip
             location="top"
-            text="Sulje Taulukko"
+            text="Piilota Taulukko"
           >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
-                color="red"
                 size="small"
-                icon="mdi-window-close"
+                color="blue-grey-lighten-2"
+                icon="mdi-window-minimize"
                 density="compact"
                 @click="$emit('closeSidebar', false)"
                 rounded
@@ -97,6 +97,10 @@ const props = defineProps({
   lines: Array,
   boldingKeys: Array,
   second_stage: Boolean,
+  disable_close: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 function handleRedirect(index) {

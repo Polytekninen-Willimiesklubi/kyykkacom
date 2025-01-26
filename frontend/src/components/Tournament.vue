@@ -49,10 +49,14 @@ const props = defineProps({
   bronze: {
     type: Boolean,
     default: true
+  },
+  format_2025: {
+    type: Boolean,
+    default: false,
   }
 });
 
-const playoffStages = [{}, {}, {}, {}, {}, {}, {}];
+const playoffStages = [{}, {}, {}, {}, {}, {}, {}, {}];
 let rounds = [];
 const data = ref([]);
 const st_round = ref([]);
@@ -61,13 +65,26 @@ const loaded_undefined = ref(false);
 function putTeamsPlayoffBracket() {
   props.bracket_placements.forEach((bracket, idx) => {
     bracket.forEach(team => {
-      const [teamName, seed] = team
-      const seedString = props.bracket_placements.length >= 2
-          ? String.fromCharCode(65 + idx) + (seed).toString()
-          : (seed).toString() + '. Seed';
+      const [teamName, seed] = !props.format_2025 ? team : [team.current_abbreviation, team.bracket_placement]
+      let seedString;
+      if (props.format_2025) {
+        let letter;
+        if (idx === 0) {
+          letter = "Y";
+        } else if (idx === 1) {
+          letter = "K";
+        } else {
+          letter = "A";
+        }
+        seedString = letter + (seed).toString()
+      } else if (props.bracket_placements.length >= 2) {
+        seedString = String.fromCharCode(65 + idx) + (seed).toString();
+      } else {
+        seedString = (seed).toString() + '. Seed';
+      }
       
       const found = rounds.find(ele => 
-           ele.player1.name === seedString
+          ele.player1.name === seedString
         || ele.player2.name === seedString
       );
 
@@ -78,7 +95,6 @@ function putTeamsPlayoffBracket() {
         correctBracket.name = teamName
       }
     })
-
   })
 }
 
@@ -165,10 +181,10 @@ function resolvePlayoffs() {
   const reversed_list = playoffStages.reverse()
   reversed_list.forEach((ele, i) => {
     for (const [key, el] of Object.entries(ele)) {
-      if (props.first_round && props.first == 7 - i) { continue }
-      const match = data.value.find(e => e.type == 7 - i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name))
+      if (props.first_round && props.first == 9 - i) { continue }
+      const match = data.value.find(e => e.type == 9 - i && (Object.keys(el)[0] == e.player1.name || Object.keys(el)[0] == e.player2.name))
       if (match === undefined) {
-        console.log("Didn't find correct match. type: " + 7 - i + ' element: ' + Object.keys(el))
+        console.log("Didn't find correct match. type: " + (9 - i).toString() + ' element: ' + Object.keys(el))
         return
       }
       const [team1Wins, team2Wins] = [el[match.player1.name], el[match.player2.name]];
@@ -186,8 +202,8 @@ function resolvePlayoffs() {
         if(el[match.tie]) {
           match.other_info += ' (Ties: ' + el[match.tie] +')'; 
         }
-        if (7 - i >= 4) { // Ignore Bronze and Finals
-          if (7 - i == 4) { // SemiFinals -> Winner needs to be assigned to Finals
+        if (8 - i >= 4) { // Ignore Bronze and Finals
+          if (8 - i == 4) { // SemiFinals -> Winner needs to be assigned to Finals
             const finals = rounds.find(ele => ele.type === 2)
             const correct_column = finals.player1.name.includes(match.name) ? 'player1' : 'player2'
             const template = finals[correct_column].template_name

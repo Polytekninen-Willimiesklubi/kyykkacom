@@ -10,6 +10,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
     const selectedSeasonId = ref(null);
     const unReservedPlayers = ref([]);
     const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')) ? JSON.parse(localStorage.getItem('allTeams')) : []);
+    const secondStage = ref(JSON.parse(localStorage.getItem('secondStage')) ? JSON.parse(localStorage.getItem('secondStage')) : []);
     const loading = ref(false);
     const loaded = ref(false);
     const singleLoading = ref(false);
@@ -85,7 +86,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
             return [[], [], []]
         }
         let returnedTeams = [[], [], []];
-        allTeams.value.forEach(ele => {
+        secondStage.value.forEach(ele => {
             if (ele.second_stage_bracket !== null) {
                 returnedTeams[ele.second_stage_bracket - 1].push(ele);
             }
@@ -141,8 +142,15 @@ export const useTeamsStore = defineStore('joukkue', () => {
             loading.value = true;
             const response = await fetch(baseUrl + question, { method: 'GET' });
             const payload = await response.json();
-            allTeams.value = payload;
+            if (navStore.selectedSeason.playoff_format === 8) {
+                allTeams.value = payload[0];
+                secondStage.value = payload[1];
+            } else {
+                allTeams.value = payload;
+                secondStage.value = []
+            }
             localStorage.setItem('allTeams', JSON.stringify(allTeams.value));
+            localStorage.setItem('secondStage', JSON.stringify(secondStage.value));
             loading.value = false;
             loaded.value = true;
         } catch (error) {

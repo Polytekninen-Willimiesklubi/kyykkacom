@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from kyykka.models import (
     CurrentSeason,
+    ExtraBracketStagePlacement,
     Match,
     News,
     PlayersInTeam,
@@ -61,3 +62,4 @@ admin.site.register(Throw)
 admin.site.register(CurrentSeason)
 admin.site.register(SuperWeekend)
 admin.site.register(News)
+admin.site.register(ExtraBracketStagePlacement)

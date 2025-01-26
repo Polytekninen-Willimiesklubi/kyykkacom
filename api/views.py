@@ -333,9 +333,25 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 serializer = serializers.TeamListSerializer(
                     self.queryset,
                     many=True,
-                    context={"season": season, "post_season": False},
+                    context={
+                        "season": season,
+                        "post_season": False,
+                        "only_first_stage": True,
+                    },
                 )
-                all_teams = serializer.data
+                if season.playoff_format == 8:
+                    seri = serializers.TeamListSerializer(
+                        self.queryset,
+                        many=True,
+                        context={
+                            "season": season,
+                            "post_season": False,
+                            "only_first_stage": False,
+                        },
+                    )
+                    all_teams = [serializer.data, seri.data]
+                else:
+                    all_teams = serializer.data
                 setToCache(key, all_teams)
         elif post_season is True:
             raise NotImplementedError
