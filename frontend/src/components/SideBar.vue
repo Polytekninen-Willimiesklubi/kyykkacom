@@ -7,14 +7,14 @@
         <v-col cols="1" align="right" class="close_button">
           <v-tooltip
             location="top"
-            text="Sulje Taulukko"
+            text="Piilota Taulukko"
           >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
-                color="red"
                 size="small"
-                icon="mdi-window-close"
+                color="blue-grey-lighten-2"
+                icon="mdi-window-minimize"
                 density="compact"
                 @click="$emit('closeSidebar', false)"
                 rounded

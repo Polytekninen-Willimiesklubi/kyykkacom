@@ -94,7 +94,7 @@ const tab_one_data = [
     {title: "SuperWeekend-Cup", cols: 4, slice: [0, 3], data: hof.superData},
     {title: "Runkosarjan Voittaja", cols: 3, slice: [0, 2], data: hof.bracketWinners},
     {title: "Henkkari-Cup", cols: 4, slice: [0, 3], data: hof.singleWinner},
-    {title: "Parikyykkä liiga", cols: 4, slice: [0, 3], data: hof.pairWinners},
+    {title: "Parikyykkäliiga", cols: 4, slice: [0, 3], data: hof.pairWinners},
     {title: "SM-Kyykkä", cols: 4, slice: [0, 3], data: hof.sm},
     {title: "Kyykkää tähtien kanssa", cols: 4, slice: [0, 3], data: hof.stars}
 ];
@@ -111,7 +111,7 @@ const tab_two_data = [
     {title: "Vuoden mieskyykkääjä",  data: hof.man},
     {title: "Vuoden naiskyykkääjä",  data: hof.woman},
     {title: "Vuoden Kuusenkaataja",  data: hof.tree},
-]
+];
 
 const info = [
     {title: "Liigan mestaruus", subtitle: "Liigan mestaruuden saavuttaa voittamalla joka talvi järjestettävän NKL pudotuspelien finaalin. Voittajalle saa TEK-malja kiertopalkinnon, joka on ollut kierrossa 1998 lähtien (?). Pokaalin jalustalle kirjoitetaan voittaja joukkueen lisäksi joukkueen pelaaajat (jotka voisivat pelata jatkosarjassa, sääntö: 2.2.8)."},
