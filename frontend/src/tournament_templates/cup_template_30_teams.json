@@ -2,8 +2,8 @@
     "first_round": 0,
     "bronze": true,
     "second_stage": true,
-    "playoffLines": [[], [5,11]],
-    "second_playofflines": [[7], [5], [5]],
+    "playoffLines": [[], [6,12]],
+    "second_playofflines": [[8], [6], [6]],
     "one_bracket" : [],
     "two_bracket" : [
         {

@@ -12,19 +12,19 @@ export default defineStore('matches', () => {
     const timeFilterMode = ref(null);
 
     const superWeekendMatches = computed(() => {
-        return matches.value.filter((match) => match.match_type >= 31);
+        return matches.value.filter(match => match.match_type >= 31);
     });
 
     const regularSeasonMatches = computed(() => {
-        return matches.value.filter((match) => !match.post_season && match.match_type < 31);
+        return matches.value.filter(match => !match.post_season && match.match_type < 31);
     });
 
     const excludingSuperMatches = computed(() => {
-        return matches.value.filter((match) => match.match_type < 31);
+        return matches.value.filter(match => match.match_type < 31);
     });
 
     const postSeasonMatches = computed(() => {
-        return matches.value.filter((match) => match.post_season);
+        return matches.value.filter(match => match.post_season);
     });
 
     const selectedMatches = computed(() => {
@@ -32,6 +32,8 @@ export default defineStore('matches', () => {
             return selectionFilttering(regularSeasonMatches.value);
         } else if (selection.value === 'Pudotuspelit') {
             return postSeasonMatches.value;
+        } else if (selection.value === 'Jatkosarja') {
+            return regularSeasonMatches.value.filter(match => match.match_type === 11);
         } else if (selection.value === 'SuperWeekend') {
             return superWeekendMatches.value;
         } else {
@@ -45,22 +47,25 @@ export default defineStore('matches', () => {
 
         // TODO Move this away
         const pelit = {
-            1: 'Runkosarja',
-            2: 'Finaali',
-            3: 'Pronssi',
-            4: 'Välierä',
-            5: 'Puolivälierä',
-            6: 'Neljännesvälierä',
-            7: 'Kahdeksannesvälierä',
-            10: 'Runkosarjafinaali',
-            20: 'Jumbofinaali',
-            31: 'SuperWeekend: Alkulohko',
-            32: 'SuperWeekend: Finaali',
-            33: 'SuperWeekend: Pronssi',
-            34: 'SuperWeekend: Välierä',
-            35: 'SuperWeekend: Puolivälierä',
-            36: 'SuperWeekend: Neljännesvälierä',
-            37: 'SuperWeekend: Kahdeksannesvälierä'
+            1: "Runkosarja",
+            2: "Finaali",
+            3: "Pronssi",
+            4: "Välierä",
+            5: "Puolivälierä",
+            6: "Neljännesvälierä",
+            7: "Kahdeksannesvälierä",
+            8: "2. Kierros",
+            9: "1. Kierros",
+            10: "Runkosarjafinaali",
+            11: "Jatkosarja",
+            20: "Putoamiskarsinta",
+            31: "SuperWeekend: Alkulohko",
+            32: "SuperWeekend: Finaali",
+            33: "SuperWeekend: Pronssi",
+            34: "SuperWeekend: Välierä",
+            35: "SuperWeekend: Puolivälierä",
+            36: "SuperWeekend: Neljännesvälierä",
+            37: "SuperWeekend: Kahdeksannesvälierä",
         };
         const question = '?season=' + navStore.seasonId;
         const response = await fetch(baseUrl + question, { method: "GET" });

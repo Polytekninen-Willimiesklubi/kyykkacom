@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column" style="width: 100%;">
     <v-btn
-      v-if="authStore.isSuperUser & !newsButton"
+      v-if="authStore.isSuperUser && !newsButton"
       text="Uusi uutinen"
       width="150px"
       class="mb-2"
@@ -9,10 +9,9 @@
     />
     <div 
       class="d-flex flex-column"
-      v-if="authStore.isSuperUser & newsButton"
+      v-if="authStore.isSuperUser && newsButton"
     >
       <QuillEditor
-        v-model:content="newsStore.newsText"
         :content=newsStore.newsText
         contentType="html" 
         theme="snow" 
@@ -79,16 +78,18 @@
 </template>
 
 <script setup>
-// TODO move to 'store'
 import { useAuthStore } from '@/stores/auth.store';
 import { useNewsStore } from '@/stores/news.store';
+import { useTeamsStore } from '@/stores/teams.store';
 
 
+const teamsStore = useTeamsStore();
 const authStore = useAuthStore();
 const newsStore = useNewsStore();
 const newsButton = ref(false);
 
 newsStore.getNews();
+teamsStore.getTeams();
 
 </script>
 <style scoped>
