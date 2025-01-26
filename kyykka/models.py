@@ -88,14 +88,18 @@ class TeamsInSeason(models.Model):
     bracket_placement = models.IntegerField(
         blank=True, null=True
     )  # Winner of the Bracket stage is marked with 0
-    first_stage_bracket = models.IntegerField(blank=True, null=True)
+    second_stage_bracket = models.IntegerField(blank=True, null=True)
     super_weekend_bracket = models.IntegerField(blank=True, null=True)
     super_weekend_bracket_placement = models.IntegerField(blank=True, null=True)
     super_weekend_playoff_seed = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        unique_together = ("season", "team")
         ordering = ("-season", "bracket", "bracket_placement")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["season", "team"], name="unique_team_season"
+            )
+        ]
 
     def __str__(self):
         return f"{self.current_abbreviation} {self.season.year}"
