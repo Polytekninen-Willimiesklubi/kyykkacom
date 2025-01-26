@@ -13,7 +13,7 @@
                   class="hidden-md-and-down"
                   :headers="headersDefaultSideBar"
                   :sort-by="[
-                    (navStore.selectedSeason.playoff_format === 8 ? {} : {key:'bracket_placement', order: 'asc'}),
+                    (navStore.selectedSeason.playoff_format === 8 ? {key:'first_bracket_placement', order: 'asc'} : {key:'bracket_placement', order: 'asc'}),
                     {key:'points_total', order: 'desc'},
                     {key: 'match_average', order: 'asc'}
                   ]"

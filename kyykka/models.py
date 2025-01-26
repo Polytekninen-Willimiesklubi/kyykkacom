@@ -211,7 +211,7 @@ class ExtraBracketStagePlacement(models.Model):
     stage = models.IntegerField(null=True)
 
     def __str__(self):
-        return f"{self.team_in_season.season} : {self.stage}. vaihe: {self.placement}. Sija"
+        return f"{self.team_in_season.season} : {self.team_in_season.current_abbreviation} : {self.stage}. vaihe: {self.placement}. Sija"
 
     class Meta:
         ordering = ("team_in_season", "stage", "placement")

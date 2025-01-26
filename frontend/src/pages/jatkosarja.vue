@@ -6,12 +6,14 @@
       :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
     />
     <side-bar
-      title="Runkosarja"
+      :title="!isTwoStage ? 'Runkosarja' : 'Jatkosarja'"
       :headers="headersPlayoff"
       :sortBy="[{key: 'bracket_placement', order: 'asc'}]"
-      :teams="teamStore.bracketedTeams"
+      :teams="!isTwoStage ? teamStore.bracketedTeams : teamStore.secondStageBrackets"
       :lines="navStore.playoffLines"
       :boldingKeys="['P', 'points_total']"
+      :second_stage="isTwoStage"
+      :disable_close="true"
     />
   </div>
   <div class="d-flex">
@@ -21,8 +23,9 @@
       :first_round="first_round"
       :first="first"
       :only_format="showFormat"
-      :bracket_placements="teamStore.onlyPlacements"
+      :bracket_placements="!isTwoStage ? teamStore.onlyPlacements : teamStore.secondStageBrackets"
       :load_ended="load_ended"
+      :format_2025="isTwoStage"
     />
   </div>
 </template>
@@ -45,6 +48,7 @@ const first_round = ref(false);
 const first = ref(0);
 const showFormat = ref(false);
 const load_ended = ref(false);
+const isTwoStage = ref(false); // If true, show the last stage of braket stages  
 
 const navStore = useNavBarStore();
 const matchesStore = useMatchesStore();
@@ -59,6 +63,10 @@ teamStore.getTeams();
 
 watch(() => [matchesStore.loaded, teamStore.loaded, navStore.loaded], ([matchesReady, teamsReady, seasonsReady]) => {
   if (!matchesReady || !teamsReady || !navStore.selectedSeason.playoff_format) return;
+
+  if (navStore.selectedSeason.playoff_format === 8) {
+    isTwoStage.value = true;
+  }
 
   const json = seasonsMappings[navStore.selectedSeason.playoff_format]
   rounds.value = navStore.selectedSeason.no_brackets === 1 ? json.one_bracket : json.two_bracket;
