@@ -1,9 +1,9 @@
 <template>
     <v-card class="mr-5" style="width: '900px';">
         <VuePdfEmbed 
-            source="/saannot_2024.pdf" 
-            download="/saannot_2024.pdf"
-            width="900"
+            source="/saannot_2025.pdf" 
+            download="/saannot_2025.pdf"
+            :width=900
             text-layer
             :page="page"
             @loaded="(obj) => {pageCount = obj.numPages; page = null;}"
