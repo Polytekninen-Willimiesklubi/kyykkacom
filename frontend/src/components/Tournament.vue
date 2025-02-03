@@ -67,7 +67,10 @@ function putTeamsPlayoffBracket() {
     bracket.forEach(team => {
       const [teamName, seed] = !props.format_2025 ? team : [team.current_abbreviation, team.bracket_placement]
       let seedString;
-      if (props.format_2025) {
+      if (seed === null) {
+        return;
+      }
+      if (props.format_2025 ) {
         let letter;
         if (idx === 0) {
           letter = "Y";
