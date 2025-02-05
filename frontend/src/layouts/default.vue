@@ -38,7 +38,7 @@
                   :headers="headersDefaultSideBar"
                   :sort-by="[{key:'bracket_placement', order: 'asc'}, {key:'points_total', order: 'desc'}]"
                   :teams="teamStore.secondStageBrackets"
-                  :lines="navStore.playoffLines"
+                  :lines="navStore.secondStagePlayoffLines"
                   :boldingKeys="['P', 'points_total']"
                   :second_stage="true"
                 >

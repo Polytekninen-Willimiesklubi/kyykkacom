@@ -10,7 +10,7 @@
       :headers="headersPlayoff"
       :sortBy="[{key: 'bracket_placement', order: 'asc'}]"
       :teams="!isTwoStage ? teamStore.bracketedTeams : teamStore.secondStageBrackets"
-      :lines="navStore.playoffLines"
+      :lines="!isTwoStage ? navStore.playoffLines: navStore.secondStagePlayoffLines"
       :boldingKeys="['P', 'points_total']"
       :second_stage="isTwoStage"
       :disable_close="true"
