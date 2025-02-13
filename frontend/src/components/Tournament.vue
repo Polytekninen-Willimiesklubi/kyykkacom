@@ -70,7 +70,7 @@ function putTeamsPlayoffBracket() {
       if (seed === null) {
         return;
       }
-      if (props.format_2025 ) {
+      if (props.format_2025) {
         let letter;
         if (idx === 0) {
           letter = "Y";
@@ -205,8 +205,8 @@ function resolvePlayoffs() {
         if(el[match.tie]) {
           match.other_info += ' (Ties: ' + el[match.tie] +')'; 
         }
-        if (8 - i >= 4) { // Ignore Bronze and Finals
-          if (8 - i == 4) { // SemiFinals -> Winner needs to be assigned to Finals
+        if (9 - i >= 4) { // Ignore Bronze and Finals
+          if (9 - i == 4) { // SemiFinals -> Winner needs to be assigned to Finals
             const finals = rounds.find(ele => ele.type === 2)
             const correct_column = finals.player1.name.includes(match.name) ? 'player1' : 'player2'
             const template = finals[correct_column].template_name
@@ -214,11 +214,11 @@ function resolvePlayoffs() {
             finals[correct_column] = new_winner
           }
           const new_match = rounds.find(ele => ele.id === match.next)
-          const n = (7 - i != 4) ? 'name' : 'loser_name'
+          const n = (9 - i != 4) ? 'name' : 'loser_name'
           const correct_column = new_match.player1.name.includes(match[n]) ? 'player1' : 'player2'
           const template = new_match[correct_column].template_name
 
-          new_match[correct_column] = (7 - i == 4) && props.bronze ? new_loser : new_winner // SemiFinals -> Loser needs to be assigned to Bronze match
+          new_match[correct_column] = (9 - i == 4) && props.bronze ? new_loser : new_winner // SemiFinals -> Loser needs to be assigned to Bronze match
           new_match[correct_column].template_name = template
         }
       }
