@@ -1447,6 +1447,8 @@ class MatchListSerializer(SharedMatchSerializer):
             "is_validated",
             "match_type",
             "seriers",
+            "video_link",
+            "stream_link",
         )
 
 
