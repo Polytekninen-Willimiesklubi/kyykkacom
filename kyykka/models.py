@@ -153,15 +153,16 @@ class Match(models.Model):
     post_season = models.BooleanField(default=False)
     match_type = models.IntegerField(blank=True, null=True, choices=MATCH_TYPES_TUPLES)
     seriers = models.IntegerField(null=True, default=1)
+    video_link = models.URLField(blank=True, null=True, max_length=100)
+    stream_link = models.URLField(blank=True, null=True, max_length=100)
 
     class Meta:
         verbose_name_plural = "Matches"
 
     def __str__(self):
-        return "%s | %s - %s" % (
-            self.match_time.strftime("%m/%d/%Y, %H:%M"),
-            self.home_team,
-            self.away_team,
+        return (
+            f"{self.match_time.strftime('%m/%d/%Y, %H:%M')} | {self.home_team} - "
+            f"{self.away_team} | {MATCH_TYPES[self.match_type]}"
         )
 
 

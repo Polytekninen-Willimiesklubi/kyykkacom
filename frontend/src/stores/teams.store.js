@@ -109,6 +109,9 @@ export const useTeamsStore = defineStore('joukkue', () => {
             returnedTeams.push([]);
         }
         allTeams.value.forEach(ele => {
+            if (ele.bracket == undefined) {
+                return;
+            }
             const tmp = !ele.bracket_placement ? 1 : ele.bracket_placement
             returnedTeams[ele.bracket - 1].push([ele.current_abbreviation, tmp]);
         });

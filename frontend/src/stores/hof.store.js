@@ -2,6 +2,7 @@
 export const useHofStore = defineStore('hof', () => {
 
     const championship = ref([
+        { 'year': 2025, 'first': '?', 'second': '?', 'third': '?', 'fourth': '?' },
         { 'year': 2024, 'first': 'Dra', 'second': 'MaHaLasku', 'third': 'SuLaKe', 'fourth': 'DiSKO' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'SÄTKY KY', 'third': 'DiSKO', 'fourth': 'VSOP' },
         { 'year': 2022, 'first': 'Ei', 'second': 'MaHaLasKu', 'third': 'SÄTKY KY', 'fourth': 'LSP' },
@@ -33,6 +34,7 @@ export const useHofStore = defineStore('hof', () => {
 
 
     const superData = ref([
+        { 'year': 2025, 'first': '?', 'second': '?' },
         { 'year': 2024, 'first': 'Dra', 'second': 'VSOP' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
         { 'year': 2022, 'first': 'MaHaLasKu', 'second': "Ei" },
@@ -60,6 +62,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const bracketWinners = ref([
+        { 'year': 2025, 'first': 'MaHaLasKu' },
         { 'year': 2024, 'first': 'Dra' },
         { 'year': 2023, 'first': 'SÄTKY KY' },
         { 'year': 2022, 'first': 'MaHaLasKu' },

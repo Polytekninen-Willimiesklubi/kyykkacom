@@ -92,8 +92,34 @@
       >
       <template #item.match_time = "{ item }">
         <v-row>
-          <v-col cols="10">
+          <v-col>
             <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span> 
+          </v-col>
+          <v-col cols="1" v-if="!item.stream_link">
+            <v-tooltip
+              activator='parent'
+              text="Striimin linkki"
+              location="left"
+            />
+            <v-btn
+              :href="item.stream_link"
+              icon="mdi-access-point"
+              size="xs-small"
+              variant="plain"
+            />
+          </v-col>
+          <v-col cols="1" v-if="!item.video_link">
+            <v-tooltip
+              activator='parent'
+              text="Video linkki"
+              location="left"
+            />
+            <v-btn
+              :href="item.video_link"
+              icon="mdi-youtube"
+              size="xs-small"
+              variant="plain"
+            />
           </v-col>
           <v-col cols="2">
             <template v-if="!item.is_validated 
