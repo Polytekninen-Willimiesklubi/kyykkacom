@@ -95,7 +95,7 @@
           <v-col>
             <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span> 
           </v-col>
-          <v-col cols="1" v-if="!item.stream_link">
+          <v-col cols="1" v-if="item.stream_link">
             <v-tooltip
               activator='parent'
               text="Striimin linkki"
@@ -108,7 +108,7 @@
               variant="plain"
             />
           </v-col>
-          <v-col cols="1" v-if="!item.video_link">
+          <v-col cols="1" v-if="item.video_link">
             <v-tooltip
               activator='parent'
               text="Video linkki"
