@@ -9,17 +9,17 @@
           </v-row>
           <v-row>
             <v-col cols="3">
-              <v-select 
+              <v-select
                 v-model="matchStore.selection"
-                color="red" 
-                :items="selectionOptions" 
+                color="red"
+                :items="selectionOptions"
                 @update:model-value="updateFilter"
               />
             </v-col>
             <v-col cols="3" v-if="(
                 matchStore.selection === 'Runkosarja' || matchStore.selection === 'Kaikki ottelut'
               ) && navStore.noBrackets >= 2"
-            > 
+            >
             <v-btn-toggle
               v-model="toggleMultiple"
               variant="outlined"
@@ -38,21 +38,21 @@
             <v-col cols="3">
               <v-row>
                 <v-col cols="12" align="center" class="pa-0">
-                  <v-btn-toggle 
+                  <v-btn-toggle
                     v-model="matchStore.timeFilterMode"
                     density="compact"
                     variant="outlined"
                     divided
                   >
-                    <!-- There might be a bug in vuetify: if value is 0-1 it will higlight 
-                        button from the other group as it's 
+                    <!-- There might be a bug in vuetify: if value is 0-1 it will higlight
+                        button from the other group as it's
                     -->
                     <v-btn size="small" text="Tänään" :value="3"/>
                     <v-btn size="small" text="Viikolla" :value="4"/>
                   </v-btn-toggle>
                 </v-col>
                 <v-col cols="12" align="center" class="pa-0">
-                  <v-btn-toggle 
+                  <v-btn-toggle
                     v-model="matchStore.timeFilterMode"
                     density="compact"
                     variant="outlined"
@@ -65,12 +65,12 @@
               </v-row>
             </v-col>
             <v-col cols="3">
-              <v-text-field 
-                color="red" 
-                v-model="search" 
-                label="Search" 
-                single-line 
-                hide-details 
+              <v-text-field
+                color="red"
+                v-model="search"
+                label="Search"
+                single-line
+                hide-details
               />
             </v-col>
           </v-row>
@@ -93,7 +93,7 @@
       <template #item.match_time = "{ item }">
         <v-row>
           <v-col>
-            <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span> 
+            <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
           </v-col>
           <v-col cols="1" v-if="item.stream_link">
             <v-tooltip
@@ -111,7 +111,7 @@
           <v-col cols="1" v-if="item.video_link">
             <v-tooltip
               activator='parent'
-              text="Video linkki"
+              text="Videolinkki"
               location="left"
             />
             <v-btn
@@ -122,8 +122,8 @@
             />
           </v-col>
           <v-col cols="2">
-            <template v-if="!item.is_validated 
-              && item.away_score_total !== null 
+            <template v-if="!item.is_validated
+              && item.away_score_total !== null
               && item.home_score_total !== null"
             >
               <v-tooltip
@@ -137,7 +137,7 @@
               />
             </template>
             <template v-else-if="(authStore.isCaptain || authStore.isSuperUser)
-              && item.home_team.id === authStore.teamId 
+              && item.home_team.id === authStore.teamId
               && (item.away_score_total === null || item.home_score_total === null)"
             >
               <v-tooltip
