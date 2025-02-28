@@ -5,26 +5,57 @@
         <v-card v-if="dataReady">
           <v-row>
             <v-col>
-              <h3 class="text-md-left headline mt-1 ml-1 mr-1">
-                {{matchData.type_name}} kenttä 
-                <span v-if="matchData.field">
-                    {{matchData.field}}
-                </span>
-                <span v-else>TBD</span>
-                <span style="float:right;">
+              <v-row class="mt-3 ml-2 mr-2">
+                <v-col cols="4" align="left" style="font-size: large; font-weight: bold">
+                  {{matchData.type_name}} kenttä
+                  <span v-if="matchData.field">
+                      {{matchData.field}}
+                  </span>
+                  <span v-else>TBD</span>
+                </v-col>
+                <v-spacer v-if="matchData.video_link || matchData.stream_link"/>
+                <template v-else>
+                  <v-col v-if="matchData.stream_link">
+                    <v-tooltip
+                      activator='parent'
+                      text="Striimin linkki"
+                      location="left"
+                    />
+                    <v-btn
+                      :href="matchData.stream_link"
+                      icon="mdi-access-point"
+                      size="small"
+                      variant="plain"
+                    />
+                  </v-col>
+                  <v-col v-if="matchData.video_link">
+                    <v-tooltip
+                      activator='parent'
+                      text="Videolinkki"
+                      location="left"
+                    />
+                    <v-btn
+                      :href="matchData.video_link"
+                      icon="mdi-youtube"
+                      size="small"
+                      variant="plain"
+                    />
+                  </v-col>
+                </template>
+                <v-col cols="4" align="right" style="font-size: large; font-weight: bold">
                   {{ date.formatByString(date.date(matchData.match_time), 'yyyy-MM-dd HH:mm') }}
-                </span>
-              </h3>
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
           <v-row justify="center" align="center">
             <v-col class="ml-5">
               <figure>
-                <v-img 
+                <v-img
                   src="@/assets/kyykkalogo120px.png"
                   height="120px"
                 />
-                <figcaption 
+                <figcaption
                   class="d-flex justify-center ma-2"
                   v-if="matchData.home_score_total"
                 >
@@ -51,11 +82,11 @@
             </v-col>
             <v-col class="mr-5">
               <figure>
-                <v-img 
+                <v-img
                   src="@/assets/kyykkalogo120px.png"
                   height="120px"
                 />
-                <figcaption 
+                <figcaption
                   class="d-flex justify-center ma-2"
                   v-if="matchData.home_score_total"
                 >
@@ -74,10 +105,10 @@
     <v-row>
       <v-col>
         <v-card color="secondary">
-          <round 
-            v-if="dataReady" 
-            :matchData="matchData" 
-            roundNumber="1" 
+          <round
+            v-if="dataReady"
+            :matchData="matchData"
+            roundNumber="1"
             teamSide="home"
             :color="getColor(matchData.home_first_round_score,
               matchData.away_first_round_score)"
@@ -86,10 +117,10 @@
       </v-col>
       <v-col>
         <v-card color="secondary">
-          <round 
-            v-if="dataReady" 
-            :matchData="matchData" 
-            roundNumber="1" 
+          <round
+            v-if="dataReady"
+            :matchData="matchData"
+            roundNumber="1"
             teamSide="away"
             :color="getColor(matchData.away_first_round_score,
               matchData.home_first_round_score)"
@@ -100,10 +131,10 @@
     <v-row>
       <v-col>
         <v-card color="secondary">
-          <round 
-            v-if="dataReady" 
-            :matchData="matchData" 
-            roundNumber="2" 
+          <round
+            v-if="dataReady"
+            :matchData="matchData"
+            roundNumber="2"
             teamSide="home"
             :color="getColor(matchData.home_second_round_score,
               matchData.away_second_round_score)"
@@ -112,10 +143,10 @@
       </v-col>
       <v-col>
         <v-card color="secondary">
-          <round 
-            v-if="dataReady" 
-            :matchData="matchData" 
-            roundNumber="2" 
+          <round
+            v-if="dataReady"
+            :matchData="matchData"
+            roundNumber="2"
             teamSide="away"
             :color="getColor(matchData.away_second_round_score,
               matchData.home_second_round_score)"
@@ -125,9 +156,9 @@
     </v-row>
     <v-row>
       <v-col class="text-xs-center">
-        <v-btn 
+        <v-btn
           text="vahvista"
-          @click="matchStore.validateClick()" 
+          @click="matchStore.validateClick()"
           color="error"
           v-if="dataReady && isAwayCaptain && !matchData.is_validated"
         />
