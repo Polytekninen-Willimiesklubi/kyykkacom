@@ -50,6 +50,13 @@
                                 :items="hof.misc"
                             />
                         </v-col>
+                        <v-col cols="4">
+                            <simple-table
+                                title="Vanhat palkinnot"
+                                :headers="headerHofMisc"
+                                :items="hof.old_mentions"
+                            />
+                        </v-col>
                     </v-row>
                 </v-tabs-window-item>
                 <v-tabs-window-item value="three">
@@ -102,14 +109,14 @@ const tab_one_data = [
 const tab_two_data = [
     {title: "Jaskan Karttu", data: hof.jaskanKarttu},
     {title: "KCK Ahti",  data: hof.KCKAhti},
+    {title: "Vuoden Kyykkäjä",  data: hof.p_o_y},
     {title: "Haukikuningas/-tar",  data: hof.hauki},
-    {title: "Vuoden Kyykkäjä/MVP",  data: hof.mvp},
+    {title: "Vuoden MVP",  data: hof.mvp},
     {title: "Runkosarjan Paras",  data: hof.bracketBest},
-    {title: "Jatkosarjan Paras",  data: hof.playoffBest},
+    {title: "Pudotuspelien Paras",  data: hof.playoffBest},
     {title: "Vuoden Viimeistelijä",  data: hof.last},
     {title: "Vuoden Tulokas",  data: hof.rookie},
-    {title: "Vuoden mieskyykkääjä",  data: hof.man},
-    {title: "Vuoden naiskyykkääjä",  data: hof.woman},
+    {title: "Vuoden nais-/mieskyykkääjä",  data: hof.man_woman},
     {title: "Vuoden Kuusenkaataja",  data: hof.tree},
 ];
 
@@ -128,9 +135,9 @@ const info = [
     {title: "Haukikuningas/-tar", subtitle: "Runsaasti tai erittäin runsaasti haukia kauden aikana heittänyt henkilö."},
     {title: "Vuoden Tulokas", subtitle: "Ensimmäisen kauden pelaaja, joka on pelannut hyvällä tasolla ja osoittanut hyvää kyykkä-henkeä"},
     {title: "Runkosarjan paras pelaaja", subtitle: "Joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso runkosarjassa."},
-    {title: "Jatkosarjan paras pelaaja", subtitle: "Joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso jatkosarjassa."},
+    {title: "Pudotuspelien paras pelaaja", subtitle: "Joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso jatkosarjassa."},
     {title: "Vuoden viimeistelijä", subtitle: "Paras yksittäisten kyykkien sekä vaikeiden linjojen poistaja; joukkueen kovan tuloksen viimeistelevä pelaaja sekä voittojen ratkaisija. Painoarvo varsinkin 4.paikan pelaajille."},
-    {title: "Vuoden nais-/mieskyykkääjä", subtitle: "Kauden paras nais-/miespuolinen kyykänpelaaja; joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso. (Vuoden pelaajan vastine)"},
+    {title: "Vuoden nais-/mieskyykkääjä", subtitle: "Kauden paras nais-/miespuolinen kyykänpelaaja, vastine Vuoden Kyykkääjän vastine. Joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso."},
     {title: "Vuoden MVP", subtitle: "Arvokkain/Paras pelaaja läpi kauden."},
     {title: "Vuoden Kuusenkaataja", subtitle: "Eniten joulukuusia (heitto joka poistaa 6 tai enemmän kyykkää) heittänyt pelaaja."},
 ];
