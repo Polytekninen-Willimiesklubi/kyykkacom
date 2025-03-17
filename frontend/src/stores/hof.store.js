@@ -29,7 +29,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2001, 'first': 'PKMM', 'second': 'TPNMP', 'third': 'SMS', 'fourth': 'ITKK99' },
         { 'year': 2000, 'first': 'ITKK99', 'second': 'KCK', 'third': 'SMS', 'fourth': 'TPNMP' },
         { 'year': 1999, 'first': 'TPNMP', 'second': '?', 'third': '?', 'fourth': '?' },
-        { 'year': 1998, 'first': 'PKMM', 'second': '?', 'third': '?', 'fourth': '?' },
+        { 'year': 1998, 'first': 'PKMM', 'second': 'Pentit', 'third': '-', 'fourth': '-' },
     ]);
 
 
@@ -183,7 +183,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2003, 'name': "Janne Lahdenperä" },
         { 'year': 2002, 'name': "Sampo Kokkonen" },
         { 'year': 2001, 'name': "Sampo Kokkonen" },
-        { 'year': 2000, 'name': "?" },
+        { 'year': 2000, 'name': "Ilmari Laakkonen*" },
         { 'year': 1999, 'name': "Tero Turtiainen" },
         { 'year': 1998, 'name': "-" },
     ]);
@@ -228,7 +228,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2018, 'name': "?" },
         { 'year': 2017, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2016, 'name': "?" },
-        { 'year': 2015, 'name': "?" },
+        { 'year': 2015, 'name': "Juha Varis" },
         { 'year': 2014, 'name': "Petteri Westerholm" },
         { 'year': 2013, 'name': "?" },
         { 'year': 2012, 'name': "Petteri Westerholm" },
@@ -284,7 +284,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2018, 'name': "?" },
         { 'year': 2017, 'name': "Ville Kytömäki" },
         { 'year': 2016, 'name': "?" },
-        { 'year': 2015, 'name': "?" },
+        { 'year': 2015, 'name': "Juha Varis" },
         { 'year': 2014, 'name': "Petteri Westerholm" },
         { 'year': 2013, 'name': "?" },
         { 'year': 2012, 'name': "Petteri Westerholm" },
@@ -315,7 +315,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2018, 'name': "?" },
         { 'year': 2017, 'name': "Petteri Westerholm" },
         { 'year': 2016, 'name': "?" },
-        { 'year': 2015, 'name': "?" },
+        { 'year': 2015, 'name': "Juha Varis" },
         { 'year': 2014, 'name': "Petteri Westerholm" },
         { 'year': 2013, 'name': "?" },
         { 'year': 2012, 'name': "Juha Varis" },
@@ -388,12 +388,15 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const old_mentions = ref([
+        { 'year': 2007, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Juha Varis' },
         { 'year': 2006, 'name': 'Illan Tähti', 'person': "Niko Kuikka" },
         { 'year': 2006, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Marjo Nieminen' },
         { 'year': 2005, 'name': 'Illan Tähti', 'person': "Mikko 'Temmi' Kuusio" },
         { 'year': 2005, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Mikko Raatikainen' },
         { 'year': 2004, 'name': 'Illan Tähti', 'person': 'Katja Talvirinne' },
         { 'year': 2004, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Jussi Ahonen' },
+        { 'year': 2003, 'name': 'Illan Tähti', 'person': 'Juha Varis' },
+
 
         { 'year': 1999, 'name': 'Vuoden tuomari', 'person': 'Ossi Hämäläinen' },
         { 'year': 1999, 'name': 'Herrasmiespelaaja', 'person': 'Jarkko Sonninen' },

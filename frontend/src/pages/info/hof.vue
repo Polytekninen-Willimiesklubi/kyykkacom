@@ -128,8 +128,9 @@ const info = [
     {title: "Parikyykkäliiga", subtitle: "Syksyllä pelattava Parikyykkäliiga pelataan henkkarimuotoisena kentän kyykkien osalta, mutta paripelinä. Pudotuspeli vaiheen voittajalle jaetaan Apila-pokaali. Apila-pokaalin kiertoon lahjoitti lassi onne. Liiga on järjestty vuodesta 2022 lähtien."},
     {title: "Kyykkä Tähtien Kanssa", subtitle: "Kevytmielisempi turnaus, missä NKL pelaaja ja NKLssä pelaamaton (usein fuksi) pelaavat parina. Järjestetään syksyisin. Järjestetty jo kauan."},
     {title: "SM-Kyykkä", subtitle: "Wappuna järjestettävä joukkuemuotoinen turnaus. 'S' nimessä viittaa Skinnarilaan, ei Suomeen. Kilpailu on järjestty ainakin vuodesta 2014. Tarkkaa vuotta ei nyt koodaja itse tiedä."},
-    
-    {title: "Jaskan Karttu", subtitle: "Myönnettään henkilölle, joka on tehnyt jotain merkittävää lappeen Rantalaisen kyykän edistämiseksi. Kyseessä ei ole lähtökohtaisesti vuosittain jaettava palkinto. ", hyperlink: "Jaskan muistolle", ref: "/info/jaska"},
+    {title: "Skinnarilan Paras Kyykän Pelaaja (SPKP)", subtitle: "Kiertopalkinto, jonka voittaa haastamalla ja voittamalla nykyisen palkinnon haltijan ELO-henkkarissa. Palkintoon saa nimen, jos 'eläköityy' aktiivisesta pelaamisesta palkinnon kanssa."},
+
+    {title: "Jaskan Karttu", subtitle: "Myönnettään henkilölle, joka on tehnyt jotain merkittävää lappeen Rantalaisen kyykän edistämiseksi. Kyseessä ei ole lähtökohtaisesti vuosittain jaettava palkinto.", hyperlink: "Jaskan muistolle", ref: "/info/jaska"},
     {title: "KCK-Ahti - Pysti", subtitle: "Palkinto jaetaan vuosittain sellaiselle pelaajalle, joka päättyvän kauden aikana on huomionarvoisasti vaikuttanut edustamansa liigassa pelaavan joukkueen menestykseen erittäin jalolla haukienheiton saralla. Mitä kriittisemmässä paikassa, sitä parempi. ", hyperlink: "Julkilausuma", ref: '/info/ahti'},
     {title: "Vuoden kyykkääjä", subtitle: "Pelaaja, joka on osoittanut kauden aikana parasta urheiluhenkeä ja herrasmiesmäistä käytöstä yhdistettynä pelin hyvään tasoon"},
     {title: "Haukikuningas/-tar", subtitle: "Runsaasti tai erittäin runsaasti haukia kauden aikana heittänyt henkilö."},
