@@ -160,9 +160,13 @@ class Match(models.Model):
         verbose_name_plural = "Matches"
 
     def __str__(self):
+        if self.match_type is None:
+            print_string = "Matsi tyyppi ei valittu"
+        else:
+            print_string = MATCH_TYPES[self.match_type]
         return (
             f"{self.match_time.strftime('%m/%d/%Y, %H:%M')} | {self.home_team} - "
-            f"{self.away_team} | {MATCH_TYPES[self.match_type]}"
+            f"{self.away_team} | {print_string}"
         )
 
 
