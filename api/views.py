@@ -276,7 +276,7 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
             self.queryset = self.queryset.filter(
                 playersinteam__team_season__season=season
             )
-            serializer = serializers.PlayerListSerializer(
+            serializer = serializers.PlayerListAllPositionSerializer(
                 self.queryset, many=True, context={"season": season}
             )
             all_players = serializer.data

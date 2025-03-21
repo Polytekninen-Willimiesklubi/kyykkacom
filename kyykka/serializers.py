@@ -189,7 +189,7 @@ def count_score_total(obj, season, throws, key="player"):
         )
         if score_total is None:
             score_total = 0
-        # setToCache(key, score_total, season_year=season.year)
+        setToCache(key, score_total, season_year=season.year)
     return score_total
 
 
@@ -232,8 +232,8 @@ class LoginUserSerializer(serializers.Serializer):
 
 
 class SharedPlayerSerializer(serializers.ModelSerializer):
-    def get_player_name(self, obj):
-        return obj.first_name + " " + obj.last_name
+    def get_player_name(self, obj: User):
+        return f"{obj.first_name} {obj.last_name}"
 
     def get_player_number(self, obj):
         try:
@@ -242,22 +242,21 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
             return None
 
     def get_score_total(self, obj):
-        season = self.context.get("season")
-        self.throws_set = obj.throw_set.filter(season=season, match__is_validated=True)
-        self.score_total = count_score_total(obj, season, self.throws_set)
+        self.throws_set = obj.throw_set.filter(
+            season=self.context.get("season"), match__is_validated=True
+        )
+        if position := self.context.get("throw_turn", None):
+            self.throws_set = self.throws_set.filter(throw_turn=position)
+        self.score_total = count_score_total(
+            obj, self.context.get("season"), self.throws_set
+        )
         return self.score_total
 
     def get_match_count(self, obj):
         key = f"player_{str(obj.id)}_match_count"
         match_count = getFromCache(key, self.context.get("season").year)
         if match_count is None:
-            match_count = (
-                Match.objects.filter(
-                    season=self.context.get("season"), throw__player=obj
-                )
-                .distinct()
-                .count()
-            )
+            match_count = self.throws_set.values("match").distict().count()
             if match_count is None:
                 match_count = 0
             setToCache(key, match_count, season_year=self.context.get("season").year)
@@ -274,9 +273,8 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
 
     def get_team(self, obj):
         try:
-            season = self.context.get("season")
             t = TeamsInSeason.objects.filter(
-                season=season, playersinteam__player=obj
+                season=self.context.get("season"), playersinteam__player=obj
             ).first()
             team = TeamSerializer(t).data
         except TeamsInSeason.DoesNotExist:
@@ -491,9 +489,10 @@ class PlayerListSerializer(SharedPlayerSerializer):
 
     def get_is_captain(self, obj):
         try:
-            return TeamsInSeason.objects.get(
-                player=obj, season=self.context.get("season")
-            ).is_captain
+            captain = obj.playerinteam_set.get(season=self.context.get("season"))
+            if captain is None:
+                return False
+            return captain
         except Exception:
             return False
 
@@ -516,6 +515,49 @@ class PlayerListSerializer(SharedPlayerSerializer):
             "scaled_points_per_throw",
             "avg_throw_turn",
             "is_captain",
+        )
+
+
+class PlayerListAllPositionSerializer(serializers.ModelSerializer):
+    total = serializers.SerializerMethodField()
+    first_position = serializers.SerializerMethodField()
+    second_position = serializers.SerializerMethodField()
+    third_position = serializers.SerializerMethodField()
+    fourth_position = serializers.SerializerMethodField()
+
+    def get_total(self, obj: User):
+        self.season = self.context["season"]
+        return PlayerListSerializer(obj, context={"season": self.season}).data
+
+    def get_first_position(self, obj: User):
+        return PlayerListSerializer(
+            obj, context={"season": self.season, "throw_turn": 1}
+        ).data
+
+    def get_second_position(self, obj: User):
+        return PlayerListSerializer(
+            obj, context={"season": self.season, "throw_turn": 2}
+        ).data
+
+    def get_third_position(self, obj: User):
+        return PlayerListSerializer(
+            obj, context={"season": self.season, "throw_turn": 3}
+        ).data
+
+    def get_fourth_position(self, obj: User):
+        return PlayerListSerializer(
+            obj, context={"season": self.season, "throw_turn": 4}
+        ).data
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "total",
+            "first_position",
+            "second_position",
+            "third_position",
+            "fourth_position",
         )
 
 

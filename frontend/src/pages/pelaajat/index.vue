@@ -12,14 +12,40 @@
           />
         </v-col>
         <v-spacer />
+        <v-col cols="2">
+          <v-btn-toggle
+            v-model="filtterEmpty"
+            variant="outlined"
+          >
+            <v-btn 
+              size="small" 
+              :value="1" 
+              text="Poista pelaamattomat" 
+              @click="playerStore.emptyFiltter = !playerStore.emptyFiltter"
+            />
+          </v-btn-toggle>
+        </v-col>
+        <v-spacer />
+        <v-col cols="4">
+          <v-btn-toggle
+            v-model="playerStore.playersPositionsToggle"
+            variant="outlined"
+            divided
+          >
+            <v-btn size="small" text="1." :value="1"/>
+            <v-btn size="small" text="2." :value="2"/>
+            <v-btn size="small" text="3." :value="3"/>
+            <v-btn size="small" text="4." :value="4"/>
+          </v-btn-toggle>
+        </v-col>
       </v-row>
       <!-- :custom-key-sort="customSorts" -->
       <v-data-table
-        mobile-breakpoint="0"
+        :mobile-breakpoint=0
         :headers="headerPlayers"
         @click:row="handleRedirect"
         :sortBy="[{key: 'rounds_total', order:'desc'}]"
-        :items="playerStore.players"
+        :items="playerStore.playersPostionFilttered"
         :loading="playerStore.loading"
         :search="search"
         no-data-text="Ei dataa :("
@@ -61,7 +87,7 @@ import { usePlayerStore } from '@/stores/players.store';
 import { useTeamsStore } from '@/stores/teams.store'
 import { useNavBarStore } from '@/stores/navbar.store';
 
-import { headerPlayers } from '@/stores/headers'
+import { headerPlayers } from '@/stores/headers';
 
 const teamStore = useTeamsStore();
 const playerStore = usePlayerStore();
@@ -70,10 +96,11 @@ const navStore = useNavBarStore();
 playerStore.getPlayers();
 teamStore.getTeams();
 
-const search = ref('')
+const search = ref('');
+const filtterEmpty = ref(undefined);
 
 function handleRedirect (value, row) {
-  location.href = '/pelaajat/' + row.item.id
+  location.href = '/pelaajat/' + row.item.id;
 }
 
 // TODO 
