@@ -1,41 +1,77 @@
 <template>
   <div class="flex-1-1-100">
     <v-card title="Pelaajat">
-      <v-row>
-        <v-col cols="4" class="mb-2 ml-2">
+      <v-row align="center">
+        <v-col cols="3" class="mb-2 ml-2" justify="left">
           <v-text-field
             color="red"
             v-model="search"
-            label="Search"
+            label="Etsi"
             single-line
             hide-details
           />
         </v-col>
-        <v-spacer />
-        <v-col cols="2">
+        <v-col cols="2" align="center">
           <v-btn-toggle
             v-model="filtterEmpty"
             variant="outlined"
           >
-            <v-btn 
-              size="small" 
-              :value="1" 
-              text="Poista pelaamattomat" 
-              @click="playerStore.emptyFiltter = !playerStore.emptyFiltter"
-            />
+            <v-tooltip
+              location="top"
+              text="Suodata pelaamattomat pelaajat"
+            >
+              <template #activator="{ props }">
+                <v-btn
+                  size="small"
+                  v-bind="props"
+                  :value="1" 
+                  icon="mdi-filter-variant" 
+                  @click="playerStore.emptyFiltter = !playerStore.emptyFiltter"
+                />
+              </template>
+            </v-tooltip>
           </v-btn-toggle>
         </v-col>
-        <v-spacer />
-        <v-col cols="4">
+        <v-col cols="3">
           <v-btn-toggle
             v-model="playerStore.playersPositionsToggle"
             variant="outlined"
             divided
           >
-            <v-btn size="small" text="1." :value="1"/>
-            <v-btn size="small" text="2." :value="2"/>
-            <v-btn size="small" text="3." :value="3"/>
-            <v-btn size="small" text="4." :value="4"/>
+            <template v-for="i in 4">
+              <v-tooltip
+                location="top"
+                :text="'Näytä vain heittopaikan '+ i +' statsit'"
+              >
+                <template #activator="{ props }">
+                  <v-btn v-bind="props" size="x-small" :text="i+'.'" :value="i"/>
+                </template>
+              </v-tooltip>
+            </template>
+          </v-btn-toggle>
+        </v-col>
+        <v-col cols="3">
+          <v-btn-toggle
+            v-model="playerStore.playoffFiltter"
+            variant="outlined"
+            divided
+            mandatory
+          >
+            <template v-for="(list, i) in [
+                ['Kaikki', 'kaikkien pelien'],
+                ['Runko', 'runkosarjapelien'],
+                ['Pudotus', 'pudotuspelien']
+              ]"
+            >
+              <v-tooltip
+                  location="top"
+                  :text="'Näytä '+ list[1] +' statsit'"
+                >
+                  <template #activator="{ props }">
+                    <v-btn v-bind="props" size="x-small" :text="list[0]" :value="i"/>
+                  </template>
+                </v-tooltip>
+            </template>
           </v-btn-toggle>
         </v-col>
       </v-row>

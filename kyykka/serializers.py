@@ -242,13 +242,20 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
             return None
 
     def get_score_total(self, obj):
-        self.throws_set = obj.throw_set.filter(
+        self.throw_set = obj.throw_set.filter(
             season=self.context.get("season"), match__is_validated=True
         )
+        if (post_season := self.context.get("post_season", None)) is False:
+            self.throw_set = self.throw_set.filter(
+                match__match_type__lt=31, match__post_season=False
+            )
+        elif post_season:
+            self.throw_set = self.throw_set.filter(match__post_season=True)
+
         if position := self.context.get("throw_turn", None):
-            self.throws_set = self.throws_set.filter(throw_turn=position)
+            self.throw_set = self.throw_set.filter(throw_turn=position)
         self.score_total = count_score_total(
-            obj, self.context.get("season"), self.throws_set
+            obj, self.context.get("season"), self.throw_set
         )
         return self.score_total
 
@@ -256,7 +263,7 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
         key = f"player_{str(obj.id)}_match_count"
         match_count = getFromCache(key, self.context.get("season").year)
         if match_count is None:
-            match_count = self.throws_set.values("match").distict().count()
+            match_count = self.throw_set.values("match").distict().count()
             if match_count is None:
                 match_count = 0
             setToCache(key, match_count, season_year=self.context.get("season").year)
@@ -266,7 +273,7 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
         key = f"player_{str(obj.id)}_rounds_total"
         rounds_total = getFromCache(key, self.context.get("season").year)
         if rounds_total is None:
-            rounds_total = self.throws_set.count()
+            rounds_total = self.throw_set.count()
             setToCache(key, rounds_total, season_year=self.context.get("season").year)
         self.rounds_total = rounds_total
         return self.rounds_total
@@ -283,22 +290,22 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
 
     def get_pikes_total(self, obj):
         season = self.context.get("season")
-        self.pikes = count_throw_results(obj, season, "h", self.throws_set)
-        pikes, zeros = count_negative_values(obj, season, self.throws_set)
+        self.pikes = count_throw_results(obj, season, "h", self.throw_set)
+        pikes, zeros = count_negative_values(obj, season, self.throw_set)
         self.z = zeros
         self.pikes += pikes
         return self.pikes
 
     def get_zeros_total(self, obj):
         self.zeros = count_throw_results(
-            obj, self.context.get("season"), 0, self.throws_set
+            obj, self.context.get("season"), 0, self.throw_set
         )
         self.zeros += self.z
         return self.zeros
 
     def get_gteSix_total(self, obj):
         return count_gte_six_throw_results(
-            obj, self.context.get("season"), self.throws_set
+            obj, self.context.get("season"), self.throw_set
         )
 
     def get_throws_total(self, obj):
@@ -306,7 +313,7 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
         throws_total = getFromCache(key, self.context.get("season").year)
         if throws_total is None:
             throws_total = self.rounds_total * 4 - count_throw_results(
-                obj, self.context.get("season"), "e", self.throws_set
+                obj, self.context.get("season"), "e", self.throw_set
             )
             if throws_total is None:
                 throws_total = 0
@@ -345,11 +352,11 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
         avg_throw_turn = getFromCache(key, self.context.get("season").year)
         if avg_throw_turn is None:
             try:
-                avg_throw_turn_sum = self.throws_set.aggregate(Sum("throw_turn"))[
+                avg_throw_turn_sum = self.throw_set.aggregate(Sum("throw_turn"))[
                     "throw_turn__sum"
                 ]
                 no_throws_turn_sum = (
-                    self.throws_set.filter(
+                    self.throw_set.filter(
                         Q(score_first="e")
                         | Q(score_second="e")
                         | Q(score_third="e")
@@ -466,7 +473,7 @@ class PlayerListSerializer(SharedPlayerSerializer):
 
     def get_scaled_points(self, obj):
         self.scaled_points = (
-            self.throws_set.annotate(
+            self.throw_set.annotate(
                 st=Cast("score_first", output_field=IntegerField()),
                 nd=Cast("score_second", output_field=IntegerField()),
                 rd=Cast("score_third", output_field=IntegerField()),
@@ -527,26 +534,49 @@ class PlayerListAllPositionSerializer(serializers.ModelSerializer):
 
     def get_total(self, obj: User):
         self.season = self.context["season"]
-        return PlayerListSerializer(obj, context={"season": self.season}).data
+        self.post_season = self.context.get("post_season", None)
+        return PlayerListSerializer(
+            obj, context={"season": self.season, "post_season": self.post_season}
+        ).data
 
     def get_first_position(self, obj: User):
         return PlayerListSerializer(
-            obj, context={"season": self.season, "throw_turn": 1}
+            obj,
+            context={
+                "season": self.season,
+                "throw_turn": 1,
+                "post_season": self.post_season,
+            },
         ).data
 
     def get_second_position(self, obj: User):
         return PlayerListSerializer(
-            obj, context={"season": self.season, "throw_turn": 2}
+            obj,
+            context={
+                "season": self.season,
+                "throw_turn": 2,
+                "post_season": self.post_season,
+            },
         ).data
 
     def get_third_position(self, obj: User):
         return PlayerListSerializer(
-            obj, context={"season": self.season, "throw_turn": 3}
+            obj,
+            context={
+                "season": self.season,
+                "throw_turn": 3,
+                "post_season": self.post_season,
+            },
         ).data
 
     def get_fourth_position(self, obj: User):
         return PlayerListSerializer(
-            obj, context={"season": self.season, "throw_turn": 4}
+            obj,
+            context={
+                "season": self.season,
+                "throw_turn": 4,
+                "post_season": self.post_season,
+            },
         ).data
 
     class Meta:
@@ -759,19 +789,19 @@ class PlayerDetailSerializer(SharedPlayerSerializer):
         ).current_abbreviation
 
     def get_ones_total(self, obj):
-        return count_throw_results(obj, self.season, 1, self.throws_set)
+        return count_throw_results(obj, self.season, 1, self.throw_set)
 
     def get_twos_total(self, obj):
-        return count_throw_results(obj, self.season, 2, self.throws_set)
+        return count_throw_results(obj, self.season, 2, self.throw_set)
 
     def get_threes_total(self, obj):
-        return count_throw_results(obj, self.season, 3, self.throws_set)
+        return count_throw_results(obj, self.season, 3, self.throw_set)
 
     def get_fours_total(self, obj):
-        return count_throw_results(obj, self.season, 4, self.throws_set)
+        return count_throw_results(obj, self.season, 4, self.throw_set)
 
     def get_fives_total(self, obj):
-        return count_throw_results(obj, self.season, 5, self.throws_set)
+        return count_throw_results(obj, self.season, 5, self.throw_set)
 
     def get_zero_percentage(self, obj):
         try:
@@ -793,7 +823,7 @@ class PlayerDetailSerializer(SharedPlayerSerializer):
         return matches
 
     def get_average_score_position_one(self, obj):
-        throws_set = self.throws_set.filter(throw_turn=1)
+        throws_set = self.throw_set.filter(throw_turn=1)
         throw_count = throws_set.count() * 4
         no_throws = count_throw_results(obj, self.season, "e", throws_set)
         scores = count_score_total(obj, self.season, throws_set)
@@ -804,7 +834,7 @@ class PlayerDetailSerializer(SharedPlayerSerializer):
         )
 
     def get_average_score_position_two(self, obj):
-        throws_set = self.throws_set.filter(throw_turn=2)
+        throws_set = self.throw_set.filter(throw_turn=2)
         throw_count = throws_set.count() * 4
         no_throws = count_throw_results(obj, self.season, "e", throws_set)
         scores = count_score_total(obj, self.season, throws_set)
@@ -815,7 +845,7 @@ class PlayerDetailSerializer(SharedPlayerSerializer):
         )
 
     def get_average_score_position_three(self, obj):
-        throws_set = self.throws_set.filter(throw_turn=3)
+        throws_set = self.throw_set.filter(throw_turn=3)
         throw_count = throws_set.count() * 4
         no_throws = count_throw_results(obj, self.season, "e", throws_set)
         scores = count_score_total(obj, self.season, throws_set)
@@ -826,7 +856,7 @@ class PlayerDetailSerializer(SharedPlayerSerializer):
         )
 
     def get_average_score_position_four(self, obj):
-        throws_set = self.throws_set.filter(throw_turn=4)
+        throws_set = self.throw_set.filter(throw_turn=4)
         throw_count = throws_set.count() * 4
         no_throws = count_throw_results(obj, self.season, "e", throws_set)
         scores = count_score_total(obj, self.season, throws_set)

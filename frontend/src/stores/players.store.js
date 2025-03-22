@@ -20,21 +20,36 @@ export const usePlayerStore = defineStore('players', () => {
   const playerMatchesPerMatch = ref([]);
   const playersPositionsToggle = ref(); // Used in players index page // TODO convert to list
   const emptyFiltter = ref(false);
+  const playoffFiltter = ref(0);
 
   const playersPostionFilttered = computed(() => {
-    let sub_filter;
+    if (players.value.length === 0) {
+      return []
+    }
+    let sub_filtter;
+    console.log(playoffFiltter.value, players.value)
+    if (playoffFiltter.value === 0) {
+      sub_filtter = players.value["total"]
+    } else if (playoffFiltter.value === 1) {
+      sub_filtter = players.value["bracket"]
+    } else {
+      sub_filtter = players.value["playoff"]
+    }
+
     if (!playersPositionsToggle.value) {
-      sub_filter = players.value.map(obj => obj.total)
+      sub_filtter = sub_filtter.map(obj => obj.total)
     }
     else {
-      sub_filter = players.value.map(obj => obj[position_mapping[playersPositionsToggle.value]])
+      sub_filtter = sub_filtter.map(obj => obj[position_mapping[playersPositionsToggle.value]])
     }
+
     console.log(emptyFiltter.value)
+
     if (emptyFiltter.value) {
-      console.log(emptyFiltter.value, sub_filter[0].rounds_total)
-      return sub_filter.filter(obj => obj.rounds_total)
+      console.log(emptyFiltter.value, sub_filtter[0].rounds_total)
+      return sub_filtter.filter(obj => obj.rounds_total)
     }
-    return sub_filter
+    return sub_filtter
   })
 
 
@@ -129,6 +144,7 @@ export const usePlayerStore = defineStore('players', () => {
     playersPositionsToggle,
     playersPostionFilttered,
     emptyFiltter,
+    playoffFiltter,
     getPlayers,
     getPlayer,
   }

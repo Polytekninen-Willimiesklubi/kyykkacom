@@ -266,22 +266,37 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     List all players that are in a team for the season beingh queried.
     """
 
-    queryset = User.objects.all()
+    queryset = User.objects.all().filter(pk=50)  # TODO REMOVE this
 
     def list(self, request, format=None):
         season = getSeason(request)
         key = "all_players_" + str(season.year)
-        all_players = getFromCache(key)
-        if all_players is None:
+        all_data = getFromCache(key)
+        if all_data is None:
             self.queryset = self.queryset.filter(
                 playersinteam__team_season__season=season
             )
-            serializer = serializers.PlayerListAllPositionSerializer(
+            total = serializers.PlayerListAllPositionSerializer(
                 self.queryset, many=True, context={"season": season}
-            )
-            all_players = serializer.data
-            setToCache(key, all_players)
-        return Response(all_players)
+            ).data
+            bracket = serializers.PlayerListAllPositionSerializer(
+                self.queryset,
+                many=True,
+                context={"season": season, "post_season": False},
+            ).data
+            playoff = serializers.PlayerListAllPositionSerializer(
+                self.queryset,
+                many=True,
+                context={"season": season, "post_season": True},
+            ).data
+
+            all_data = {
+                "total": total,
+                "bracket": bracket,
+                "playoff": playoff,
+            }
+            setToCache(key, all_data)
+        return Response(all_data)
 
     def retrieve(self, request, pk=None):
         # season = getSeason(request)
