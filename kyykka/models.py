@@ -46,7 +46,7 @@ PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
 
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="player")
-    number = models.CharField(max_length=2, default=99)
+    number = models.CharField(max_length=2, default="99")
 
 
 class Team(models.Model):
@@ -118,20 +118,18 @@ class SuperWeekend(models.Model):
 
 
 class PlayersInTeam(models.Model):
-    team_season = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
-    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    team_season = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE)
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
     is_captain = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("player", "team_season")
         # Make sure are players allowed to change team during the season?
 
-    def __str__(self):
-        return "%s %s %s %s" % (
-            self.team_season.season.year,
-            self.team_season.current_abbreviation,
-            self.player.first_name,
-            self.player.last_name,
+    def __str__(self) -> str:
+        return (
+            f"{self.team_season.season.year} {self.team_season.current_abbreviation} "
+            f"{self.player.first_name} {self.player.last_name}"
         )
 
 
@@ -160,9 +158,12 @@ class Match(models.Model):
         verbose_name_plural = "Matches"
 
     def __str__(self):
+        match_type = (
+            "Ei tyyppiä" if self.match_type is None else MATCH_TYPES[self.match_type]
+        )
         return (
             f"{self.match_time.strftime('%m/%d/%Y, %H:%M')} | {self.home_team} - "
-            f"{self.away_team} | {MATCH_TYPES[self.match_type]}"
+            f"{self.away_team} | {match_type}"
         )
 
 
