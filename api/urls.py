@@ -57,6 +57,7 @@ urlpatterns = [
         views.KyykkaAdminSuperViewSet.as_view(),
         name="admin-super",
     ),
+    path("test/", views.ThrowsAPI.as_view({"get": "list"}), name="test"),
 ]
 
 router = SimpleRouter()

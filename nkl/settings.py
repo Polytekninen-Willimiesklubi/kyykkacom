@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "kyykka.apps.KyykkaConfig",
     "drf_yasg",
+    "silk",
 ]
 
 LOGIN_URL = "/api/login/"
@@ -67,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "silk.middleware.SilkyMiddleware",
 ]
 
 ROOT_URLCONF = "nkl.urls"
@@ -94,7 +96,7 @@ DATABASES = {}
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.memcached.MemcachedCache",
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
         "LOCATION": "127.0.0.1:11211",
     }
 }

@@ -24,6 +24,7 @@ from kyykka.models import (
     Throw,
     User,
 )
+from kyykka.new_serializers.throw_model import ThrowsSummary
 from utils.caching import (
     cache_reset_key,
     getFromCache,
@@ -746,3 +747,8 @@ class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
                 },
                 status=400,
             )
+
+
+class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
+    serializer_class = ThrowsSummary
+    queryset = Throw.objects.all()
