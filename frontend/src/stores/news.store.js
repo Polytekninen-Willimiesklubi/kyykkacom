@@ -7,7 +7,7 @@ function getDateString() {
     return date.toISOString();
 }
 
-export const useNewsStore = defineStore('news', () => { 
+export const useNewsStore = defineStore('news', () => {
     const allNews = ref([]);
     // Loading data
     const dataReady = ref(false);
@@ -19,7 +19,7 @@ export const useNewsStore = defineStore('news', () => {
     const saved = ref(false);
 
     // input for saving news
-    const newsText = ref('');
+    const newsText = ref("");
     const headline = ref('');
     const writer = ref('');
 
@@ -30,7 +30,7 @@ export const useNewsStore = defineStore('news', () => {
     })
     const currentPageContent = computed(() => {
         const page = currentPageNro.value
-        return [...allNews.value.slice(2*(page-1), 2*page >= allNews.value.length ? undefined : 2*page)]
+        return [...allNews.value.slice(2 * (page - 1), 2 * page >= allNews.value.length ? undefined : 2 * page)]
     })
 
     async function getNews() {
@@ -38,8 +38,8 @@ export const useNewsStore = defineStore('news', () => {
         error.value = false;
         dataReady.value = false;
         try {
-            const response = await fetch(baseUrl, {method: 'GET'});
-            
+            const response = await fetch(baseUrl, { method: 'GET' });
+
             const payload = await response.json();
             // Sort news recent first
             allNews.value = payload.sort((a, b) => {
@@ -47,7 +47,7 @@ export const useNewsStore = defineStore('news', () => {
             });
             dataReady.value = true;
 
-        } catch(e) {
+        } catch (e) {
             error.value = true;
             console.log(e)
         } finally {
@@ -69,11 +69,11 @@ export const useNewsStore = defineStore('news', () => {
                 'body': JSON.stringify({
                     "writer": writer.value,
                     "header": headline.value,
-                    "date" : getDateString(),
-                    "text" : newsText.value,
+                    "date": getDateString(),
+                    "text": newsText.value,
                 }),
                 withCredentials: true,
-              });
+            });
             console.log(response.status);
             if (response.status === 200) {
                 saved.value = true;
@@ -81,8 +81,8 @@ export const useNewsStore = defineStore('news', () => {
                 newsText.value = "";
                 headline.value = "";
                 getNews();
-            } 
-        } catch(e) {
+            }
+        } catch (e) {
             savingError.value = true;
             console.log(e);
         } finally {
@@ -107,5 +107,5 @@ export const useNewsStore = defineStore('news', () => {
         getNews,
         saveNews,
     }
-    
+
 })

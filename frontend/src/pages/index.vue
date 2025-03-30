@@ -12,7 +12,7 @@
       v-if="authStore.isSuperUser && newsButton"
     >
       <QuillEditor
-        :content=newsStore.newsText
+        :content="newsStore.newsText"
         contentType="html" 
         theme="snow" 
         class="mb-1" 
