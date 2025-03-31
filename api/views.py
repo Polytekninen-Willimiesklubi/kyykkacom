@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_swagger.views import get_swagger_view
+from rest_framework.request import Request
+import typing as t
 
 import kyykka.serializers as serializers
 from kyykka.models import (
@@ -35,49 +37,58 @@ from utils.caching import (
 
 schema_view = get_swagger_view(title="NKL API")
 
+def get_current_season() -> Season:
+    current = CurrentSeason.objects.first()
+    if current is None:
+        raise CurrentSeason.DoesNotExist
+    return current.season
 
-def getSeason(request):
+
+def getSeason(request: Request) -> Season:
     try:
+        print(type(request))
         season_id = request.query_params.get("season")
         if season_id:
-            season = Season.objects.get(id=season_id)
+            return Season.objects.get(id=season_id)
         else:
             raise Season.DoesNotExist
     except (Season.DoesNotExist, ValueError):
-        season = CurrentSeason.objects.first().season
-    return season
+        return get_current_season()
 
 
-def getPostseason(request):
+def getPostseason(request: Request) -> bool | None:
     try:
-        post_season = bool(int(request.query_params.get("post_season")))
+        req_post_season = request.query_params.get("post_season", None)
+        if req_post_season is None:
+            return None
+        return bool(int(req_post_season))
     except (ValueError, TypeError):
-        post_season = None
-    return post_season
+        return None
 
-
-def getRole(user):
+def getRole(user: User) -> t.Literal[0, 1, 2]:
     try:
         if user.is_superuser:
-            role = 2
-        elif user.playersinteam_set.get(
-            team_season__season=CurrentSeason.objects.first().season
-        ).is_captain:
-            role = 1
+            return 2
         else:
-            role = 0
+            player_in_team: PlayersInTeam = user.playersinteam_set.get(  # type: ignore
+                team_season__season=get_current_season()
+            )
+            assert isinstance(player_in_team, PlayersInTeam)
+            if player_in_team.is_captain:
+                return 1
+            else:
+                return 0
     except PlayersInTeam.DoesNotExist:
-        role = 0
-    return role
+        return 0
 
-
-def getSuper(request):
+def getSuper(request: Request) -> bool | None:
     try:
-        super_weekend = bool(int(request.query_params.get("super_weekend")))
+        request_param = request.query_params.get("super_weekend", None)
+        if request_param is None:
+            return None
+        return bool(int(request_param))
     except (ValueError, TypeError):
-        super_weekend = None
-    return super_weekend
-
+        return None
 
 @ensure_csrf_cookie
 def csrf(request):
@@ -93,12 +104,12 @@ class IsCaptain(permissions.BasePermission):
     Permission check to verify that user is captain in the right team.
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request: Request, view):
         try:
             if request.user.is_superuser:
                 return True
             return request.user.playersinteam_set.get(
-                team_season__season=CurrentSeason.objects.first().season
+                team_season__season=get_current_season()
             ).is_captain
         except PlayersInTeam.DoesNotExist:
             return False
@@ -106,22 +117,22 @@ class IsCaptain(permissions.BasePermission):
 
 class IsCaptainForThrow(permissions.BasePermission):
     """
-    Permission check to verify if user is captain in the right team for updaing throws
+    Permission check to verify if user is captain in the right team for updating throws
+
+    Home team captain is only one allowed to modify the throws
     """
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request: Request, view, obj: Throw):
         try:
             if request.user.is_superuser:
                 return True
-            return (
-                request.user
-                == obj.match.home_team.playersinteam_set.filter(
-                    team_season__season=CurrentSeason.objects.first().season,
-                    is_captain=True,
-                )
-                .first()
-                .player
-            )
+            
+            home_team_captain = obj.match.home_team.players.filter(is_captain=True).first()
+            if home_team_captain is None:
+                print(f"Team {obj.match.home_team} has no captain!")
+                return False
+            
+            return request.user == home_team_captain.player
         except AttributeError:
             print("has_object_permission", request.user.id, obj)
             return False
@@ -133,29 +144,21 @@ class MatchDetailPermission(permissions.BasePermission):
     Else user needs to be captain of the away_team (patchin round scores)
     """
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request:Request, view, obj: Throw):
         if request.user.is_superuser:
             return True
-        if "is_validated" in request.data and len(request.data) == 1:
-            return (
-                request.user
-                == obj.away_team.playersinteam_set.filter(
-                    team_season__season=CurrentSeason.objects.first().season,
-                    is_captain=True,
-                )
-                .first()
-                .player
-            )
-        if "is_validated" not in request.data:
-            return (
-                request.user
-                == obj.home_team.playersinteam_set.filter(
-                    team_season__season=CurrentSeason.objects.first().season,
-                    is_captain=True,
-                )
-                .first()
-                .player
-            )
+        if "is_validated" in request.data: # type: ignore
+            away_captain = obj.match.away_team.players.filter(is_captain=True).first()
+            if away_captain is None:
+                print(f"Team {obj.match.away_team} has no captain!")
+                return False
+            return request.user == away_captain.player
+        else:
+            home_captain = obj.match.home_team.players.filter(is_captain=True).first()
+            if home_captain is None:
+                print(f"Team {obj.match.home_team} has no captain!")
+                return False
+            return request.user == home_captain.player
 
 
 class IsSuperUserOrAdmin(permissions.BasePermission):
@@ -267,16 +270,16 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     List all players that are in a team for the season beingh queried.
     """
 
-    queryset = User.objects.all().filter(pk=50)  # TODO REMOVE this
+    queryset = User.objects.all()  
 
     def list(self, request, format=None):
         season = getSeason(request)
         key = "all_players_" + str(season.year)
+        print(season)
         all_data = getFromCache(key)
+        print(all_data)
         if all_data is None:
-            self.queryset = self.queryset.filter(
-                playersinteam__team_season__season=season
-            )
+            self.queryset = self.queryset.filter(playersinteam__team_season__season=season)
             total = serializers.PlayerListAllPositionSerializer(
                 self.queryset, many=True, context={"season": season}
             ).data
@@ -642,7 +645,7 @@ class SeasonsAPI(generics.GenericAPIView):
         key = "current_season"
         current_season = getFromCache(key)
         if current_season is None:
-            current = CurrentSeason.objects.first().season
+            current = get_current_season()
             current_season = serializers.SeasonSerializer(current).data
             setToCache(key, current_season)
 
@@ -667,7 +670,7 @@ class SuperWeekendAPI(generics.GenericAPIView):
 
             if super_weekends is None:
                 super_weekends = serializers.SuperWeekendSerializer(
-                    self.queryset.all(), many=True
+                    self.queryset, many=True
                 ).data
                 setToCache(key, super_weekends)
         else:
@@ -751,4 +754,4 @@ class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
 
 class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
     serializer_class = ThrowsSummary
-    queryset = Throw.objects.all()
+    queryset = Throw.objects.filter(match=1000)

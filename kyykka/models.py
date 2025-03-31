@@ -83,7 +83,7 @@ class TeamsInSeason(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     current_name = models.CharField(max_length=128)
     current_abbreviation = models.CharField(max_length=15)
-    players = models.ManyToManyField(User, through="PlayersInTeam")
+    players: models.ManyToManyField["PlayersInTeam", User] = models.ManyToManyField(User, through="PlayersInTeam")
     bracket = models.IntegerField(null=True)
     bracket_placement = models.IntegerField(
         blank=True, null=True
