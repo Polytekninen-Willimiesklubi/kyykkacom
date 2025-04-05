@@ -651,16 +651,15 @@ class SeasonsAPI(generics.GenericAPIView):
             all_seasons = serializers.SeasonSerializer(
                 self.queryset.all(), many=True
             ).data
+            print(all_seasons)
             setToCache(key, all_seasons)
 
-        key = "current_season"
-        current_season = getFromCache(key)
-        if current_season is None:
-            current = get_current_season()
-            current_season = serializers.SeasonSerializer(current).data
-            setToCache(key, current_season)
+        key = "current_season_ser"
+        current_season = get_current_season()
+        # TODO this serialzer maybe should be cached instead, but that's not that big deal IMO.
+        current = serializers.SeasonSerializer(current_season).data
 
-        return Response((all_seasons, current_season))
+        return Response((all_seasons, current))
 
 
 class SuperWeekendAPI(generics.GenericAPIView):
@@ -764,7 +763,7 @@ class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
 
 
 class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
-    queryset = Throw.objects.select_related('season', "team", "match")
+    queryset = Throw.objects.select_related("season", "team", "match")
     serializer_class = serializers.PlayerListSerializer
 
     def list(self, request, format=None):
@@ -809,12 +808,13 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             scaled_points=Sum('_scaled_points'),
             weighted_throw_total=Sum("weighted_throw_count"),
         )
-        # Combine all of the data
-        # print(throws)
+
 
         return_value = defaultdict(lambda: defaultdict(dict))
+        ids = set()
         for result in throws:
             playoff = "playoff" if result["playoff"] else "bracket"
+            ids.add(result["player"])
             tmp = return_value[
                 (result["player"], result["team_name"], result["player_name"])
             ][playoff][result["throw_turn"]] = result
@@ -831,6 +831,17 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                 "player_name": name,
                 "team_name": team,
                 **val
+            })
+
+        # Append the players that haven't thrown at all
+        players = PlayersInTeam.objects.select_related(
+            "team_season__season", "player", "team_season"
+        ).filter(team_season__season=season).exclude(player__in=ids)
+        for player in players:
+            final_result.append({
+                "player": player.player.id, # type: ignore
+                "player_name": f"{player.player.first_name} {player.player.last_name}",
+                "team_name": player.team_season.current_abbreviation,
             })
 
         return Response(final_result)
