@@ -36,7 +36,6 @@ export const usePlayerStore = defineStore('players', () => {
     if (players.value.length === 0) {
       return []
     }
-    // console.log(players.value)
     let filterValues;
     if (playoffFiltter.value === 0) {
       filterValues = ["bracket", "playoff"]
@@ -45,7 +44,6 @@ export const usePlayerStore = defineStore('players', () => {
     } else {
       filterValues = ["playoff"]
     }
-    console.log("hei")
 
     return players.value.reduce((acc, obj) => {
       const extractedData = {
@@ -80,7 +78,6 @@ export const usePlayerStore = defineStore('players', () => {
     if (stageFilter.value.length === 0) {
       return []
     }
-    console.log("moi")
     let positionsFilter;
     if (!playersPositionsToggle.value.length) {
       positionsFilter = [1, 2, 3, 4];
@@ -108,7 +105,6 @@ export const usePlayerStore = defineStore('players', () => {
         score_per_throw: Number.NaN,
         scaled_points_per_throw: Number.NaN,
       };
-      // Loop through positions only once
       for (const position of positionsFilter) {
         const nestedData = item[position];
         if (!nestedData) {
@@ -133,17 +129,6 @@ export const usePlayerStore = defineStore('players', () => {
       acc.push(extractedData);
       return acc
     }, []);
-
-
-    // const idCount = filteredData.reduce((acc, obj) => {
-    //   acc[obj.id] = (acc[obj.id] || 0) + 1;
-    //   return acc;
-    // }, {});
-
-    // // Step 2: Find non-unique ids (ids that appear more than once)
-    // const nonUniqueIds = Object.keys(idCount).filter(id => idCount[id] > 1);
-    // console.log(nonUniqueIds)
-    console.log(filteredData)
 
     if (emptyFilter.value) {
       return filteredData.filter(obj => obj.rounds_total)

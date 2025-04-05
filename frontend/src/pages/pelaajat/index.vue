@@ -81,7 +81,7 @@
         :mobile-breakpoint=0
         :headers="headerPlayers"
         @click:row="handleRedirect"
-        :sortBy="[{key: 'rounds_total', order:'desc'}]"
+        :sortBy="sortBy"
         :items="playerStore.playersPostionFilttered"
         :loading="playerStore.loading"
         :search="search"
@@ -135,32 +135,20 @@ teamStore.getTeams();
 
 const search = ref('');
 const filtterEmpty = ref(undefined);
+// Setting sortBy stops the resetting after filtering is applied
+const sortBy = ref([{key: 'rounds_total', order:'desc'}])
 
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.player_id;
 }
-
-// TODO 
-// Inverses the order of which is first: desc or asc
-// const customSorts = {
-//   score_per_throw: (item1, item2, isDesc) => {
-//     console.log(isDesc)
-//     a = item1 == "NaN" ? -1 : item1
-//     b = item2 == "NaN" ? -1 : item2
-//     return b - a
-//   }
-// }
 
 watch(() => navStore.seasonId, (newId) => {
   playerStore.getPlayers();
 })
 
 </script>
-
 <style scoped>
-
 tbody tr :hover {
   cursor: unset;
 }
-
 </style>
