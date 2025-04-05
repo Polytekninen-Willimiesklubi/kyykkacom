@@ -1,3 +1,4 @@
+from collections import defaultdict
 import json
 
 from django.contrib.auth import login, logout
@@ -13,6 +14,8 @@ from rest_framework_swagger.views import get_swagger_view
 from rest_framework.request import Request
 import typing as t
 
+from django.db.models.functions import Cast, Concat
+
 import kyykka.serializers as serializers
 from kyykka.models import (
     CurrentSeason,
@@ -27,6 +30,10 @@ from kyykka.models import (
     User,
 )
 from kyykka.new_serializers.throw_model import ThrowsSummary
+from django.core.cache import cache
+from django.db.models import F, IntegerField, Sum, Q, Count, Case, When, FloatField, Value
+
+
 from utils.caching import (
     cache_reset_key,
     getFromCache,
@@ -38,20 +45,28 @@ from utils.caching import (
 schema_view = get_swagger_view(title="NKL API")
 
 def get_current_season() -> Season:
+    cache_value = cache.get("current_season", None)
+    if cache_value is not None:
+        return cache_value
     current = CurrentSeason.objects.first()
     if current is None:
         raise CurrentSeason.DoesNotExist
+    cache.set("current_season", current.season, 60 * 60 * 12)
     return current.season
 
 
 def getSeason(request: Request) -> Season:
     try:
-        print(type(request))
         season_id = request.query_params.get("season")
         if season_id:
-            return Season.objects.get(id=season_id)
+            season = cache.get(f"season_{season_id}", None)
         else:
-            raise Season.DoesNotExist
+            return get_current_season()
+        if season is not None:
+            return season
+        season = Season.objects.get(id=season_id)
+        cache.set(f"season_{season_id}", season, 60 * 60 * 12)
+        return season
     except (Season.DoesNotExist, ValueError):
         return get_current_season()
 
@@ -187,7 +202,6 @@ class LoginAPI(generics.GenericAPIView):
             player_in_team = PlayersInTeam.objects.filter(
                 player=user, team_season__season=current
             ).first()
-            team_id = player_in_team.team_season.id  # FIXME this needs to find current teams somehow if player is also captain of that team
             role = getRole(user)
             # role = '1' if player_in_team.is_captain else '0'
         except (PlayersInTeam.DoesNotExist, AttributeError):
@@ -270,16 +284,15 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     List all players that are in a team for the season beingh queried.
     """
 
-    queryset = User.objects.all()  
+    queryset = PlayersInTeam.objects.all()
 
     def list(self, request, format=None):
         season = getSeason(request)
         key = "all_players_" + str(season.year)
-        print(season)
         all_data = getFromCache(key)
-        print(all_data)
         if all_data is None:
-            self.queryset = self.queryset.filter(playersinteam__team_season__season=season)
+            self.queryset = self.queryset.filter(team_season__season=season)
+            data = serializers.PlayerListAllPositionSerializer(self.queryset, many=True).data
             total = serializers.PlayerListAllPositionSerializer(
                 self.queryset, many=True, context={"season": season}
             ).data
@@ -393,8 +406,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 }
             }
             weighted_total = 0
-            team_season = get_object_or_404(self.queryset, pk=pk)
-            team = Team.objects.filter(id=team_season.team.id)
             all_team_seasons = self.queryset.filter(team=team.first())
             players = {}
             player_weighted_total = {}
@@ -753,5 +764,73 @@ class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
 
 
 class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
-    serializer_class = ThrowsSummary
-    queryset = Throw.objects.filter(match=1000)
+    queryset = Throw.objects.select_related('season', "team", "match")
+    serializer_class = serializers.PlayerListSerializer
+
+    def list(self, request, format=None):
+        season = getSeason(request)
+        # TODO cache this bitch if already calculated once
+        # TODO superweekend should be ignored
+        throws = self.queryset.filter(season=season, match__match_type__lt=31).alias(
+            st=Cast("score_first", IntegerField()),
+            nd=Cast("score_second", IntegerField()),
+            rd=Cast("score_third", IntegerField()),
+            th=Cast("score_fourth", IntegerField()),
+            non_throws=Case(When(score_first='e', then=1), default=0)
+                + Case(When(score_second='e', then=1), default=0)
+                + Case(When(score_third='e', then=1), default=0)
+                + Case(When(score_fourth='e', then=1), default=0),
+            weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
+            _scaled_points=(
+                  (F("st") + F("nd")) * (9 + F("throw_turn"))
+                + (F("rd") + F("th")) * (13 + F("throw_turn"))
+            ) / 5,
+        ).values("player").annotate(
+            player_name=Concat("player__first_name", Value(" "), "player__last_name"),
+            team_name=F("team__current_abbreviation"),
+            throw_turn=F("throw_turn"),
+            playoff=F("match__post_season"),
+            score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
+            pikes_total=Count("pk", filter=Q(score_first='h'))
+                      + Count("pk", filter=Q(score_second='h'))
+                      + Count("pk", filter=Q(score_third='h'))
+                      + Count("pk", filter=Q(score_fourth='h')),
+            zeros_total=Count("pk", filter=Q(score_first='0'))
+                      + Count("pk", filter=Q(score_second='0'))
+                      + Count("pk", filter=Q(score_third='0'))
+                      + Count("pk", filter=Q(score_fourth='0')),
+            gte_six_total=Count("pk", filter=Q(st__gte=6))
+                        + Count("pk", filter=Q(nd__gte=6))
+                        + Count("pk", filter=Q(rd__gte=6))
+                        + Count("pk", filter=Q(th__gte=6)),
+            match_count=Count("match", distinct=True),
+            rounds_total=Count("pk"),
+            throws_total=Count("pk") * 4 -Sum("non_throws"),
+            scaled_points=Sum('_scaled_points'),
+            weighted_throw_total=Sum("weighted_throw_count"),
+        )
+        # Combine all of the data
+        # print(throws)
+
+        return_value = defaultdict(lambda: defaultdict(dict))
+        for result in throws:
+            playoff = "playoff" if result["playoff"] else "bracket"
+            tmp = return_value[
+                (result["player"], result["team_name"], result["player_name"])
+            ][playoff][result["throw_turn"]] = result
+            del tmp["player"]
+            del tmp["player_name"]
+            del tmp["team_name"]
+            del tmp["throw_turn"]
+            del tmp["playoff"]
+
+        final_result = []
+        for (i, team, name), val in return_value.items():
+            final_result.append({
+                "player": i,
+                "player_name": name,
+                "team_name": team,
+                **val
+            })
+
+        return Response(final_result)

@@ -43,7 +43,7 @@ function throwSort(a, b) {
 
 export const headerPlayers = [
     { title: 'Nimi', key: 'player_name', align: 'left', width: '30%' },
-    { title: 'Joukkue', key: 'team.current_abbreviation', align: 'center', width: '10%' },
+    { title: 'Joukkue', key: 'team_name', align: 'center', width: '10%' },
     { title: 'E', key: 'rounds_total', align: 'center', tooltip: 'Pelatut Erät' },
     { title: 'K', key: 'score_total', align: 'center', tooltip: 'Poistetut Kyykät' },
     { title: 'KPH', key: 'score_per_throw', align: 'center', tooltip: 'Kyykkää Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
@@ -53,7 +53,7 @@ export const headerPlayers = [
     { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
     { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
     { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
-    { title: 'JK', key: 'gteSix_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
+    { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
 /********** PLAYER PAGE **********/

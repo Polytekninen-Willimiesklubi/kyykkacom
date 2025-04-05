@@ -37,6 +37,7 @@
             v-model="playerStore.playersPositionsToggle"
             variant="outlined"
             divided
+            multiple
           >
             <template v-for="i in 4">
               <v-tooltip
@@ -136,7 +137,7 @@ const search = ref('');
 const filtterEmpty = ref(undefined);
 
 function handleRedirect (value, row) {
-  location.href = '/pelaajat/' + row.item.id;
+  location.href = '/pelaajat/' + row.item.player_id;
 }
 
 // TODO 

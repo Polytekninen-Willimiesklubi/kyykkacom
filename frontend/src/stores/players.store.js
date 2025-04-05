@@ -2,14 +2,22 @@ import { useNavBarStore } from "./navbar.store";
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/players/`;
 
-const position_mapping = {
-  1: "first_position",
-  2: "second_position",
-  3: "third_position",
-  4: "fourth_position",
+// TODO doc
+function divide_round(value, divider) {
+  return divider ? Math.round(value / divider * 100) / 100 : Number.NaN
 }
-
-
+// NOTE this must kept upto date with the API return values
+const fields = [
+  "score_total",
+  "pikes_total",
+  "zeros_total",
+  "gte_six_total",
+  "match_count",
+  "rounds_total",
+  "throws_total",
+  "scaled_points",
+  "weighted_throw_total",
+]
 export const usePlayerStore = defineStore('players', () => {
   const loading = ref(false);
   const loadingPlayer = ref(false);
@@ -18,38 +26,129 @@ export const usePlayerStore = defineStore('players', () => {
   const player = ref({})
   const playerMatchesPerPeriod = ref([]);
   const playerMatchesPerMatch = ref([]);
-  const playersPositionsToggle = ref(); // Used in players index page // TODO convert to list
-  const emptyFiltter = ref(false);
+  const playersPositionsToggle = ref([]); // Used in players index page
+  const emptyFilter = ref(false);
   const playoffFiltter = ref(0);
 
-  const playersPostionFilttered = computed(() => {
+  // Pre-Filtter that is for internal use only. This is applied before position filtter
+  // and should lead better performance
+  const stageFilter = computed(() => {
     if (players.value.length === 0) {
       return []
     }
-    let sub_filtter;
-    console.log(playoffFiltter.value, players.value)
+    // console.log(players.value)
+    let filterValues;
     if (playoffFiltter.value === 0) {
-      sub_filtter = players.value["total"]
+      filterValues = ["bracket", "playoff"]
     } else if (playoffFiltter.value === 1) {
-      sub_filtter = players.value["bracket"]
+      filterValues = ["bracket"]
     } else {
-      sub_filtter = players.value["playoff"]
+      filterValues = ["playoff"]
     }
+    console.log("hei")
 
-    if (!playersPositionsToggle.value) {
-      sub_filtter = sub_filtter.map(obj => obj.total)
-    }
-    else {
-      sub_filtter = sub_filtter.map(obj => obj[position_mapping[playersPositionsToggle.value]])
-    }
+    return players.value.reduce((acc, obj) => {
+      const extractedData = {
+        player_id: obj.player,
+        player_name: obj.player_name,
+        team_name: obj.team_name,
+      };
+      for (const stage of filterValues) {
+        if (obj[stage] === undefined) {
+          continue;
+        }
+        for (const position of [1, 2, 3, 4]) {
+          if (obj[stage][position] == undefined) {
+            continue;
+          }
+          if (extractedData[position] === undefined) {
+            extractedData[position] = structuredClone(toRaw(obj[stage][position]));
+          } else {
+            for (const field of fields) {
+              extractedData[position][field] += obj[stage][position][field];
+            }
+          }
+        }
+      }
+      acc.push(extractedData)
+      return acc
+    }, [])
+  })
 
-    console.log(emptyFiltter.value)
-
-    if (emptyFiltter.value) {
-      console.log(emptyFiltter.value, sub_filtter[0].rounds_total)
-      return sub_filtter.filter(obj => obj.rounds_total)
+  // TODO add also players who hasn't throw any throws yet.
+  const playersPostionFilttered = computed(() => {
+    if (stageFilter.value.length === 0) {
+      return []
     }
-    return sub_filtter
+    console.log("moi")
+    let positionsFilter;
+    if (!playersPositionsToggle.value.length) {
+      positionsFilter = [1, 2, 3, 4];
+    } else {
+      positionsFilter = playersPositionsToggle.value;
+    }
+    let listId = 0
+    const filteredData = stageFilter.value.reduce((acc, item) => {
+      const extractedData = {
+        id: listId++,
+        player_id: item.player,
+        player_name: item.player_name,
+        team_name: item.team_name,
+        score_total: 0,
+        pikes_total: 0,
+        zeros_total: 0,
+        gte_six_total: 0,
+        match_count: 0,
+        rounds_total: 0,
+        throws_total: 0,
+        scaled_points: 0,
+        weighted_throw_total: 0,
+        pike_percentage: Number.NaN,
+        avg_throw_turn: Number.NaN,
+        score_per_throw: Number.NaN,
+        scaled_points_per_throw: Number.NaN,
+      };
+      // Loop through positions only once
+      for (const position of positionsFilter) {
+        const nestedData = item[position];
+        if (!nestedData) {
+          continue;
+        }
+        for (const field of fields) {
+          extractedData[field] += nestedData[field];
+        }
+      }
+      extractedData.pike_percentage = divide_round(
+        extractedData.pikes_total * 100, extractedData.throws_total
+      );
+      extractedData.avg_throw_turn = divide_round(
+        extractedData.weighted_throw_total, extractedData.throws_total
+      );
+      extractedData.score_per_throw = divide_round(
+        extractedData.score_total, extractedData.throws_total
+      );
+      extractedData.scaled_points_per_throw = divide_round(
+        extractedData.scaled_points, extractedData.throws_total
+      );
+      acc.push(extractedData);
+      return acc
+    }, []);
+
+
+    // const idCount = filteredData.reduce((acc, obj) => {
+    //   acc[obj.id] = (acc[obj.id] || 0) + 1;
+    //   return acc;
+    // }, {});
+
+    // // Step 2: Find non-unique ids (ids that appear more than once)
+    // const nonUniqueIds = Object.keys(idCount).filter(id => idCount[id] > 1);
+    // console.log(nonUniqueIds)
+    console.log(filteredData)
+
+    if (emptyFilter.value) {
+      return filteredData.filter(obj => obj.rounds_total)
+    }
+    return filteredData
   })
 
 
@@ -59,8 +158,7 @@ export const usePlayerStore = defineStore('players', () => {
     const question = '?season=' + navStore.seasonId;
     const response = await fetch(baseUrl + question, { method: 'GET' });
     const payload = await response.json();
-
-    players.value = payload;
+    players.value = payload.filter(obj => obj.player);
     loading.value = false;
   }
 
@@ -143,7 +241,7 @@ export const usePlayerStore = defineStore('players', () => {
     playerMatchesPerMatch,
     playersPositionsToggle,
     playersPostionFilttered,
-    emptyFiltter,
+    emptyFiltter: emptyFilter,
     playoffFiltter,
     getPlayers,
     getPlayer,

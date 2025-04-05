@@ -58,10 +58,11 @@ urlpatterns = [
         name="admin-super",
     ),
     path("test/", views.ThrowsAPI.as_view({"get": "list"}), name="test"),
+    path("players/", views.ThrowsAPI.as_view({"get": "list"}))
 ]
 
 router = SimpleRouter()
-router.register(r"players", views.PlayerViewSet, "player")
+# router.register(r"players", views.PlayerViewSet, "player")
 router.register(r"teams", views.TeamViewSet)
 
 # router.register(r'matches', views.MatchViewSet)
