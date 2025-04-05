@@ -23,9 +23,9 @@
             </ul>
 
             <div class="text-h5 mt-2 mb-2">Pelin Päätyttyä</div>
-            <li class="ml-5">Kättele vastustaja joukuetta pelistä.</li>
+            <li class="ml-5">Kättele vastustajajoukuetta pelistä.</li>
             <li class="ml-5">Kokoa kenttä seuraavalle joukkueelle.</li>
-            <li class="ml-5">Kunnosta kenttä. Aina jos kenttä ei enään käytetä.</li>
+            <li class="ml-5">Kunnosta kenttä. Aina jos kenttää ei enään käytetä.</li>
             <li class="ml-5">Laske kyykät aina ennen kuin ne pakataan pois.</li>
             <li class="ml-5">Kadonneet kyykät etsitään, ja jos ei löydy ilmoitetaan kadonneeksi (mistä kentältä + mikä kyykkä).</li>
             <li class="ml-5">Palauta tarvikkeet, kyykät, kartut, yms. konttiin.</li>
@@ -49,13 +49,13 @@
             <li class="ml-8">7. A pystyy paikallaan ja mittaa 5m. B piirtää kevyesti osan ympyrää oletettuun toisen etukulmaan kohtaan. (ristiin)</li>
             <li class="ml-8">8. Ympyrien Leikkauspisteet ovat halutut pelien neliöiden kulmat ja ne merkataan. Häivytä apuympyrän merkinnät</li>
             <li class="ml-5">9. Toista kohdat 4 - 8. toiselle pelineliölle.</li>
-            <li class="ml-5">10. Kaavaimella piirtäkää viivat siten että viivoitin jää "neliön" sisään (Sisäreuna jää terävä).</li>
+            <li class="ml-5">10. Kaavaimella piirtäkää viivat siten että viivoitin jää "neliön" sisään (Sisäreuna jää teräväksi).</li>
 
 
 
             <div class="text-h5 mt-2 mb-2">Kentän huolto</div>
             <span class="content">
-                Aika ajoin kenttien neliötä kannattaa siirtä, jotta kentät eivät kulu vain yhdestä kohtaa liikaa.
+                Aika ajoin kenttien neliötä kannattaa siirtää, jotta kentät eivät kulu vain yhdestä kohtaa liikaa.
             </span><br />
             
             <div class="text-h6 mt-2 mb-2">Talvella</div>
