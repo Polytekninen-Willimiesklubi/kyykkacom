@@ -55,20 +55,19 @@ def get_current_season() -> Season:
     return current.season
 
 
-def getSeason(request: Request) -> Season:
+def getSeason(request: Request) -> Season | None:
     try:
-        season_id = request.query_params.get("season")
-        if season_id:
-            season = cache.get(f"season_{season_id}", None)
-        else:
-            return get_current_season()
+        season_id = request.query_params.get("season", None)
+        if season_id is None:
+            return None
+        season = cache.get(f"season_{season_id}", None)
         if season is not None:
             return season
         season = Season.objects.get(id=season_id)
         cache.set(f"season_{season_id}", season, 60 * 60 * 12)
         return season
     except (Season.DoesNotExist, ValueError):
-        return get_current_season()
+        return None
 
 
 def getPostseason(request: Request) -> bool | None:
@@ -763,14 +762,18 @@ class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
 
 
 class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
-    queryset = Throw.objects.select_related("season", "team", "match")
+    queryset = Throw.objects.select_related("season", "team", "match").exclude(player__isnull=True)
     serializer_class = serializers.PlayerListSerializer
 
-    def list(self, request, format=None):
-        season = getSeason(request)
+    def list(self, request: Request, format=None):
+        season_id = request.query_params.get("season", None)
+        season: Season | None = None
+        if season_id is not None:
+            season = getSeason(request)
+            self.queryset = self.queryset.filter(season=season)
         # TODO cache this bitch if already calculated once
         # TODO superweekend should be ignored
-        throws = self.queryset.filter(season=season, match__match_type__lt=31).alias(
+        throws = self.queryset.filter(match__match_type__lt=31).alias(
             st=Cast("score_first", IntegerField()),
             nd=Cast("score_second", IntegerField()),
             rd=Cast("score_third", IntegerField()),
@@ -807,41 +810,27 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             throws_total=Count("pk") * 4 -Sum("non_throws"),
             scaled_points=Sum('_scaled_points'),
             weighted_throw_total=Sum("weighted_throw_count"),
+            season=F("season__year")
         )
-
-
-        return_value = defaultdict(lambda: defaultdict(dict))
-        ids = set()
-        for result in throws:
-            playoff = "playoff" if result["playoff"] else "bracket"
-            ids.add(result["player"])
-            tmp = return_value[
-                (result["player"], result["team_name"], result["player_name"])
-            ][playoff][result["throw_turn"]] = result
-            del tmp["player"]
-            del tmp["player_name"]
-            del tmp["team_name"]
-            del tmp["throw_turn"]
-            del tmp["playoff"]
-
-        final_result = []
-        for (i, team, name), val in return_value.items():
-            final_result.append({
-                "player": i,
-                "player_name": name,
-                "team_name": team,
-                **val
-            })
-
-        # Append the players that haven't thrown at all
+        ids = set([result["player"] for result in throws])
+        
+        # Add the players that haven't thrown at all
         players = PlayersInTeam.objects.select_related(
             "team_season__season", "player", "team_season"
-        ).filter(team_season__season=season).exclude(player__in=ids)
+        )
+        
+        throws = list(throws)
+
+        if season is not None:
+            players = players.filter(team_season__season=season)
+        players = players.exclude(player__in=ids)
         for player in players:
-            final_result.append({
+            throws.append({
                 "player": player.player.id, # type: ignore
                 "player_name": f"{player.player.first_name} {player.player.last_name}",
                 "team_name": player.team_season.current_abbreviation,
+                "season": player.team_season.season.year,
+                "playoff": False,
             })
 
-        return Response(final_result)
+        return Response(throws)

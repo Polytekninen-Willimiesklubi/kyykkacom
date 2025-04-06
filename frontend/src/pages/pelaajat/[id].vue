@@ -6,7 +6,7 @@
           <v-card class="ma-2">
             <v-card-title align="center">{{playerStore.player.player_name}}</v-card-title>
             <v-data-table
-              mobile-breakpoint="0"
+              :mobile-breakpoint="0"
               :headers="headerPlayerOverallStats"
               class="allTimeStats"
               :items="[playerStore.player]"
@@ -35,7 +35,7 @@
         <v-col>
           <v-card class="ma-2">
             <v-data-table
-              mobile-breakpoint="0"
+              :mobile-breakpoint="0"
               class="seasonStats"
               :headers="headerPlayerSeasonStats"
               height="20em"
@@ -151,7 +151,7 @@
         <v-col>
           <v-card>
             <v-data-table
-              mobile-breakpoint="0"
+              :mobile-breakpoint="0"
               class="matchesClass"
               @click:row="handleRedirect"
               :search="search"

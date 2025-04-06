@@ -34,6 +34,7 @@ declare module 'vue-router/auto-routes' {
     '/ottelut/[id]': RouteRecordInfo<'/ottelut/[id]', '/ottelut/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/pelaajat/': RouteRecordInfo<'/pelaajat/', '/pelaajat', Record<never, never>, Record<never, never>>,
     '/pelaajat/[id]': RouteRecordInfo<'/pelaajat/[id]', '/pelaajat/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/pelaajat/kaikki/': RouteRecordInfo<'/pelaajat/kaikki/', '/pelaajat/kaikki', Record<never, never>, Record<never, never>>,
     '/runkosarja': RouteRecordInfo<'/runkosarja', '/runkosarja', Record<never, never>, Record<never, never>>,
     '/SuperWeekend': RouteRecordInfo<'/SuperWeekend', '/SuperWeekend', Record<never, never>, Record<never, never>>,
   }

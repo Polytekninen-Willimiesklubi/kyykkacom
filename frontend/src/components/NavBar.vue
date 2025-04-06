@@ -43,6 +43,27 @@
           </v-list>
         </v-menu>
       </v-btn>
+      <v-btn
+        v-else-if="item.title === 'Pelaajat'"
+        class="hidden-md-and-down"
+        append-icon="mdi-menu-down"
+      >
+        {{ item.title }}
+        <v-menu
+          activator="parent"
+          :open-on-hover="true"
+          color="grey-darken-3"
+        >
+          <v-list bg-color="grey-darken-3">
+            <v-list-item>
+              <v-btn block variant="text" text="Valittu kausi" :to="item.route"/>
+            </v-list-item>
+            <v-list-item>
+              <v-btn block variant="text" text="Kaikki kaudet" to="/pelaajat/kaikki"/>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-btn>
       <v-btn 
         class="hidden-md-and-down"
         :text="item.title"
