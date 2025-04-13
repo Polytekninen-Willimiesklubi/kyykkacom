@@ -58,7 +58,8 @@ urlpatterns = [
         name="admin-super",
     ),
     path("test/", views.ThrowsAPI.as_view({"get": "list"}), name="test"),
-    path("players/", views.ThrowsAPI.as_view({"get": "list"}))
+    path("players/", views.ThrowsAPI.as_view({"get": "list"})),
+    path("players/<int:pk>/", views.ThrowsAPI.as_view({"get": "retrieve"})),
 ]
 
 router = SimpleRouter()

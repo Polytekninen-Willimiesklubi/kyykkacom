@@ -1,6 +1,4 @@
-from collections import defaultdict
 import json
-
 from django.contrib.auth import login, logout
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -14,7 +12,7 @@ from rest_framework_swagger.views import get_swagger_view
 from rest_framework.request import Request
 import typing as t
 
-from django.db.models.functions import Cast, Concat
+from django.db.models.functions import Cast, Concat, Round
 
 import kyykka.serializers as serializers
 from kyykka.models import (
@@ -24,14 +22,12 @@ from kyykka.models import (
     PlayersInTeam,
     Season,
     SuperWeekend,
-    Team,
     TeamsInSeason,
     Throw,
     User,
 )
-from kyykka.new_serializers.throw_model import ThrowsSummary
 from django.core.cache import cache
-from django.db.models import F, IntegerField, Sum, Q, Count, Case, When, FloatField, Value
+from django.db.models import F, IntegerField, Sum, Q, Count, Case, When, Value, F, FloatField, CharField, SmallIntegerField, Max
 
 
 from utils.caching import (
@@ -765,7 +761,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
     queryset = Throw.objects.select_related("season", "team", "match").exclude(player__isnull=True)
     serializer_class = serializers.PlayerListSerializer
 
-    def list(self, request: Request, format=None):
+    def list(self, request: Request, format=None) -> Response:
         season_id = request.query_params.get("season", None)
         season: Season | None = None
         if season_id is not None:
@@ -773,7 +769,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             self.queryset = self.queryset.filter(season=season)
         # TODO cache this bitch if already calculated once
         # TODO superweekend should be ignored
-        throws = self.queryset.filter(match__match_type__lt=31).alias(
+        throws = self.queryset.filter(match__match_type__lt=31, match__is_validated=True).alias(
             st=Cast("score_first", IntegerField()),
             nd=Cast("score_second", IntegerField()),
             rd=Cast("score_third", IntegerField()),
@@ -834,3 +830,319 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             })
 
         return Response(throws)
+    
+    def retrieve(self, request: Request, pk=None) -> Response | None:
+        assert pk is not None
+        players_data = self.queryset.filter(
+            player=pk, match__match_type__lt=31, match__is_validated=True
+        ).alias(
+            st=Cast("score_first", IntegerField()),
+            nd=Cast("score_second", IntegerField()),
+            rd=Cast("score_third", IntegerField()),
+            th=Cast("score_fourth", IntegerField()),
+            non_throws=Case(When(score_first='e', then=1), default=0)
+                     + Case(When(score_second='e', then=1), default=0)
+                     + Case(When(score_third='e', then=1), default=0)
+                     + Case(When(score_fourth='e', then=1), default=0),
+            weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
+            _scaled_points=(
+                  (F("st") + F("nd")) * (9 + F("throw_turn"))
+                + (F("rd") + F("th")) * (13 + F("throw_turn"))
+            ) / 5,
+            _score_total=F("st") + F("nd") + F("rd") + F("th"),
+            _avg_round_score=F('_score_total') / (4 - F('non_throws')),
+        )
+
+        season_data = players_data.values("player").annotate(
+            team_name=F("team__current_abbreviation"),
+            score_total=Sum("_score_total"),
+            pikes_total=Count("pk", filter=Q(score_first='h'))
+                      + Count("pk", filter=Q(score_second='h'))
+                      + Count("pk", filter=Q(score_third='h'))
+                      + Count("pk", filter=Q(score_fourth='h')),
+            zeros_total=Count("pk", filter=Q(score_first='0'))
+                      + Count("pk", filter=Q(score_second='0'))
+                      + Count("pk", filter=Q(score_third='0'))
+                      + Count("pk", filter=Q(score_fourth='0')),
+            ones_total=Count("pk", filter=Q(st=1))
+                        + Count("pk", filter=Q(nd=1))
+                        + Count("pk", filter=Q(rd=1))
+                        + Count("pk", filter=Q(th=1)),
+            twos_total=Count("pk", filter=Q(st=2))
+                        + Count("pk", filter=Q(nd=2))
+                        + Count("pk", filter=Q(rd=2))
+                        + Count("pk", filter=Q(th=2)),
+            threes_total=Count("pk", filter=Q(st=3))
+                        + Count("pk", filter=Q(nd=3))
+                        + Count("pk", filter=Q(rd=3))
+                        + Count("pk", filter=Q(th=3)),
+            fours_total=Count("pk", filter=Q(st=4))
+                        + Count("pk", filter=Q(nd=4))
+                        + Count("pk", filter=Q(rd=4))
+                        + Count("pk", filter=Q(th=4)), 
+            fives_total=Count("pk", filter=Q(st=5))
+                        + Count("pk", filter=Q(nd=5))
+                        + Count("pk", filter=Q(rd=5))
+                        + Count("pk", filter=Q(th=5)),         
+            gte_six_total=Count("pk", filter=Q(st__gte=6))
+                        + Count("pk", filter=Q(nd__gte=6))
+                        + Count("pk", filter=Q(rd__gte=6))
+                        + Count("pk", filter=Q(th__gte=6)),
+            match_count=Count("match", distinct=True),
+            rounds_total=Count("pk"),
+            throws_total=Count("pk") * 4 - Sum("non_throws"),
+            scaled_points=Sum('_scaled_points'),
+            weighted_throw_total=Sum("weighted_throw_count"),
+            season=F("season__year"),
+            position_one_throws=(
+                4*Count("pk", filter=Q(throw_turn=1)) - Sum("non_throws", filter=Q(throw_turn=1))
+            ),
+            position_two_throws=(
+                4*Count("pk", filter=Q(throw_turn=2)) - Sum("non_throws", filter=Q(throw_turn=2))
+            ),
+            position_three_throws=(
+                4*Count("pk", filter=Q(throw_turn=3)) - Sum("non_throws", filter=Q(throw_turn=3))
+            ),
+            position_four_throws=(
+                4*Count("pk", filter=Q(throw_turn=4)) - Sum("non_throws", filter=Q(throw_turn=4))
+            ),
+            avg_score=Case(
+                When(throws_total__gt=0, then=Round(
+                    F("score_total") / F("throws_total"), 
+                    precision=2
+                )),
+                output_field=FloatField(),
+            ),
+            avg_scaled_points=Case(
+                When(throws_total__gt=0, then=Round(
+                        F("scaled_points") / F("throws_total"),
+                        precision=2
+                )),
+                output_field=FloatField(),
+            ),
+            avg_position=Case(
+                When(throws_total__gt=0, then=Round(
+                        F("weighted_throw_total") / F("throws_total"), 
+                        precision=2,
+                )),
+                output_field=FloatField(),
+            ),
+            pike_percentage=Case(
+                When(throws_total__gt=0, then=Round(
+                    F("pikes_total") / F("throws_total") * 100,
+                    precision=2
+                )),
+                output_field=FloatField(),
+            ),
+            avg_score_position_one=Case(
+                When(position_one_throws__gt=0, then=Round(
+                    Sum("_score_total", filter=Q(throw_turn=1)) / F("position_one_throws"),
+                    precision=2,
+                )),
+                output_field=FloatField(),
+            ),
+            avg_score_position_two=Case(
+                When(position_two_throws__gt=0, then=Round(
+                    Sum("_score_total", filter=Q(throw_turn=2)) / F("position_two_throws"),
+                    precision=2,
+                )),
+                output_field=FloatField(),
+            ),
+            avg_score_position_three=Case(
+                When(position_three_throws__gt=0, then=Round(
+                    Sum("_score_total", filter=Q(throw_turn=3)) / F("position_three_throws"),
+                    precision=2,
+                )),
+                output_field=FloatField(),
+            ),
+            avg_score_position_four=Case(
+                When(position_four_throws__gt=0, then=Round(
+                    Sum("_score_total", filter=Q(throw_turn=4)) / F("position_four_throws"),
+                    precision=2,
+                )),
+                output_field=FloatField(),
+            ),
+        ).order_by("season")
+
+        all_time_stats = season_data.aggregate(
+            season_count=Count("season"),
+            matches=Sum("match_count"),
+            rounds=Sum("rounds_total"),
+            throws=Sum("throws_total"),
+            pikes=Sum("pikes_total"),
+            zeros=Sum("zeros_total"),
+            scores=Sum("score_total"),
+            gte_six=Sum("gte_six_total"),
+            scaled_points_total=Sum('scaled_points'),
+            avg_score=Case(
+                When(throws__gt=0, then=Round(F("scores") / F("throws"), precision=2)),
+                output_field=FloatField(),
+            ),
+            avg_scaled_points=Case(
+                When(throws__gt=0, then=Round(F("scaled_points_total") / F("throws"), precision=2)),
+                output_field=FloatField(),
+            ),
+            avg_position=Case(
+                When(throws__gt=0, then=Round(Sum("weighted_throw_total") / F("throws"), precision=2)),
+                output_field=FloatField(),
+            ),
+            pike_percentage=Case(
+                When(throws__gt=0, then=Round(F("pikes") / F("throws") * 100, precision=2)),
+                output_field=FloatField(),
+            ),
+        )
+        user = User.objects.get(pk=pk)
+
+        matches_per_period = players_data.annotate(
+            own_team_score=Case(
+                When(
+                    match__home_team=F("team"),
+                    then=Case(When(
+                        throw_round=1, 
+                        then=F("match__home_first_round_score")),
+                        default=F("match__home_second_round_score")
+                    )
+                ),
+                When(
+                    match__away_team=F("team"),
+                    then=Case(When(
+                        throw_round=1,
+                        then=F("match__away_first_round_score")),
+                        default=F("match__away_second_round_score")
+                    )
+                ),
+                output_field=SmallIntegerField(),
+            ),
+            opponent_score=Case(
+                When(
+                    match__home_team=F("team"),
+                    then=Case(When(
+                        throw_round=1,
+                        then=F("match__away_first_round_score")),
+                        default=F("match__away_second_round_score")
+                    )
+                ),
+                When(
+                    match__away_team=F("team"),
+                    then=Case(When(
+                        throw_round=1,
+                        then=F("match__home_first_round_score")),
+                        default=F("match__home_second_round_score")
+                    )
+                ),
+                output_field=SmallIntegerField(),
+            ),
+            score=F("_score_total"),
+            oppenent_name=Case(
+                When(match__home_team=F("team"), then=F("match__away_team__current_abbreviation")),
+                default=F("match__home_team__current_abbreviation"),
+                output_field=CharField(), 
+            ),
+            time=F('match__match_time'),
+            avg_round_score=Round(F('_avg_round_score'), precision=2, output_field=FloatField()),
+            season_name=F("season__year"),
+        )
+
+
+        matches_both_periods = players_data.alias(
+            first=Case(
+                When(throw_round=1, then=F("score_first")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            second=Case(
+                When(throw_round=1, then=F("score_second")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            third=Case(
+                When(throw_round=1, then=F("score_third")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            fourth=Case(
+                When(throw_round=1, then=F("score_fourth")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            fifth=Case(
+                When(throw_round=2, then=F("score_first")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            sixth=Case(
+                When(throw_round=2, then=F("score_second")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            seventh=Case(
+                When(throw_round=2, then=F("score_third")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            eighth=Case(
+                When(throw_round=2, then=F("score_fourth")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            position_one=Case(
+                When(throw_round=1, then=F("throw_turn")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+            position_two=Case(
+                When(throw_round=2, then=F("throw_turn")),
+                default=Value("-"),
+                output_field=CharField(),
+            ),
+        ).values('match', 'season').annotate(
+            time=F('match__match_time'),
+            opponent_name=Case(
+                When(match__home_team=F("team"), then=F("match__away_team__current_abbreviation")),
+                default=F("match__home_team__current_abbreviation"),
+                output_field=CharField(), 
+            ),
+            position_one=Max("position_one"),
+            position_two=Max("position_two"),
+            score=Sum("_score_total"),
+            first=Max("first"),
+            second=Max("second"),
+            third=Max("third"),
+            fourth=Max("fourth"),
+            fifth=Max("fifth"),
+            sixth=Max("sixth"),
+            seventh=Max("seventh"),
+            eighth=Max("eighth"),
+            score_per_throw=Round(
+                F("score") / (4*Count("pk") - Sum("non_throws")),
+                precision=2,
+                output_field=FloatField()
+            ),
+            own_team_score=Case(
+                When(
+                    match__home_team=F("team"),
+                    then=F("match__home_first_round_score") + F("match__home_second_round_score"),
+                ),
+                default=F("match__away_first_round_score") + F("match__away_second_round_score"),
+                output_field=SmallIntegerField(),
+            ),
+            opponent_score=Case(
+                When(
+                    match__home_team=F("team"),
+                    then=F("match__away_first_round_score") + F("match__away_second_round_score"),
+                ),
+                default=F("match__home_first_round_score") + F("match__home_second_round_score"),
+                output_field=SmallIntegerField(),
+            ),
+        )
+
+        return Response({
+            "id" : user.pk,
+            "player_name" : f"{user.first_name} {user.last_name}",
+            "stats_per_seasons": season_data,
+            "all_time_stats": all_time_stats,
+            # .values() needed, as the query doesn't have one yet.
+            "matches_per_period": matches_per_period.values(),
+            "matches_both_periods": matches_both_periods,
+        })
+

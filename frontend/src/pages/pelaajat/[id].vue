@@ -9,7 +9,7 @@
               :mobile-breakpoint="0"
               :headers="headerPlayerOverallStats"
               class="allTimeStats"
-              :items="[playerStore.player]"
+              :items="[playerStore.player.all_time_stats]"
               density="compact"
             >
               <template #headers="{ columns }">
@@ -19,7 +19,7 @@
                       {{ column.title }}
                       <v-tooltip v-if="column.tooltip"
                         activator="parent"
-                        location="bottom"
+                        location="top"
                         :text="column.tooltip"
                       />
                     </td>
@@ -61,13 +61,13 @@
                   <td> {{ item.rounds_total }}</td>
                   <td> {{ item.score_total }}</td>
                   <td> {{ item.throws_total }}</td>
-                  <td> {{ item.score_per_throw }}</td>
-                  <td> {{ item.avg_throw_turn }}</td>
+                  <td> {{ item.avg_score }}</td>
+                  <td> {{ item.avg_position }}</td>
                   <td> {{ item.pikes_total }}</td>
                   <td> {{ item.pike_percentage }}</td>
                   <td> {{ item.zeros_total }}</td>
-                  <td> {{ item.zero_percentage }}</td>
-                  <td> {{ item.gteSix_total }}</td>
+                  <!-- <td> {{ item.zero_percentage }}</td> -->
+                  <td> {{ item.gte_six_total }}</td>
                 </tr>
 
               </template>
@@ -149,8 +149,7 @@
       </v-row>
       <v-row>
         <v-col>
-          <v-card>
-            <v-data-table
+          <v-data-table
               :mobile-breakpoint="0"
               class="matchesClass"
               @click:row="handleRedirect"
@@ -161,41 +160,52 @@
               no-data-text="Ei dataa :("
               loading-text="Ladataan kausia..."
               density="compact"
+          >
+            <!-- This is somewhat modified solution from this 
+             https://github.com/vuetifyjs/vuetify/issues/17590#issuecomment-2571395957
+             Idea is to just add tooltip, but you need then add all the normal functionalities,
+             not to override them.
+            -->
+            <template v-for="header in matchHeaders"
+              #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
             >
-              <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
-                <tr>
-                  <template v-for="column in columns" :key="column.key">
-                    <td class="mr-2 cursor-pointer" @click="() => toggleSort(column)">
-                      <span> {{ column.title }} </span>
-                      <v-tooltip v-if="column.tooltip"
-                        activator="parent"
-                        location="bottom"
-                        :text="column.tooltip"
-                      />
-                      <template v-if="isSorted(column)">
-                        <v-icon :icon="getSortIcon(column)" />
-                      </template>
-                    </td>
-                  </template>
-                </tr>
+              <v-tooltip :text="column.tooltip" v-if="column.tooltip">
+                <template #activator="{ props }">
+                  <div class="v-data-table-header__content" v-bind="props">
+                    <span @click="() => toggleSort(column)">{{ column.title }}</span>
+                    <v-icon v-if="column.sortable" 
+                      class="v-data-table-header__sort-icon" 
+                      :icon="getSortIcon(column)" 
+                    />
+                  </div>
+                </template>
+              </v-tooltip>
+              <template v-else>
+                <div class="v-data-table-header__content">
+                  <span @click="() => toggleSort(column)">{{ column.title }}</span>
+                    <v-icon v-if="column.sortable" 
+                      class="v-data-table-header__sort-icon" 
+                      :icon="getSortIcon(column)" 
+                    />
+                </div>
               </template>
-              <template #item.match_time="{ item }">
-                <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
-              </template>
-              <template #item.own_team_total="{ item }">
-                <v-chip
-                  :color="getColor(item.own_team_total, item.opposite_team_total)"
-                  :text="item.own_team_total "
-                />
-              </template>
-              <template #item.opposite_team_total="{ item }">
-                <v-chip 
-                  :color="getColor(item.opposite_team_total, item.own_team_total)"
-                  :text="item.opposite_team_total "
-                />
-              </template>
-            </v-data-table>
-          </v-card>
+            </template>
+            <template #item.match_time="{ item }">
+              <span>{{ date.formatByString(date.date(item.time), 'yyyy-MM-dd HH:mm') }}</span>
+            </template>
+            <template #item.own_team_score="{ item }">
+              <v-chip
+                :color="getColor(item.own_team_score, item.opponent_score)"
+                :text="item.own_team_score.toString()"
+              />
+            </template>
+            <template #item.opponent_score="{ item }">
+              <v-chip 
+                :color="getColor(item.opponent_score, item.own_team_score)"
+                :text="item.opponent_score.toString()"
+              />
+            </template>
+          </v-data-table>
         </v-col>
       </v-row>
     </v-card>
@@ -243,25 +253,29 @@ const matchHeaders = ref(headersPlayerPeriod);
 function filtterItems() {
   let arr
   if(sortGamesSwitch.value === 'Erittäin') {
-    arr = playerStore.playerMatchesPerPeriod;
+    console.log(playerStore.loading, playerStore.loadedData)
+    arr = playerStore.player.matches_per_period;
     matchHeaders.value = headersPlayerPeriod;
   } else {
-    arr = playerStore.playerMatchesPerMatch;
+    arr = playerStore.player.matches_both_periods;
     matchHeaders.value = headersPlayerGames;
   }
 
-  const returning_arr = filterGamesSwitch.value === 'Kaikki kaudet'
-    ? arr
-    : arr.filter(ele => currentSelection.includes(ele.season));
+  let return_arr
+  if (filterGamesSwitch.value === 'Kaikki kaudet') {
+    return_arr = arr
+  } else {
+    return_arr = arr.filter(ele => currentSelection.includes(ele.season_name))
+  }
 
   if (search.value == '') {
-    matchItems.value = returning_arr;
+    matchItems.value = return_arr;
     return;
   }
-  matchItems.value = returning_arr.filter(match => {
+  matchItems.value = return_arr.filter(match => {
     let found = false;
     for (const key in match) {
-      if (key == 'id') { continue; }
+      if (key === 'id') { continue; }
       const ele = typeof match[key] !== 'string' ? String(match[key]) : match[key]
       if (ele.toLowerCase().includes(search.value.toLowerCase())) {
         found = true;
@@ -289,13 +303,14 @@ function chanceHeaderStat(val) {
   const headers = [
     'Erät', 'Kyykät', 'Heitot', 'KPH', 
     'kHP', 'Hauet', 'H%',
-    'VM' ,'VM%', 'JK'
+    'VM' , 'JK'
   ];
   const header_binds = [
-    'rounds_total', 'score_total', 'throws_total', 'score_per_throw',
-    'avg_throw_turn', 'pikes_total', 'pike_percentage', 'zeros_total', 
-    'zero_percentage', 'gteSix_total'
+    'rounds_total', 'score_total', 'throws_total', 'avg_score',
+    'avg_position', 'pikes_total', 'pike_percentage', 'zeros_total', 
+    'gte_six_total'
   ];
+  // 'zero_percentage',
 
   if (!headers.includes(head)) { return; }
 
@@ -377,7 +392,7 @@ function chanceSeason (value) {
                       + selected_season.threes_total
                       + selected_season.fours_total
                       + selected_season.fives_total
-                      + selected_season.gteSix_total
+                      + selected_season.gte_six_total
 
     canvas1DataNormalized.value = [ ...canvas1DataNormalized.value,
       {
@@ -390,7 +405,7 @@ function chanceSeason (value) {
           Math.round((selected_season.threes_total) / totalThrow * 100 * 100 ) / 100,
           Math.round((selected_season.fours_total) / totalThrow * 100 * 100 ) / 100,
           Math.round((selected_season.fives_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.gteSix_total) / totalThrow * 100 * 100 ) / 100,
+          Math.round((selected_season.gte_six_total) / totalThrow * 100 * 100 ) / 100,
         ]
       }
     ];
@@ -406,7 +421,7 @@ function chanceSeason (value) {
           selected_season.threes_total,
           selected_season.fours_total,
           selected_season.fives_total,
-          selected_season.gteSix_total
+          selected_season.gte_six_total
         ]
       }
     ];
@@ -416,10 +431,10 @@ function chanceSeason (value) {
         label: 'Kausi ' + selected_season.season,
         backgroundColor: color,
         data: [
-          selected_season.average_score_position_one,
-          selected_season.average_score_position_two,
-          selected_season.average_score_position_three,
-          selected_season.average_score_position_four
+          selected_season.avg_score_position_one,
+          selected_season.avg_score_position_two,
+          selected_season.avg_score_position_three,
+          selected_season.avg_score_position_four
         ]
       }
     ];
@@ -431,7 +446,7 @@ function chanceSeason (value) {
 /**
  * Returns True for one season index for to initially color one row in aggregated year stats
  * @param {number} season Season index
- * @returns {bool} True if season is first item in 'currentSelection' and only once else False 
+ * @returns {boolean} True if season is first item in 'currentSelection' and only once else False 
  */
 function initalColor(season) {
   if(colorInitialized || season !== currentSelection[0]) {
@@ -453,7 +468,6 @@ watch(() => playerStore.loadedData, () => {
     index = (index === -1) ? stats_per_seasons.length -1 : index;
     const currentSelcSeason = stats_per_seasons[index];
     const seasonString = currentSelcSeason.season;
-    
     currentSelection.push(seasonString);
     colors[0] = seasonString;
     columnCurrentSelection.push('KPH');
@@ -465,7 +479,7 @@ watch(() => playerStore.loadedData, () => {
                       + currentSelcSeason.threes_total
                       + currentSelcSeason.fours_total
                       + currentSelcSeason.fives_total
-                      + currentSelcSeason.gteSix_total
+                      + currentSelcSeason.gte_six_total
 
     const init1Normalized = {
       label: 'Kausi ' + currentSelcSeason.season,
@@ -477,7 +491,7 @@ watch(() => playerStore.loadedData, () => {
         Math.round((currentSelcSeason.threes_total) / totalThrow * 100 * 100 ) / 100,
         Math.round((currentSelcSeason.fours_total) / totalThrow * 100 * 100 ) / 100,
         Math.round((currentSelcSeason.fives_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.gteSix_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.gte_six_total) / totalThrow * 100 * 100 ) / 100,
       ]
     };
   
@@ -491,12 +505,12 @@ watch(() => playerStore.loadedData, () => {
         currentSelcSeason.threes_total,
         currentSelcSeason.fours_total,
         currentSelcSeason.fives_total,
-        currentSelcSeason.gteSix_total
+        currentSelcSeason.gte_six_total
       ]
     };
     const canvas2_data_tmp = [];
     for (const s of stats_per_seasons) {
-      canvas2_data_tmp.push(s.score_per_throw);
+      canvas2_data_tmp.push(s.avg_score);
       canvas2Labels.value.push(s.season);
     }
     const init2 = {
@@ -510,10 +524,10 @@ watch(() => playerStore.loadedData, () => {
       label: 'Kausi ' + currentSelcSeason.season,
       backgroundColor: '#B3E5FC',
       data: [
-        currentSelcSeason.average_score_position_one,
-        currentSelcSeason.average_score_position_two,
-        currentSelcSeason.average_score_position_three,
-        currentSelcSeason.average_score_position_four
+        currentSelcSeason.avg_score_position_one,
+        currentSelcSeason.avg_score_position_two,
+        currentSelcSeason.avg_score_position_three,
+        currentSelcSeason.avg_score_position_four
       ]
     };
     canvas1DataNormalized.value = [init1Normalized]
@@ -531,11 +545,10 @@ watch(() => playerStore.loadedData, () => {
       break;
     }
   }
+  // Initialize the match list by calling the filtterItems() once
+  filtterItems();
 },
 {once: true})
-
-// Initialize the match list by calling the filtterItems() once
-filtterItems();
 </script>
 
 
