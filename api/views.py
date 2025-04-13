@@ -596,11 +596,8 @@ class MatchDetail(APIView):
     permission_classes = [MatchDetailPermission]
 
     def get(self, request, pk):
-        season = getSeason(request)
         match = get_object_or_404(self.queryset, pk=pk)
-        serializer = serializers.MatchDetailSerializer(
-            match, context={"season": season}
-        )
+        serializer = serializers.MatchDetailSerializer(match)
         return Response(serializer.data)
 
     def patch(self, request, pk, format=None):

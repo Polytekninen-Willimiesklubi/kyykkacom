@@ -1452,35 +1452,23 @@ class TeamDetailSerializer(serializers.ModelSerializer):
 
 
 class SharedMatchSerializer(serializers.ModelSerializer):
-    def get_home_score_total(self, obj):
-        key = "match_" + str(obj.id) + "_home_score_total"
-        home_score_total = getFromCache(key, self.context.get("season").year)
-        if home_score_total is None:
-            try:
-                home_score_total = (
-                    obj.home_first_round_score + obj.home_second_round_score
-                )
-            except TypeError:
-                home_score_total = None
-            setToCache(
-                key, home_score_total, season_year=self.context.get("season").year
-            )
-        return home_score_total
+    def get_home_score_total(self, obj: Match) -> int | None:
+        if obj.home_first_round_score is None and obj.home_second_round_score is None:
+            return None
+        elif obj.home_first_round_score is None:
+            return obj.home_second_round_score
+        elif obj.home_second_round_score is None:
+            return obj.home_first_round_score
+        return obj.home_first_round_score + obj.home_second_round_score
 
-    def get_away_score_total(self, obj):
-        key = "match_" + str(obj.id) + "_away_score_total"
-        away_score_total = getFromCache(key, self.context.get("season").year)
-        if away_score_total is None:
-            try:
-                away_score_total = (
-                    obj.away_first_round_score + obj.away_second_round_score
-                )
-            except TypeError:
-                away_score_total = None
-            setToCache(
-                key, away_score_total, season_year=self.context.get("season").year
-            )
-        return away_score_total
+    def get_away_score_total(self, obj: Match) -> int | None:
+        if obj.away_first_round_score is None and obj.away_second_round_score is None:
+            return None
+        elif obj.away_first_round_score is None:
+            return obj.away_second_round_score
+        elif obj.away_second_round_score is None:
+            return obj.away_first_round_score
+        return obj.away_first_round_score + obj.away_second_round_score
 
 
 class MatchListSerializer(SharedMatchSerializer):
@@ -1672,27 +1660,23 @@ class MatchDetailSerializer(SharedMatchSerializer):
     second_round = serializers.SerializerMethodField()
     type_name = serializers.SerializerMethodField()
 
-    def get_second_round(self, obj):
+    def get_first_round(self, obj: Match):
         return MatchRoundSerializer(
-            obj.throw_set.filter(throw_round=2),
+            obj.throw_set.filter(throw_round=1), # type: ignore
             context={"home_team": obj.home_team, "away_team": obj.away_team},
         ).data
 
-    def get_first_round(self, obj):
+    def get_second_round(self, obj: Match):
         return MatchRoundSerializer(
-            obj.throw_set.filter(throw_round=1),
+            obj.throw_set.filter(throw_round=2), # type: ignore
             context={"home_team": obj.home_team, "away_team": obj.away_team},
         ).data
 
     def get_home_team(self, obj):
-        return MatchTeamSerializer(
-            obj.home_team, context={"season": self.context.get("season")}
-        ).data
+        return MatchTeamSerializer(obj.home_team).data
 
     def get_away_team(self, obj):
-        return MatchTeamSerializer(
-            obj.away_team, context={"season": self.context.get("season")}
-        ).data
+        return MatchTeamSerializer(obj.away_team).data
 
     def get_type_name(self, obj):
         game = {
