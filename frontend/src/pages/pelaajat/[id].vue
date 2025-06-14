@@ -150,16 +150,16 @@
       <v-row>
         <v-col>
           <v-data-table
-              :mobile-breakpoint="0"
-              class="matchesClass"
-              @click:row="handleRedirect"
-              :search="search"
-              :headers="matchHeaders"
-              :items="matchItems"
-              :loading="playerStore.loadingPlayer"
-              no-data-text="Ei dataa :("
-              loading-text="Ladataan kausia..."
-              density="compact"
+            :mobile-breakpoint="0"
+            class="matchesClass"
+            @click:row="handleRedirect"
+            :search="search"
+            :headers="matchHeaders"
+            :items="matchItems"
+            :loading="playerStore.loadingPlayer"
+            no-data-text="Ei dataa :("
+            loading-text="Ladataan kausia..."
+            density="compact"
           >
             <!-- This is somewhat modified solution from this 
              https://github.com/vuetifyjs/vuetify/issues/17590#issuecomment-2571395957
