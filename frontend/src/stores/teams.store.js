@@ -18,7 +18,6 @@ export const useTeamsStore = defineStore('joukkue', () => {
 
     const seasonStats = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
-            console.log(allTimeStats.value)
             return allTimeStats.value;
         }
         const returnValue = Object.keys(seasonsStats.value).length && selectedSeasonId.value
@@ -39,7 +38,6 @@ export const useTeamsStore = defineStore('joukkue', () => {
     const teamName = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
             const latestIndex = Math.max(...Object.keys(seasonsStats.value).map(x => +x)) //str -> int conversion
-            console.log(seasonsStats.value[latestIndex])
             return seasonsStats.value[latestIndex].current_name;
         }
         return Object.keys(seasonsStats.value).length && selectedSeasonId.value
@@ -191,6 +189,17 @@ export const useTeamsStore = defineStore('joukkue', () => {
         try {
             const response = await fetch(reserveUrl, { method: 'GET' });
             const payload = await response.json();
+            if (!response.ok) {
+                if (response.status === 403) {
+                    fetchNewToken();
+                }
+                console.log("Get request was denied: " + response);
+                return;
+            }
+            if (payload.length === 0) {
+                unReservedPlayers.value = [];
+                return;
+            }
 
             unReservedPlayers.value = payload.filter((ele) => { ele.team.current_name !== '' })
         } catch (error) {
