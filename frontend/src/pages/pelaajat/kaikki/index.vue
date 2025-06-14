@@ -58,7 +58,6 @@
             variant="outlined"
             divided
             mandatory
-            @update:model-value="tableHeaders = playerStore.aggregationSetting === 1 ? headerAllPlayersPerSeason : headerAllPlayers"
           >
             <template v-for="(list, i) in [
                 ['Kaikki', 'kaikkien pelien'],
@@ -83,6 +82,7 @@
             variant="outlined"
             divided
             mandatory
+            @update:model-value="tableHeaders = playerStore.aggregationSetting === 1 ? headerAllPlayersPerSeason : headerAllPlayers"
           >
             <v-tooltip
               location="top"
