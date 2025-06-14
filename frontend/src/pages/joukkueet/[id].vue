@@ -254,7 +254,7 @@ const panel = ref([0]);
 
 
 function handleRedirect (value, row) {
-  location.href = '/pelaajat/' + row.item.id
+  location.href = '/pelaajat/' + row.item.player
 }
 
 function handleRedirectMatches (value, row) {

@@ -16,7 +16,7 @@
         </v-row>
       </v-card-title>
       <v-data-table
-        mobile-breakpoint="0"
+        :mobile-breakpoint=0
         density='compact'
         @click:row="handleRedirect"
         color='alert'
@@ -48,7 +48,7 @@ const search = ref('');
 
 
 function handleRedirect(value, row) {
-  location.href = '/joukkueet/' + row.item.id;
+  location.href = '/joukkueet/' + row.item.team;
 }
 
 </script>
