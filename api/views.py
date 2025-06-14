@@ -301,7 +301,6 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
         all_data = getFromCache(key)
         if all_data is None:
             self.queryset = self.queryset.filter(team_season__season=season)
-            data = serializers.PlayerListAllPositionSerializer(self.queryset, many=True).data
             total = serializers.PlayerListAllPositionSerializer(
                 self.queryset, many=True, context={"season": season}
             ).data
@@ -431,6 +430,25 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             weighted_total=F("match_count") * F("match_average"),
         )
 
+        # Add in players that have not played any rounds
+        not_played_players = PlayersInTeam.objects.filter(team_season__team=pk).annotate(
+            _id=F("player__id"),
+            player_name=Concat(
+                "player__first_name", Value(" "), "player__last_name", output_field=CharField()
+            )
+        ).values(
+            "team_season__season__year",
+            "_id",
+            "player_name",
+        )
+        per_season_non_played = {}
+        for player in not_played_players:
+            if player["team_season__season__year"] not in per_season_non_played:
+                per_season_non_played[player["team_season__season__year"]] = []
+            per_season_non_played[player["team_season__season__year"]].append(player)
+
+        
+
         all_time_stats: dict[str, int | float | t.Any] = {
             "score_total": 0,
             "match_count": 0,
@@ -454,7 +472,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         del all_time_stats["weighted_total"]
         data["all_time"] = all_time_stats
 
-        test_players = Throw.objects.select_related("team", "match", "season").filter(
+        players = Throw.objects.select_related("team", "match", "season").filter(
             match__is_validated=True, team__team=pk, match__match_type__lt=31
         ).alias(
             # Cast the scores to integers for >= 6 counting
@@ -479,7 +497,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             avg_throw_turn=rounded_divison("weighted_throw_count", "throws_total"),   
         )
         all_time_player_stats = {}
-        for player in test_players:
+        for player in players:
             if player["player"] not in all_time_player_stats:
                 all_time_player_stats[player["player"]] = {
                     "player_name": player["player_name"],
@@ -491,20 +509,42 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     "throws_total": 0,
                     "scaled_points": 0,
                     "gteSix_total": 0,
+                    "weighted_throw_count": 0
                 }
             for key in all_time_player_stats[player["player"]]:
                 if key in ("player_name", "player", "weighted_throw_count"):
                     continue
 
                 all_time_player_stats[player["player"]][key] += player[key]
-            
-            if "weighted_throw_count" not in all_time_player_stats[player["player"]]:                
-                all_time_player_stats[player["player"]]["weighted_throw_count"] = 0
             all_time_player_stats[player["player"]]["weighted_throw_count"] += player["avg_throw_turn"] * player["throws_total"]
 
             if "players" not in data[player["season__year"]]:
                 data[player["season__year"]]["players"] = []
             data[player["season__year"]]["players"].append(player)
+
+        for season in per_season_non_played:
+            if season not in data:
+                data[season] = {}
+            if "players" not in data[season]:
+                data[season]["players"] = []
+            
+            season_player_ids = [p["player"] for p in data[season]["players"]]
+            for player in per_season_non_played[season]:
+                if player["_id"] not in season_player_ids:
+                    player["player"] = player["_id"]
+                    del player["_id"]
+                    player["score_total"] = 0
+                    player["rounds_total"] = 0
+                    player["pikes_total"] = 0
+                    player["zeros_total"] = 0
+                    player["throws_total"] = 0
+                    player["scaled_points"] = 0
+                    player["gteSix_total"] = 0
+                    player["weighted_throw_count"] = 0
+                    data[season]["players"].append(player)
+                
+                    if player["player"] not in all_time_player_stats:
+                        all_time_player_stats[player["player"]] = player
 
         for player in all_time_player_stats.values():
             player["score_per_throw"] = (
@@ -530,7 +570,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             del player["weighted_throw_count"]
 
         data["all_time"]["players"] = list(all_time_player_stats.values())
-        # data["test"] = throws
 
         matches = Match.objects.select_related("home_team__team", "away_team__team", "season").filter(
             Q(home_team__team=pk) | Q(away_team__team=pk), is_validated=True, match_type__lt=31
