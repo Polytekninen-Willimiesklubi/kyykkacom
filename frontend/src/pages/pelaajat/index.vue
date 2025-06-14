@@ -89,29 +89,38 @@
         loading-text="Ladataan pelaajia..."
         items-per-page="-1"
         density="compact"
+      >
+        <template v-for="header in headerPlayers"
+          #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
         >
-        <!-- Header Tooltip -->
-        <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
-          <tr>
-            <template v-for="column in columns" :key="column.key">
-              <th
-                class="v-data-table__td v-data-table__th cursor-pointer player-header"
-                @click="() => toggleSort(column)"
-              >
-                <div class="v-data-table-header__content justify-center" align="center">
-                  {{ column.title }}
-                  <v-tooltip v-if="column.tooltip"
-                    activator="parent"
-                    location="bottom"
-                    :text="column.tooltip"
-                  />
-                  <template v-if="isSorted(column)">
-                    <v-icon :icon="getSortIcon(column)" />
-                  </template>
-                </div>
-              </th>
+          <v-tooltip :text="column.tooltip" v-if="column.tooltip" location="top">
+            <template #activator="{ props }">
+              <div class="v-data-table-header__content" v-bind="props">
+                <!-- HACK To properly center column header with the sort icon
+                          just add another span to other side -->
+                <span v-if="column.align !== 'left'" style="width:14px"></span>
+                <span @click="() => toggleSort(column)">{{ column.title }}</span>
+                <v-icon v-if="column.sortable" 
+                  class="v-data-table-header__sort-icon" 
+                  :icon="getSortIcon(column)"
+                  size="x-small"
+                />
+              </div>
             </template>
-          </tr>
+          </v-tooltip>
+          <template v-else>
+            <div class="v-data-table-header__content">
+              <!-- HACK To properly center column header with the sort icon
+                        just add another span to other side -->
+              <span v-if="column.align !== 'left'" style="width:14px"></span>
+              <span @click="() => toggleSort(column)">{{ column.title }}</span>
+              <v-icon v-if="column.sortable" 
+                class="v-data-table-header__sort-icon" 
+                :icon="getSortIcon(column)"
+                size="x-small"
+              />
+            </div>
+          </template>
         </template>
         <template #bottom></template> <!-- This hides the pagination controls-->
       </v-data-table>
