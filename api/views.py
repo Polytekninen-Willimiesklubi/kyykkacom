@@ -572,7 +572,14 @@ class MatchList(views.APIView):
 
     # throttle_classes = [AnonRateThrottle]
     # queryset = Match.objects.filter(match_time__lt=datetime.datetime.now() + datetime.timedelta(weeks=2))
-    queryset = Match.objects.all()
+    queryset = Match.objects.select_related(
+        "home_team__team", 
+        "away_team__team", 
+        "season", 
+    ).prefetch_related(
+        "home_team__players", 
+        "away_team__players"
+    ).all()
 
     def get(self, request):
         season = getSeason(request)
