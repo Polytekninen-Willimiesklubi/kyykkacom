@@ -80,7 +80,7 @@ export const headerAllPlayersPerSeason = [
 ];
 
 export const headerAllPlayers = [
-    { title: 'Nimi', key: 'player_name', align: 'left', width: '30%' },
+    { title: 'Nimi', key: 'player_name', align: 'start', width: '30%' },
     { title: 'Kaudet', key: 'season_count', align: 'center', width: '5%', tooltip: 'Kaikki pelatut kaudet' },
     { title: 'E', key: 'rounds_total', align: 'center', tooltip: 'Pelatut Erät' },
     { title: 'K', key: 'score_total', align: 'center', tooltip: 'Poistetut Kyykät' },

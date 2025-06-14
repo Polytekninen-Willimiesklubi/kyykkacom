@@ -1240,7 +1240,7 @@ class TeamListSerializer(serializers.ModelSerializer):
             if self.matches_played
             else "NaN"
         )
-
+        
     def get_matches_played(self, obj):
         return self.matches_played
 
@@ -1286,6 +1286,7 @@ class TeamListSerializer(serializers.ModelSerializer):
         model = TeamsInSeason
         fields = (
             "id",
+            "team",
             "current_name",
             "current_abbreviation",
             "matches_won",
