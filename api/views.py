@@ -17,6 +17,7 @@ from .query_utils import (
     scores_casted_to_int,
     count_non_throws,
     get_correct_round_score,
+    get_correct_match_score,
 )
 
 from django.db.models.functions import Concat, Round
@@ -35,7 +36,7 @@ from kyykka.models import (
     MATCH_TYPES
 )
 from django.core.cache import cache
-from django.db.models import F, Sum, Q, Count, Case, When, Value, F, FloatField, CharField, SmallIntegerField, Max
+from django.db.models import F, Sum, Q, Count, Case, When, Value, F, FloatField, CharField, SmallIntegerField, Max, Min
 
 from utils.caching import (
     cache_reset_key,
@@ -407,6 +408,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
             _scaled_points=scaled_points(),
             round_score=get_correct_round_score(),
+            match_score=get_correct_match_score(),
         ).values('season__year').annotate(
             current_name=F("team__current_name"),
             current_abbriviation=F("team__current_abbreviation"),
@@ -428,9 +430,12 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 output_field=FloatField(),
             ),
             weighted_total=F("match_count") * F("match_average"),
+            clearances=Count("pk", filter=Q(round_score__lte=0)) / 4,
+            best_round=Min("round_score"),
+            best_match=Min("match_score"),
         )
 
-        # Add in players that have not played any rounds
+        # This below is for adding in players that have not played any rounds
         not_played_players = PlayersInTeam.objects.filter(team_season__team=pk).annotate(
             _id=F("player__id"),
             player_name=Concat(
@@ -457,6 +462,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             "throws_total": 0,
             "gteSix_total": 0,
             "zero_or_pike_first_throw_total": 0,
+            "clearances": 0,
+            "best_round": 80,
+            "best_match": 160,
             "weighted_total": 0,
         }
 
@@ -464,7 +472,10 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         for season in throws:
             data[season["season__year"]] = season
             for key in all_time_stats.keys():
-                all_time_stats[key] += season[key]
+                if key not in ("best_round", "best_match"):
+                    all_time_stats[key] += season[key]
+                else:
+                    all_time_stats[key] = min(all_time_stats[key], season[key])
 
         all_time_stats["zero_percentage"] = round(all_time_stats["zeros_total"] / all_time_stats["throws_total"] * 100, 2) if all_time_stats["throws_total"] else 0
         all_time_stats["pike_percentage"] = round(all_time_stats["pikes_total"] / all_time_stats["throws_total"] * 100,2) if all_time_stats["throws_total"] else 0
@@ -515,7 +526,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 if key in ("player_name", "player", "weighted_throw_count"):
                     continue
 
-                all_time_player_stats[player["player"]][key] += player[key]
+                all_time_player_stats[player["player"]][key] += player[key] if player[key] is not None else 0
             all_time_player_stats[player["player"]]["weighted_throw_count"] += player["avg_throw_turn"] * player["throws_total"]
 
             if "players" not in data[player["season__year"]]:
@@ -541,6 +552,10 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     player["scaled_points"] = 0
                     player["gteSix_total"] = 0
                     player["weighted_throw_count"] = 0
+                    player["pike_percentage"] = "NaN"
+                    player["avg_throw_turn"] = "NaN"
+                    player["score_per_throw"] = "NaN"
+                    player["scaled_points_per_throw"] = "NaN"
                     data[season]["players"].append(player)
                 
                     if player["player"] not in all_time_player_stats:

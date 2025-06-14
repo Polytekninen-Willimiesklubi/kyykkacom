@@ -67,3 +67,18 @@ def get_correct_round_score() -> Case:
         ),
         output_field=SmallIntegerField(),
     )
+
+
+def get_correct_match_score() -> Case:
+    """Returns the correct score for the throw rounds' match based on the team.
+    
+    Match score is determined by the team (home or away) and the throw round (1 or 2).
+    """
+    return Case(            
+        When(
+            match__home_team=F("team"),
+            then=F("match__home_first_round_score") + F("match__home_second_round_score"),
+        ),
+        default=F("match__away_first_round_score") + F("match__away_second_round_score"),
+        output_field=SmallIntegerField(),
+    )

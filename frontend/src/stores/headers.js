@@ -230,10 +230,12 @@ export const headersTeamSeasonStats = [
     { title: 'Ottelu keskiarvo', key: 'match_average' },
     { title: 'Hauet', key: 'pikes_total' },
     { title: 'Haukiprosentti', key: 'pike_percentage' },
-    { title: 'Nolla heitot', key: 'zeros_total' },
-    { title: 'Nollaprosentti', key: 'zero_percentage' },
+    { title: 'Virkamiehet', key: 'zeros_total' },
     { title: 'Nolla aloitukset', key: 'zero_or_pike_first_throw_total' },
+    { title: 'Tyhjennykset', key: 'clearances' },
     { title: 'Joulukuuset', key: 'gteSix_total' },
+    { title: 'Paras Peli', key: 'best_match' },
+    { title: 'Paras Erä', key: 'best_round' },
 ];
 
 /********** MATCHES PAGE **********/
