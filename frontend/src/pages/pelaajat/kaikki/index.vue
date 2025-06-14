@@ -58,6 +58,7 @@
             variant="outlined"
             divided
             mandatory
+            @update:model-value="tableHeaders = playerStore.aggregationSetting === 1 ? headerAllPlayersPerSeason : headerAllPlayers"
           >
             <template v-for="(list, i) in [
                 ['Kaikki', 'kaikkien pelien'],
@@ -104,7 +105,7 @@
       </v-row>
       <v-data-table
         :mobile-breakpoint=0
-        :headers="playerStore.aggregationSetting === 1 ? headerAllPlayersPerSeason : headerAllPlayers"
+        :headers="tableHeaders"
         @click:row="handleRedirect"
         :sortBy="sortBy"
         :items="playerStore.playersPostionFilttered"
@@ -115,28 +116,37 @@
         items-per-page="50"
         density="compact"
       >
-        <!-- Header Tooltip -->
-        <template #headers="{ columns, isSorted, getSortIcon, toggleSort }">
-          <tr>
-            <template v-for="column in columns" :key="column.key">
-              <th
-                class="v-data-table__td v-data-table__th cursor-pointer player-header"
-                @click="() => toggleSort(column)"
-              >
-                <div class="v-data-table-header__content justify-center" align="center">
-                  {{ column.title }}
-                  <v-tooltip v-if="column.tooltip"
-                    activator="parent"
-                    location="bottom"
-                    :text="column.tooltip"
-                  />
-                  <template v-if="isSorted(column)">
-                    <v-icon :icon="getSortIcon(column)" />
-                  </template>
-                </div>
-              </th>
+        <template v-for="header in tableHeaders"
+            #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
+        >
+          <v-tooltip :text="column.tooltip" v-if="column.tooltip" location="top">
+            <template #activator="{ props }">
+              <div class="v-data-table-header__content" v-bind="props">
+                <!-- HACK To properly center column header with the sort icon
+                          just add another span to other side -->
+                <span v-if="column.align !== 'left'" style="width:14px"></span>
+                <span @click="() => toggleSort(column)">{{ column.title }}</span>
+                <v-icon v-if="column.sortable" 
+                  class="v-data-table-header__sort-icon" 
+                  :icon="getSortIcon(column)"
+                  size="x-small"
+                />
+              </div>
             </template>
-          </tr>
+          </v-tooltip>
+          <template v-else> <!-- No Tooltip -->
+            <div class="v-data-table-header__content">
+              <!-- HACK To properly center column header with the sort icon
+                        just add another span to other side -->
+              <span v-if="column.align !== 'left'" style="width:14px"></span>
+              <span @click="() => toggleSort(column)">{{ column.title }}</span>
+              <v-icon v-if="column.sortable" 
+                class="v-data-table-header__sort-icon" 
+                :icon="getSortIcon(column)"
+                size="x-small"
+              />
+            </div>
+          </template>
         </template>
       </v-data-table>
     </v-card>
@@ -146,7 +156,6 @@
 <script setup>
 import { usePlayerStore } from '@/stores/players.store';
 import { useTeamsStore } from '@/stores/teams.store'
-
 import { headerAllPlayers, headerAllPlayersPerSeason } from '@/stores/headers';
 
 const teamStore = useTeamsStore();
@@ -156,10 +165,11 @@ playerStore.getPlayers();
 playerStore.aggregationSetting = 1;
 teamStore.getTeams();
 
+// Setting sortBy stops the resetting after filtering is applied
+const sortBy = ref([{key: 'rounds_total', order:'desc'}]);
+const tableHeaders = ref(headerAllPlayersPerSeason);
 const search = ref('');
 const filtterEmpty = ref(undefined);
-// Setting sortBy stops the resetting after filtering is applied
-const sortBy = ref([{key: 'rounds_total', order:'desc'}])
 
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.player_id;
