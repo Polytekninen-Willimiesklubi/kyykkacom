@@ -1,18 +1,24 @@
 import json
 from django.contrib.auth import login, logout
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
-from rest_framework import generics, permissions, status, viewsets
-from rest_framework.mixins import UpdateModelMixin
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions, status, viewsets, mixins, views
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_swagger.views import get_swagger_view
 from rest_framework.request import Request
 import typing as t
 
-from django.db.models.functions import Cast, Concat, Round
+from .query_utils import (
+    count_field_total, 
+    rounded_divison,
+    scaled_points,
+    scores_casted_to_int,
+    count_non_throws,
+    get_correct_round_score,
+)
+
+from django.db.models.functions import Concat, Round
 
 import kyykka.serializers as serializers
 from kyykka.models import (
@@ -28,7 +34,7 @@ from kyykka.models import (
     MATCH_TYPES
 )
 from django.core.cache import cache
-from django.db.models import F, IntegerField, Sum, Q, Count, Case, When, Value, F, FloatField, CharField, SmallIntegerField, Max
+from django.db.models import F, Sum, Q, Count, Case, When, Value, F, FloatField, CharField, SmallIntegerField, Max
 
 from utils.caching import (
     cache_reset_key,
@@ -108,6 +114,8 @@ def csrf(request):
 def ping(request):
     return JsonResponse({"result:": "pong"})
 
+score_fields = ["score_first", "score_second", "score_third", "score_fourth"]
+casted_score_fields = ["st", "nd", "rd", "th"]
 
 class IsCaptain(permissions.BasePermission):
     """
@@ -213,7 +221,7 @@ class LoginAPI(generics.GenericAPIView):
         return response
 
 
-class LogoutAPI(APIView):
+class LogoutAPI(views.APIView):
     def post(self, request, *args, **kwargs):
         logout(request)
         response = HttpResponse(json.dumps({"success": True}))
@@ -243,7 +251,7 @@ class RegistrationAPI(generics.GenericAPIView):
 class ReservePlayerAPI(generics.GenericAPIView):
     serializer_class = serializers.ReserveCreateSerializer
     queryset = User.objects.all()
-    permission_classes = [IsAuthenticated, IsCaptain]
+    permission_classes = [permissions.IsAuthenticated, IsCaptain]
 
     def get(self, request):
         season = getSeason(request)
@@ -385,70 +393,30 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(all_teams)
 
     def retrieve(self, request, pk=None):
-        throws = Throw.objects.select_related("team", "match").filter(
+        throws = Throw.objects.select_related("team", "match", "season").filter(
             match__is_validated=True, team__team=pk, match__match_type__lt=31
         ).alias(
-            st=Cast("score_first", IntegerField()),
-            nd=Cast("score_second", IntegerField()),
-            rd=Cast("score_third", IntegerField()),
-            th=Cast("score_fourth", IntegerField()),
-            non_throws=Case(When(score_first='e', then=1), default=0)
-                + Case(When(score_second='e', then=1), default=0)
-                + Case(When(score_third='e', then=1), default=0)
-                + Case(When(score_fourth='e', then=1), default=0),
+            # Cast the scores to integers for >= 6 counting
+            **scores_casted_to_int(),
+            non_throws=count_non_throws(),
             weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
-            _scaled_points=(
-                (F("st") + F("nd")) * (9 + F("throw_turn"))
-                + (F("rd") + F("th")) * (13 + F("throw_turn"))
-            ) / 5,
-            round_score=Case(            
-                When(
-                    match__home_team=F("team"),
-                    then=Case(When(
-                        throw_round=1, 
-                        then=F("match__home_first_round_score")),
-                        default=F("match__home_second_round_score")
-                    )
-                ),
-                When(
-                    match__away_team=F("team"),
-                    then=Case(When(
-                        throw_round=1,
-                        then=F("match__away_first_round_score")),
-                        default=F("match__away_second_round_score")
-                    )
-                ),
-                output_field=SmallIntegerField(),
-            )
+            _scaled_points=scaled_points(),
+            round_score=get_correct_round_score(),
         ).values('season__year').annotate(
             current_name=F("team__current_name"),
             current_abbriviation=F("team__current_abbreviation"),
             score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
             match_count=Count("match", distinct=True),
-            pikes_total=Count("pk", filter=Q(score_first='h'))
-                        + Count("pk", filter=Q(score_second='h'))
-                        + Count("pk", filter=Q(score_third='h'))
-                        + Count("pk", filter=Q(score_fourth='h')),
-            zeros_total=Count("pk", filter=Q(score_first='0'))
-                        + Count("pk", filter=Q(score_second='0'))
-                        + Count("pk", filter=Q(score_third='0'))
-                        + Count("pk", filter=Q(score_fourth='0')),
+            pikes_total=count_field_total("h", *score_fields),
+            zeros_total=count_field_total("0", *score_fields),
             throws_total=4*Count("pk") - Sum("non_throws"),
-            gteSix_total=Count("pk", filter=Q(st__gte=6))
-                        + Count("pk", filter=Q(nd__gte=6))
-                        + Count("pk", filter=Q(rd__gte=6))
-                        + Count("pk", filter=Q(th__gte=6)),
-            zero_or_pike_first_throw_total=Count("pk", filter=Q(throw_turn=1) & (Q(score_first="0") | Q(score_first="h"))),
-            zero_percentage=Round(
-                F("zeros_total") / F("throws_total")* 100,
-                precision=2,
-                output_field=FloatField(),
+            gteSix_total=count_field_total(6, *casted_score_fields, gte=True),
+            zero_or_pike_first_throw_total=Count(
+                "pk",
+                filter=Q(throw_turn=1) & (Q(score_first="0") | Q(score_first="h"))
             ),
-            pike_percentage=Round(
-                F("pikes_total") / F("throws_total")* 100,
-                precision=2,
-                output_field=FloatField(),
-            ),
+            zero_percentage=rounded_divison("zeros_total", "throws_total", True),
+            pike_percentage=rounded_divison("pikes_total", "throws_total", True),
             match_average=Round(
                 Sum("round_score") / (F("match_count") * 4),
                 precision=2,
@@ -480,79 +448,29 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         del all_time_stats["weighted_total"]
         data["all_time"] = all_time_stats
 
-        test_players = Throw.objects.select_related("team", "match").filter(
+        test_players = Throw.objects.select_related("team", "match", "season").filter(
             match__is_validated=True, team__team=pk, match__match_type__lt=31
         ).alias(
-            st=Cast("score_first", IntegerField()),
-            nd=Cast("score_second", IntegerField()),
-            rd=Cast("score_third", IntegerField()),
-            th=Cast("score_fourth", IntegerField()),
-            non_throws=Case(When(score_first='e', then=1), default=0)
-                + Case(When(score_second='e', then=1), default=0)
-                + Case(When(score_third='e', then=1), default=0)
-                + Case(When(score_fourth='e', then=1), default=0),
+            # Cast the scores to integers for >= 6 counting
+            **scores_casted_to_int(),
+            non_throws=count_non_throws(),
             weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
-            _scaled_points=(
-                (F("st") + F("nd")) * (9 + F("throw_turn"))
-                + (F("rd") + F("th")) * (13 + F("throw_turn"))
-            ) / 5,
-            round_score=Case(            
-                When(
-                    match__home_team=F("team"),
-                    then=Case(When(
-                        throw_round=1, 
-                        then=F("match__home_first_round_score")),
-                        default=F("match__home_second_round_score")
-                    )
-                ),
-                When(
-                    match__away_team=F("team"),
-                    then=Case(When(
-                        throw_round=1,
-                        then=F("match__away_first_round_score")),
-                        default=F("match__away_second_round_score")
-                    )
-                ),
-                output_field=SmallIntegerField(),
-            )
+            _scaled_points=scaled_points(),
+            round_score=get_correct_round_score(),
         ).values('season__year', 'player').annotate(
             throws_total=4 * Count("pk") - Sum("non_throws"),
             player_name=Concat("player__first_name", Value(" "), "player__last_name", output_field=CharField()),
             rounds_total=Count("match"),
             score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
-            score_per_throw=Round(
-                F("score_total") / F("throws_total"),
-                precision=2,
-                output_field=FloatField(),
-            ) if F("throws_total") else Value("NaN"),
+            score_per_throw=rounded_divison("score_total", "throws_total"),
             scaled_points=Sum("_scaled_points"),
-            scaled_points_per_throw=Round(
-                F("scaled_points") / F("throws_total"),
-                precision=2,
-                output_field=FloatField(),
-            ) if F("throws_total") else Value("NaN"),
-            pikes_total=Count("pk", filter=Q(score_first='h'))
-                        + Count("pk", filter=Q(score_second='h'))
-                        + Count("pk", filter=Q(score_third='h'))
-                        + Count("pk", filter=Q(score_fourth='h')),
-            zeros_total=Count("pk", filter=Q(score_first='0'))
-                        + Count("pk", filter=Q(score_second='0'))
-                        + Count("pk", filter=Q(score_third='0'))
-                        + Count("pk", filter=Q(score_fourth='0')),
-            gteSix_total=Count("pk", filter=Q(st__gte=6))
-                        + Count("pk", filter=Q(nd__gte=6))
-                        + Count("pk", filter=Q(rd__gte=6))
-                        + Count("pk", filter=Q(th__gte=6)),
-            pike_percentage=Round(
-                F("pikes_total") / F("throws_total")* 100,
-                precision=2,
-                output_field=FloatField(),
-            ),
-            avg_throw_turn = Round(
-                Sum("weighted_throw_count") / F("throws_total"),
-                precision=2,
-                output_field=FloatField(),
-            ) if F("throws_total") else Value("NaN"),
+            scaled_points_per_throw=rounded_divison("scaled_points", "throws_total"),
+            weighted_throw_count=Sum("weighted_throw_count"),
+            pikes_total=count_field_total("h", *score_fields),
+            zeros_total=count_field_total("0", *score_fields),
+            gteSix_total=count_field_total(6, *casted_score_fields, gte=True),
+            pike_percentage=rounded_divison("pikes_total", "throws_total", True),
+            avg_throw_turn=rounded_divison("weighted_throw_count", "throws_total"),   
         )
         all_time_player_stats = {}
         for player in test_players:
@@ -608,7 +526,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         data["all_time"]["players"] = list(all_time_player_stats.values())
         # data["test"] = throws
 
-        matches = Match.objects.select_related("home_team", "away_team").filter(
+        matches = Match.objects.select_related("home_team__team", "away_team__team", "season").filter(
             Q(home_team__team=pk) | Q(away_team__team=pk), is_validated=True, match_type__lt=31
         )
         data["all_time"]["matches"] = []
@@ -647,7 +565,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(data)
 
 
-class MatchList(APIView):
+class MatchList(views.APIView):
     """
     List all matches
     """
@@ -693,7 +611,7 @@ class MatchList(APIView):
         return Response(all_matches)
 
 
-class MatchDetail(APIView):
+class MatchDetail(views.APIView):
     """
     Retrieve or update a Match instance
     """
@@ -728,10 +646,10 @@ class MatchDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ThrowAPI(generics.GenericAPIView, UpdateModelMixin):
+class ThrowAPI(generics.GenericAPIView, mixins.UpdateModelMixin):
     serializer_class = serializers.ThrowSerializer
     queryset = Throw.objects.all()
-    permission_classes = [IsAuthenticated, IsCaptain, IsCaptainForThrow]
+    permission_classes = [permissions.IsAuthenticated, IsCaptain, IsCaptainForThrow]
 
     def patch(self, request, *args, **kwargs):
         cache_reset_key(
@@ -793,7 +711,7 @@ class SuperWeekendAPI(generics.GenericAPIView):
         return Response(super_weekends)
 
 
-class KyykkaAdminViewSet(generics.GenericAPIView, UpdateModelMixin):
+class KyykkaAdminViewSet(generics.GenericAPIView, mixins.UpdateModelMixin):
     serializer_class = serializers.TeamsInSeasonSerializer
     queryset = TeamsInSeason.objects.all()
     permission_classes = [IsSuperUserOrAdmin]
@@ -823,7 +741,7 @@ class KyykkaAdminMatchViewSet(generics.GenericAPIView):
             )
 
 
-class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
+class KyykkaAdminSuperViewSet(generics.GenericAPIView, mixins.UpdateModelMixin):
     serializer_class = serializers.SuperWeekendSerializer
     queryset = SuperWeekend.objects.all()
     permission_classes = [IsSuperUserOrAdmin]
@@ -832,7 +750,7 @@ class KyykkaAdminSuperViewSet(generics.GenericAPIView, UpdateModelMixin):
         return self.partial_update(request, *args, **kwargs)
 
 
-class NewsAPI(generics.GenericAPIView, UpdateModelMixin):
+class NewsAPI(generics.GenericAPIView, mixins.UpdateModelMixin):
     serializer_class = serializers.NewsSerializer
     queryset = News.objects.all()
 
@@ -874,37 +792,20 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
         # TODO cache this bitch if already calculated once
         # TODO superweekend should be ignored
         throws = self.queryset.filter(match__match_type__lt=31, match__is_validated=True).alias(
-            st=Cast("score_first", IntegerField()),
-            nd=Cast("score_second", IntegerField()),
-            rd=Cast("score_third", IntegerField()),
-            th=Cast("score_fourth", IntegerField()),
-            non_throws=Case(When(score_first='e', then=1), default=0)
-                + Case(When(score_second='e', then=1), default=0)
-                + Case(When(score_third='e', then=1), default=0)
-                + Case(When(score_fourth='e', then=1), default=0),
+            # Cast the scores to integers for >= 6 counting
+            **scores_casted_to_int(),
+            non_throws=count_non_throws(),
             weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
-            _scaled_points=(
-                  (F("st") + F("nd")) * (9 + F("throw_turn"))
-                + (F("rd") + F("th")) * (13 + F("throw_turn"))
-            ) / 5,
+            _scaled_points=scaled_points(),
         ).values("player").annotate(
             player_name=Concat("player__first_name", Value(" "), "player__last_name"),
             team_name=F("team__current_abbreviation"),
             throw_turn=F("throw_turn"),
             playoff=F("match__post_season"),
             score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
-            pikes_total=Count("pk", filter=Q(score_first='h'))
-                      + Count("pk", filter=Q(score_second='h'))
-                      + Count("pk", filter=Q(score_third='h'))
-                      + Count("pk", filter=Q(score_fourth='h')),
-            zeros_total=Count("pk", filter=Q(score_first='0'))
-                      + Count("pk", filter=Q(score_second='0'))
-                      + Count("pk", filter=Q(score_third='0'))
-                      + Count("pk", filter=Q(score_fourth='0')),
-            gte_six_total=Count("pk", filter=Q(st__gte=6))
-                        + Count("pk", filter=Q(nd__gte=6))
-                        + Count("pk", filter=Q(rd__gte=6))
-                        + Count("pk", filter=Q(th__gte=6)),
+            pikes_total=count_field_total("h", *score_fields),
+            zeros_total=count_field_total("0", *score_fields),
+            gte_six_total=count_field_total(6, *casted_score_fields, gte=True),
             match_count=Count("match", distinct=True),
             rounds_total=Count("pk"),
             throws_total=Count("pk") * 4 -Sum("non_throws"),
@@ -940,19 +841,11 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
         players_data = self.queryset.filter(
             player=pk, match__match_type__lt=31, match__is_validated=True
         ).alias(
-            st=Cast("score_first", IntegerField()),
-            nd=Cast("score_second", IntegerField()),
-            rd=Cast("score_third", IntegerField()),
-            th=Cast("score_fourth", IntegerField()),
-            non_throws=Case(When(score_first='e', then=1), default=0)
-                     + Case(When(score_second='e', then=1), default=0)
-                     + Case(When(score_third='e', then=1), default=0)
-                     + Case(When(score_fourth='e', then=1), default=0),
+            # Cast the scores to integers for >= 6 counting
+            **scores_casted_to_int(),
+            non_throws=count_non_throws(),
             weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
-            _scaled_points=(
-                  (F("st") + F("nd")) * (9 + F("throw_turn"))
-                + (F("rd") + F("th")) * (13 + F("throw_turn"))
-            ) / 5,
+            _scaled_points=scaled_points(),
             _score_total=F("st") + F("nd") + F("rd") + F("th"),
             _avg_round_score=F('_score_total') / (4 - F('non_throws')),
         )
@@ -960,38 +853,14 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
         season_data = players_data.values("player").annotate(
             team_name=F("team__current_abbreviation"),
             score_total=Sum("_score_total"),
-            pikes_total=Count("pk", filter=Q(score_first='h'))
-                      + Count("pk", filter=Q(score_second='h'))
-                      + Count("pk", filter=Q(score_third='h'))
-                      + Count("pk", filter=Q(score_fourth='h')),
-            zeros_total=Count("pk", filter=Q(score_first='0'))
-                      + Count("pk", filter=Q(score_second='0'))
-                      + Count("pk", filter=Q(score_third='0'))
-                      + Count("pk", filter=Q(score_fourth='0')),
-            ones_total=Count("pk", filter=Q(st=1))
-                        + Count("pk", filter=Q(nd=1))
-                        + Count("pk", filter=Q(rd=1))
-                        + Count("pk", filter=Q(th=1)),
-            twos_total=Count("pk", filter=Q(st=2))
-                        + Count("pk", filter=Q(nd=2))
-                        + Count("pk", filter=Q(rd=2))
-                        + Count("pk", filter=Q(th=2)),
-            threes_total=Count("pk", filter=Q(st=3))
-                        + Count("pk", filter=Q(nd=3))
-                        + Count("pk", filter=Q(rd=3))
-                        + Count("pk", filter=Q(th=3)),
-            fours_total=Count("pk", filter=Q(st=4))
-                        + Count("pk", filter=Q(nd=4))
-                        + Count("pk", filter=Q(rd=4))
-                        + Count("pk", filter=Q(th=4)), 
-            fives_total=Count("pk", filter=Q(st=5))
-                        + Count("pk", filter=Q(nd=5))
-                        + Count("pk", filter=Q(rd=5))
-                        + Count("pk", filter=Q(th=5)),         
-            gte_six_total=Count("pk", filter=Q(st__gte=6))
-                        + Count("pk", filter=Q(nd__gte=6))
-                        + Count("pk", filter=Q(rd__gte=6))
-                        + Count("pk", filter=Q(th__gte=6)),
+            pikes_total=count_field_total("h", *score_fields),
+            zeros_total=count_field_total("0", *score_fields),
+            ones_total=count_field_total("1", *score_fields),
+            twos_total=count_field_total("2", *score_fields),
+            threes_total=count_field_total("3", *score_fields),
+            fours_total=count_field_total("4", *score_fields),
+            fives_total=count_field_total("5", *score_fields),
+            gte_six_total=count_field_total(6, *casted_score_fields, gte=True),
             match_count=Count("match", distinct=True),
             rounds_total=Count("pk"),
             throws_total=Count("pk") * 4 - Sum("non_throws"),
@@ -1010,62 +879,30 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             position_four_throws=(
                 4*Count("pk", filter=Q(throw_turn=4)) - Sum("non_throws", filter=Q(throw_turn=4))
             ),
-            avg_score=Case(
-                When(throws_total__gt=0, then=Round(
-                    F("score_total") / F("throws_total"), 
-                    precision=2
-                )),
+            avg_score=rounded_divison("score_total", "throws_total"),
+            avg_scaled_points=rounded_divison("scaled_points", "throws_total"),
+            avg_position=rounded_divison("weighted_throw_total", "throws_total"),
+            pike_percentage=rounded_divison("pikes_total", "throws_total", True),
+            avg_score_position_one=Round(
+                Sum("_score_total", filter=Q(throw_turn=1)) / F("position_one_throws"),
+                precision=2,
                 output_field=FloatField(),
-            ),
-            avg_scaled_points=Case(
-                When(throws_total__gt=0, then=Round(
-                        F("scaled_points") / F("throws_total"),
-                        precision=2
-                )),
+            ) if F("position_one_throws") else Value("NaN"),
+            avg_score_position_two=Round(
+                Sum("_score_total", filter=Q(throw_turn=2)) / F("position_two_throws"),
+                precision=2,
                 output_field=FloatField(),
-            ),
-            avg_position=Case(
-                When(throws_total__gt=0, then=Round(
-                        F("weighted_throw_total") / F("throws_total"), 
-                        precision=2,
-                )),
+            ) if F("position_two_throws") else Value("NaN"),
+            avg_score_position_three=Round(
+                Sum("_score_total", filter=Q(throw_turn=3)) / F("position_three_throws"),
+                precision=2,
                 output_field=FloatField(),
-            ),
-            pike_percentage=Case(
-                When(throws_total__gt=0, then=Round(
-                    F("pikes_total") / F("throws_total") * 100,
-                    precision=2,
-                )),
+            ) if F("position_three_throws") else Value("NaN"),
+            avg_score_position_four=Round(
+                Sum("_score_total", filter=Q(throw_turn=4)) / F("position_four_throws"),
+                precision=2,
                 output_field=FloatField(),
-            ),
-            avg_score_position_one=Case(
-                When(position_one_throws__gt=0, then=Round(
-                    Sum("_score_total", filter=Q(throw_turn=1)) / F("position_one_throws"),
-                    precision=2,
-                )),
-                output_field=FloatField(),
-            ),
-            avg_score_position_two=Case(
-                When(position_two_throws__gt=0, then=Round(
-                    Sum("_score_total", filter=Q(throw_turn=2)) / F("position_two_throws"),
-                    precision=2,
-                )),
-                output_field=FloatField(),
-            ),
-            avg_score_position_three=Case(
-                When(position_three_throws__gt=0, then=Round(
-                    Sum("_score_total", filter=Q(throw_turn=3)) / F("position_three_throws"),
-                    precision=2,
-                )),
-                output_field=FloatField(),
-            ),
-            avg_score_position_four=Case(
-                When(position_four_throws__gt=0, then=Round(
-                    Sum("_score_total", filter=Q(throw_turn=4)) / F("position_four_throws"),
-                    precision=2,
-                )),
-                output_field=FloatField(),
-            ),
+            ) if F("position_four_throws") else Value("NaN"),
         ).order_by("season")
 
         all_time_stats = season_data.aggregate(
@@ -1078,22 +915,14 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             scores=Sum("score_total"),
             gte_six=Sum("gte_six_total"),
             scaled_points_total=Sum('scaled_points'),
-            avg_score=Case(
-                When(throws__gt=0, then=Round(F("scores") / F("throws"), precision=2)),
-                output_field=FloatField(),
-            ),
-            avg_scaled_points=Case(
-                When(throws__gt=0, then=Round(F("scaled_points_total") / F("throws"), precision=2)),
-                output_field=FloatField(),
-            ),
-            avg_position=Case(
-                When(throws__gt=0, then=Round(Sum("weighted_throw_total") / F("throws"), precision=2)),
-                output_field=FloatField(),
-            ),
-            pike_percentage=Case(
-                When(throws__gt=0, then=Round(F("pikes") / F("throws") * 100, precision=2)),
-                output_field=FloatField(),
-            ),
+            avg_score=rounded_divison("scores", "throws"),
+            avg_scaled_points=rounded_divison("scaled_points_total", "throws"),
+            avg_position=Round(
+                Sum("weighted_throw_total") / F("throws"),
+                precision=2,
+                output_field=FloatField()
+            ) if F("throws") else Value("NaN"),
+            pike_percentage=rounded_divison("pikes", "throws", True),
         )
         user = User.objects.get(pk=pk)
 
