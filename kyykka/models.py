@@ -6,6 +6,7 @@ from django.dispatch import receiver
 # from utils.caching import reset_player_cache
 
 MATCH_TYPES = {
+    0: "Ei tyyppiä / Undefined",
     1: "Runkosarja",
     2: "Finaali",
     3: "Pronssi",

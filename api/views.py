@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import generics, permissions, status, viewsets, mixins, views
 from rest_framework.response import Response
+from django.http import Http404
 from rest_framework_swagger.views import get_swagger_view
 from rest_framework.request import Request
 import typing as t
@@ -57,11 +58,16 @@ def get_current_season() -> Season:
     return current.season
 
 
-def getSeason(request: Request) -> Season | None:
+def get_season(request: Request) -> Season:
+    """Get the current season from the request query parameters or cache.
+    
+        Raises:
+            `Http404` if the season ID is not provided or does not exist.
+    """
     try:
         season_id = request.query_params.get("season", None)
         if season_id is None:
-            return None
+            raise Http404("Season ID was not provided in the request.")
         season = cache.get(f"season_{season_id}", None)
         if season is not None:
             return season
@@ -69,7 +75,7 @@ def getSeason(request: Request) -> Season | None:
         cache.set(f"season_{season_id}", season, 60 * 60 * 12)
         return season
     except (Season.DoesNotExist, ValueError):
-        return None
+        raise Http404("Season with the provided ID does not exist.")
 
 
 def getPostseason(request: Request) -> bool | None:
@@ -254,7 +260,7 @@ class ReservePlayerAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, IsCaptain]
 
     def get(self, request):
-        season = getSeason(request)
+        season = get_season(request)
         queryset = User.objects.filter(is_superuser=False).order_by("first_name")
         serializer = serializers.ReserveListSerializer(
             queryset, many=True, context={"season": season}
@@ -290,7 +296,7 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = PlayersInTeam.objects.all()
 
     def list(self, request, format=None):
-        season = getSeason(request)
+        season = get_season(request)
         key = "all_players_" + str(season.year)
         all_data = getFromCache(key)
         if all_data is None:
@@ -333,7 +339,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TeamsInSeason.objects.select_related("team").all()
 
     def list(self, request):
-        season = getSeason(request)
+        season = get_season(request)
         post_season = getPostseason(request)
         super_weekend = getSuper(request)
         if post_season is None:
@@ -545,10 +551,18 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 own_second = match.away_second_round_score
                 opp_first = match.home_first_round_score
                 opp_second = match.home_second_round_score
-            own_team_total = own_first + own_second
-            opp_team_total = opp_first + opp_second
+            if own_first and own_second:
+                own_team_total = own_first + own_second
+            else:
+                own_team_total = None
+            if opp_first and opp_second:
+                opp_team_total = opp_first + opp_second
+            else:
+                opp_team_total = None
+            if match.match_type is None:
+                match.match_type = 0  # Default to 0 if None
             m = {
-                "id": match.id,
+                "id": match.pk,
                 "match_time": match.match_time.strftime("%Y-%m-%d %H:%M"),
                 "match_type": MATCH_TYPES[match.match_type],
                 "opposite_team": opposite_team,
@@ -582,7 +596,7 @@ class MatchList(views.APIView):
     ).all()
 
     def get(self, request):
-        season = getSeason(request)
+        season = get_season(request)
         super_weekend = getSuper(request)
         if not super_weekend:
             post_season = getPostseason(request)
@@ -633,7 +647,7 @@ class MatchDetail(views.APIView):
         return Response(serializer.data)
 
     def patch(self, request, pk, format=None):
-        season = getSeason(request)
+        season = get_season(request)
         match = get_object_or_404(self.queryset, pk=pk)
         self.check_object_permissions(request, match)
         # Update user session (so that it wont expire..)
@@ -644,7 +658,7 @@ class MatchDetail(views.APIView):
         if serializer.is_valid():
             serializer.save()
             player_ids = (
-                match.throw_set.all().values_list("player__id", flat=True).distinct()
+                match.throw_set.all().values_list("player__id", flat=True).distinct() # type: ignore
             )
             for id in player_ids:
                 reset_player_cache(id, str(season.year))
@@ -712,7 +726,7 @@ class SuperWeekendAPI(generics.GenericAPIView):
             super_weekends = getFromCache(key)
 
             if super_weekends is None:
-                self.queryset = self.queryset.get(season=season)
+                self.queryset = self.queryset.filter(season=season)
                 super_weekends = serializers.SuperWeekendSerializer(self.queryset).data
                 setToCache(key, super_weekends)
         return Response(super_weekends)
@@ -793,8 +807,10 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
     def list(self, request: Request, format=None) -> Response:
         season_id = request.query_params.get("season", None)
         season: Season | None = None
+        
+        # Prefilter by season if provided
         if season_id is not None:
-            season = getSeason(request)
+            season = get_season(request)
             self.queryset = self.queryset.filter(season=season)
         # TODO cache this bitch if already calculated once
         # TODO superweekend should be ignored
