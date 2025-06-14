@@ -25,10 +25,10 @@ from kyykka.models import (
     TeamsInSeason,
     Throw,
     User,
+    MATCH_TYPES
 )
 from django.core.cache import cache
 from django.db.models import F, IntegerField, Sum, Q, Count, Case, When, Value, F, FloatField, CharField, SmallIntegerField, Max
-
 
 from utils.caching import (
     cache_reset_key,
@@ -322,7 +322,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     This viewset automatically provides `list` and `detail` actions.
     """
 
-    queryset = TeamsInSeason.objects.all()
+    queryset = TeamsInSeason.objects.select_related("team").all()
 
     def list(self, request):
         season = getSeason(request)
@@ -385,159 +385,266 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(all_teams)
 
     def retrieve(self, request, pk=None):
-        try:
-            # FIXME THIS should be done in some sort of serializer rather than here
-            response_data = {
-                "all_time": {
+        throws = Throw.objects.select_related("team", "match").filter(
+            match__is_validated=True, team__team=pk, match__match_type__lt=31
+        ).alias(
+            st=Cast("score_first", IntegerField()),
+            nd=Cast("score_second", IntegerField()),
+            rd=Cast("score_third", IntegerField()),
+            th=Cast("score_fourth", IntegerField()),
+            non_throws=Case(When(score_first='e', then=1), default=0)
+                + Case(When(score_second='e', then=1), default=0)
+                + Case(When(score_third='e', then=1), default=0)
+                + Case(When(score_fourth='e', then=1), default=0),
+            weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
+            _scaled_points=(
+                (F("st") + F("nd")) * (9 + F("throw_turn"))
+                + (F("rd") + F("th")) * (13 + F("throw_turn"))
+            ) / 5,
+            round_score=Case(            
+                When(
+                    match__home_team=F("team"),
+                    then=Case(When(
+                        throw_round=1, 
+                        then=F("match__home_first_round_score")),
+                        default=F("match__home_second_round_score")
+                    )
+                ),
+                When(
+                    match__away_team=F("team"),
+                    then=Case(When(
+                        throw_round=1,
+                        then=F("match__away_first_round_score")),
+                        default=F("match__away_second_round_score")
+                    )
+                ),
+                output_field=SmallIntegerField(),
+            )
+        ).values('season__year').annotate(
+            current_name=F("team__current_name"),
+            current_abbriviation=F("team__current_abbreviation"),
+            score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
+            match_count=Count("match", distinct=True),
+            pikes_total=Count("pk", filter=Q(score_first='h'))
+                        + Count("pk", filter=Q(score_second='h'))
+                        + Count("pk", filter=Q(score_third='h'))
+                        + Count("pk", filter=Q(score_fourth='h')),
+            zeros_total=Count("pk", filter=Q(score_first='0'))
+                        + Count("pk", filter=Q(score_second='0'))
+                        + Count("pk", filter=Q(score_third='0'))
+                        + Count("pk", filter=Q(score_fourth='0')),
+            throws_total=4*Count("pk") - Sum("non_throws"),
+            gteSix_total=Count("pk", filter=Q(st__gte=6))
+                        + Count("pk", filter=Q(nd__gte=6))
+                        + Count("pk", filter=Q(rd__gte=6))
+                        + Count("pk", filter=Q(th__gte=6)),
+            zero_or_pike_first_throw_total=Count("pk", filter=Q(throw_turn=1) & (Q(score_first="0") | Q(score_first="h"))),
+            zero_percentage=Round(
+                F("zeros_total") / F("throws_total")* 100,
+                precision=2,
+                output_field=FloatField(),
+            ),
+            pike_percentage=Round(
+                F("pikes_total") / F("throws_total")* 100,
+                precision=2,
+                output_field=FloatField(),
+            ),
+            match_average=Round(
+                Sum("round_score") / (F("match_count") * 4),
+                precision=2,
+                output_field=FloatField(),
+            ),
+            weighted_total=F("match_count") * F("match_average"),
+        )
+
+        all_time_stats: dict[str, int | float | t.Any] = {
+            "score_total": 0,
+            "match_count": 0,
+            "pikes_total": 0,
+            "zeros_total": 0,
+            "throws_total": 0,
+            "gteSix_total": 0,
+            "zero_or_pike_first_throw_total": 0,
+            "weighted_total": 0,
+        }
+
+        data = {}
+        for season in throws:
+            data[season["season__year"]] = season
+            for key in all_time_stats.keys():
+                all_time_stats[key] += season[key]
+
+        all_time_stats["zero_percentage"] = round(all_time_stats["zeros_total"] / all_time_stats["throws_total"] * 100, 2) if all_time_stats["throws_total"] else 0
+        all_time_stats["pike_percentage"] = round(all_time_stats["pikes_total"] / all_time_stats["throws_total"] * 100,2) if all_time_stats["throws_total"] else 0
+        all_time_stats["match_average"] = round(all_time_stats["weighted_total"] / all_time_stats["match_count"], 2) if all_time_stats["match_count"] else 0
+        del all_time_stats["weighted_total"]
+        data["all_time"] = all_time_stats
+
+        test_players = Throw.objects.select_related("team", "match").filter(
+            match__is_validated=True, team__team=pk, match__match_type__lt=31
+        ).alias(
+            st=Cast("score_first", IntegerField()),
+            nd=Cast("score_second", IntegerField()),
+            rd=Cast("score_third", IntegerField()),
+            th=Cast("score_fourth", IntegerField()),
+            non_throws=Case(When(score_first='e', then=1), default=0)
+                + Case(When(score_second='e', then=1), default=0)
+                + Case(When(score_third='e', then=1), default=0)
+                + Case(When(score_fourth='e', then=1), default=0),
+            weighted_throw_count=F('throw_turn') * (4 - F('non_throws')),
+            _scaled_points=(
+                (F("st") + F("nd")) * (9 + F("throw_turn"))
+                + (F("rd") + F("th")) * (13 + F("throw_turn"))
+            ) / 5,
+            round_score=Case(            
+                When(
+                    match__home_team=F("team"),
+                    then=Case(When(
+                        throw_round=1, 
+                        then=F("match__home_first_round_score")),
+                        default=F("match__home_second_round_score")
+                    )
+                ),
+                When(
+                    match__away_team=F("team"),
+                    then=Case(When(
+                        throw_round=1,
+                        then=F("match__away_first_round_score")),
+                        default=F("match__away_second_round_score")
+                    )
+                ),
+                output_field=SmallIntegerField(),
+            )
+        ).values('season__year', 'player').annotate(
+            throws_total=4 * Count("pk") - Sum("non_throws"),
+            player_name=Concat("player__first_name", Value(" "), "player__last_name", output_field=CharField()),
+            rounds_total=Count("match"),
+            score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
+            score_per_throw=Round(
+                F("score_total") / F("throws_total"),
+                precision=2,
+                output_field=FloatField(),
+            ) if F("throws_total") else Value("NaN"),
+            scaled_points=Sum("_scaled_points"),
+            scaled_points_per_throw=Round(
+                F("scaled_points") / F("throws_total"),
+                precision=2,
+                output_field=FloatField(),
+            ) if F("throws_total") else Value("NaN"),
+            pikes_total=Count("pk", filter=Q(score_first='h'))
+                        + Count("pk", filter=Q(score_second='h'))
+                        + Count("pk", filter=Q(score_third='h'))
+                        + Count("pk", filter=Q(score_fourth='h')),
+            zeros_total=Count("pk", filter=Q(score_first='0'))
+                        + Count("pk", filter=Q(score_second='0'))
+                        + Count("pk", filter=Q(score_third='0'))
+                        + Count("pk", filter=Q(score_fourth='0')),
+            gteSix_total=Count("pk", filter=Q(st__gte=6))
+                        + Count("pk", filter=Q(nd__gte=6))
+                        + Count("pk", filter=Q(rd__gte=6))
+                        + Count("pk", filter=Q(th__gte=6)),
+            pike_percentage=Round(
+                F("pikes_total") / F("throws_total")* 100,
+                precision=2,
+                output_field=FloatField(),
+            ),
+            avg_throw_turn = Round(
+                Sum("weighted_throw_count") / F("throws_total"),
+                precision=2,
+                output_field=FloatField(),
+            ) if F("throws_total") else Value("NaN"),
+        )
+        all_time_player_stats = {}
+        for player in test_players:
+            if player["player"] not in all_time_player_stats:
+                all_time_player_stats[player["player"]] = {
+                    "player_name": player["player_name"],
+                    "player": player["player"],
                     "score_total": 0,
-                    "match_count": 0,
+                    "rounds_total": 0,
                     "pikes_total": 0,
                     "zeros_total": 0,
                     "throws_total": 0,
+                    "scaled_points": 0,
                     "gteSix_total": 0,
-                    "zero_or_pike_first_throw_total": 0,
-                    "players": [],
-                    "matches": [],
                 }
+            for key in all_time_player_stats[player["player"]]:
+                if key in ("player_name", "player", "weighted_throw_count"):
+                    continue
+
+                all_time_player_stats[player["player"]][key] += player[key]
+            
+            if "weighted_throw_count" not in all_time_player_stats[player["player"]]:                
+                all_time_player_stats[player["player"]]["weighted_throw_count"] = 0
+            all_time_player_stats[player["player"]]["weighted_throw_count"] += player["avg_throw_turn"] * player["throws_total"]
+
+            if "players" not in data[player["season__year"]]:
+                data[player["season__year"]]["players"] = []
+            data[player["season__year"]]["players"].append(player)
+
+        for player in all_time_player_stats.values():
+            player["score_per_throw"] = (
+                round(player["score_total"] / player["throws_total"], 2)
+                if player["throws_total"]
+                else "NaN"
+            )
+            player["scaled_points_per_throw"] = (
+                round(player["scaled_points"] / player["throws_total"], 2)
+                if player["throws_total"]
+                else "NaN"
+            )
+            player["pike_percentage"] = (
+                round(player["pikes_total"] / player["throws_total"] * 100, 2)
+                if player["throws_total"]
+                else "NaN"
+            )
+            player["avg_throw_turn"] = (
+                round(player["weighted_throw_count"] / player["throws_total"], 2)
+                if player["throws_total"]
+                else "NaN"
+            )
+            del player["weighted_throw_count"]
+
+        data["all_time"]["players"] = list(all_time_player_stats.values())
+        # data["test"] = throws
+
+        matches = Match.objects.select_related("home_team", "away_team").filter(
+            Q(home_team__team=pk) | Q(away_team__team=pk), is_validated=True, match_type__lt=31
+        )
+        data["all_time"]["matches"] = []
+        for match in matches:
+            if "matches" not in data[match.season.year]:
+                data[match.season.year]["matches"] = []
+            if match.home_team.team == pk:
+                opposite_team = match.away_team.current_abbreviation
+                own_first = match.home_first_round_score
+                own_second = match.home_second_round_score
+                opp_first = match.away_first_round_score
+                opp_second = match.away_second_round_score
+            else:
+                opposite_team = match.home_team.current_abbreviation
+                own_first = match.away_first_round_score
+                own_second = match.away_second_round_score
+                opp_first = match.home_first_round_score
+                opp_second = match.home_second_round_score
+            own_team_total = own_first + own_second
+            opp_team_total = opp_first + opp_second
+            m = {
+                "id": match.id,
+                "match_time": match.match_time.strftime("%Y-%m-%d %H:%M"),
+                "match_type": MATCH_TYPES[match.match_type],
+                "opposite_team": opposite_team,
+                "own_first": own_first,
+                "own_second": own_second,
+                "opp_first": opp_first,
+                "opp_second": opp_second,
+                "own_team_total": own_team_total,
+                "opposite_team_total": opp_team_total,
             }
-            weighted_total = 0
-            all_team_seasons = self.queryset.filter(team=team.first())
-            players = {}
-            player_weighted_total = {}
-            for one_season in all_team_seasons.all():
-                throws = Throw.objects.filter(match__is_validated=True, team=one_season)
-                season = one_season.season
-                context = {"season": season, "throws": throws}
-                one_serializer = serializers.TeamDetailSerializer(
-                    one_season, context=context
-                )
-                response_data[season.year] = one_serializer.data
-                response_data["all_time"]["score_total"] += one_serializer.data[
-                    "score_total"
-                ]
-                response_data["all_time"]["match_count"] += one_serializer.data[
-                    "match_count"
-                ]
-                response_data["all_time"]["pikes_total"] += one_serializer.data[
-                    "pikes_total"
-                ]
-                response_data["all_time"]["zeros_total"] += one_serializer.data[
-                    "zeros_total"
-                ]
-                response_data["all_time"]["throws_total"] += one_serializer.data[
-                    "throws_total"
-                ]
-                response_data["all_time"]["gteSix_total"] += one_serializer.data[
-                    "gteSix_total"
-                ]
-                response_data["all_time"]["zero_or_pike_first_throw_total"] += (
-                    one_serializer.data["zero_or_pike_first_throw_total"]
-                )
-                weighted_total += (
-                    one_serializer.data["match_average"]
-                    * one_serializer.data["match_count"]
-                )
-                response_data["all_time"]["matches"].extend(
-                    one_serializer.data["matches"]
-                )
+            data[match.season.year]["matches"].append(m)
+            data["all_time"]["matches"].append(m)
 
-                for player in one_serializer.data["players"]:
-                    if player["player_name"] not in players:
-                        players[player["player_name"]] = {
-                            "id": player["id"],
-                            "player_number": player["player_number"],
-                            "score_total": 0,
-                            "rounds_total": 0,
-                            "pikes_total": 0,
-                            "zeros_total": 0,
-                            "throws_total": 0,
-                            "scaled_points": 0,
-                            "gteSix_total": 0,
-                        }
-                        player_weighted_total[player["player_name"]] = 0
-                    players[player["player_name"]]["score_total"] += player[
-                        "score_total"
-                    ]
-                    players[player["player_name"]]["rounds_total"] += player[
-                        "rounds_total"
-                    ]
-                    players[player["player_name"]]["pikes_total"] += player[
-                        "pikes_total"
-                    ]
-                    players[player["player_name"]]["zeros_total"] += player[
-                        "zeros_total"
-                    ]
-                    players[player["player_name"]]["throws_total"] += player[
-                        "throws_total"
-                    ]
-                    players[player["player_name"]]["scaled_points"] += (
-                        player["scaled_points"]
-                        if player["scaled_points"] is not None
-                        else 0
-                    )
-                    players[player["player_name"]]["gteSix_total"] += player[
-                        "gteSix_total"
-                    ]
-                    player_weighted_total[player["player_name"]] += (
-                        player["throws_total"] * player["avg_throw_turn"]
-                    )
-
-            for name, stats in players.items():
-                players[name]["score_per_throw"] = (
-                    round(stats["score_total"] / stats["throws_total"], 2)
-                    if stats["throws_total"]
-                    else "NaN"
-                )
-                players[name]["avg_throw_turn"] = (
-                    round(player_weighted_total[name] / stats["throws_total"], 2)
-                    if stats["throws_total"]
-                    else "NaN"
-                )
-                players[name]["scaled_points_per_throw"] = (
-                    round(stats["scaled_points"] / stats["throws_total"], 2)
-                    if stats["throws_total"]
-                    else "NaN"
-                )
-                players[name]["pike_percentage"] = (
-                    round(stats["pikes_total"] / stats["throws_total"] * 100, 2)
-                    if stats["throws_total"]
-                    else "NaN"
-                )
-
-            for name, stats in players.items():
-                response_data["all_time"]["players"].append(
-                    {"player_name": name, **stats}
-                )
-            response_data["all_time"]["match_average"] = (
-                round(weighted_total / response_data["all_time"]["match_count"], 2)
-                if response_data["all_time"]["match_count"]
-                else "NaN"
-            )
-            response_data["all_time"]["pike_percentage"] = (
-                round(
-                    response_data["all_time"]["pikes_total"]
-                    / response_data["all_time"]["throws_total"]
-                    * 100,
-                    2,
-                )
-                if response_data["all_time"]["throws_total"]
-                else "NaN"
-            )
-            response_data["all_time"]["zero_percentage"] = (
-                round(
-                    response_data["all_time"]["zeros_total"]
-                    / response_data["all_time"]["throws_total"]
-                    * 100,
-                    2,
-                )
-                if response_data["all_time"]["throws_total"]
-                else "NaN"
-            )
-        except ValueError:
-            # pk probably not integer?
-            raise Http404
-        # Do these querys only once here, instead of doing them 2 times at serializer.
-        return Response(response_data)
+        return Response(data)
 
 
 class MatchList(APIView):
@@ -927,7 +1034,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             pike_percentage=Case(
                 When(throws_total__gt=0, then=Round(
                     F("pikes_total") / F("throws_total") * 100,
-                    precision=2
+                    precision=2,
                 )),
                 output_field=FloatField(),
             ),
