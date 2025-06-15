@@ -79,7 +79,7 @@ def get_season(request: Request) -> Season:
         raise Http404("Season with the provided ID does not exist.")
 
 
-def getPostseason(request: Request) -> bool | None:
+def get_post_season(request: Request) -> bool | None:
     try:
         req_post_season = request.query_params.get("post_season", None)
         if req_post_season is None:
@@ -104,7 +104,7 @@ def getRole(user: User) -> t.Literal[0, 1, 2]:
     except PlayersInTeam.DoesNotExist:
         return 0
 
-def getSuper(request: Request) -> bool | None:
+def get_super(request: Request) -> bool | None:
     try:
         request_param = request.query_params.get("super_weekend", None)
         if request_param is None:
@@ -340,8 +340,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request):
         season = get_season(request)
-        post_season = getPostseason(request)
-        super_weekend = getSuper(request)
+        post_season = get_post_season(request)
+        super_weekend = get_super(request)
         if post_season is None:
             if super_weekend is None:
                 key = "all_teams_" + str(season.year)
@@ -452,8 +452,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 per_season_non_played[player["team_season__season__year"]] = []
             per_season_non_played[player["team_season__season__year"]].append(player)
 
-        
-
         all_time_stats: dict[str, int | float | t.Any] = {
             "score_total": 0,
             "match_count": 0,
@@ -477,9 +475,18 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 else:
                     all_time_stats[key] = min(all_time_stats[key], season[key])
 
-        all_time_stats["zero_percentage"] = round(all_time_stats["zeros_total"] / all_time_stats["throws_total"] * 100, 2) if all_time_stats["throws_total"] else 0
-        all_time_stats["pike_percentage"] = round(all_time_stats["pikes_total"] / all_time_stats["throws_total"] * 100,2) if all_time_stats["throws_total"] else 0
-        all_time_stats["match_average"] = round(all_time_stats["weighted_total"] / all_time_stats["match_count"], 2) if all_time_stats["match_count"] else 0
+        all_time_stats["zero_percentage"] = round(
+            all_time_stats["zeros_total"] / all_time_stats["throws_total"] * 100, 2
+        ) if all_time_stats["throws_total"] else "NaN"
+        
+        all_time_stats["pike_percentage"] = round(
+            all_time_stats["pikes_total"] / all_time_stats["throws_total"] * 100, 2
+        ) if all_time_stats["throws_total"] else "NaN"
+
+        all_time_stats["match_average"] = round(
+            all_time_stats["weighted_total"] / all_time_stats["match_count"], 2
+        ) if all_time_stats["match_count"] else "NaN"
+
         del all_time_stats["weighted_total"]
         data["all_time"] = all_time_stats
 
@@ -651,9 +658,9 @@ class MatchList(views.APIView):
 
     def get(self, request):
         season = get_season(request)
-        super_weekend = getSuper(request)
+        super_weekend = get_super(request)
         if not super_weekend:
-            post_season = getPostseason(request)
+            post_season = get_post_season(request)
             key = "all_matches_" + str(season.year)
             if post_season is not None:
                 key += "_post_season" if post_season else "_regular_season"
