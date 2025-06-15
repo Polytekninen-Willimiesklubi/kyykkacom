@@ -185,7 +185,11 @@ export const headersTeams = [
     { title: 'Voitot', key: 'matches_won', align: 'center' },
     { title: 'Häviöt', key: 'matches_lost', align: 'center' },
     { title: 'Tasurit', key: 'matches_tie', align: 'center' },
-    { title: 'Ottelu Ka', key: 'match_average', align: 'center' }
+    { title: 'Ottelu Ka', key: 'match_average', align: 'center' },
+    { title: 'Paras Erä', key: 'best_round', align: 'center' },
+    { title: 'Paras Ottelu', key: 'best_match', align: 'center' },
+    { title: 'Tyhjennykset', key: 'clearences', align: 'center' },
+
 ];
 
 /********** TEAM PAGE **********/

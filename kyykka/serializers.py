@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
+from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When, Min
 from django.db.models.functions import Cast, Substr
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -1182,7 +1182,10 @@ class TeamListSerializer(serializers.ModelSerializer):
     match_average = serializers.SerializerMethodField()
     points_average = serializers.SerializerMethodField()
     first_bracket_placement = serializers.SerializerMethodField()
-
+    best_round = serializers.SerializerMethodField()
+    best_match = serializers.SerializerMethodField()
+    clearences = serializers.SerializerMethodField()
+    
     def count_match_results(self, obj):
         results_home = obj.home_matches.filter(
             is_validated=True, season=self.context.get("season"), match_type__lt=30
@@ -1209,6 +1212,27 @@ class TeamListSerializer(serializers.ModelSerializer):
         results_away = results_away.annotate(
             home=F("home_first_round_score") + F("home_second_round_score"),
             away=F("away_first_round_score") + F("away_second_round_score"),
+        )
+
+        self.best_match = min(
+            results_home.aggregate(Min("home"))["home__min"],
+            results_away.aggregate(Min("away"))["away__min"]
+        )
+
+        self.best_round = min(
+            results_home.aggregate(first=Min("home_first_round_score"))["first"],
+            results_home.aggregate(second=Min("home_second_round_score"))["second"],
+            results_away.aggregate(first=Min("away_first_round_score"))["first"],
+            results_away.aggregate(second=Min("away_second_round_score"))["second"],
+        )
+
+        self.clearences = sum(
+            [
+                results_home.filter(home_first_round_score__lte=0).count(),
+                results_home.filter(home_second_round_score__lte=0).count(),
+                results_away.filter(away_first_round_score__lte=0).count(),
+                results_away.filter(away_second_round_score__lte=0).count()
+            ]
         )
 
         self.matches_won = (
@@ -1282,6 +1306,15 @@ class TeamListSerializer(serializers.ModelSerializer):
         else:
             return None
 
+    def get_best_match(self, obj):
+        return self.best_match
+
+    def get_best_round(self, obj):
+        return self.best_round
+    
+    def get_clearences(self, obj):
+        return self.clearences
+
     class Meta:
         model = TeamsInSeason
         fields = (
@@ -1301,6 +1334,9 @@ class TeamListSerializer(serializers.ModelSerializer):
             "bracket_placement",
             "second_stage_bracket",
             "first_bracket_placement",
+            "best_round",
+            "best_match",
+            "clearences",
         )
 
 
