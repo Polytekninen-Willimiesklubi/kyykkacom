@@ -76,7 +76,7 @@
           </v-row>
       </v-card-title>
       <v-data-table
-        :mobile-breakpoint=0
+        :mobile-breakpoint="0"
         :headers="matchHeaders"
         :items="matchStore.selectedMatches"
         :search="search"

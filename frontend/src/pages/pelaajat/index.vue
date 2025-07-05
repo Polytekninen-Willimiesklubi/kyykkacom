@@ -78,7 +78,7 @@
       </v-row>
       <!-- :custom-key-sort="customSorts" -->
       <v-data-table
-        :mobile-breakpoint=0
+        :mobile-breakpoint="0"
         :headers="headerPlayers"
         @click:row="handleRedirect"
         :sortBy="sortBy"

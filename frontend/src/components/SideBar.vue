@@ -32,7 +32,7 @@
         </v-card-subtitle>
         <v-divider />
         <v-data-table
-          :mobile-breakpoint=0
+          :mobile-breakpoint="0"
           class="sidebar"
           :headers="headers"
           :items="listItem"

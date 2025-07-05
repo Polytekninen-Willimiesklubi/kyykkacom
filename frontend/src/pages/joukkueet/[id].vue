@@ -76,7 +76,7 @@
           <v-expansion-panel-text>
             <v-data-table 
               class="mt-5"
-              :mobile-breakpoint=0
+              :mobile-breakpoint="0"
               :headers="headersTeamPlayers"
               @click:row="handleRedirect"
               :items="teamStore.seasonPlayers"
@@ -128,7 +128,7 @@
                   single-line
                 />
                 <v-data-table 
-                  :mobile-breakpoint=0
+                  :mobile-breakpoint="0"
                   :search="search"
                   :items="teamStore.unReservedPlayers"
                   :headers="headersTeamReserve"
@@ -166,7 +166,7 @@
                 single-line
               />
             <v-data-table 
-              :mobile-breakpoint=0
+              :mobile-breakpoint="0"
               @click:row="handleRedirectMatches"
               color='alert'
               :search="matchSearch"

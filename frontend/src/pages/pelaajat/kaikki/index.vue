@@ -104,7 +104,7 @@
         </v-col>
       </v-row>
       <v-data-table
-        :mobile-breakpoint=0
+        :mobile-breakpoint="0"
         :headers="tableHeaders"
         @click:row="handleRedirect"
         :sortBy="sortBy"

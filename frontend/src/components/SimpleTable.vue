@@ -4,9 +4,8 @@
         class="ma-5" 
         style="align-self: start;"
     >
-
         <v-data-table
-            mobile-breakpoint="0"
+            :mobile-breakpoint="0"
             class="hof_table"
             :headers="props.headers"
             :items="props.items"
