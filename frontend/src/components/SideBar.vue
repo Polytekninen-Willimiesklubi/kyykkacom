@@ -68,7 +68,7 @@
               class="v-data-table__tr v-data-table__tr"
               :class="{'first-border': isFirst(index), 
                 'second-border': isSecond(index)}"
-              @click="handleRedirect(item['team'])"
+              @click="handleRedirect(item['team_id'])"
             >
               <td 
                 v-for="header in headers"

@@ -59,16 +59,18 @@ def get_current_season() -> Season:
     return current.season
 
 
-def get_season(request: Request) -> Season:
+def get_season(request: Request, required: bool = False) -> Season | None:
     """Get the current season from the request query parameters or cache.
     
         Raises:
-            `Http404` if the season ID is not provided or does not exist.
+            `Http404` if the season ID does not exist or not provided and required.
     """
     try:
         season_id = request.query_params.get("season", None)
         if season_id is None:
-            raise Http404("Season ID was not provided in the request.")
+            if required:
+                raise Http404("Season ID was not provided in the request, but was required.")
+            return None
         season = cache.get(f"season_{season_id}", None)
         if season is not None:
             return season
@@ -339,9 +341,114 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TeamsInSeason.objects.select_related("team").all()
 
     def list(self, request):
+        # other_queryset = Match.objects.filter(is_validated=True)
         season = get_season(request)
         post_season = get_post_season(request)
         super_weekend = get_super(request)
+        # TODO Cache
+
+        # if season:
+        #     self.queryset = self.queryset.filter(season=season)
+        #     other_queryset = other_queryset.filter(season=season)
+
+        # if post_season:
+        #     other_queryset = other_queryset.filter(post_season=post_season, match_type=1)
+        # elif post_season is False:
+        #     other_queryset = other_queryset.filter(post_season=post_season)
+
+        # if super_weekend:    
+        #     other_queryset = other_queryset.filter(match_type__gte=30)
+        # elif super_weekend is False:
+        #     other_queryset = other_queryset.filter(match_type__lt=30)
+
+        home_results = self.queryset.filter(season=season).alias(
+            home_score=F("home_matches__home_first_round_score") + F("home_matches__home_second_round_score"),
+            home_opp_score=F("home_matches__away_first_round_score") + F("home_matches__away_second_round_score"),
+            home_id=F("home_matches__pk"),
+            best_round_match=Case(
+                When(
+                    home_matches__home_first_round_score__lt=F("home_matches__home_second_round_score"),
+                    then=F("home_matches__home_first_round_score"),
+                ),
+                default=F("home_matches__home_second_round_score"),
+            ),
+        ).values("id", "current_name", "current_abbreviation", "team_id").annotate(
+            matches_lost=Count("home_id", filter=Q(home_score__gt=F("home_opp_score"))),
+            matches_won=Count("home_id", filter=Q(home_score__lt=F("home_opp_score"))),
+            matches_tie=Count("home_id", filter=Q(home_score__exact=F("home_opp_score"))),
+            matches_played=F("matches_lost") + F("matches_won") + F("matches_tie"),
+            weighted_sum=Sum("home_score"),
+            best_round=Min("best_round_match"),
+            best_match=Min("home_score"),
+            clearences=(
+                Count("home_id", filter=Q(home_matches__home_first_round_score__lte=0)) 
+                + Count("home_id", filter=Q(home_matches__home_second_round_score__lte=0))
+            ),
+            points_total=F("matches_won") * 2 + F("matches_tie"),
+        )
+
+
+        away_results = self.queryset.filter(season=season).alias(
+            away_score=F("away_matches__away_first_round_score") + F("away_matches__away_second_round_score"),
+            away_opp_score=F("away_matches__home_first_round_score") + F("away_matches__home_second_round_score"),
+            away_id=F("away_matches__pk"),
+            best_round_match=Case(
+                When(
+                    away_matches__away_first_round_score__lt=F("away_matches__away_second_round_score"),
+                    then=F("away_matches__away_first_round_score"),
+                ),
+                default=F("away_matches__away_second_round_score"),
+            ),
+        ).values("id", "current_name", "current_abbreviation", "team_id", "bracket").annotate(
+            matches_lost=Count("away_id", filter=Q(away_score__gt=F("away_opp_score"))),
+            matches_won=Count("away_id", filter=Q(away_score__lt=F("away_opp_score"))),
+            matches_tie=Count("away_id", filter=Q(away_score__exact=F("away_opp_score"))),
+            matches_played=F("matches_lost") + F("matches_won") + F("matches_tie"),
+            weighted_sum=Sum("away_score"),
+            best_round=Min("best_round_match"),
+            best_match=Min("away_score"),
+            clearences=(
+                Count("away_id", filter=Q(away_matches__away_first_round_score__lte=0)) 
+                + Count("away_id", filter=Q(away_matches__away_second_round_score__lte=0))
+            ),
+            points_total=F("matches_won") * 2 + F("matches_tie"),
+        )
+    
+
+        # Add results together
+        results = {}
+        for result in home_results:
+            index = result["id"]
+            results[index] = result
+
+        for result in away_results:
+            index = result["id"]
+            if index not in results:
+                results[index] = result
+                continue
+            team_stats = results[index]
+            team_stats["matches_lost"] += result["matches_lost"]
+            team_stats["matches_won"] += result["matches_won"]
+            team_stats["matches_tie"] += result["matches_tie"]
+            team_stats["matches_played"] += result["matches_played"]
+            team_stats["clearences"] += result["clearences"]
+            team_stats["weighted_sum"] += result["weighted_sum"]
+            team_stats["points_total"] += result["points_total"]
+            team_stats["best_round"] = min(result["best_round"], team_stats["best_round"])
+            team_stats["best_match"] = min(result["best_match"], team_stats["best_match"])
+        
+        for result in results.values():
+            result["match_average"] = round(
+                result["weighted_sum"] / result["matches_played"], 2
+            ) if result["matches_played"] else "NaN"
+            del result["weighted_sum"]
+            result["points_average"] = round(
+                result["points_total"] / result["matches_played"], 2
+            ) if result["matches_played"] else "NaN"
+
+        return Response(results.values())
+
+
         if post_season is None:
             if super_weekend is None:
                 key = "all_teams_" + str(season.year)
@@ -600,7 +707,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         for match in matches:
             if "matches" not in data[match.season.year]:
                 data[match.season.year]["matches"] = []
-            if match.home_team.team == pk:
+            if isinstance(pk, str):
+                pk = int(pk)
+            if match.home_team.team.pk == pk:
                 opposite_team = match.away_team.current_abbreviation
                 own_first = match.home_first_round_score
                 own_second = match.home_second_round_score
@@ -612,11 +721,11 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 own_second = match.away_second_round_score
                 opp_first = match.home_first_round_score
                 opp_second = match.home_second_round_score
-            if own_first and own_second:
+            if own_first is not None and own_second is not None:
                 own_team_total = own_first + own_second
             else:
                 own_team_total = None
-            if opp_first and opp_second:
+            if opp_first is not None and opp_second is not None:
                 opp_team_total = opp_first + opp_second
             else:
                 opp_team_total = None

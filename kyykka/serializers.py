@@ -1208,49 +1208,51 @@ class TeamListSerializer(serializers.ModelSerializer):
         results_home = results_home.annotate(
             home=F("home_first_round_score") + F("home_second_round_score"),
             away=F("away_first_round_score") + F("away_second_round_score"),
+        ).aggregate(
+            Sum("home"),
+            Min("home"),
+            first=Min("home_first_round_score"),
+            second=Min("home_second_round_score"),
+            cleareances=(
+                Count('pk', filter=Q(home_first_round_score__lte=0)) 
+                + Count('pk', filter=Q(home_second_round_score__lte=0))
+            ),
+            wins=Count('pk', filter=Q(home__lt=F("away"))),
+            losses=Count('pk', filter=Q(home__gt=F("away"))),
+            ties=Count('pk', filter=Q(home__exact=F("away"))),
         )
         results_away = results_away.annotate(
             home=F("home_first_round_score") + F("home_second_round_score"),
             away=F("away_first_round_score") + F("away_second_round_score"),
+        ).aggregate(
+            Sum("away"),
+            Min("away"),
+            first=Min("away_first_round_score"),
+            second=Min("away_second_round_score"),
+            cleareances=(
+                Count('pk', filter=Q(away_first_round_score__lte=0)) 
+                + Count('pk', filter=Q(away_second_round_score__lte=0))
+            ),
+            wins=Count('pk', filter=Q(away__lt=F("home"))),
+            losses=Count('pk', filter=Q(away__gt=F("home"))),
+            ties=Count('pk', filter=Q(away__exact=F("home"))),
         )
 
-        self.best_match = min(
-            results_home.aggregate(Min("home"))["home__min"],
-            results_away.aggregate(Min("away"))["away__min"]
-        )
-
+        self.best_match = min(results_home["home__min"], results_away["away__min"])
         self.best_round = min(
-            results_home.aggregate(first=Min("home_first_round_score"))["first"],
-            results_home.aggregate(second=Min("home_second_round_score"))["second"],
-            results_away.aggregate(first=Min("away_first_round_score"))["first"],
-            results_away.aggregate(second=Min("away_second_round_score"))["second"],
+            results_home["first"],
+            results_home["second"],
+            results_away["first"],
+            results_away["second"],
         )
-
-        self.clearences = sum(
-            [
-                results_home.filter(home_first_round_score__lte=0).count(),
-                results_home.filter(home_second_round_score__lte=0).count(),
-                results_away.filter(away_first_round_score__lte=0).count(),
-                results_away.filter(away_second_round_score__lte=0).count()
-            ]
-        )
-
-        self.matches_won = (
-            results_home.filter(home__lt=F("away")).count()
-            + results_away.filter(away__lt=F("home")).count()
-        )
-        self.matches_lost = (
-            results_home.filter(away__lt=F("home")).count()
-            + results_away.filter(home__lt=F("away")).count()
-        )
-        self.matches_tie = (
-            results_home.filter(home__exact=F("away")).count()
-            + results_away.filter(home__exact=F("away")).count()
-        )
+        self.clearences = results_home["cleareances"] + results_away["cleareances"]
+        self.matches_won = results_home["wins"] + results_away["wins"]
+        self.matches_lost = results_home["losses"] + results_away["losses"]
+        self.matches_tie = results_home["ties"] + results_away["ties"]
         self.matches_played = self.matches_lost + self.matches_tie + self.matches_won
 
-        match_score_home = results_home.aggregate(Sum("home"))["home__sum"]
-        match_score_away = results_away.aggregate(Sum("away"))["away__sum"]
+        match_score_home = results_home["home__sum"]
+        match_score_away = results_away["away__sum"]
         if match_score_home is None and match_score_away is None:
             self.match_average = "NaN"
             return
@@ -1300,11 +1302,11 @@ class TeamListSerializer(serializers.ModelSerializer):
         return count_score_total(obj, season, throws, key="team")
 
     def get_first_bracket_placement(self, obj):
-        seq = ExtraBracketStagePlacement.objects.filter(team_in_season=obj, stage=1)
+        # if season is None or season.playoff_format == 8:
+        seq = ExtraBracketStagePlacement.objects.filter(team_in_season=obj, stage=1).order_by()
         if len(seq):
             return seq[0].placement
-        else:
-            return None
+        return None
 
     def get_best_match(self, obj):
         return self.best_match

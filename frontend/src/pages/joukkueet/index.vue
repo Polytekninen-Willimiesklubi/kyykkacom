@@ -48,7 +48,7 @@ const search = ref('');
 
 
 function handleRedirect(value, row) {
-  location.href = '/joukkueet/' + row.item.team;
+  location.href = '/joukkueet/' + row.item.team_id;
 }
 
 </script>
