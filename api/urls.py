@@ -57,14 +57,15 @@ urlpatterns = [
         views.KyykkaAdminSuperViewSet.as_view(),
         name="admin-super",
     ),
-    path("test/", views.ThrowsAPI.as_view({"get": "list"}), name="test"),
     path("players/", views.ThrowsAPI.as_view({"get": "list"})),
     path("players/<int:pk>/", views.ThrowsAPI.as_view({"get": "retrieve"})),
+    path("teams/", views.TeamViewSet.as_view({"get": "list"})),
+    path("teams/<int:pk>/", views.TeamViewSet.as_view({"get": "retrieve"})),
 ]
 
 router = SimpleRouter()
 # router.register(r"players", views.PlayerViewSet, "player")
-router.register(r"teams", views.TeamViewSet)
+# router.register(r"teams", views.TeamViewSet)
 
 # router.register(r'matches', views.MatchViewSet)
 # router.register(r'reserve', views.ReservePlayerViewSet)

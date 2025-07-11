@@ -49,7 +49,7 @@ from utils.caching import (
 schema_view = get_swagger_view(title="NKL API")
 
 def get_current_season() -> Season:
-    cache_value = cache.get("current_season", None)
+    cache_value = None # cache.get("current_season", None)
     if cache_value is not None:
         return cache_value
     current = CurrentSeason.objects.first()
@@ -91,18 +91,20 @@ def get_post_season(request: Request) -> bool | None:
         return None
 
 def getRole(user: User) -> t.Literal[0, 1, 2]:
+    """
+    Returns:
+        "0": Not a captain
+        "1": Captain
+        "2": Super user
+    """
     try:
         if user.is_superuser:
             return 2
-        else:
-            player_in_team: PlayersInTeam = user.playersinteam_set.get(  # type: ignore
-                team_season__season=get_current_season()
-            )
-            assert isinstance(player_in_team, PlayersInTeam)
-            if player_in_team.is_captain:
-                return 1
-            else:
-                return 0
+        player_in_team = user.playersinteam_set.get(team_season__season=get_current_season()) # pyright: ignore
+        assert isinstance(player_in_team, PlayersInTeam)
+        if player_in_team.is_captain:
+            return 1
+        return 0
     except PlayersInTeam.DoesNotExist:
         return 0
 
@@ -164,6 +166,29 @@ class IsCaptainForThrow(permissions.BasePermission):
             print("has_object_permission", request.user.id, obj)
             return False
 
+class IsCaptainForTeam(permissions.BasePermission):
+    """Permission check to verify if user is captain in the right team for reserving players"""
+    def has_permission(self, request: Request, view):
+        # if request.user.is_superuser:
+        #     return True
+        try:
+            current = CurrentSeason.objects.first()
+            assert current is not None
+            player = PlayersInTeam.objects.filter(
+                team_season__season=current.season, player=request.user
+            ).first()
+            if player is None:
+                return None
+            try:
+                team_id = int(request.query_params.get("team", None)) # type: ignore
+            except ValueError:
+                return False
+            return player.is_captain and player.team_season.team.pk == team_id
+        except (ValueError, TypeError):
+            return None
+        except AttributeError:
+            print("has_permission", request.user.id)
+            return False
 
 class MatchDetailPermission(permissions.BasePermission):
     """
@@ -214,6 +239,7 @@ class LoginAPI(generics.GenericAPIView):
             player_in_team = PlayersInTeam.objects.filter(
                 player=user, team_season__season=current
             ).first()
+            team_id = player_in_team.team_season.team.id
             role = getRole(user)
             # role = '1' if player_in_team.is_captain else '0'
         except (PlayersInTeam.DoesNotExist, AttributeError):
@@ -260,17 +286,22 @@ class RegistrationAPI(generics.GenericAPIView):
 class ReservePlayerAPI(generics.GenericAPIView):
     serializer_class = serializers.ReserveCreateSerializer
     queryset = User.objects.all()
-    permission_classes = [permissions.IsAuthenticated, IsCaptain]
+    permission_classes = [permissions.IsAuthenticated, IsCaptainForTeam]
 
     def get(self, request):
-        season = get_season(request)
-        queryset = User.objects.filter(is_superuser=False).order_by("first_name")
-        serializer = serializers.ReserveListSerializer(
-            queryset, many=True, context={"season": season}
-        )
+        current_season = CurrentSeason.objects.first()
+        assert current_season is not None
+        unreserved_players = self.queryset.exclude(
+            # Filtter out people that have team
+            Q(playersinteam__team_season__season=current_season.season)
+            | Q(is_superuser=True)
+            | Q(is_staff=True)
+        ).order_by("first_name")
+
+        serializer = serializers.UserSerializer(unreserved_players, many=True)
         return Response(serializer.data)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         success, message = serializer.save()
@@ -372,7 +403,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 ),
                 default=F("home_matches__home_second_round_score"),
             ),
-        ).values("id", "current_name", "current_abbreviation", "team_id").annotate(
+        ).values("id", "current_name", "current_abbreviation", "team_id", "bracket").annotate(
             matches_lost=Count("home_id", filter=Q(home_score__gt=F("home_opp_score"))),
             matches_won=Count("home_id", filter=Q(home_score__lt=F("home_opp_score"))),
             matches_tie=Count("home_id", filter=Q(home_score__exact=F("home_opp_score"))),
@@ -386,7 +417,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             ),
             points_total=F("matches_won") * 2 + F("matches_tie"),
         )
-
 
         away_results = self.queryset.filter(season=season).alias(
             away_score=F("away_matches__away_first_round_score") + F("away_matches__away_second_round_score"),
@@ -413,7 +443,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             ),
             points_total=F("matches_won") * 2 + F("matches_tie"),
         )
-    
+
 
         # Add results together
         results = {}
@@ -432,10 +462,16 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             team_stats["matches_tie"] += result["matches_tie"]
             team_stats["matches_played"] += result["matches_played"]
             team_stats["clearences"] += result["clearences"]
-            team_stats["weighted_sum"] += result["weighted_sum"]
             team_stats["points_total"] += result["points_total"]
-            team_stats["best_round"] = min(result["best_round"], team_stats["best_round"])
-            team_stats["best_match"] = min(result["best_match"], team_stats["best_match"])
+
+            if team_stats["weighted_sum"] is not None and result["weighted_sum"] is not None:
+                team_stats["weighted_sum"] += result["weighted_sum"]
+                team_stats["best_round"] = min(result["best_round"], team_stats["best_round"])
+                team_stats["best_match"] = min(result["best_match"], team_stats["best_match"])
+            elif team_stats["weighted_sum"] is None and result["weighted_sum"] is not None:
+                team_stats["weighted_sum"] = result["weighted_sum"]
+                team_stats["best_round"] = result["best_round"]
+                team_stats["best_match"] = result["best_match"]
         
         for result in results.values():
             result["match_average"] = round(
@@ -506,6 +542,22 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(all_teams)
 
     def retrieve(self, request, pk=None):
+        all_time_stats: dict[str, int | float | t.Any] = {
+            "score_total": 0,
+            "match_count": 0,
+            "pikes_total": 0,
+            "zeros_total": 0,
+            "throws_total": 0,
+            "gteSix_total": 0,
+            "zero_or_pike_first_throw_total": 0,
+            "clearances": 0,
+            "best_round": 'NaN',
+            "best_match": 'NaN',
+            "weighted_total": 0,
+            "match_average": 'NaN',
+            'pike_percentage': 'NaN',
+        }
+
         throws = Throw.objects.select_related("team", "match", "season").filter(
             match__is_validated=True, team__team=pk, match__match_type__lt=31
         ).alias(
@@ -517,8 +569,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             round_score=get_correct_round_score(),
             match_score=get_correct_match_score(),
         ).values('season__year').annotate(
-            current_name=F("team__current_name"),
-            current_abbriviation=F("team__current_abbreviation"),
             score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
             match_count=Count("match", distinct=True),
             pikes_total=count_field_total("h", *score_fields),
@@ -542,6 +592,45 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             best_match=Min("match_score"),
         )
 
+        data = {}
+        # If no matches have not been played in the season yet find it through TeamInSeason.
+        seasons = TeamsInSeason.objects.filter(team=pk).values("season__year", "current_name", "current_abbreviation")
+        for season in seasons:
+            data[season["season__year"]] = season
+            for key, value in all_time_stats.items():
+                data[season["season__year"]][key] = value
+            del season["season__year"]
+
+        for season in throws:
+            for key in season:
+                if key != "season__year":
+                    data[season["season__year"]][key] = season[key]  
+            for key in all_time_stats.keys():
+                if key in ("match_average", "pike_percentage"):
+                    continue
+                elif key not in ("best_round", "best_match"):
+                    all_time_stats[key] += season[key]
+                else:
+                    if all_time_stats[key] == 'NaN':
+                        all_time_stats[key] = season[key]
+                    else:
+                        all_time_stats[key] = min(all_time_stats[key], season[key])
+
+        all_time_stats["zero_percentage"] = round(
+            all_time_stats["zeros_total"] / all_time_stats["throws_total"] * 100, 2
+        ) if all_time_stats["throws_total"] else "NaN"
+        
+        all_time_stats["pike_percentage"] = round(
+            all_time_stats["pikes_total"] / all_time_stats["throws_total"] * 100, 2
+        ) if all_time_stats["throws_total"] else "NaN"
+
+        all_time_stats["match_average"] = round(
+            all_time_stats["weighted_total"] / all_time_stats["match_count"], 2
+        ) if all_time_stats["match_count"] else "NaN"
+
+        del all_time_stats["weighted_total"]
+        data["all_time"] = all_time_stats
+
         # This below is for adding in players that have not played any rounds
         not_played_players = PlayersInTeam.objects.filter(team_season__team=pk).annotate(
             _id=F("player__id"),
@@ -558,44 +647,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             if player["team_season__season__year"] not in per_season_non_played:
                 per_season_non_played[player["team_season__season__year"]] = []
             per_season_non_played[player["team_season__season__year"]].append(player)
+            del player["team_season__season__year"]
 
-        all_time_stats: dict[str, int | float | t.Any] = {
-            "score_total": 0,
-            "match_count": 0,
-            "pikes_total": 0,
-            "zeros_total": 0,
-            "throws_total": 0,
-            "gteSix_total": 0,
-            "zero_or_pike_first_throw_total": 0,
-            "clearances": 0,
-            "best_round": 80,
-            "best_match": 160,
-            "weighted_total": 0,
-        }
-
-        data = {}
-        for season in throws:
-            data[season["season__year"]] = season
-            for key in all_time_stats.keys():
-                if key not in ("best_round", "best_match"):
-                    all_time_stats[key] += season[key]
-                else:
-                    all_time_stats[key] = min(all_time_stats[key], season[key])
-
-        all_time_stats["zero_percentage"] = round(
-            all_time_stats["zeros_total"] / all_time_stats["throws_total"] * 100, 2
-        ) if all_time_stats["throws_total"] else "NaN"
-        
-        all_time_stats["pike_percentage"] = round(
-            all_time_stats["pikes_total"] / all_time_stats["throws_total"] * 100, 2
-        ) if all_time_stats["throws_total"] else "NaN"
-
-        all_time_stats["match_average"] = round(
-            all_time_stats["weighted_total"] / all_time_stats["match_count"], 2
-        ) if all_time_stats["match_count"] else "NaN"
-
-        del all_time_stats["weighted_total"]
-        data["all_time"] = all_time_stats
 
         players = Throw.objects.select_related("team", "match", "season").filter(
             match__is_validated=True, team__team=pk, match__match_type__lt=31
@@ -646,6 +699,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             if "players" not in data[player["season__year"]]:
                 data[player["season__year"]]["players"] = []
             data[player["season__year"]]["players"].append(player)
+            del player["season__year"]
 
         for season in per_season_non_played:
             if season not in data:
@@ -854,7 +908,7 @@ class SeasonsAPI(generics.GenericAPIView):
 
     def get(self, request):
         key = "all_seasons"
-        all_seasons = getFromCache(key)
+        all_seasons = None # getFromCache(key)
         if all_seasons is None:
             all_seasons = serializers.SeasonSerializer(
                 self.queryset.all(), many=True
@@ -862,7 +916,6 @@ class SeasonsAPI(generics.GenericAPIView):
             print(all_seasons)
             setToCache(key, all_seasons)
 
-        key = "current_season_ser"
         current_season = get_current_season()
         # TODO this serialzer maybe should be cached instead, but that's not that big deal IMO.
         current = serializers.SeasonSerializer(current_season).data

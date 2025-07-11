@@ -12,7 +12,7 @@
       v-if="authStore.isSuperUser && newsButton"
     >
       <QuillEditor
-        :content="newsStore.newsText"
+        v-model:content="newsStore.newsText"
         contentType="html" 
         theme="snow" 
         class="mb-1" 
@@ -80,16 +80,12 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth.store';
 import { useNewsStore } from '@/stores/news.store';
-import { useTeamsStore } from '@/stores/teams.store';
 
-
-const teamsStore = useTeamsStore();
 const authStore = useAuthStore();
 const newsStore = useNewsStore();
 const newsButton = ref(false);
 
 newsStore.getNews();
-teamsStore.getTeams();
 
 </script>
 <style scoped>

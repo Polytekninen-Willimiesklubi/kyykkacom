@@ -54,6 +54,7 @@ export const useNavBarStore = defineStore('navbar', () => {
     }
 
     async function getSeasons() {
+        const teamStore = useTeamsStore();
         try {
             let payload = null;
             if (!localStorage.allSeasons) {
@@ -78,7 +79,7 @@ export const useNavBarStore = defineStore('navbar', () => {
             localStorage.setItem('selectedSeason', JSON.stringify(selectedSeason.value))
             seasons.value = allSeasons;
             localStorage.setItem('allSeasons', JSON.stringify(allSeasons));
-
+            teamStore.getTeams();
 
         } catch (error) {
             console.log(error);

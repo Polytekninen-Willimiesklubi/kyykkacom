@@ -306,11 +306,11 @@ export const headersRound = [
 
 export const headersNavBar = [
     { title: 'Koti', route: '/', icon: 'mdi-home' },
+    { title: 'Oma Joukkue', route: '/joukkueet/', icon: 'mdi-account' },
     { title: 'Ottelut', route: '/ottelut', icon: 'mdi-space-invaders' },
     { title: 'Joukkueet', route: '/joukkueet', icon: 'mdi-emoticon-poop' },
     { title: 'Runkosarja', route: '/runkosarja', icon: 'mdi-format-list-numbered' },
     { title: 'Pelaajat', route: '/pelaajat', icon: 'mdi-account-group' },
-    { title: 'Oma Joukkue', route: '/joukkueet/', icon: 'mdi-account' }, // Add if-clause and id to route in place of use   
     { title: 'Pudotuspelit', route: '/jatkosarja', icon: 'mdi-bank' },
     { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
     { title: 'Info', route: '/info', icon: 'mdi-information-outline' }
