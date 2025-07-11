@@ -253,7 +253,6 @@ const matchHeaders = ref(headersPlayerPeriod);
 function filtterItems() {
   let arr
   if(sortGamesSwitch.value === 'Erittäin') {
-    console.log(playerStore.loading, playerStore.loadedData)
     arr = playerStore.player.matches_per_period;
     matchHeaders.value = headersPlayerPeriod;
   } else {

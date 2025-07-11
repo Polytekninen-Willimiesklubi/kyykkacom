@@ -389,11 +389,10 @@ class SharedPlayerSerializer(serializers.ModelSerializer):
 
 class UserSerializer(SharedPlayerSerializer):
     player_name = serializers.SerializerMethodField()
-    player_number = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ("id", "player_name", "player_number")
+        fields = ("id", "player_name")
 
 
 class ReserveListSerializer(SharedPlayerSerializer):

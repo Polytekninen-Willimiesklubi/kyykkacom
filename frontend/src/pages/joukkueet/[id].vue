@@ -116,7 +116,7 @@
           <v-expansion-panels>
             <v-expansion-panel
               title="Varaa pelaajia"
-              v-if="authStore.isCaptain || authStore.isSuperUser"
+              v-if="teamStore.reserveLoading || teamStore.reserveAllowed"
             >
               <v-expansion-panel-text>
                 <v-text-field 
@@ -139,17 +139,12 @@
                 >
                   <template #item.actions="{ item }">
                     <v-icon
-                      v-if="!item.team.current_name"
                       icon="mdi-plus"
                       color=green
                       @click="teamStore.reservePlayer(item)"
                     />
-                    <v-icon v-else 
-                      icon="mdi-lock"
-                      color=gray
-                    />
                   </template>
-                  <template #bottom></template>
+                  <!-- <template #bottom></template> -->
                 </v-data-table>
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -269,7 +264,13 @@ function getColor(val1, val2) {
 
 teamStore.getTeamPlayers(route.params.id)
 if (authStore.loggedIn && (authStore.isCaptain || authStore.isSuperUser)) {
-  teamStore.getReserve()
+  teamStore.getReserve(route.params.id)
 }
+
+// Forcing reload of the page fixes a issue where if I am at some location '/page/15' and I have 
+// a redirect button to location '/page/50' it would not load the new content.  
+watch(() => route.params.id, () => {
+  window.location.reload()
+});
 
 </script>
