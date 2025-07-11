@@ -3,14 +3,14 @@
     <template v-slot:activator="{ props: activatorProps }">
       <v-btn
         @click="dialog = !dialog"
-        text="Register"
+        text="Rekisteröidy"
         v-bind="activatorProps"
         class="hidden-lg-and-up ml-1" 
         width="100%"
       />
       <v-btn
         @click="dialog = !dialog"
-        text="Register"
+        text="Rekisteröidy"
         class="hidden-md-and-down" 
         v-bind="activatorProps"
       />
