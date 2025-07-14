@@ -12,7 +12,9 @@
             hide-details
           />
         </v-col>
-        <v-col cols="2" align="center">
+        <v-spacer />
+        <v-spacer />
+        <!-- <v-col cols="2" align="center">
           <v-btn-toggle
             v-model="filtterEmpty"
             variant="outlined"
@@ -27,34 +29,14 @@
                   v-bind="props"
                   :value="1" 
                   icon="mdi-filter-variant" 
-                  @click="playerStore.emptyFiltter = !playerStore.emptyFiltter"
                 />
               </template>
             </v-tooltip>
           </v-btn-toggle>
-        </v-col>
-        <v-col cols="2">
-          <v-btn-toggle
-            v-model="playerStore.playersPositionsToggle"
-            variant="outlined"
-            divided
-            multiple
-          >
-            <template v-for="i in 4">
-              <v-tooltip
-                location="top"
-                :text="'Näytä vain heittopaikan '+ i +' statsit'"
-              >
-                <template #activator="{ props }">
-                  <v-btn v-bind="props" size="x-small" :text="i+'.'" :value="i"/>
-                </template>
-              </v-tooltip>
-            </template>
-          </v-btn-toggle>
-        </v-col>
+        </v-col> -->
         <v-col cols="3">
           <v-btn-toggle
-            v-model="playerStore.playoffFiltter"
+            v-model="teamStore.filterSetting"
             variant="outlined"
             divided
             mandatory
@@ -76,13 +58,14 @@
             </template>
           </v-btn-toggle>
         </v-col>
+        <v-spacer />
         <v-col cols="2">
           <v-btn-toggle
-            v-model="playerStore.aggregationSetting"
+            v-model="teamStore.aggregationSetting"
             variant="outlined"
             divided
             mandatory
-            @update:model-value="tableHeaders = playerStore.aggregationSetting === 1 ? headerAllPlayersPerSeason : headerAllPlayers"
+            @update:model-value="tableHeaders = teamStore.aggregationSetting === 1 ? headersAllTeamsPerSeason : headersTeamsAllTime"
           >
             <v-tooltip
               location="top"
@@ -102,16 +85,17 @@
             </v-tooltip>
           </v-btn-toggle>
         </v-col>
+        <v-spacer />
       </v-row>
       <v-data-table
         :mobile-breakpoint="0"
         :headers="tableHeaders"
         @click:row="handleRedirect"
         :sortBy="sortBy"
-        :items="playerStore.playersPostionFilttered"
-        :loading="playerStore.loading"
-        :search="search"
+        :items="teamStore.filteredAllResults"
+        :loading="teamStore.loading"
         no-data-text="Ei dataa :("
+        :search="search"
         loading-text="Ladataan kaikkia pelaajia..."
         items-per-page="50"
         density="compact"
@@ -153,26 +137,26 @@
   </div>
 </template>
 
+<route lang="yaml">
+  meta:
+      layout: "withoutSidebar"
+</route>
+
 <script setup>
-import { usePlayerStore } from '@/stores/players.store';
 import { useTeamsStore } from '@/stores/teams.store'
-import { headerAllPlayers, headerAllPlayersPerSeason } from '@/stores/headers';
+import { headersTeamsAllTime, headersAllTeamsPerSeason } from '@/stores/headers';
 
 const teamStore = useTeamsStore();
-const playerStore = usePlayerStore();
-
-playerStore.getPlayers();
-playerStore.aggregationSetting = 1;
-teamStore.getTeams();
+teamStore.aggregationSetting = 2;
+teamStore.getTeamsAllSeasons();
 
 // Setting sortBy stops the resetting after filtering is applied
-const sortBy = ref([{key: 'rounds_total', order:'desc'}]);
-const tableHeaders = ref(headerAllPlayersPerSeason);
+const sortBy = ref([{key: 'season_count', order:'desc'}]);
+const tableHeaders = ref(headersTeamsAllTime);
 const search = ref('');
-const filtterEmpty = ref(undefined);
 
 function handleRedirect (value, row) {
-  location.href = '/pelaajat/' + row.item.player_id;
+  location.href = '/joukkueet/' + row.item.team_id;
 }
 
 </script>

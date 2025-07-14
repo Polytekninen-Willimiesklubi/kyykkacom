@@ -7,6 +7,8 @@ const reserveUrl = `${import.meta.env.VITE_API_URL}/reserve/`;
 export const useTeamsStore = defineStore('joukkue', () => {
     const allTimeStats = ref({});
     const seasonsStats = ref({});
+    const allTeamsAllSeasonsStats = ref([]);
+    const allTeamsAllTimeStats = ref([])
     const selectedSeasonId = ref(null);
     const unReservedPlayers = ref([]);
     const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')) ? JSON.parse(localStorage.getItem('allTeams')) : []);
@@ -16,6 +18,8 @@ export const useTeamsStore = defineStore('joukkue', () => {
     const singleLoading = ref(false);
     const reserveLoading = ref(false);
     const reserveAllowed = ref(true);
+    const filterSetting = ref(0); // 0: All, 1: Bracket, 2: Playoff
+    const aggregationSetting = ref(1); // 1: Per Season, 2: All Time
 
     const seasonStats = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
@@ -117,6 +121,20 @@ export const useTeamsStore = defineStore('joukkue', () => {
         return returnedTeams
     });
 
+    const filteredAllResults = computed(() => {
+        const values = aggregationSetting.value === 1 ? allTeamsAllSeasonsStats : allTeamsAllTimeStats;
+        if (filterSetting.value === 0) {
+            return values.value["all"];
+        }
+        else if (filterSetting.value === 1) {
+            return values.value["bracket"];
+        } else if (filterSetting.value === 2) {
+            return values.value["playoff"];
+        }
+        console.log("Incorrect filter setting: " + filterSetting.value);
+        return [];
+    })
+
 
     // const superWeekendBrackets = computed( () => {
     //     const navStore = useNavBarStore();
@@ -162,10 +180,32 @@ export const useTeamsStore = defineStore('joukkue', () => {
         } catch (error) {
             console.log(error);
             return false;
+        } finally {
+            loading.value = false;
         }
         return true;
     }
 
+    async function getTeamsAllSeasons() {
+        loading.value = true;
+        loaded.value = false;
+        try {
+            const response = await fetch(baseUrl + "all/", { method: 'GET' });
+            const payload = await response.json();
+
+            allTeamsAllSeasonsStats.value = payload[0];
+            allTeamsAllTimeStats.value = payload[1];
+
+        } catch (error) {
+            console.log(error);
+            loaded.value = false;
+            return false;
+        } finally {
+            loading.value = false;
+        }
+        loaded.value = true
+        return true;
+    }
 
     /**
      * Calls teams API to get one team all seasons statistics. Saves those to store attributes
@@ -285,8 +325,14 @@ export const useTeamsStore = defineStore('joukkue', () => {
         // superWeekendBrackets,
         teamName,
         matches,
+        allTeamsAllTimeStats,
+        allTeamsAllSeasonsStats,
+        filterSetting,
+        aggregationSetting,
+        filteredAllResults,
         getTeams,
         getTeamPlayers,
+        getTeamsAllSeasons,
         getReserve,
         reservePlayer,
     }

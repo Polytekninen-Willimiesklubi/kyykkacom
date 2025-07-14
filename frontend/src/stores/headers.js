@@ -192,6 +192,41 @@ export const headersTeams = [
 
 ];
 
+/********** ALL TEAMS PAGE **********/
+
+export const headersTeamsAllTime = [
+    { title: 'Nimi', key: 'current_name', align: 'center', tooltip: 'Viimeisin nimi' },
+    { title: 'Lyhenne', key: 'current_abbreviation', align: 'center', tooltip: 'Viimeisin lyhenne' },
+    { title: 'Kaudet', key: 'season_count', align: 'center', tooltip: 'Pelatut kaudet' },
+    { title: 'Ottelut', key: 'matches_played', align: 'center' },
+    { title: 'Voitot', key: 'matches_won', align: 'center' },
+    { title: 'Häviöt', key: 'matches_lost', align: 'center' },
+    { title: 'Tasurit', key: 'matches_tie', align: 'center' },
+    { title: 'Ottelu Ka', key: 'match_average', align: 'center' },
+    { title: 'Paras Erä', key: 'best_round', align: 'center' },
+    { title: 'Paras Ottelu', key: 'best_match', align: 'center' },
+    { title: 'Tyhjennykset', key: 'clearences', align: 'center' },
+
+];
+
+export const headersAllTeamsPerSeason = [
+    { title: 'Nimi', key: 'current_name', align: 'center' },
+    { title: 'Lyhenne', key: 'current_abbreviation', align: 'center' },
+    { title: 'Kausi', key: 'season', align: 'center', tooltip: 'Pelatut kaudet' },
+    { title: 'Ottelut', key: 'matches_played', align: 'center' },
+    { title: 'Voitot', key: 'matches_won', align: 'center' },
+    { title: 'Häviöt', key: 'matches_lost', align: 'center' },
+    { title: 'Tasurit', key: 'matches_tie', align: 'center' },
+    { title: 'Ottelu Ka', key: 'match_average', align: 'center' },
+    { title: 'Paras Erä', key: 'best_round', align: 'center' },
+    { title: 'Paras Ottelu', key: 'best_match', align: 'center' },
+    { title: 'Tyhjennykset', key: 'clearences', align: 'center' },
+
+];
+
+
+
+
 /********** TEAM PAGE **********/
 
 export const headersTeamReserve = [

@@ -61,6 +61,8 @@ urlpatterns = [
     path("players/<int:pk>/", views.ThrowsAPI.as_view({"get": "retrieve"})),
     path("teams/", views.TeamViewSet.as_view({"get": "list"})),
     path("teams/<int:pk>/", views.TeamViewSet.as_view({"get": "retrieve"})),
+    path("teams/all/", views.TeamViewSet.as_view({"get": "list_all"})),
+
 ]
 
 router = SimpleRouter()
