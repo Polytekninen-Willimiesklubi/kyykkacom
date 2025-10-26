@@ -20,26 +20,12 @@ Repository for kyykka.com 2.0
 
 2. System dependencies:
 
-- PyMySQL (default): The project uses `PyMySQL` (a pure-Python MySQL driver) by default, so you do not need to install native MySQL client headers or build tools for most development workflows.
+- The project requires the native MySQL driver (`mysqlclient`). You must install the system build dependencies on Ubuntu/Debian:
 
-- Optional — native MySQL driver (`mysqlclient`): If you prefer the native driver (for example for slightly better performance or binary compatibility), install the system build dependencies on Ubuntu/Debian and then install the `mysql` optional extra described below.
-
-  ```bash
-  sudo apt update
-  sudo apt install -y python3-dev default-libmysqlclient-dev pkg-config build-essential memcached
-  ```
-
-  After installing the system packages, add the native driver into your venv with:
-
-  ```bash
-  pip install -e ".[mysql]"
-  ```
-
-  Or install it together with dev extras:
-
-  ```bash
-  pip install -e ".[dev,mysql]"
-  ```
+   ```bash
+   sudo apt update
+   sudo apt install -y python3-dev default-libmysqlclient-dev pkg-config build-essential memcached
+   ```
 
 3. Create and activate a virtual environment:
    ```bash
@@ -51,12 +37,9 @@ Repository for kyykka.com 2.0
    ```bash
    # Install core dependencies
    pip install -e .
-   
-   # For development, install additional tools
-   pip install -e ".[dev]"
 
-   # If using `mysqlclient`, install that package with dev
-   pip install -e ".[dev, mysqlclient]"
+   # For development, install additional tools
+   pip install -e .[dev]
    ```
 
 5. Database setup:
@@ -80,7 +63,7 @@ Repository for kyykka.com 2.0
    }
    ```
 
-- Note: the project ships with `nkl/__init__.py` that calls `pymysql.install_as_MySQLdb()` so `PyMySQL` works as a drop-in replacement for `mysqlclient`.
+
 
 - Run migrations:
    ```bash
