@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "kyykka.apps.KyykkaConfig",
-    "drf_yasg",
+    "drf_spectacular",
     "silk",
 ]
 
@@ -57,6 +57,32 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': (
     #     'rest_framework.permissions.IsAuthenticated',
     # )
+    # Use drf-spectacular for API schema generation
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# drf-spectacular settings
+SPECTACULAR_SETTINGS = {
+    "TITLE": "NKL API",
+    "DESCRIPTION": "API for kyykka.com",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # Other settings...
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+    },
+    # Tags to group endpoints by model/resource
+    "TAGS": [
+        {"name": "auth", "description": "Authentication operations"},
+        {"name": "matches", "description": "Match management"},
+        {"name": "players", "description": "Player operations"},
+        {"name": "teams", "description": "Team management"},
+        {"name": "throws", "description": "Throw recording and statistics"},
+        {"name": "seasons", "description": "Season management"},
+        {"name": "news", "description": "News operations"},
+    ],
 }
 
 MIDDLEWARE = [
