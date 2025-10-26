@@ -1,54 +1,137 @@
-# NKL
+# Kyykka.com
 
 Repository for kyykka.com 2.0
 
-# Setting up a local development environment
+## Setting up a local development environment
 
-Clone this repository
+### Prerequisites
 
-Install python 3.6
+- Python 3.10 or newer
+- MySQL
+- Node.js (for frontend development)
 
-Optional but highly recommended: create virtual environment for this project, see https://docs.python.org/3/tutorial/venv.html
+### Backend Setup
 
-MySQL and other stuff:
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/Polytekninen-Willimiesklubi/kyykkacom.git
+   cd kyykkacom
+   ```
 
-`sudo apt install python3-dev default-libmysqlclient-dev memcached`
+2. System dependencies:
 
-At root of the cloned project (where requirements.txt is), install requirements
+- PyMySQL (default): The project uses `PyMySQL` (a pure-Python MySQL driver) by default, so you do not need to install native MySQL client headers or build tools for most development workflows.
 
-`pip install -r requirements.txt`
+- Optional — native MySQL driver (`mysqlclient`): If you prefer the native driver (for example for slightly better performance or binary compatibility), install the system build dependencies on Ubuntu/Debian and then install the `mysql` optional extra described below.
 
-After opening mysql instance and selecting database `nkl` run migrations
+  ```bash
+  sudo apt update
+  sudo apt install -y python3-dev default-libmysqlclient-dev pkg-config build-essential memcached
+  ```
 
-`python manage.py migrate`
+  After installing the system packages, add the native driver into your venv with:
 
-After the migrations are complete populate the tables
+  ```bash
+  pip install -e ".[mysql]"
+  ```
 
-`python manage.py shell`
+  Or install it together with dev extras:
 
-In the python shell run the following code and wait for it to complete
+  ```bash
+  pip install -e ".[dev,mysql]"
+  ```
 
-`from utils.dummyGen import *; initGen()`
+3. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
+   ```
 
-Start the development server
+4. Install Python dependencies:
+   ```bash
+   # Install core dependencies
+   pip install -e .
+   
+   # For development, install additional tools
+   pip install -e ".[dev]"
 
-`python manage.py runserver localhost:8000`
+   # If using `mysqlclient`, install that package with dev
+   pip install -e ".[dev, mysqlclient]"
+   ```
 
-# Setting up the local development environment for frontend
+5. Database setup:
 
-First install Nodejs from:
-https://nodejs.org/en/download/
+- Create a MySQL database (example name `nkl` or the one you prefer).
 
-After that go to the root of the vue project where package.json resides
+- Create a local settings file at `nkl/settings_local.py` (this file is excluded from version control). Example `settings_local.py`:
 
-`cd frontend`
+   ```python
+   SECRET_KEY = "replace-with-secure-key"
+   DEBUG = True
+   DATABASES = {
+         "default": {
+               "ENGINE": "django.db.backends.mysql",
+               "NAME": "nkl",
+               "USER": "example",
+               "PASSWORD": "example",
+               "HOST": "127.0.0.1",
+               "PORT": "3306",
+         }
+   }
+   ```
 
-and install requirements
+- Note: the project ships with `nkl/__init__.py` that calls `pymysql.install_as_MySQLdb()` so `PyMySQL` works as a drop-in replacement for `mysqlclient`.
 
-`npm install`
+- Run migrations:
+   ```bash
+   python manage.py migrate
+   ```
 
-This will install all the packages listed in "devDependencies" of package.json.
+- Populate initial data (optional):
+   ```bash
+   python manage.py shell
+   >>> from utils.dummyGen import *; initGen()
+   ```
 
-And start up the vue server
+6. Start the development server:
+   ```bash
+   python manage.py runserver localhost:8000
+   ```
 
-`npm run serve`
+### Frontend Setup
+
+1. Install Node.js from [the official website](https://nodejs.org/) if you haven't already
+
+2. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+The frontend will be available at `http://localhost:5173` by default.
+
+## Development
+
+For the best development experience, you can start both frontend and backend servers using the provided VS Code tasks:
+
+```bash
+# Start both backend and frontend servers
+npm run dev
+```
+
+## Project Structure
+
+- `/api/` - Django API application
+- `/kyykka/` - Main Django application
+- `/frontend/` - Vue.js frontend application
+- `/nkl/` - Django project settings
+- `/utils/` - Utility scripts and helpers
