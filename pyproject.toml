@@ -11,7 +11,6 @@ dependencies = [
     "gunicorn==20.0.4",
     "PyMySQL==1.0.3",
     "pymemcache==4.0.0",
-    "python-memcached==1.59",
     "pytz==2025.2",
     "sqlparse==0.5.3",
     "six==1.16.0",
