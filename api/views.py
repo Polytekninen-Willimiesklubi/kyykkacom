@@ -48,7 +48,7 @@ from utils.caching import (
     setToCache,
 )
 
-from .query_utils import (
+from .views.utils.query_helpers import (
     count_field_total,
     count_non_throws,
     get_correct_match_score,
@@ -60,6 +60,7 @@ from .query_utils import (
 
 
 def get_current_season() -> Season:
+    # TODO fix cache value
     cache_value = None  # cache.get("current_season", None)
     if cache_value is not None:
         return cache_value
@@ -146,22 +147,6 @@ def ping(request):
 
 score_fields = ["score_first", "score_second", "score_third", "score_fourth"]
 casted_score_fields = ["st", "nd", "rd", "th"]
-
-
-class IsCaptain(permissions.BasePermission):
-    """
-    Permission check to verify that user is captain in the right team.
-    """
-
-    def has_permission(self, request: Request, view):
-        try:
-            if request.user.is_superuser:
-                return True
-            return request.user.playersinteam_set.get(
-                team_season__season=get_current_season()
-            ).is_captain
-        except PlayersInTeam.DoesNotExist:
-            return False
 
 
 class IsCaptainForThrow(permissions.BasePermission):

@@ -8,7 +8,7 @@ from drf_spectacular.views import (
 )
 from rest_framework.routers import SimpleRouter
 
-from api import views
+from . import views
 
 urlpatterns = [
     # API Schema URLs
@@ -19,7 +19,6 @@ urlpatterns = [
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     # path('docs/', views.schema_view),
     path("csrf/", views.csrf),
-    path("ping/", views.ping),
     path("login/", views.LoginAPI.as_view(), name="login"),
     path("logout/", views.LogoutAPI.as_view()),
     path("register/", views.RegistrationAPI.as_view(), name="register"),
@@ -50,6 +49,7 @@ urlpatterns = [
     path("teams/", views.TeamViewSet.as_view({"get": "list"})),
     path("teams/<int:pk>/", views.TeamViewSet.as_view({"get": "retrieve"})),
     path("teams/all/", views.TeamViewSet.as_view({"get": "list_all"})),
+    # path("upload/", views.LogoUploadView.as_view(), name="logo-upload"),
 ]
 
 router = SimpleRouter()
