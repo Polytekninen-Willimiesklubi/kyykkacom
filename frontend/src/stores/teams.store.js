@@ -189,10 +189,27 @@ export const useTeamsStore = defineStore('joukkue', () => {
     async function getReserve() {
         reserveLoading.value = true;
         try {
-            const response = await fetch(reserveUrl, { method: 'GET' });
-            const payload = await response.json();
-
-            unReservedPlayers.value = payload.filter((ele) => { ele.team.current_name !== '' })
+            const requestOpt = {
+                'method': 'GET',
+                'headers': {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                credentials: 'include',
+            };
+            const response = await fetch(reserveUrl, requestOpt);
+            let payload = [];
+            if (!response.ok && response.status === 403) {
+                fetchNewToken();
+                requestOpt.headers['X-CSRFToken'] = getCookie('csrftoken');
+                const secondResponse = await fetch(reserveUrl, requestOpt);
+                if (!secondResponse.ok) {
+                    console.log("Get request was denied: " + secondResponse);
+                }
+                payload = await secondResponse.json();
+            } else {
+                payload = await response.json();
+            }
+            unReservedPlayers.value = payload.filter((ele) => ele.team.current_name === '')
         } catch (error) {
             console.log(error)
         } finally {
@@ -211,11 +228,11 @@ export const useTeamsStore = defineStore('joukkue', () => {
         const requestOpt = {
             'method': 'POST',
             'headers': {
-                'X-CSRFToken': getCookie('csrftoken')
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
             },
-            'content-type': 'application/json',
             'body': JSON.stringify({ player: player.id }),
-            withCredentials: true,
+            credentials: 'include',
         };
         try {
             const response = await fetch(reserveUrl + question, requestOpt);
