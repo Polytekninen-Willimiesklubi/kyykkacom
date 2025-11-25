@@ -28,7 +28,7 @@ export const checkScoreRules = [
 ];
 
 
-async function fetchWrapper(url, postData, method='PATCH') {
+async function fetchWrapper(url, postData, method = 'PATCH') {
     const requestOpt = {
         'method': method,
         'headers': {
@@ -36,11 +36,11 @@ async function fetchWrapper(url, postData, method='PATCH') {
             'content-type': 'application/json',
         },
         'body': JSON.stringify(postData),
-        withCredentials: true,
+        credentials: 'include',
     }
     try {
         const response = await fetch(url, requestOpt);
-        
+
         if (!response.ok && response.status === 403) {
             fetchNewToken();
             requestOpt.headers['X-CSRFToken'] = getCookie('csrftoken');
@@ -49,7 +49,7 @@ async function fetchWrapper(url, postData, method='PATCH') {
                 console.log("Post request was denied: " + secondResponse);
             }
         }
-    } catch(error) {
+    } catch (error) {
         console.log(error)
     }
 }
@@ -83,7 +83,7 @@ export const useAdminStore = defineStore('admin', () => {
         const superStore = useSuperStore();
         const promise1 = superStore.getAllData()
         const promise2 = teamStore.getTeams();
-        
+
         await Promise.all([promise1, promise2])
         regularSeasonTeams.value = structuredClone(toRaw(teamStore.bracketedTeams).map(ele => ele.map(toRaw)));
         superWeekendTeams.value = structuredClone(toRaw(superStore.bracketedTeams).map(ele => ele.map(toRaw)));

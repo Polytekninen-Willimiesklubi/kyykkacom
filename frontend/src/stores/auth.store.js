@@ -16,7 +16,7 @@ export function getCookie(name) {
 }
 
 export async function fetchNewToken() {
-    await fetch('api/csrf/', { withCredentials: true })
+    await fetch('api/csrf/', { credentials: 'include' })
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
                     'Content-Type': 'application/json',
                 },
                 'body': JSON.stringify(credentials.value),
-                'withCredentials': true,
+                credentials: 'include',
             };
 
             const response = await fetch(baseUrl, requestOpt)
