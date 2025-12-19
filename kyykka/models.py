@@ -86,13 +86,17 @@ class TeamsInSeason(models.Model):
     current_abbreviation = models.CharField(max_length=15)
     players = models.ManyToManyField(User, through="PlayersInTeam")
     bracket = models.IntegerField(null=True)
-    bracket_placement = models.IntegerField(
-        blank=True, null=True
-    )  # Winner of the Bracket stage is marked with 0
+    # Winner of the Bracket stage is marked with 0
+    bracket_placement = models.IntegerField(blank=True, null=True)
     second_stage_bracket = models.IntegerField(blank=True, null=True)
     super_weekend_bracket = models.IntegerField(blank=True, null=True)
     super_weekend_bracket_placement = models.IntegerField(blank=True, null=True)
     super_weekend_playoff_seed = models.IntegerField(blank=True, null=True)
+    logo_url = models.ImageField(
+        upload_to="frontend/public/team_logos/",
+        default="frontend/public/team_logos/default_team_logo.png",
+    )
+    logo_uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
         ordering = ("-season", "bracket", "bracket_placement")

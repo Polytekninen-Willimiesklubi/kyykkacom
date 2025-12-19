@@ -9,12 +9,34 @@
         <v-card elevation=0 class="ma-2">
           <v-row class="pb-5">
             <v-col align="center" justify="center" cols="2">
-              <img src="@/assets/kyykkalogo120px.png"/>
+              <img 
+                :src="teamStore.teamLogo"
+                :style="{
+                  maxWidth: '128px',
+                  maxHeight: '128px',
+                  borderRadius: '8px',
+                  objectFit: 'contain'
+                }"
+              />
+            </v-col>
+            <v-col>
+              <h2>Upload Logo</h2>
+              <input type="file" @change="onFileChange" />
+              <v-btn 
+                text="Upload"
+                @click="upload"
+                :disabled="!file"
+              />
+
+              <div v-if="uploaded">
+                <h3>Uploaded:</h3>
+                <img :src="uploaded.original" width="128px" />
+              </div>
             </v-col>
             <v-col cols="10">
               <v-row>
                 <v-col>
-                  <v-card-title align="center">{{ teamStore.teamName }}</v-card-title>
+                  <v-card-title align="center">{{ teamStore.teamLogo }}</v-card-title>
                 </v-col>
               </v-row>
               <v-row>
@@ -254,6 +276,36 @@ function handleRedirect (value, row) {
 
 function handleRedirectMatches (value, row) {
   location.href = '/ottelut/' + row.item.id
+}
+
+const file = ref(null);
+const uploaded = ref(null);
+
+function onFileChange(e) {
+  file.value = e.target.files[0]
+}
+
+async function upload() {
+  const formData = new FormData()
+
+  const renamedFile = new File(
+    [file.value],
+    `team_${route.params.id}_logo.${file.value.name.split('.').pop()}`,
+    { type: file.value.type }
+  )
+  console.log("Renamed file: ", renamedFile)
+  formData.append('logo_url', renamedFile)
+  formData.append('team_id', route.params.id)
+  formData.append('season_year', teamStore.selectedSeasonId)
+
+  const res = await fetch('http://localhost:8000/api/upload/', {
+    method: 'PATCH',
+    body: formData,
+  })
+
+  const json_data = await res.json()
+  uploaded.value = json_data.data
+
 }
 
 function getColor(val1, val2) {

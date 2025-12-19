@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
+from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from drf_spectacular.types import OpenApiTypes
@@ -139,3 +140,37 @@ class SuperWeekendAPI(generics.GenericAPIView):
             self.queryset = self.queryset.filter(season=season)
             super_weekends = serializers.SuperWeekendSerializer(self.queryset).data
         return Response(super_weekends)
+
+
+class LogoUploadView(generics.GenericAPIView):
+    serializer_class = serializers.LogoUploadSerializer
+
+    def get_object(self, team_id, season_year):
+        try:
+            season = Season.objects.get(year=season_year)
+            return self.serializer_class.Meta.model.objects.get(
+                team=team_id, season=season
+            )
+        except self.serializer_class.Meta.model.DoesNotExist:
+            raise Http404(
+                f"Team in season does not exist. {team_id=}, season_year={season_year}"
+            )
+        except Season.DoesNotExist:
+            raise Http404(f"Season does not exist. Year provided: {season_year}")
+
+    def patch(self, request: Request, *args, **kwargs) -> Response:
+        model_instance = self.get_object(
+            request.data.get("team_id"), request.data.get("season_year")
+        )
+        serializer = self.serializer_class(model_instance, data=request.data)
+
+        if not serializer.is_valid():
+            print(serializer.errors)
+            return Response(
+                {"success": False, "message": "Invalid data provided."}, status=400
+            )
+
+        serializer.save()
+        return Response(
+            {"success": True, "message": "Logo uploaded successfully!"}, status=200
+        )

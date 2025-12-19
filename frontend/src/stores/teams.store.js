@@ -42,11 +42,23 @@ export const useTeamsStore = defineStore('joukkue', () => {
 
     const teamName = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
-            const latestIndex = Math.max(...Object.keys(seasonsStats.value).map(x => +x)) //str -> int conversion
+            //str -> int conversion
+            const latestIndex = Math.max(...Object.keys(seasonsStats.value).map(x => +x))
             return seasonsStats.value[latestIndex].current_name;
         }
         return Object.keys(seasonsStats.value).length && selectedSeasonId.value
             ? seasonsStats.value[selectedSeasonId.value].current_name
+            : '';
+    })
+
+    const teamLogo = computed(() => {
+        if (selectedSeasonId.value === 'allTime') {
+            //str -> int conversion
+            const latestIndex = Math.max(...Object.keys(seasonsStats.value).map(x => +x))
+            return seasonsStats.value[latestIndex].logo_url.replace("frontend/public", "");
+        }
+        return Object.keys(seasonsStats.value).length && selectedSeasonId.value
+            ? seasonsStats.value[selectedSeasonId.value].logo_url.replace("frontend/public", "")
             : '';
     })
 
@@ -324,6 +336,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
         secondStageBrackets,
         // superWeekendBrackets,
         teamName,
+        teamLogo,
         matches,
         allTeamsAllTimeStats,
         allTeamsAllSeasonsStats,

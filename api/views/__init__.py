@@ -7,7 +7,7 @@ from .admin_api import (
 )
 from .auth_api import LoginAPI, LogoutAPI, RegistrationAPI
 from .match_api import MatchDetail, MatchList
-from .other_apis import NewsAPI, SeasonsAPI, SuperWeekendAPI
+from .other_apis import LogoUploadView, NewsAPI, SeasonsAPI, SuperWeekendAPI
 from .permissions import csrf
 from .player_api import PlayerViewSet, ReservePlayerAPI
 from .team_api import TeamViewSet
@@ -31,5 +31,5 @@ __all__ = [
     "ThrowAPI",
     "TeamViewSet",
     "csrf",
-    # "LogoUploadView",
+    "LogoUploadView",
 ]

@@ -21,7 +21,13 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 import kyykka.serializers as serializers
-from kyykka.models import MATCH_TYPES, Match, PlayersInTeam, TeamsInSeason, Throw
+from kyykka.models import (
+    MATCH_TYPES,
+    Match,
+    PlayersInTeam,
+    TeamsInSeason,
+    Throw,
+)
 
 from .utils.getters import get_season
 from .utils.query_helpers import (
@@ -240,7 +246,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 else "NaN"
             )
 
-        return Response(results.values())
+        return Response(list(results.values()))
 
     def retrieve(self, request, pk=None):
         all_time_stats: dict[str, int | float | t.Any] = {
@@ -300,8 +306,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         data = {}
         # If no matches have not been played in the season yet find it through TeamInSeason.
         seasons = TeamsInSeason.objects.filter(team=pk).values(
-            "season__year", "current_name", "current_abbreviation"
+            "season__year", "current_name", "current_abbreviation", "logo_url"
         )
+
         for season in seasons:
             data[season["season__year"]] = season
             for key, value in all_time_stats.items():

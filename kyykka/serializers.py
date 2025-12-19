@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When, Min
+from django.db.models import Case, Count, F, IntegerField, Min, Q, Sum, Value, When
 from django.db.models.functions import Cast, Substr
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -1184,7 +1184,7 @@ class TeamListSerializer(serializers.ModelSerializer):
     best_round = serializers.SerializerMethodField()
     best_match = serializers.SerializerMethodField()
     clearences = serializers.SerializerMethodField()
-    
+
     def count_match_results(self, obj):
         results_home = obj.home_matches.filter(
             is_validated=True, season=self.context.get("season"), match_type__lt=30
@@ -1213,12 +1213,12 @@ class TeamListSerializer(serializers.ModelSerializer):
             first=Min("home_first_round_score"),
             second=Min("home_second_round_score"),
             cleareances=(
-                Count('pk', filter=Q(home_first_round_score__lte=0)) 
-                + Count('pk', filter=Q(home_second_round_score__lte=0))
+                Count("pk", filter=Q(home_first_round_score__lte=0))
+                + Count("pk", filter=Q(home_second_round_score__lte=0))
             ),
-            wins=Count('pk', filter=Q(home__lt=F("away"))),
-            losses=Count('pk', filter=Q(home__gt=F("away"))),
-            ties=Count('pk', filter=Q(home__exact=F("away"))),
+            wins=Count("pk", filter=Q(home__lt=F("away"))),
+            losses=Count("pk", filter=Q(home__gt=F("away"))),
+            ties=Count("pk", filter=Q(home__exact=F("away"))),
         )
         results_away = results_away.annotate(
             home=F("home_first_round_score") + F("home_second_round_score"),
@@ -1229,12 +1229,12 @@ class TeamListSerializer(serializers.ModelSerializer):
             first=Min("away_first_round_score"),
             second=Min("away_second_round_score"),
             cleareances=(
-                Count('pk', filter=Q(away_first_round_score__lte=0)) 
-                + Count('pk', filter=Q(away_second_round_score__lte=0))
+                Count("pk", filter=Q(away_first_round_score__lte=0))
+                + Count("pk", filter=Q(away_second_round_score__lte=0))
             ),
-            wins=Count('pk', filter=Q(away__lt=F("home"))),
-            losses=Count('pk', filter=Q(away__gt=F("home"))),
-            ties=Count('pk', filter=Q(away__exact=F("home"))),
+            wins=Count("pk", filter=Q(away__lt=F("home"))),
+            losses=Count("pk", filter=Q(away__gt=F("home"))),
+            ties=Count("pk", filter=Q(away__exact=F("home"))),
         )
 
         self.best_match = min(results_home["home__min"], results_away["away__min"])
@@ -1265,7 +1265,7 @@ class TeamListSerializer(serializers.ModelSerializer):
             if self.matches_played
             else "NaN"
         )
-        
+
     def get_matches_played(self, obj):
         return self.matches_played
 
@@ -1302,7 +1302,9 @@ class TeamListSerializer(serializers.ModelSerializer):
 
     def get_first_bracket_placement(self, obj):
         # if season is None or season.playoff_format == 8:
-        seq = ExtraBracketStagePlacement.objects.filter(team_in_season=obj, stage=1).order_by()
+        seq = ExtraBracketStagePlacement.objects.filter(
+            team_in_season=obj, stage=1
+        ).order_by()
         if len(seq):
             return seq[0].placement
         return None
@@ -1312,7 +1314,7 @@ class TeamListSerializer(serializers.ModelSerializer):
 
     def get_best_round(self, obj):
         return self.best_round
-    
+
     def get_clearences(self, obj):
         return self.clearences
 
@@ -1700,13 +1702,13 @@ class MatchDetailSerializer(SharedMatchSerializer):
 
     def get_first_round(self, obj: Match):
         return MatchRoundSerializer(
-            obj.throw_set.filter(throw_round=1), # type: ignore
+            obj.throw_set.filter(throw_round=1),  # type: ignore
             context={"home_team": obj.home_team, "away_team": obj.away_team},
         ).data
 
     def get_second_round(self, obj: Match):
         return MatchRoundSerializer(
-            obj.throw_set.filter(throw_round=2), # type: ignore
+            obj.throw_set.filter(throw_round=2),  # type: ignore
             context={"home_team": obj.home_team, "away_team": obj.away_team},
         ).data
 
@@ -2034,3 +2036,9 @@ class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = "__all__"
+
+
+class LogoUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeamsInSeason
+        fields = ("logo_url", "logo_uploaded_at")

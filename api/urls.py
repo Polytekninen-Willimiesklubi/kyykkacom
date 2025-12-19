@@ -49,7 +49,7 @@ urlpatterns = [
     path("teams/", views.TeamViewSet.as_view({"get": "list"})),
     path("teams/<int:pk>/", views.TeamViewSet.as_view({"get": "retrieve"})),
     path("teams/all/", views.TeamViewSet.as_view({"get": "list_all"})),
-    # path("upload/", views.LogoUploadView.as_view(), name="logo-upload"),
+    path("upload/", views.LogoUploadView.as_view(), name="logo-upload"),
 ]
 
 router = SimpleRouter()
