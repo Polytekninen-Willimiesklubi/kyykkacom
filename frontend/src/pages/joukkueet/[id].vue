@@ -135,6 +135,7 @@
                   :loading="teamStore.reserveLoading"
                   loading-text="Ladataan pelaajia..."
                   no-data-text="Ei dataa :("
+                  items-per-page="-1"
                   density="compact"
                 >
                   <template #item.actions="{ item }">

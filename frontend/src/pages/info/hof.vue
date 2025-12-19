@@ -50,6 +50,13 @@
                                 :items="hof.misc"
                             />
                         </v-col>
+                        <v-col cols="4">
+                            <simple-table
+                                title="Vanhat palkinnot"
+                                :headers="headerHofMisc"
+                                :items="hof.old_mentions"
+                            />
+                        </v-col>
                     </v-row>
                 </v-tabs-window-item>
                 <v-tabs-window-item value="three">
@@ -102,14 +109,14 @@ const tab_one_data = [
 const tab_two_data = [
     {title: "Jaskan Karttu", data: hof.jaskanKarttu},
     {title: "KCK Ahti",  data: hof.KCKAhti},
+    {title: "Vuoden Kyykkäjä",  data: hof.p_o_y},
     {title: "Haukikuningas/-tar",  data: hof.hauki},
-    {title: "Vuoden Kyykkäjä/MVP",  data: hof.mvp},
+    {title: "Vuoden MVP",  data: hof.mvp},
     {title: "Runkosarjan Paras",  data: hof.bracketBest},
-    {title: "Jatkosarjan Paras",  data: hof.playoffBest},
+    {title: "Pudotuspelien Paras",  data: hof.playoffBest},
     {title: "Vuoden Viimeistelijä",  data: hof.last},
     {title: "Vuoden Tulokas",  data: hof.rookie},
-    {title: "Vuoden mieskyykkääjä",  data: hof.man},
-    {title: "Vuoden naiskyykkääjä",  data: hof.woman},
+    {title: "Vuoden nais-/mieskyykkääjä",  data: hof.man_woman},
     {title: "Vuoden Kuusenkaataja",  data: hof.tree},
 ];
 
@@ -121,16 +128,17 @@ const info = [
     {title: "Parikyykkäliiga", subtitle: "Syksyllä pelattava Parikyykkäliiga pelataan henkkarimuotoisena kentän kyykkien osalta, mutta paripelinä. Pudotuspeli vaiheen voittajalle jaetaan Apila-pokaali. Apila-pokaalin kiertoon lahjoitti lassi onne. Liiga on järjestty vuodesta 2022 lähtien."},
     {title: "Kyykkä Tähtien Kanssa", subtitle: "Kevytmielisempi turnaus, missä NKL pelaaja ja NKLssä pelaamaton (usein fuksi) pelaavat parina. Järjestetään syksyisin. Järjestetty jo kauan."},
     {title: "SM-Kyykkä", subtitle: "Wappuna järjestettävä joukkuemuotoinen turnaus. 'S' nimessä viittaa Skinnarilaan, ei Suomeen. Kilpailu on järjestty ainakin vuodesta 2014. Tarkkaa vuotta ei nyt koodaja itse tiedä."},
-    
-    {title: "Jaskan Karttu", subtitle: "Myönnettään henkilölle, joka on tehnyt jotain merkittävää lappeen Rantalaisen kyykän edistämiseksi. Kyseessä ei ole lähtökohtaisesti vuosittain jaettava palkinto. ", hyperlink: "Jaskan muistolle", ref: "/info/jaska"},
+    {title: "Skinnarilan Paras Kyykän Pelaaja (SPKP)", subtitle: "Kiertopalkinto, jonka voittaa haastamalla ja voittamalla nykyisen palkinnon haltijan ELO-henkkarissa. Palkintoon saa nimen, jos 'eläköityy' aktiivisesta pelaamisesta palkinnon kanssa."},
+
+    {title: "Jaskan Karttu", subtitle: "Myönnettään henkilölle, joka on tehnyt jotain merkittävää lappeen Rantalaisen kyykän edistämiseksi. Kyseessä ei ole lähtökohtaisesti vuosittain jaettava palkinto.", hyperlink: "Jaskan muistolle", ref: "/info/jaska"},
     {title: "KCK-Ahti - Pysti", subtitle: "Palkinto jaetaan vuosittain sellaiselle pelaajalle, joka päättyvän kauden aikana on huomionarvoisasti vaikuttanut edustamansa liigassa pelaavan joukkueen menestykseen erittäin jalolla haukienheiton saralla. Mitä kriittisemmässä paikassa, sitä parempi. ", hyperlink: "Julkilausuma", ref: '/info/ahti'},
     {title: "Vuoden kyykkääjä", subtitle: "Pelaaja, joka on osoittanut kauden aikana parasta urheiluhenkeä ja herrasmiesmäistä käytöstä yhdistettynä pelin hyvään tasoon"},
     {title: "Haukikuningas/-tar", subtitle: "Runsaasti tai erittäin runsaasti haukia kauden aikana heittänyt henkilö."},
     {title: "Vuoden Tulokas", subtitle: "Ensimmäisen kauden pelaaja, joka on pelannut hyvällä tasolla ja osoittanut hyvää kyykkä-henkeä"},
     {title: "Runkosarjan paras pelaaja", subtitle: "Joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso runkosarjassa."},
-    {title: "Jatkosarjan paras pelaaja", subtitle: "Joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso jatkosarjassa."},
+    {title: "Pudotuspelien paras pelaaja", subtitle: "Joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso jatkosarjassa."},
     {title: "Vuoden viimeistelijä", subtitle: "Paras yksittäisten kyykkien sekä vaikeiden linjojen poistaja; joukkueen kovan tuloksen viimeistelevä pelaaja sekä voittojen ratkaisija. Painoarvo varsinkin 4.paikan pelaajille."},
-    {title: "Vuoden nais-/mieskyykkääjä", subtitle: "Kauden paras nais-/miespuolinen kyykänpelaaja; joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso. (Vuoden pelaajan vastine)"},
+    {title: "Vuoden nais-/mieskyykkääjä", subtitle: "Kauden paras nais-/miespuolinen kyykänpelaaja, vastine Vuoden Kyykkääjän vastine. Joukkueen pelin edistäminen sekä korkea henkilökohtaisen pelaamisen taso."},
     {title: "Vuoden MVP", subtitle: "Arvokkain/Paras pelaaja läpi kauden."},
     {title: "Vuoden Kuusenkaataja", subtitle: "Eniten joulukuusia (heitto joka poistaa 6 tai enemmän kyykkää) heittänyt pelaaja."},
 ];

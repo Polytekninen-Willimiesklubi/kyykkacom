@@ -2,7 +2,7 @@
 export const useHofStore = defineStore('hof', () => {
 
     const championship = ref([
-        { 'year': 2025, 'first': '?', 'second': '?', 'third': '?', 'fourth': '?' },
+        { 'year': 2025, 'first': 'MaHaLasKu', 'second': 'Dra', 'third': 'ALTF4', 'fourth': 'MCMC' },
         { 'year': 2024, 'first': 'Dra', 'second': 'MaHaLasku', 'third': 'SuLaKe', 'fourth': 'DiSKO' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'SÄTKY KY', 'third': 'DiSKO', 'fourth': 'VSOP' },
         { 'year': 2022, 'first': 'Ei', 'second': 'MaHaLasKu', 'third': 'SÄTKY KY', 'fourth': 'LSP' },
@@ -29,12 +29,12 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2001, 'first': 'PKMM', 'second': 'TPNMP', 'third': 'SMS', 'fourth': 'ITKK99' },
         { 'year': 2000, 'first': 'ITKK99', 'second': 'KCK', 'third': 'SMS', 'fourth': 'TPNMP' },
         { 'year': 1999, 'first': 'TPNMP', 'second': '?', 'third': '?', 'fourth': '?' },
-        { 'year': 1998, 'first': 'PKMM', 'second': '?', 'third': '?', 'fourth': '?' },
+        { 'year': 1998, 'first': 'PKMM', 'second': 'Pentit', 'third': '-', 'fourth': '-' },
     ]);
 
 
     const superData = ref([
-        { 'year': 2025, 'first': '?', 'second': '?' },
+        { 'year': 2025, 'first': 'MaHaLasKu', 'second': 'SuLake' },
         { 'year': 2024, 'first': 'Dra', 'second': 'VSOP' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
         { 'year': 2022, 'first': 'MaHaLasKu', 'second': "Ei" },
@@ -92,19 +92,20 @@ export const useHofStore = defineStore('hof', () => {
 
 
     const singleWinner = ref([
+        { 'year': 2025, 'first': 'Totti Sillanpää', 'second': 'Mikko "Temmi" Kuusio' },
         { 'year': 2024, 'first': 'Leevi Hovatov', 'second': 'Mikko "Temmi" Kuusio' },
         { 'year': 2023, 'first': 'Atte Putkonen', 'second': 'Sami Valjakka' },
         { 'year': 2022, 'first': 'Lassi Onne', 'second': "Leevi Hovatov" },
         { 'year': 2021, 'first': '-', 'second': '-' },
         { 'year': 2020, 'first': 'Elmo Pärssinen', 'second': "Lassi Onne" },
         { 'year': 2019, 'first': 'Armi Rissanen', 'second': "Leevi Hovatov" },
-        { 'year': 2018, 'first': 'Jyri "Kode" Koistinen', 'second': "?" },
-        { 'year': 2017, 'first': 'Ville Kytömäki', 'second': "?" },
+        { 'year': 2018, 'first': 'Jyri "Kode" Koistinen', 'second': "Armi Rissanen" },
+        { 'year': 2017, 'first': 'Ville Kytömäki', 'second': "Masi Kähkönen" },
         { 'year': 2016, 'first': '-', 'second': "-" },
         { 'year': 2015, 'first': '-', 'second': "-" },
         { 'year': 2014, 'first': 'Juha Varis', 'second': "Petteri Westerholm", 'third': "Tiina Viitanen" },
         { 'year': 2013, 'first': 'Petteri Westerholm', 'second': "Anssi Tura (?)" },
-        { 'year': 2012, 'first': 'Petteri Westerholm', 'second': "Juha Varis (?)" },
+        { 'year': 2012, 'first': 'Petteri Westerholm', 'second': "Juha Varis" },
         { 'year': 2011, 'first': 'Petteri Westerholm', 'second': "?" },
         { 'year': 2010, 'first': 'Mikko "Temmi" Kuusio', 'second': "?" },
     ]);
@@ -112,8 +113,8 @@ export const useHofStore = defineStore('hof', () => {
     const pairWinners = ref([
         { 'year': 2024, 'first': 'Totti Sillanpää, Oskari Ekholm', 'second': "Eemil Ivars, Olli Aula" },
         { 'year': 2023, 'first': 'Erik Kuitunen, Totti Sillanpää', 'second': "Mikko 'Temmi' Kuusio, Pasi Kortelainen" },
-        { 'year': 2023, 'first': 'Erik Kuitunen, Jarno Mikkola', 'second': "Totti Sillanpää, Veikka Immonen" },
-        { 'year': 2022, 'first': 'Lassi Onne, Elmo Pärssinen', 'second': "Jarno Mikkola, Totti Sillanpää" },
+        { 'year': 2022, 'first': 'Erik Kuitunen, Jarno Mikkola', 'second': "Totti Sillanpää, Veikka Immonen" },
+        { 'year': 2021, 'first': 'Lassi Onne, Elmo Pärssinen', 'second': "Jarno Mikkola, Totti Sillanpää" },
     ]);
 
     const jaskanKarttu = ref([
@@ -128,6 +129,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const KCKAhti = ref([
+        { 'year': 2025, 'name': 'Jarno Mikkola' },
         { 'year': 2024, 'name': '-' },
         { 'year': 2023, 'name': "Saara Inkinen" },
         { 'year': 2022, 'name': "Tomi Krokberg" },
@@ -156,6 +158,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const hauki = ref([
+        { 'year': 2025, 'name': 'Lauri Sorsa' },
         { 'year': 2024, 'name': 'Armi Rissanen' },
         { 'year': 2023, 'name': "Saara Inkinen" },
         { 'year': 2022, 'name': "Tomi Krokberg" },
@@ -180,12 +183,13 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2003, 'name': "Janne Lahdenperä" },
         { 'year': 2002, 'name': "Sampo Kokkonen" },
         { 'year': 2001, 'name': "Sampo Kokkonen" },
-        { 'year': 2000, 'name': "?" },
+        { 'year': 2000, 'name': "Ilmari Laakkonen*" },
         { 'year': 1999, 'name': "Tero Turtiainen" },
         { 'year': 1998, 'name': "-" },
     ]);
 
     const last = ref([
+        { 'year': 2025, 'name': "Jyri 'Kode' Koistinen" },
         { 'year': 2024, 'name': "Jyri 'Kode' Koistinen" },
         { 'year': 2023, 'name': "Totti Sillanpää" },
         { 'year': 2022, 'name': "Totti Sillanpää" },
@@ -213,9 +217,10 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2000, 'name': "-" },
     ]);
 
-    const mvp = ref([
-        { 'year': 2024, 'name': "Mikko 'Temmi' Kuusio" },
-        { 'year': 2023, 'name': "Atte Putkonen" },
+    const p_o_y = ref([
+        { 'year': 2025, 'name': "Sami Valjakka" },
+        { 'year': 2024, 'name': "-" },
+        { 'year': 2023, 'name': "Armi Rissanen" },
         { 'year': 2022, 'name': "Jarno Mikkola" },
         { 'year': 2021, 'name': "-" },
         { 'year': 2020, 'name': "?" },
@@ -223,7 +228,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2018, 'name': "?" },
         { 'year': 2017, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2016, 'name': "?" },
-        { 'year': 2015, 'name': "?" },
+        { 'year': 2015, 'name': "Juha Varis" },
         { 'year': 2014, 'name': "Petteri Westerholm" },
         { 'year': 2013, 'name': "?" },
         { 'year': 2012, 'name': "Petteri Westerholm" },
@@ -243,30 +248,20 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 1998, 'name': "-" },
     ]);
 
-    const man = ref([
-        { 'year': 2024, 'name': "Totti Sillanpää" },
+    const mvp = ref([
+        { 'year': 2025, 'name': "Sami Valjakka" },
+        { 'year': 2024, 'name': "Mikko 'Temmi' Kuusio" },
+        { 'year': 2023, 'name': "Atte Putkonen" },
+    ])
+
+    const man_woman = ref([
+        { 'year': 2025, 'name': "Vilma Rantanen" },
+        { 'year': 2024, 'name': "Totti Sillanpää/Armi Rissanen" },
         { 'year': 2023, 'name': "Markus Laitinen" },
-        { 'year': 2022, 'name': "" },
-        { 'year': 2021, 'name': "-" },
-        { 'year': 2020, 'name': "?" },
-        { 'year': 2019, 'name': "?" },
-        { 'year': 2018, 'name': "?" },
-        { 'year': 2017, 'name': "?" },
-        { 'year': 2016, 'name': "?" },
-        { 'year': 2015, 'name': "?" },
-        { 'year': 2014, 'name': "-" },
-        { 'year': 2013, 'name': "?" },
-        { 'year': 2012, 'name': "?" },
-
-    ]);
-
-    const woman = ref([
-        { 'year': 2024, 'name': "Armi Rissanen" },
-        { 'year': 2023, 'name': "Armi Rissanen" },
         { 'year': 2022, 'name': "Armi Rissanen" },
         { 'year': 2021, 'name': "-" },
         { 'year': 2020, 'name': "?" },
-        { 'year': 2019, 'name': "?" },
+        { 'year': 2019, 'name': "Armi Rissanen" },
         { 'year': 2018, 'name': "?" },
         { 'year': 2017, 'name': "Armi Rissanen" },
         { 'year': 2016, 'name': "?" },
@@ -279,6 +274,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const bracketBest = ref([
+        { 'year': 2025, 'name': "Totti Sillanpää" },
         { 'year': 2024, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2023, 'name': "Niko Grön" },
         { 'year': 2022, 'name': "Sami Valjakka" },
@@ -288,7 +284,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2018, 'name': "?" },
         { 'year': 2017, 'name': "Ville Kytömäki" },
         { 'year': 2016, 'name': "?" },
-        { 'year': 2015, 'name': "?" },
+        { 'year': 2015, 'name': "Juha Varis" },
         { 'year': 2014, 'name': "Petteri Westerholm" },
         { 'year': 2013, 'name': "?" },
         { 'year': 2012, 'name': "Petteri Westerholm" },
@@ -309,6 +305,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const playoffBest = ref([
+        { 'year': 2025, 'name': "Erik 'Eki' Kuitunen" },
         { 'year': 2024, 'name': "Leevi Hovatov" },
         { 'year': 2023, 'name': "Leevi Hovatov" },
         { 'year': 2022, 'name': "Atte Putkonen" },
@@ -318,7 +315,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2018, 'name': "?" },
         { 'year': 2017, 'name': "Petteri Westerholm" },
         { 'year': 2016, 'name': "?" },
-        { 'year': 2015, 'name': "?" },
+        { 'year': 2015, 'name': "Juha Varis" },
         { 'year': 2014, 'name': "Petteri Westerholm" },
         { 'year': 2013, 'name': "?" },
         { 'year': 2012, 'name': "Juha Varis" },
@@ -333,12 +330,13 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2003, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2002, 'name': "Joni Kämäräinen" },
         { 'year': 2001, 'name': "Mika Alitalo" },
-        { 'year': 2000, 'name': "?" },
+        { 'year': 2000, 'name': "Saku Ruottinen" },
         { 'year': 1999, 'name': "Jaakko Akkanen" },
         { 'year': 1998, 'name': "-" },
     ]);
 
     const rookie = ref([
+        { 'year': 2025, 'name': "Veikka Rantala" },
         { 'year': 2024, 'name': "Eino Auvinen" },
         { 'year': 2023, 'name': "Eetu Knutars" },
         { 'year': 2022, 'name': "Lauri Lempiö" },
@@ -369,37 +367,46 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const tree = ref([
+        { 'year': 2025, 'name': "Joona Lappalainen" },
         { 'year': 2024, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2023, 'name': "Joona Lappalainen" },
         { 'year': 2022, 'name': "Jarno Mikkola" },
     ]);
 
     const misc = ref([
-        { 'year': 2024, 'name': 'Vuoden ilmiö', 'person': "KOFF" },
-        { 'year': 2024, 'name': "Vuoden kyykkacom", 'person': "Totti Sillanpää" },
+        { 'year': 2025, 'name': 'Vuoden Heitto', 'person': "Masin kuuden kyykän lakaisu finaalissa" },
+        { 'year': 2025, 'name': 'Vuoden Sulaminen', 'person': "AMK:n parkkipaikat ennen PoWiCupia" },
+        { 'year': 2025, 'name': 'Vuoden Byrokraatti', 'person': "Atso Härkönen" },
+        { 'year': 2025, 'name': 'Vuoden Epäilmiö', 'person': "MÄYRÄKOIRA" },
+        { 'year': 2024, 'name': 'Vuoden Ilmiö', 'person': "KOFF" },
+        { 'year': 2024, 'name': "Vuoden Kyykkacom", 'person': "Totti Sillanpää" },
         { 'year': 2022, 'name': "Vuoden Suurin Yllätys", 'person': "SÄTKY ky:n pronssi" },
         { 'year': 2022, 'name': "Suurin Sulaminen", 'person': "LSP kolme viimeistä mailaa yhteen kyykkään haukia, johtaen häviöön TAI K-Mafian häviö sätkyä vastaan jatkosarjassa." },
         { 'year': 2022, 'name': "Vuoden Heitto", 'person': "Elmon kahdeksan kyykän poisto finaalin viimeisen ottelun viimeisessä erässä." },
         { 'year': 2022, 'name': "Vuoden Pettymys", 'person': "K-Mafia ei tyhjentänyt" },
-        { 'year': 2022, 'name': "Vuoden Onnekas", 'person': "Atso Härkönen, kolme kappaletta kolmen kyykän kilkkejä yhden pelipäivän aikana. Myös Lassi." },
+        { 'year': 2022, 'name': "Vuoden Onnekas", 'person': "Atso Härkönen, kolme kappaletta kolmen kyykän kilkkejä yhden pelipäivän aikana. Myös Lassi." }
+    ]);
 
-
+    const old_mentions = ref([
+        { 'year': 2007, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Juha Varis' },
         { 'year': 2006, 'name': 'Illan Tähti', 'person': "Niko Kuikka" },
         { 'year': 2006, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Marjo Nieminen' },
         { 'year': 2005, 'name': 'Illan Tähti', 'person': "Mikko 'Temmi' Kuusio" },
         { 'year': 2005, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Mikko Raatikainen' },
         { 'year': 2004, 'name': 'Illan Tähti', 'person': 'Katja Talvirinne' },
         { 'year': 2004, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Jussi Ahonen' },
+        { 'year': 2003, 'name': 'Illan Tähti', 'person': 'Juha Varis' },
+
 
         { 'year': 1999, 'name': 'Vuoden tuomari', 'person': 'Ossi Hämäläinen' },
         { 'year': 1999, 'name': 'Herrasmiespelaaja', 'person': 'Jarkko Sonninen' },
         { 'year': 1999, 'name': 'Kuvauksellisin pelaaja', 'person': 'Janne Pulli' },
         { 'year': 1999, 'name': 'Faniklubin suosikkipelaaja', 'person': 'Marko Parviainen' },
         { 'year': 1999, 'name': 'Finaalien MVP', 'person': 'Riku Kemppainen' }
-
-    ]);
+    ])
 
     const sm = ref([
+        { 'year': 2025, 'first': '?', 'second': '?' },
         { 'year': 2024, 'first': 'MaHaLasKu', 'second': 'DiSKO' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
         { 'year': 2022, 'first': 'Booga', 'second': "MaHaLasKu" },
@@ -442,8 +449,9 @@ export const useHofStore = defineStore('hof', () => {
         hauki,
         last,
         mvp,
-        man,
-        woman,
+        man_woman,
+        p_o_y,
+        old_mentions,
         bracketBest,
         playoffBest,
         rookie,
