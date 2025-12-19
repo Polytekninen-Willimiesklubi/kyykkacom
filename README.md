@@ -1,54 +1,120 @@
-# NKL
+# Kyykka.com
 
 Repository for kyykka.com 2.0
 
-# Setting up a local development environment
+## Setting up a local development environment
 
-Clone this repository
+### Prerequisites
 
-Install python 3.6
+- Python 3.10 or newer
+- MySQL
+- Node.js (for frontend development)
 
-Optional but highly recommended: create virtual environment for this project, see https://docs.python.org/3/tutorial/venv.html
+### Backend Setup
 
-MySQL and other stuff:
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/Polytekninen-Willimiesklubi/kyykkacom.git
+   cd kyykkacom
+   ```
 
-`sudo apt install python3-dev default-libmysqlclient-dev memcached`
+2. System dependencies:
 
-At root of the cloned project (where requirements.txt is), install requirements
+- The project requires the native MySQL driver (`mysqlclient`). You must install the system build dependencies on Ubuntu/Debian:
 
-`pip install -r requirements.txt`
+   ```bash
+   sudo apt update
+   sudo apt install -y python3-dev default-libmysqlclient-dev pkg-config build-essential memcached
+   ```
 
-After opening mysql instance and selecting database `nkl` run migrations
+3. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
+   ```
 
-`python manage.py migrate`
+4. Install Python dependencies:
+   ```bash
+   # Install core dependencies
+   pip install -e .
 
-After the migrations are complete populate the tables
+   # For development, install additional tools
+   pip install -e .[dev]
+   ```
 
-`python manage.py shell`
+5. Database setup:
 
-In the python shell run the following code and wait for it to complete
+- Create a MySQL database (example name `nkl` or the one you prefer).
 
-`from utils.dummyGen import *; initGen()`
+- Create a local settings file at `nkl/settings_local.py` (this file is excluded from version control). Example `settings_local.py`:
 
-Start the development server
+   ```python
+   SECRET_KEY = "replace-with-secure-key"
+   DEBUG = True
+   DATABASES = {
+         "default": {
+               "ENGINE": "django.db.backends.mysql",
+               "NAME": "nkl",
+               "USER": "example",
+               "PASSWORD": "example",
+               "HOST": "127.0.0.1",
+               "PORT": "3306",
+         }
+   }
+   ```
 
-`python manage.py runserver localhost:8000`
 
-# Setting up the local development environment for frontend
 
-First install Nodejs from:
-https://nodejs.org/en/download/
+- Run migrations:
+   ```bash
+   python manage.py migrate
+   ```
 
-After that go to the root of the vue project where package.json resides
+- Populate initial data (optional):
+   ```bash
+   python manage.py shell
+   >>> from utils.dummyGen import *; initGen()
+   ```
 
-`cd frontend`
+6. Start the development server:
+   ```bash
+   python manage.py runserver localhost:8000
+   ```
 
-and install requirements
+### Frontend Setup
 
-`npm install`
+1. Install Node.js from [the official website](https://nodejs.org/) if you haven't already
 
-This will install all the packages listed in "devDependencies" of package.json.
+2. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
 
-And start up the vue server
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-`npm run serve`
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+The frontend will be available at `http://localhost:5173` by default.
+
+## Development
+
+For the best development experience, you can start both frontend and backend servers using the provided VS Code tasks:
+
+```bash
+# Start both backend and frontend servers
+npm run dev
+```
+
+## Project Structure
+
+- `/api/` - Django API application
+- `/kyykka/` - Main Django application
+- `/frontend/` - Vue.js frontend application
+- `/nkl/` - Django project settings
+- `/utils/` - Utility scripts and helpers

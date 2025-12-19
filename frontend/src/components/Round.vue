@@ -37,7 +37,7 @@
     <!-- TODO loading -->
     <v-data-table 
       v-if="!showInput"
-      mobile-breakpoint="0" 
+      :mobile-breakpoint="0" 
       :headers="headersRound"
       @click:row="handleRedirect"
       :items="data"
@@ -49,7 +49,7 @@
     <!-- TODO loading -->
     <v-data-table 
       v-else
-      mobile-breakpoint="0" 
+      :mobile-breakpoint="0" 
       v-model="select"
       :headers="headersRound"
       :items="data"

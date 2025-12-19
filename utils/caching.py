@@ -1,12 +1,13 @@
 from django.core.cache import cache
+import typing as t
 # TODO: Figure out why this causes a import loop?
 # from kyykka.models import Season, CurrentSeason
 
-def getFromCache(key, season_year = None):
+def getFromCache(key, season_year = None) -> t.Any | None:
     if season_year:
         key = key + "_" + str(season_year)
     # print("Get cache", key, cache.get(key))
-    return cache.get(key)
+    return cache.get(key, None)
 
 
 def setToCache(key, value, timeout=60 * 60 * 12, season_year=""):

@@ -1,8 +1,9 @@
+<!-- BUG isNaN sortting to bottom does not work -->
 <template>
   <div class="flex-1-1-100">
-    <v-card title="Pelaajat">
+    <v-card title="Kaikki Pelaajat">
       <v-row align="center">
-        <v-col cols="3" class="mb-2 ml-2" justify="left">
+        <v-col cols="2" class="mb-2 ml-2" justify="left">
           <v-text-field
             color="red"
             v-model="search"
@@ -32,7 +33,7 @@
             </v-tooltip>
           </v-btn-toggle>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="2">
           <v-btn-toggle
             v-model="playerStore.playersPositionsToggle"
             variant="outlined"
@@ -75,23 +76,48 @@
             </template>
           </v-btn-toggle>
         </v-col>
+        <v-col cols="2">
+          <v-btn-toggle
+            v-model="playerStore.aggregationSetting"
+            variant="outlined"
+            divided
+            mandatory
+            @update:model-value="tableHeaders = playerStore.aggregationSetting === 1 ? headerAllPlayersPerSeason : headerAllPlayers"
+          >
+            <v-tooltip
+              location="top"
+              :text="'Näytä kaikki pelaajan kaudet tiivistettynä.'"
+            >
+              <template #activator="{ props }">
+                <v-btn v-bind="props" size="x-small" text="Kaikki kaudet" :value="2"/>
+              </template>
+            </v-tooltip>
+            <v-tooltip
+              location="top"
+              :text="'Näytä pelaajat kausittain'"
+            >
+              <template #activator="{ props }">
+                <v-btn v-bind="props" size="x-small" text="Per Kausi" :value="1"/>
+              </template>
+            </v-tooltip>
+          </v-btn-toggle>
+        </v-col>
       </v-row>
-      <!-- :custom-key-sort="customSorts" -->
       <v-data-table
         :mobile-breakpoint="0"
-        :headers="headerPlayers"
+        :headers="tableHeaders"
         @click:row="handleRedirect"
         :sortBy="sortBy"
         :items="playerStore.playersPostionFilttered"
         :loading="playerStore.loading"
         :search="search"
         no-data-text="Ei dataa :("
-        loading-text="Ladataan pelaajia..."
-        items-per-page="-1"
+        loading-text="Ladataan kaikkia pelaajia..."
+        items-per-page="50"
         density="compact"
       >
-        <template v-for="header in headerPlayers"
-          #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
+        <template v-for="header in tableHeaders"
+            #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
         >
           <v-tooltip :text="column.tooltip" v-if="column.tooltip" location="top">
             <template #activator="{ props }">
@@ -108,7 +134,7 @@
               </div>
             </template>
           </v-tooltip>
-          <template v-else>
+          <template v-else> <!-- No Tooltip -->
             <div class="v-data-table-header__content">
               <!-- HACK To properly center column header with the sort icon
                         just add another span to other side -->
@@ -122,7 +148,6 @@
             </div>
           </template>
         </template>
-        <template #bottom></template> <!-- This hides the pagination controls-->
       </v-data-table>
     </v-card>
   </div>
@@ -131,29 +156,24 @@
 <script setup>
 import { usePlayerStore } from '@/stores/players.store';
 import { useTeamsStore } from '@/stores/teams.store'
-import { useNavBarStore } from '@/stores/navbar.store';
-
-import { headerPlayers } from '@/stores/headers';
+import { headerAllPlayers, headerAllPlayersPerSeason } from '@/stores/headers';
 
 const teamStore = useTeamsStore();
 const playerStore = usePlayerStore();
-const navStore = useNavBarStore();
 
-playerStore.getPlayers(navStore.seasonId);
+playerStore.getPlayers();
+playerStore.aggregationSetting = 1;
 teamStore.getTeams();
 
+// Setting sortBy stops the resetting after filtering is applied
+const sortBy = ref([{key: 'rounds_total', order:'desc'}]);
+const tableHeaders = ref(headerAllPlayersPerSeason);
 const search = ref('');
 const filtterEmpty = ref(undefined);
-// Setting sortBy stops the resetting after filtering is applied
-const sortBy = ref([{key: 'rounds_total', order:'desc'}])
 
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.player_id;
 }
-
-watch(() => navStore.seasonId, (newId) => {
-  playerStore.getPlayers(navStore.seasonId);
-})
 
 </script>
 <style scoped>

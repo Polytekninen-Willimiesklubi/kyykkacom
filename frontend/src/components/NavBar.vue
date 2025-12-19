@@ -43,20 +43,35 @@
           </v-list>
         </v-menu>
       </v-btn>
-      <v-btn 
+      <v-btn
+        v-else-if="item.title === 'Pelaajat' || item.title === 'Joukkueet'"
         class="hidden-md-and-down"
-        :text="item.title"
-        :to="item.route + userStore.teamId"
-        v-else-if="item.title=='Oma Joukkue' 
-          && userStore.loggedIn && userStore.teamId != 'null'"
-      />
+        append-icon="mdi-menu-down"
+        :to="item.route"
+      >
+        {{ item.title }}
+        <v-menu
+          activator="parent"
+          :open-on-hover="true"
+          color="grey-darken-3"
+        >
+          <v-list bg-color="grey-darken-3">
+            <v-list-item>
+              <v-btn block variant="text" text="Valittu kausi" :to="item.route"/>
+            </v-list-item>
+            <v-list-item>
+              <v-btn block variant="text" text="Kaikki kaudet" :to="item.route + '/kaikki'"/>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-btn>
       <v-btn 
         class="hidden-md-and-down"
         :text="item.title"
         :to="item.route"
         v-else-if="
         item.if_clause === undefined 
-        && item.title !== 'Koti' 
+        && item.title !== 'Koti'
         && item.title !== 'Oma Joukkue'
         && item.title !== 'Runkosarja'
         || item.if_clause"
@@ -80,13 +95,17 @@
 
     <div class="hidden-md-and-down pa-4" v-if="!userStore.loggedIn">
       <log-in />
-    </div>
-
-    <div class="hidden-md-and-down" v-if="!userStore.loggedIn">
       <register />
     </div>
 
-    <div class="hidden-md-and-down" v-if="userStore.loggedIn">
+    <div class="hidden-md-and-down" v-else>
+      <v-btn v-if="userStore.teamId"
+        text="Oma Joukkue"
+        :to="{ path: `/joukkueet/${userStore.teamId}`}"
+      />
+      <v-btn v-else
+        text="Ei joukkuetta"
+      />
       <v-btn
         :text="userStore.playerName"
         :to="'/pelaajat/' + userStore.userId" 
@@ -107,11 +126,12 @@
     temporary
   >
     <v-list :nav="true">
+
       <template v-for="item in headersNavBar">
-        <v-list-item 
-          :to=item.route v-if="item.if_clause == undefined || item.if_clause"
+        <v-list-item v-if="item.title !== 'Oma Joukkue' || userStore.teamId"
+          :to="item.title !== 'Oma Joukkue' ? item.route : item.route + userStore.teamId" 
           :prepend-icon="item.icon"
-          :title="item.title"  
+          :title="item.title"
         />
       </template>
 
@@ -121,23 +141,27 @@
           <register />
         </div>
         <v-btn v-else
-          text="Log out"
+          text="Kirjaudu ulos"
           style="position:absolute;"
           @click="userStore.logOut()"
           :to="'/'"
           width="95%"
         />
       </v-list-item>
+
     </v-list>
     <template #prepend v-if="userStore.loggedIn">
-      <v-list-item 
-        :title="userStore.playerName"
-        subtitle="Logged In"
-        two-line
-      >
-        <v-avatar
-          image="https://www.robertharding.com/watermark.php?type=preview&im=RF/RH_RF/VERTICAL/1112-5071"
-        />
+      <v-list-item>
+        <v-row align="center" style="padding-top: 4px;">
+          <v-col cols="4">
+            <v-avatar
+              image="https://www.robertharding.com/watermark.php?type=preview&im=RF/RH_RF/VERTICAL/1112-5071"
+            />
+          </v-col>
+          <v-col>
+            {{ userStore.playerName }}
+          </v-col>
+        </v-row>
       </v-list-item>
     </template>
   </v-navigation-drawer>

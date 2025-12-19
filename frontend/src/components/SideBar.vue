@@ -32,7 +32,7 @@
         </v-card-subtitle>
         <v-divider />
         <v-data-table
-          :mobile-breakpoint=0
+          :mobile-breakpoint="0"
           class="sidebar"
           :headers="headers"
           :items="listItem"
@@ -68,7 +68,7 @@
               class="v-data-table__tr v-data-table__tr"
               :class="{'first-border': isFirst(index), 
                 'second-border': isSecond(index)}"
-              @click="handleRedirect(item['id'])"
+              @click="handleRedirect(item['team_id'])"
             >
               <td 
                 v-for="header in headers"

@@ -76,7 +76,7 @@
           <v-expansion-panel-text>
             <v-data-table 
               class="mt-5"
-              :mobile-breakpoint=0
+              :mobile-breakpoint="0"
               :headers="headersTeamPlayers"
               @click:row="handleRedirect"
               :items="teamStore.seasonPlayers"
@@ -116,7 +116,7 @@
           <v-expansion-panels>
             <v-expansion-panel
               title="Varaa pelaajia"
-              v-if="authStore.isCaptain || authStore.isSuperUser"
+              v-if="teamStore.reserveLoading || teamStore.reserveAllowed"
             >
               <v-expansion-panel-text>
                 <v-text-field 
@@ -128,7 +128,7 @@
                   single-line
                 />
                 <v-data-table 
-                  :mobile-breakpoint=0
+                  :mobile-breakpoint="0"
                   :search="search"
                   :items="teamStore.unReservedPlayers"
                   :headers="headersTeamReserve"
@@ -140,17 +140,12 @@
                 >
                   <template #item.actions="{ item }">
                     <v-icon
-                      v-if="!item.team.current_name"
                       icon="mdi-plus"
                       color=green
                       @click="teamStore.reservePlayer(item)"
                     />
-                    <v-icon v-else 
-                      icon="mdi-lock"
-                      color=gray
-                    />
                   </template>
-                  <template #bottom></template>
+                  <!-- <template #bottom></template> -->
                 </v-data-table>
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -167,7 +162,7 @@
                 single-line
               />
             <v-data-table 
-              :mobile-breakpoint=0
+              :mobile-breakpoint="0"
               @click:row="handleRedirectMatches"
               color='alert'
               :search="matchSearch"
@@ -255,7 +250,7 @@ const panel = ref([0]);
 
 
 function handleRedirect (value, row) {
-  location.href = '/pelaajat/' + row.item.id
+  location.href = '/pelaajat/' + row.item.player
 }
 
 function handleRedirectMatches (value, row) {
@@ -270,7 +265,13 @@ function getColor(val1, val2) {
 
 teamStore.getTeamPlayers(route.params.id)
 if (authStore.loggedIn && (authStore.isCaptain || authStore.isSuperUser)) {
-  teamStore.getReserve()
+  teamStore.getReserve(route.params.id)
 }
+
+// Forcing reload of the page fixes a issue where if I am at some location '/page/15' and I have 
+// a redirect button to location '/page/50' it would not load the new content.  
+watch(() => route.params.id, () => {
+  window.location.reload()
+});
 
 </script>

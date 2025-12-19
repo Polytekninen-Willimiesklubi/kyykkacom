@@ -4,7 +4,7 @@
   <v-app class="pt-10">
     <NavBar/>
     <v-main class="content">
-      <v-layout class="pa-10">
+      <v-layout class="pa-10 centered">
         <router-view />
       </v-layout>
     </v-main>
@@ -14,4 +14,9 @@
 </template>
 
 <style scoped>
+
+.centered {
+  justify-content: center;
+}
+
 </style>

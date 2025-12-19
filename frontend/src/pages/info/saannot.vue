@@ -1,13 +1,28 @@
 <template>
-    <v-card class="mr-5" style="width: '900px';">
-        <VuePdfEmbed 
-            source="/saannot_2025.pdf" 
-            download="/saannot_2025.pdf"
-            :width=900
-            text-layer
-            :page="page"
-            @loaded="(obj) => {pageCount = obj.numPages; page = null;}"
-        />
+    <v-card class="mr-5">
+        <v-row>
+            <v-spacer/>
+            <v-col align="center">
+                Säännöt vuodelta:
+            </v-col>
+            <v-col cols="6" align="center">
+                <v-select 
+                    v-model="saannot"
+                    :items="[
+                        '2023',
+                        '2024',
+                        '2025',
+                    ]"
+                    item-color="red"
+                />
+            </v-col>
+            <v-spacer/>
+        </v-row>
+        <v-row>
+            <v-col>
+                <object height="900" width="1000" :data="'/saannot_'+saannot+'.pdf'"></object>
+            </v-col>
+        </v-row>
     </v-card>
 </template>
 
@@ -16,16 +31,11 @@
         layout: "withoutSidebar"
 </route>
 
-
 <script setup>
-import VuePdfEmbed from 'vue-pdf-embed';
-import 'vue-pdf-embed/dist/styles/textLayer.css'
 
-const pageCount = ref(null);
-const page = ref(null);
+const saannot = ref("2025");
 
 </script>
-
 <style>
 .rules__link {
   text-decoration: none;

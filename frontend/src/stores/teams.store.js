@@ -7,6 +7,8 @@ const reserveUrl = `${import.meta.env.VITE_API_URL}/reserve/`;
 export const useTeamsStore = defineStore('joukkue', () => {
     const allTimeStats = ref({});
     const seasonsStats = ref({});
+    const allTeamsAllSeasonsStats = ref([]);
+    const allTeamsAllTimeStats = ref([])
     const selectedSeasonId = ref(null);
     const unReservedPlayers = ref([]);
     const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')) ? JSON.parse(localStorage.getItem('allTeams')) : []);
@@ -15,10 +17,12 @@ export const useTeamsStore = defineStore('joukkue', () => {
     const loaded = ref(false);
     const singleLoading = ref(false);
     const reserveLoading = ref(false);
+    const reserveAllowed = ref(true);
+    const filterSetting = ref(0); // 0: All, 1: Bracket, 2: Playoff
+    const aggregationSetting = ref(1); // 1: Per Season, 2: All Time
 
     const seasonStats = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
-            console.log(allTimeStats.value)
             return allTimeStats.value;
         }
         const returnValue = Object.keys(seasonsStats.value).length && selectedSeasonId.value
@@ -29,7 +33,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
 
     const seasonPlayers = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
-            return allTimeStats.value.players
+            return allTimeStats.value.players;
         }
         return Object.keys(seasonsStats.value).length && selectedSeasonId.value
             ? seasonsStats.value[selectedSeasonId.value].players
@@ -39,7 +43,6 @@ export const useTeamsStore = defineStore('joukkue', () => {
     const teamName = computed(() => {
         if (selectedSeasonId.value === 'allTime') {
             const latestIndex = Math.max(...Object.keys(seasonsStats.value).map(x => +x)) //str -> int conversion
-            console.log(seasonsStats.value[latestIndex])
             return seasonsStats.value[latestIndex].current_name;
         }
         return Object.keys(seasonsStats.value).length && selectedSeasonId.value
@@ -70,20 +73,20 @@ export const useTeamsStore = defineStore('joukkue', () => {
                 returnedTeams[ele.bracket - 1].push(ele);
             });
         } else {
-            returnedTeams = [allTeams.value]
+            returnedTeams = [allTeams.value];
         }
         returnedTeams.forEach(ele => {
             ele.forEach((e, i) => {
-                e.order = i + 1
+                e.order = i + 1;
             })
         })
-        return returnedTeams
+        return returnedTeams;
     });
 
     const secondStageBrackets = computed(() => {
         const navStore = useNavBarStore();
         if (navStore.selectedSeason.playoff_format !== 8 || allTeams.value.length === 0) {
-            return [[], [], []]
+            return [[], [], []];
         }
         let returnedTeams = [[], [], []];
         secondStage.value.forEach(ele => {
@@ -93,10 +96,10 @@ export const useTeamsStore = defineStore('joukkue', () => {
         });
         returnedTeams.forEach((ele, i) => {
             ele.forEach((e, j) => {
-                e.order = j + 1 + i * 12
+                e.order = j + 1 + i * 12;
             })
         })
-        return returnedTeams
+        return returnedTeams;
     });
 
     const onlyPlacements = computed(() => {
@@ -117,6 +120,20 @@ export const useTeamsStore = defineStore('joukkue', () => {
         });
         return returnedTeams
     });
+
+    const filteredAllResults = computed(() => {
+        const values = aggregationSetting.value === 1 ? allTeamsAllSeasonsStats : allTeamsAllTimeStats;
+        if (filterSetting.value === 0) {
+            return values.value["all"];
+        }
+        else if (filterSetting.value === 1) {
+            return values.value["bracket"];
+        } else if (filterSetting.value === 2) {
+            return values.value["playoff"];
+        }
+        console.log("Incorrect filter setting: " + filterSetting.value);
+        return [];
+    })
 
 
     // const superWeekendBrackets = computed( () => {
@@ -140,6 +157,10 @@ export const useTeamsStore = defineStore('joukkue', () => {
 
     async function getTeams() {
         const navStore = useNavBarStore();
+        if (navStore.seasonId === undefined || navStore.seasonId === null) {
+            console.log("Season Id was undefined");
+            return false;
+        }
         const question = '?season=' + navStore.seasonId + '&post_season=0'
         try {
             loading.value = true;
@@ -150,7 +171,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
                 secondStage.value = payload[1];
             } else {
                 allTeams.value = payload;
-                secondStage.value = []
+                secondStage.value = [];
             }
             localStorage.setItem('allTeams', JSON.stringify(allTeams.value));
             localStorage.setItem('secondStage', JSON.stringify(secondStage.value));
@@ -158,11 +179,40 @@ export const useTeamsStore = defineStore('joukkue', () => {
             loaded.value = true;
         } catch (error) {
             console.log(error);
-            return false
+            return false;
+        } finally {
+            loading.value = false;
         }
-        return true
+        return true;
     }
 
+    async function getTeamsAllSeasons() {
+        loading.value = true;
+        loaded.value = false;
+        try {
+            const response = await fetch(baseUrl + "all/", { method: 'GET' });
+            const payload = await response.json();
+
+            allTeamsAllSeasonsStats.value = payload[0];
+            allTeamsAllTimeStats.value = payload[1];
+
+        } catch (error) {
+            console.log(error);
+            loaded.value = false;
+            return false;
+        } finally {
+            loading.value = false;
+        }
+        loaded.value = true
+        return true;
+    }
+
+    /**
+     * Calls teams API to get one team all seasons statistics. Saves those to store attributes
+     * @async
+     * @param {number} teamIndex 
+     * @returns {Promise<void>} 
+     */
     async function getTeamPlayers(teamIndex) {
         singleLoading.value = true;
         const navStore = useNavBarStore();
@@ -182,77 +232,79 @@ export const useTeamsStore = defineStore('joukkue', () => {
         }
         // Select the most recent year to single team page
         selectedSeasonId.value = recent_year != -1 ? String(recent_year) : 'allTime'
-
         singleLoading.value = false;
     }
 
-    async function getReserve() {
+    async function getReserve(teamIndex) {
         reserveLoading.value = true;
+        reserveAllowed.value = false;
+        const requestOpt = {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            credentials: 'include'
+        };
         try {
-            const requestOpt = {
-                'method': 'GET',
-                'headers': {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                credentials: 'include',
-            };
-            const response = await fetch(reserveUrl, requestOpt);
-            let payload = [];
+            const question = reserveUrl + "?team=" + teamIndex
+            let response = await fetch(question, requestOpt);
             if (!response.ok && response.status === 403) {
+                // Make another request if token was too old
                 fetchNewToken();
                 requestOpt.headers['X-CSRFToken'] = getCookie('csrftoken');
-                const secondResponse = await fetch(reserveUrl, requestOpt);
-                if (!secondResponse.ok) {
-                    console.log("Get request was denied: " + secondResponse);
+                response = await fetch(question, requestOpt);
+                if (!response.ok) {
+                    console.log("Getting unreserved players request was denied.")
+                    reserveAllowed.value = false;
+                    return;
                 }
-                payload = await secondResponse.json();
-            } else {
-                payload = await response.json();
             }
-            unReservedPlayers.value = payload.filter((ele) => ele.team.current_name === '')
+
+            const payload = await response.json();
+            unReservedPlayers.value = payload.length ? payload : [];
+            reserveAllowed.value = true;
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            reserveAllowed.value = false;
         } finally {
             reserveLoading.value = false;
         }
     }
 
     async function reservePlayer(player) {
-
         const navStore = useNavBarStore();
         if (!confirm('Haluatko varmasti varata pelaajan "' + player.player_name + '"?')) {
-            return
+            return;
         }
-
         const question = '?season=' + navStore.seasonId;
         const requestOpt = {
-            'method': 'POST',
-            'headers': {
+            method: 'POST',
+            headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
+                'content-type': 'application/json',
             },
-            'body': JSON.stringify({ player: player.id }),
-            credentials: 'include',
+            body: JSON.stringify({ player: player.id }),
+            credentials: 'include'
         };
-        try {
-            const response = await fetch(reserveUrl + question, requestOpt);
 
+        try {
+            let response = await fetch(reserveUrl + question, requestOpt);
             if (!response.ok && response.status === 403) {
                 fetchNewToken();
                 requestOpt.headers['X-CSRFToken'] = getCookie('csrftoken');
-                const secondResponse = await fetch(reserveUrl + question, requestOpt);
-                if (!secondResponse.ok) {
-                    console.log("Post request was denied: " + secondResponse);
+                response = await fetch(reserveUrl + question, requestOpt);
+                if (!response.ok) {
+                    console.log("Post request to reserve player was denied: " + response);
                 }
             }
-
-            const index = unReservedPlayers.value.findIndex(item => player.id === item.id);
-            const reservedPlayer = unReservedPlayers.value.splice(index, 1);
-            seasonsStats[navStore.seasonId].players.push(reservedPlayer);
-
+            if (response.ok) {
+                const index = unReservedPlayers.value.findIndex(item => player.id === item.id);
+                unReservedPlayers.value.splice(index, 1);
+            }
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
+
     }
     return {
         allTeams,
@@ -268,12 +320,19 @@ export const useTeamsStore = defineStore('joukkue', () => {
         onlyPlacements,
         singleLoading,
         reserveLoading,
+        reserveAllowed,
         secondStageBrackets,
         // superWeekendBrackets,
         teamName,
         matches,
+        allTeamsAllTimeStats,
+        allTeamsAllSeasonsStats,
+        filterSetting,
+        aggregationSetting,
+        filteredAllResults,
         getTeams,
         getTeamPlayers,
+        getTeamsAllSeasons,
         getReserve,
         reservePlayer,
     }

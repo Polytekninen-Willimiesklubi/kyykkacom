@@ -26,11 +26,11 @@ export const useNewsStore = defineStore('news', () => {
     // Pagination
     const currentPageNro = ref(1);
     const totalPages = computed(() => {
-        return Math.ceil(allNews.value.length / 2)
+        return Math.ceil(allNews.value.length / 2);
     })
     const currentPageContent = computed(() => {
-        const page = currentPageNro.value
-        return [...allNews.value.slice(2 * (page - 1), 2 * page >= allNews.value.length ? undefined : 2 * page)]
+        const page = currentPageNro.value;
+        return [...allNews.value.slice(2 * (page - 1), 2 * page >= allNews.value.length ? undefined : 2 * page)];
     })
 
     async function getNews() {
@@ -43,13 +43,13 @@ export const useNewsStore = defineStore('news', () => {
             const payload = await response.json();
             // Sort news recent first
             allNews.value = payload.sort((a, b) => {
-                return new Date(b.date) - new Date(a.date)
+                return new Date(b.date) - new Date(a.date);
             });
             dataReady.value = true;
 
         } catch (e) {
             error.value = true;
-            console.log(e)
+            console.log(e);
         } finally {
             loading.value = false;
         }
@@ -61,12 +61,12 @@ export const useNewsStore = defineStore('news', () => {
         savingError.value = false;
         try {
             const response = await fetch(baseUrl, {
-                'method': 'POST',
-                'headers': {
+                method: 'POST',
+                headers: {
                     'X-CSRFToken': getCookie('csrftoken'),
                     'content-type': 'application/json',
                 },
-                'body': JSON.stringify({
+                body: JSON.stringify({
                     "writer": writer.value,
                     "header": headline.value,
                     "date": getDateString(),

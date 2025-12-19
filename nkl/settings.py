@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "kyykka.apps.KyykkaConfig",
-    "drf_yasg",
+    "drf_spectacular",
+    "silk",
 ]
 
 LOGIN_URL = "/api/login/"
@@ -56,6 +57,32 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': (
     #     'rest_framework.permissions.IsAuthenticated',
     # )
+    # Use drf-spectacular for API schema generation
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# drf-spectacular settings
+SPECTACULAR_SETTINGS = {
+    "TITLE": "NKL API",
+    "DESCRIPTION": "API for kyykka.com",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # Other settings...
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+    },
+    # Tags to group endpoints by model/resource
+    "TAGS": [
+        {"name": "auth", "description": "Authentication operations"},
+        {"name": "matches", "description": "Match management"},
+        {"name": "players", "description": "Player operations"},
+        {"name": "teams", "description": "Team management"},
+        {"name": "throws", "description": "Throw recording and statistics"},
+        {"name": "seasons", "description": "Season management"},
+        {"name": "news", "description": "News operations"},
+    ],
 }
 
 MIDDLEWARE = [
@@ -67,6 +94,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "silk.middleware.SilkyMiddleware",
 ]
 
 ROOT_URLCONF = "nkl.urls"
@@ -94,7 +122,7 @@ DATABASES = {}
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.memcached.MemcachedCache",
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
         "LOCATION": "127.0.0.1:11211",
     }
 }

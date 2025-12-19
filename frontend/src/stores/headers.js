@@ -3,14 +3,21 @@
 /******************* FUNCTIONS **********************/
 
 /**
- * Checks if given value is 'NaN'. Should be used in cases where there is only postive values.
- * @param {number | string} value Given value to check 'NaN'
- * @returns {number} Negative value if True else orginal value
+ * Comparisson that will sort 'NaN' value to bottom
+ * @param {number} a
+ * @param {number} b
+ * @returns {number} a - b if both not 'NaN'
 */
-function isStrNaN(value) {
-    return value === 'NaN' ? -2 : Number(value)
+function nanSort(a, b) {
+    if (isNaN(a) && isNaN(b)) {
+        return 0
+    } else if (isNaN(a)) {
+        return -1
+    } else if (isNaN(b)) {
+        return 1
+    }
+    return Number(a) - Number(b)
 }
-
 /** 
  * Custom sort to revaluate string values in throw values ('e' and 'h')
  * @param {number} a 
@@ -43,83 +50,115 @@ function throwSort(a, b) {
 
 export const headerPlayers = [
     { title: 'Nimi', key: 'player_name', align: 'left', width: '30%' },
-    { title: 'Joukkue', key: 'team.current_abbreviation', align: 'center', width: '10%' },
+    { title: 'Joukkue', key: 'team_name', align: 'center', width: '10%' },
     { title: 'E', key: 'rounds_total', align: 'center', tooltip: 'Pelatut Erät' },
     { title: 'K', key: 'score_total', align: 'center', tooltip: 'Poistetut Kyykät' },
-    { title: 'KPH', key: 'score_per_throw', align: 'center', tooltip: 'Kyykkää Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
+    { title: 'KPH', key: 'score_per_throw', align: 'center', tooltip: 'Kyykkää Per Heitto', sort: nanSort },
     { title: 'SP', key: 'scaled_points', align: 'center', tooltip: 'Skaalatut Pisteet: S=2n*(h+w)/10, missä h: heittopaikka, w: Heittäjän 1./2. heitoilta 9, 3./4. 13, n: Poistetut kyykät' },
-    { title: 'SPPH', key: 'scaled_points_per_throw', align: 'center', tooltip: 'Skaalatut Pisteet Per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
-    { title: 'kHP', key: 'avg_throw_turn', align: 'center', tooltip: 'Keskimääräinen Heittopaikka', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
+    { title: 'SPPH', key: 'scaled_points_per_throw', align: 'center', tooltip: 'Skaalatut Pisteet Per Heitto', sort: nanSort },
+    { title: 'kHP', key: 'avg_throw_turn', align: 'center', tooltip: 'Keskimääräinen Heittopaikka', sort: nanSort },
     { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
-    { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
+    { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
     { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
-    { title: 'JK', key: 'gteSix_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
+    { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
+
+export const headerAllPlayersPerSeason = [
+    { title: 'Nimi', key: 'player_name', align: 'left', width: '30%' },
+    { title: 'Kausi', key: 'season', align: 'center', width: '10%' },
+    { title: 'Joukkue', key: 'team_name', align: 'center', width: '10%' },
+    { title: 'E', key: 'rounds_total', align: 'center', tooltip: 'Pelatut Erät' },
+    { title: 'K', key: 'score_total', align: 'center', tooltip: 'Poistetut Kyykät' },
+    { title: 'KPH', key: 'score_per_throw', align: 'center', tooltip: 'Kyykkää Per Heitto', sort: nanSort },
+    { title: 'SP', key: 'scaled_points', align: 'center', tooltip: 'Skaalatut Pisteet: S=2n*(h+w)/10, missä h: heittopaikka, w: Heittäjän 1./2. heitoilta 9, 3./4. 13, n: Poistetut kyykät' },
+    { title: 'SPPH', key: 'scaled_points_per_throw', align: 'center', tooltip: 'Skaalatut Pisteet Per Heitto', sort: nanSort },
+    { title: 'kHP', key: 'avg_throw_turn', align: 'center', tooltip: 'Keskimääräinen Heittopaikka', sort: nanSort },
+    { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
+    { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
+    { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
+    { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
+];
+
+export const headerAllPlayers = [
+    { title: 'Nimi', key: 'player_name', align: 'start', width: '30%' },
+    { title: 'Kaudet', key: 'season_count', align: 'center', width: '5%', tooltip: 'Kaikki pelatut kaudet' },
+    { title: 'E', key: 'rounds_total', align: 'center', tooltip: 'Pelatut Erät' },
+    { title: 'K', key: 'score_total', align: 'center', tooltip: 'Poistetut Kyykät' },
+    { title: 'KPH', key: 'score_per_throw', align: 'center', tooltip: 'Kyykkää Per Heitto', sort: nanSort },
+    { title: 'SP', key: 'scaled_points', align: 'center', tooltip: 'Skaalatut Pisteet: S=2n*(h+w)/10, missä h: heittopaikka, w: Heittäjän 1./2. heitoilta 9, 3./4. 13, n: Poistetut kyykät' },
+    { title: 'SPPH', key: 'scaled_points_per_throw', align: 'center', tooltip: 'Skaalatut Pisteet Per Heitto', sort: nanSort },
+    { title: 'kHP', key: 'avg_throw_turn', align: 'center', tooltip: 'Keskimääräinen Heittopaikka', sort: nanSort },
+    { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
+    { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
+    { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
+    { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
+];
+
 
 /********** PLAYER PAGE **********/
 
 export const headersPlayerPeriod = [
     { title: 'Aika', key: 'match_time' },
-    { title: 'Vastustaja', key: 'opp_name' },
-    { title: 'Erä', key: 'period' },
-    { title: 'HP', key: 'turn', tooltip: 'Heittopaikka' },
+    { title: 'Vastustaja', key: 'oppenent_name' },
+    { title: 'Erä', key: 'throw_round' },
+    { title: 'HP', key: 'throw_turn', tooltip: 'Heittopaikka' },
     {
         title: 'Heitot',
-        children: [
+        children: [ // TODO sorting check
             { title: '1', key: 'score_first', tooltip: '1. heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
             { title: '2', key: 'score_second', tooltip: '2. heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
             { title: '3', key: 'score_third', tooltip: '3. heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
             { title: '4', key: 'score_fourth', tooltip: '4. heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
         ]
     },
-    { title: 'Yht.', key: 'score_total', tooltip: 'Heitot Yhteensä (Kyykkää)' },
-    { title: 'KPH', key: 'score_average_round', tooltip: 'Kyykkää per Heitto' },
-    { title: 'OJ pis.', key: 'own_score_round', tooltip: 'Oman joukkueen pisteet' },
-    { title: 'VJ pis.', key: 'opp_score_round', tooltip: 'Vastustaja joukkueen pisteet' }
+    { title: 'Yht.', key: 'score', tooltip: 'Heitot Yhteensä (Kyykkää)' },
+    { title: 'KPH', key: 'avg_round_score', tooltip: 'Kyykkää per Heitto' },
+    { title: 'OJ pis.', key: 'own_team_score', tooltip: 'Oman joukkueen pisteet' },
+    { title: 'VJ pis.', key: 'opponent_score', tooltip: 'Vastustaja joukkueen pisteet' }
 ];
 
 export const headersPlayerGames = [
     { title: 'Aika', key: 'match_time' },
     { title: 'Vastustaja', key: 'opponent_name' },
-    { title: 'HP1', key: 'throw_turn_one', tooltip: '1. erän heittopaikka' },
-    { title: 'HP2', key: 'throw_turn_two', tooltip: '2. erän heittopaikka' },
+    { title: '1.HP', key: 'position_one', tooltip: '1. erän heittopaikka' },
+    { title: '2.HP', key: 'position_two', tooltip: '2. erän heittopaikka' },
     {
-        title: '1.erän Heitot',
+        title: '1. Erän Heitot',
         children: [
-            { title: '1', key: 'score_first', tooltip: '1.erän 1.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
-            { title: '2', key: 'score_second', tooltip: '1.erän 2.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
-            { title: '3', key: 'score_third', tooltip: '1.erän 3.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
-            { title: '4', key: 'score_fourth', tooltip: '1.erän 4.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
+            { title: '1', key: 'first', tooltip: '1.erän 1.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
+            { title: '2', key: 'second', tooltip: '1.erän 2.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
+            { title: '3', key: 'third', tooltip: '1.erän 3.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
+            { title: '4', key: 'fourth', tooltip: '1.erän 4.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
         ]
     },
     {
-        title: '2.erän Heitot',
+        title: '2. Erän Heitot',
         children: [
-            { title: '5', key: 'score_fifth', tooltip: '2.erän 1.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
-            { title: '6', key: 'score_sixth', tooltip: '2.erän 2.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
-            { title: '7', key: 'score_seventh', tooltip: '2.erän 3.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
-            { title: '8', key: 'score_eighth', tooltip: '2.erän 4.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
+            { title: '1', key: 'fifth', tooltip: '2.erän 1.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
+            { title: '2', key: 'sixth', tooltip: '2.erän 2.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
+            { title: '3', key: 'seventh', tooltip: '2.erän 3.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
+            { title: '4', key: 'eighth', tooltip: '2.erän 4.heitto (Kyykkää)', sort: (a, b) => throwSort(a, b) },
         ]
     },
-    { title: 'Yht.', key: 'score_total', tooltip: 'Poistetut kyykät Yhteensä (Kyykkää)' },
-    { title: 'KPH', key: 'score_average_match', tooltip: 'Kyykkää per Heitto' },
-    { title: 'OJ pis.', key: 'own_score', tooltip: 'Oman joukkueen pisteet' },
+    { title: 'Yht.', key: 'score', tooltip: 'Poistetut kyykät Yhteensä (Kyykkää)' },
+    { title: 'KPH', key: 'score_per_throw', tooltip: 'Kyykkää per Heitto' },
+    { title: 'OJ pis.', key: 'own_team_score', tooltip: 'Oman joukkueen pisteet' },
     { title: 'VJ pis.', key: 'opponent_score', tooltip: 'Vastustaja joukkueen pisteet' }
 ];
 
 export const headerPlayerOverallStats = [
     { title: '', key: 'season', sortable: false },
     { title: 'Kaudet', key: 'season_count', sortable: false },
-    { title: 'Erät', key: 'all_rounds_total', sortable: false },
-    { title: 'Kyykät', key: 'all_score_total', sortable: false },
-    { title: 'Heitot', key: 'all_throws_total', sortable: false },
-    { title: 'KPH', key: 'total_average_throw', sortable: false, tooltip: 'Kyykkää per Heitto' },
-    { title: 'kHP', key: 'total_average_throw_turn', sortable: false, tooltip: 'Keskimääräinen heittopaikka' },
-    { title: 'Hauet', key: 'all_pikes_total', sortable: false, tooltip: 'Kaikki Hauet (=Ohi heitot)' },
-    { title: 'H%', key: 'total_pike_percentage', sortable: false, tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
-    { title: 'VM', key: 'all_zeros_total', sortable: false, tooltip: 'Virkamiehet: Nollaheitot ilman haukia' },
-    { title: 'VM%', key: 'total_zero_percentage', sortable: false, tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
-    { title: 'JK', key: 'all_gteSix_total', sortable: false, tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
+    { title: 'Erät', key: 'rounds', sortable: false },
+    { title: 'Kyykät', key: 'scores', sortable: false },
+    { title: 'Heitot', key: 'throws', sortable: false },
+    { title: 'KPH', key: 'avg_score', sortable: false, tooltip: 'Kyykkää per Heitto' },
+    { title: 'kHP', key: 'avg_position', sortable: false, tooltip: 'Keskimääräinen heittopaikka' },
+    { title: 'Hauet', key: 'pikes', sortable: false, tooltip: 'Kaikki Hauet (=Ohi heitot)' },
+    { title: 'H%', key: 'pike_percentage', sortable: false, tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
+    { title: 'VM', key: 'zeros', sortable: false, tooltip: 'Virkamiehet: Nollaheitot ilman haukia' },
+    // { title: 'VM%', key: 'total_zero_percentage', sortable: false, tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
+    { title: 'JK', key: 'gte_six', sortable: false, tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
 ];
 
 export const headerPlayerSeasonStats = [
@@ -128,13 +167,13 @@ export const headerPlayerSeasonStats = [
     { title: 'Erät', key: 'rounds_total' },
     { title: 'Kyykät', key: 'score_total' },
     { title: 'Heitot', key: 'throws_total' },
-    { title: 'KPH', key: 'score_per_throw', tooltip: 'Kyykkää per Heitto' },
-    { title: 'kHP', key: 'avg_throw_turn', tooltip: 'Keskimääräinen heittopaikka' },
+    { title: 'KPH', key: 'avg_score', tooltip: 'Kyykkää per Heitto' },
+    { title: 'kHP', key: 'avg_position', tooltip: 'Keskimääräinen heittopaikka' },
     { title: 'Hauet', key: 'pikes_total', tooltip: 'Kaikki Hauet (=Ohi heitot)' },
     { title: 'H%', key: 'pike_percentage', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
     { title: 'VM', key: 'zeros_total', tooltip: 'Virkamiehet: Nollaheitot ilman haukia' },
-    { title: 'VM%', key: 'zero_percentage', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
-    { title: 'JK', key: 'gteSix_total', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
+    // { title: 'VM%', key: 'zero_percentage', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
+    { title: 'JK', key: 'pike_percentage', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
 ];
 
 /********** TEAMS PAGE **********/
@@ -146,8 +185,47 @@ export const headersTeams = [
     { title: 'Voitot', key: 'matches_won', align: 'center' },
     { title: 'Häviöt', key: 'matches_lost', align: 'center' },
     { title: 'Tasurit', key: 'matches_tie', align: 'center' },
-    { title: 'Ottelu Ka', key: 'match_average', align: 'center' }
+    { title: 'Ottelu Ka', key: 'match_average', align: 'center' },
+    { title: 'Paras Erä', key: 'best_round', align: 'center' },
+    { title: 'Paras Ottelu', key: 'best_match', align: 'center' },
+    { title: 'Tyhjennykset', key: 'clearences', align: 'center' },
+
 ];
+
+/********** ALL TEAMS PAGE **********/
+
+export const headersTeamsAllTime = [
+    { title: 'Nimi', key: 'current_name', align: 'center', tooltip: 'Viimeisin nimi' },
+    { title: 'Lyhenne', key: 'current_abbreviation', align: 'center', tooltip: 'Viimeisin lyhenne' },
+    { title: 'Kaudet', key: 'season_count', align: 'center', tooltip: 'Pelatut kaudet' },
+    { title: 'Ottelut', key: 'matches_played', align: 'center' },
+    { title: 'Voitot', key: 'matches_won', align: 'center' },
+    { title: 'Häviöt', key: 'matches_lost', align: 'center' },
+    { title: 'Tasurit', key: 'matches_tie', align: 'center' },
+    { title: 'Ottelu Ka', key: 'match_average', align: 'center' },
+    { title: 'Paras Erä', key: 'best_round', align: 'center' },
+    { title: 'Paras Ottelu', key: 'best_match', align: 'center' },
+    { title: 'Tyhjennykset', key: 'clearences', align: 'center' },
+
+];
+
+export const headersAllTeamsPerSeason = [
+    { title: 'Nimi', key: 'current_name', align: 'center' },
+    { title: 'Lyhenne', key: 'current_abbreviation', align: 'center' },
+    { title: 'Kausi', key: 'season', align: 'center', tooltip: 'Pelatut kaudet' },
+    { title: 'Ottelut', key: 'matches_played', align: 'center' },
+    { title: 'Voitot', key: 'matches_won', align: 'center' },
+    { title: 'Häviöt', key: 'matches_lost', align: 'center' },
+    { title: 'Tasurit', key: 'matches_tie', align: 'center' },
+    { title: 'Ottelu Ka', key: 'match_average', align: 'center' },
+    { title: 'Paras Erä', key: 'best_round', align: 'center' },
+    { title: 'Paras Ottelu', key: 'best_match', align: 'center' },
+    { title: 'Tyhjennykset', key: 'clearences', align: 'center' },
+
+];
+
+
+
 
 /********** TEAM PAGE **********/
 
@@ -162,10 +240,10 @@ export const headersTeamPlayers = [
     { title: 'K', key: 'score_total', width: '1%', align: 'center', tooltip: 'Poistetut Kyykkät' },
     { title: 'KPH', key: 'score_per_throw', width: '1%', align: 'center', tooltip: 'Kyykkää per Heitto' },
     { title: 'SP', key: 'scaled_points', width: '1%', align: 'center', tooltip: 'Skaalatut Pisteet: S=2n*(h+w)/10, missä h: heittopaikka, w: Heittäjän 1./2. heitoilta 9, 3./4. 13, n: Poistetut kyykät' },
-    { title: 'SPPH', key: 'scaled_points_per_throw', width: '1%', align: 'center', tooltip: 'Skaalatut Pisteet per Heitto', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
-    { title: 'kHP', key: 'avg_throw_turn', width: '1%', align: 'center', tooltip: 'Keskimääräinen Heittopaikka', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
+    { title: 'SPPH', key: 'scaled_points_per_throw', width: '1%', align: 'center', tooltip: 'Skaalatut Pisteet per Heitto', sort: nanSort },
+    { title: 'kHP', key: 'avg_throw_turn', width: '1%', align: 'center', tooltip: 'Keskimääräinen Heittopaikka', sort: nanSort },
     { title: 'H', key: 'pikes_total', width: '1%', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
-    { title: 'H%', key: 'pike_percentage', width: '1%', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: (a, b) => isStrNaN(a) - isStrNaN(b) },
+    { title: 'H%', key: 'pike_percentage', width: '1%', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
     { title: 'VM', key: 'zeros_total', width: '1%', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
     { title: 'JK', key: 'gteSix_total', width: '1%', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
 ];
@@ -191,10 +269,12 @@ export const headersTeamSeasonStats = [
     { title: 'Ottelu keskiarvo', key: 'match_average' },
     { title: 'Hauet', key: 'pikes_total' },
     { title: 'Haukiprosentti', key: 'pike_percentage' },
-    { title: 'Nolla heitot', key: 'zeros_total' },
-    { title: 'Nollaprosentti', key: 'zero_percentage' },
+    { title: 'Virkamiehet', key: 'zeros_total' },
     { title: 'Nolla aloitukset', key: 'zero_or_pike_first_throw_total' },
+    { title: 'Tyhjennykset', key: 'clearances' },
     { title: 'Joulukuuset', key: 'gteSix_total' },
+    { title: 'Paras Peli', key: 'best_match' },
+    { title: 'Paras Erä', key: 'best_round' },
 ];
 
 /********** MATCHES PAGE **********/
@@ -211,7 +291,8 @@ export const headersMatches = [
 ];
 
 export const headersMatchesPostSeason = [
-    { key: 'data-table-group', width: '0px', sortable: false }, // This removes 'group-by' header -> https://github.com/vuetifyjs/vuetify/issues/17863
+    // This extra entry removes 'group-by' header -> https://github.com/vuetifyjs/vuetify/issues/17863
+    { key: 'data-table-group', width: '0px', sortable: false },
     { title: 'Aika', key: 'match_time', align: 'left' },
     { title: 'Kenttä', key: 'field', width: '1%', align: 'center' },
     { title: 'Koti', key: 'home_team.current_abbreviation', align: 'center' },
@@ -260,11 +341,11 @@ export const headersRound = [
 
 export const headersNavBar = [
     { title: 'Koti', route: '/', icon: 'mdi-home' },
+    { title: 'Oma Joukkue', route: '/joukkueet/', icon: 'mdi-account' },
     { title: 'Ottelut', route: '/ottelut', icon: 'mdi-space-invaders' },
     { title: 'Joukkueet', route: '/joukkueet', icon: 'mdi-emoticon-poop' },
     { title: 'Runkosarja', route: '/runkosarja', icon: 'mdi-format-list-numbered' },
     { title: 'Pelaajat', route: '/pelaajat', icon: 'mdi-account-group' },
-    { title: 'Oma Joukkue', route: '/joukkueet/', icon: 'mdi-account' }, // Add if-clause and id to route in place of use   
     { title: 'Pudotuspelit', route: '/jatkosarja', icon: 'mdi-bank' },
     { title: 'SuperWeekend', route: '/superweekend', icon: 'mdi-nuke' },
     { title: 'Info', route: '/info', icon: 'mdi-information-outline' }

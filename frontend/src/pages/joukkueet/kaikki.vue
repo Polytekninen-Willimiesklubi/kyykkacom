@@ -1,8 +1,9 @@
+<!-- BUG isNaN sortting to bottom does not work -->
 <template>
   <div class="flex-1-1-100">
-    <v-card title="Pelaajat">
+    <v-card title="Kaikki Joukkueet">
       <v-row align="center">
-        <v-col cols="3" class="mb-2 ml-2" justify="left">
+        <v-col cols="2" class="mb-2 ml-2" justify="left">
           <v-text-field
             color="red"
             v-model="search"
@@ -11,7 +12,9 @@
             hide-details
           />
         </v-col>
-        <v-col cols="2" align="center">
+        <v-spacer />
+        <v-spacer />
+        <!-- <v-col cols="2" align="center">
           <v-btn-toggle
             v-model="filtterEmpty"
             variant="outlined"
@@ -26,34 +29,14 @@
                   v-bind="props"
                   :value="1" 
                   icon="mdi-filter-variant" 
-                  @click="playerStore.emptyFiltter = !playerStore.emptyFiltter"
                 />
               </template>
             </v-tooltip>
           </v-btn-toggle>
-        </v-col>
+        </v-col> -->
         <v-col cols="3">
           <v-btn-toggle
-            v-model="playerStore.playersPositionsToggle"
-            variant="outlined"
-            divided
-            multiple
-          >
-            <template v-for="i in 4">
-              <v-tooltip
-                location="top"
-                :text="'Näytä vain heittopaikan '+ i +' statsit'"
-              >
-                <template #activator="{ props }">
-                  <v-btn v-bind="props" size="x-small" :text="i+'.'" :value="i"/>
-                </template>
-              </v-tooltip>
-            </template>
-          </v-btn-toggle>
-        </v-col>
-        <v-col cols="3">
-          <v-btn-toggle
-            v-model="playerStore.playoffFiltter"
+            v-model="teamStore.filterSetting"
             variant="outlined"
             divided
             mandatory
@@ -75,23 +58,50 @@
             </template>
           </v-btn-toggle>
         </v-col>
+        <v-spacer />
+        <v-col cols="2">
+          <v-btn-toggle
+            v-model="teamStore.aggregationSetting"
+            variant="outlined"
+            divided
+            mandatory
+            @update:model-value="tableHeaders = teamStore.aggregationSetting === 1 ? headersAllTeamsPerSeason : headersTeamsAllTime"
+          >
+            <v-tooltip
+              location="top"
+              :text="'Näytä kaikki pelaajan kaudet tiivistettynä.'"
+            >
+              <template #activator="{ props }">
+                <v-btn v-bind="props" size="x-small" text="Kaikki kaudet" :value="2"/>
+              </template>
+            </v-tooltip>
+            <v-tooltip
+              location="top"
+              :text="'Näytä pelaajat kausittain'"
+            >
+              <template #activator="{ props }">
+                <v-btn v-bind="props" size="x-small" text="Per Kausi" :value="1"/>
+              </template>
+            </v-tooltip>
+          </v-btn-toggle>
+        </v-col>
+        <v-spacer />
       </v-row>
-      <!-- :custom-key-sort="customSorts" -->
       <v-data-table
         :mobile-breakpoint="0"
-        :headers="headerPlayers"
+        :headers="tableHeaders"
         @click:row="handleRedirect"
         :sortBy="sortBy"
-        :items="playerStore.playersPostionFilttered"
-        :loading="playerStore.loading"
-        :search="search"
+        :items="teamStore.filteredAllResults"
+        :loading="teamStore.loading"
         no-data-text="Ei dataa :("
-        loading-text="Ladataan pelaajia..."
-        items-per-page="-1"
+        :search="search"
+        loading-text="Ladataan kaikkia pelaajia..."
+        items-per-page="50"
         density="compact"
       >
-        <template v-for="header in headerPlayers"
-          #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
+        <template v-for="header in tableHeaders"
+            #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
         >
           <v-tooltip :text="column.tooltip" v-if="column.tooltip" location="top">
             <template #activator="{ props }">
@@ -108,7 +118,7 @@
               </div>
             </template>
           </v-tooltip>
-          <template v-else>
+          <template v-else> <!-- No Tooltip -->
             <div class="v-data-table-header__content">
               <!-- HACK To properly center column header with the sort icon
                         just add another span to other side -->
@@ -122,38 +132,32 @@
             </div>
           </template>
         </template>
-        <template #bottom></template> <!-- This hides the pagination controls-->
       </v-data-table>
     </v-card>
   </div>
 </template>
 
-<script setup>
-import { usePlayerStore } from '@/stores/players.store';
-import { useTeamsStore } from '@/stores/teams.store'
-import { useNavBarStore } from '@/stores/navbar.store';
+<route lang="yaml">
+  meta:
+      layout: "withoutSidebar"
+</route>
 
-import { headerPlayers } from '@/stores/headers';
+<script setup>
+import { useTeamsStore } from '@/stores/teams.store'
+import { headersTeamsAllTime, headersAllTeamsPerSeason } from '@/stores/headers';
 
 const teamStore = useTeamsStore();
-const playerStore = usePlayerStore();
-const navStore = useNavBarStore();
+teamStore.aggregationSetting = 2;
+teamStore.getTeamsAllSeasons();
 
-playerStore.getPlayers(navStore.seasonId);
-teamStore.getTeams();
-
-const search = ref('');
-const filtterEmpty = ref(undefined);
 // Setting sortBy stops the resetting after filtering is applied
-const sortBy = ref([{key: 'rounds_total', order:'desc'}])
+const sortBy = ref([{key: 'season_count', order:'desc'}]);
+const tableHeaders = ref(headersTeamsAllTime);
+const search = ref('');
 
 function handleRedirect (value, row) {
-  location.href = '/pelaajat/' + row.item.player_id;
+  location.href = '/joukkueet/' + row.item.team_id;
 }
-
-watch(() => navStore.seasonId, (newId) => {
-  playerStore.getPlayers(navStore.seasonId);
-})
 
 </script>
 <style scoped>
