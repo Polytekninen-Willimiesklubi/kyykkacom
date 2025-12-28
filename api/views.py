@@ -1207,6 +1207,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 if result["matches_played"]
                 else "NaN"
             )
+            if result["matches_played"] == 0:
+                single_results["first_stage"][result["id"]] = result.copy()
 
         for result in single_results["first_stage"].values():
             result["points_average"] = (
