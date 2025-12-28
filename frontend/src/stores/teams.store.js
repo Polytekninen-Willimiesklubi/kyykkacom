@@ -167,10 +167,10 @@ export const useTeamsStore = defineStore('joukkue', () => {
             const response = await fetch(baseUrl + question, { method: 'GET' });
             const payload = await response.json();
             if (navStore.selectedSeason.playoff_format === 8) {
-                allTeams.value = payload[0];
-                secondStage.value = payload[1];
+                allTeams.value = payload["first_stage"];
+                secondStage.value = payload["bracket"];
             } else {
-                allTeams.value = payload;
+                allTeams.value = payload["bracket"];
                 secondStage.value = [];
             }
             localStorage.setItem('allTeams', JSON.stringify(allTeams.value));
