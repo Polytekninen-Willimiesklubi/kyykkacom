@@ -134,6 +134,16 @@
           :title="item.title"
         />
       </template>
+      <v-list-item
+        to="/joukkueet/kaikki"
+        prepend-icon="mdi-format-list-bulleted-type"
+        title="Kaikkien kausien joukkueet"
+      />
+      <v-list-item
+        to="/pelaajat/kaikki"
+        prepend-icon="mdi-format-list-bulleted-type"
+        title="Kaikkien kausien pelaajat"
+      />
 
       <v-list-item>
         <div class="pa-2" v-if="!userStore.loggedIn">
