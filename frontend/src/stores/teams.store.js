@@ -1,5 +1,5 @@
 import { useNavBarStore } from "@/stores/navbar.store";
-import { getCookie, fetchNewToken } from '@/stores/auth.store';
+import { getCookie, fetchNewToken, useAuthStore } from '@/stores/auth.store';
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/teams/`;
 const reserveUrl = `${import.meta.env.VITE_API_URL}/reserve/`;
@@ -273,10 +273,15 @@ export const useTeamsStore = defineStore('joukkue', () => {
 
     async function reservePlayer(player) {
         const navStore = useNavBarStore();
+        const authStore = useAuthStore();
+        if (!authStore.loggedIn) {
+            alert("Kirjaudu sisään varataksesi pelaajan.");
+            return;
+        }
         if (!confirm('Haluatko varmasti varata pelaajan "' + player.player_name + '"?')) {
             return;
         }
-        const question = '?season=' + navStore.seasonId;
+        const question = '?season=' + navStore.seasonId + '&team=' + authStore.teamId;
         const requestOpt = {
             method: 'POST',
             headers: {
