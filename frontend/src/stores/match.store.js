@@ -7,7 +7,10 @@ export const useMatchStore = defineStore('match', () => {
 
     const isAwayCaptain = computed(() => {
         const authStore = useAuthStore();
-        return authStore.isCaptain && authStore.teamId === matchData.value.away_team.id;
+        return authStore.isSuperUser || (
+            authStore.isCaptain
+            && authStore.teamId === matchData.value.away_team.team_id
+        );
     })
 
     async function getMatchData(matchIndex) {

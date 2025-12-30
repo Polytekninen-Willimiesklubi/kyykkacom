@@ -597,16 +597,31 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         for season in throws:
             for key in season:
                 if key != "season__year":
+                    if key == "score_total" and season[key] is None:
+                        # FIXME score_total should be 0 instead, but is None
+                        # because Sum("st") etc. is None
+                        season[key] = 0
+                    if key == "match_average" and season[key] is None:
+                        season[key] = "NaN"
+                    if key == "best_round" and season[key] is None:
+                        season[key] = "NaN"
+                    if key == "best_match" and season[key] is None:
+                        season[key] = "NaN"
                     data[season["season__year"]][key] = season[key]
             for key in all_time_stats.keys():
                 if key in ("match_average", "pike_percentage"):
                     continue
                 elif key not in ("best_round", "best_match"):
-                    all_time_stats[key] += season[key]
+                    all_time_stats[key] += season[key] if season[key] is not None else 0
                 else:
+                    if season[key] is None:
+                        continue
                     if all_time_stats[key] == "NaN":
                         all_time_stats[key] = season[key]
                     else:
+                        # FIXME Same fixme as previously
+                        if season[key] == "NaN":
+                            continue
                         all_time_stats[key] = min(all_time_stats[key], season[key])
 
         all_time_stats["zero_percentage"] = (
@@ -628,6 +643,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         all_time_stats["match_average"] = (
             round(all_time_stats["weighted_total"] / all_time_stats["match_count"], 2)
             if all_time_stats["match_count"]
+            and all_time_stats["weighted_total"] is not None
             else "NaN"
         )
 
@@ -716,9 +732,10 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 all_time_player_stats[player["player"]][key] += (
                     player[key] if player[key] is not None else 0
                 )
-            all_time_player_stats[player["player"]]["weighted_throw_count"] += (
-                player["avg_throw_turn"] * player["throws_total"]
-            )
+            if player["avg_throw_turn"] != "NaN":
+                all_time_player_stats[player["player"]]["weighted_throw_count"] += (
+                    player["avg_throw_turn"] * player["throws_total"]
+                )
 
             if "players" not in data[player["season__year"]]:
                 data[player["season__year"]]["players"] = []
@@ -1265,7 +1282,6 @@ class MatchList(views.APIView):
     """
 
     # throttle_classes = [AnonRateThrottle]
-    # queryset = Match.objects.filter(match_time__lt=datetime.datetime.now() + datetime.timedelta(weeks=2))
     queryset = (
         Match.objects.select_related(
             "home_team__team",
@@ -1284,7 +1300,12 @@ class MatchList(views.APIView):
             key = "all_matches_" + str(season.year)
             if post_season is not None:
                 key += "_post_season" if post_season else "_regular_season"
-            all_matches = getFromCache(key)
+            # TODO The season list will expand every season, so we don't cache current
+            # season matches as the cache invalidation is right now an headache.
+            if get_current_season() == season:
+                all_matches = None
+            else:
+                all_matches = getFromCache(key)
             if all_matches is None:
                 if post_season is None:
                     self.queryset = self.queryset.filter(season=season)
@@ -1296,7 +1317,8 @@ class MatchList(views.APIView):
                     self.queryset, many=True, context={"season": season}
                 )
                 all_matches = serializer.data
-                setToCache(key, all_matches)
+                if get_current_season() != season:
+                    setToCache(key, all_matches)
         else:
             key = "all_matches_super_weekend" + str(season.year)
             all_matches = getFromCache(key)
@@ -1344,8 +1366,8 @@ class MatchDetail(views.APIView):
         return Response(serializer.data)
 
     def patch(self, request, pk, format=None):
-        season = get_season(request)
         match = get_object_or_404(self.queryset, pk=pk)
+        season = match.season
         self.check_object_permissions(request, match)
         # Update user session (so that it wont expire..)
         request.session.modified = True

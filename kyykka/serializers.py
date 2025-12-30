@@ -1143,6 +1143,24 @@ class PlayerNameSerializer(SharedPlayerSerializer):
         fields = ("id", "player_name")
 
 
+class TeamSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeamsInSeason
+        fields = ("id", "current_name", "current_abbreviation")
+
+
+class TeamNoPlayersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeamsInSeason
+        fields = (
+            "id",
+            "current_name",
+            "season",
+            "current_abbreviation",
+            "bracket",
+        )
+
+
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamsInSeason
@@ -1518,19 +1536,21 @@ class MatchListSerializer(SharedMatchSerializer):
     away_team = serializers.SerializerMethodField()
 
     def get_home_team(self, obj):
-        key = "team_" + str(obj.home_team.id)
-        team = getFromCache(key)
-        if team is None:
-            team = TeamSerializer(obj.home_team).data
-            setToCache(key, team, 3600)
+        # key = "team_" + str(obj.home_team.id)
+        # team = getFromCache(key)
+        # if team is None:
+        # print("moi")
+        # print(obj.home_team.players)
+        team = TeamNoPlayersSerializer(obj.home_team).data
+        # setToCache(key, team, 3600)
         return team
 
     def get_away_team(self, obj):
-        key = "team_" + str(obj.away_team.id)
-        team = getFromCache(key)
-        if team is None:
-            team = TeamSerializer(obj.away_team).data
-            setToCache(key, team, 3600)
+        # key = "team_" + str(obj.away_team.id)
+        # team = getFromCache(key)
+        # if team is None:
+        team = TeamNoPlayersSerializer(obj.away_team).data
+        # setToCache(key, team, 3600)
         return team
 
     class Meta:
@@ -1574,9 +1594,9 @@ class Match2ListSerializer(serializers.ModelSerializer):
         team = getFromCache(key)
         if team is None:
             team = (
-                TeamSerializer(obj.away_team).data
+                TeamSimpleSerializer(obj.away_team).data
                 if self.own_team
-                else TeamSerializer(obj.home_team).data
+                else TeamSimpleSerializer(obj.home_team).data
             )
             setToCache(key, team, 3600)
         return team["current_abbreviation"]
@@ -1773,13 +1793,14 @@ class MatchTeamSerializer(serializers.ModelSerializer):
     players = serializers.SerializerMethodField()
     team_id = serializers.SerializerMethodField()
 
-    def get_players(self, obj):
-        return PlayerNameSerializer(
-            obj.players.filter(
-                playersinteam__team_season__season=self.context.get("season")
-            ),
-            many=True,
+    def get_players(self, obj: TeamsInSeason):
+        season_team_players = PlayersInTeam.objects.filter(team_season=obj).values_list(
+            "player__id", flat=True
+        )
+        players = PlayerNameSerializer(
+            User.objects.filter(id__in=season_team_players), many=True
         ).data
+        return players
 
     def get_team_id(self, obj: TeamsInSeason):
         return obj.team.pk
@@ -1836,6 +1857,9 @@ class ThrowScoreSerializer(serializers.ModelSerializer):
             obj.score_third,
             obj.score_fourth,
         ]
+        for i in range(len(tmp_list)):
+            if tmp_list[i] == "":
+                tmp_list[i] = None
         scores = score_format(tmp_list)
         self.score_first, self.score_second, self.score_third, self.score_fourth = (
             scores

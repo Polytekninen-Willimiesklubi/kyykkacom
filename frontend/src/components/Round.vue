@@ -127,9 +127,11 @@ data.forEach(function (item) {
 })
 
 if (
-  !props.matchData.is_validated
-  && localStorage.teamId == props.matchData.home_team.id 
-  && (localStorage.roleId == 1 || localStorage.roleId == 2)
+  localStorage.roleId == 2 || (
+    !props.matchData.is_validated
+    && localStorage.teamId == props.matchData.home_team.team_id
+    && localStorage.roleId == 1
+  )
 ) {
   showInput.value = true;
 } else {
@@ -137,7 +139,10 @@ if (
 }
 
 function handleRedirect (value, row) {
-  if (row.item.player.id !== undefined) {
+  if (row.item.player === null) {
+    return;
+  }
+  if (row.item.player.id !== undefined || row.item.player.id !== null) {
     location.href = '/pelaajat/' + row.item.player.id;
   }
 }
