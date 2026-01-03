@@ -684,6 +684,13 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 _scaled_points=scaled_points(),
                 round_score=get_correct_round_score(),
             )
+            .alias(
+                clearence=Case(
+                    When(round_score__lte=0, then=1),
+                    default=0,
+                    output_field=SmallIntegerField(),
+                ),
+            )
             .values("season__year", "player")
             .annotate(
                 throws_total=4 * Count("pk") - Sum("non_throws"),
@@ -694,6 +701,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     output_field=CharField(),
                 ),
                 rounds_total=Count("match"),
+                clearence_count=Sum("clearence"),
                 score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
                 score_per_throw=rounded_divison("score_total", "throws_total"),
                 scaled_points=Sum("_scaled_points"),
@@ -721,6 +729,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     "throws_total": 0,
                     "scaled_points": 0,
                     "gteSix_total": 0,
+                    "clearence_count": 0,
                     "weighted_throw_count": 0,
                 }
             for key in all_time_player_stats[player["player"]]:
@@ -756,6 +765,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     player["pikes_total"] = 0
                     player["zeros_total"] = 0
                     player["throws_total"] = 0
+                    player["clearence_count"] = 0
                     player["scaled_points"] = 0
                     player["gteSix_total"] = 0
                     player["weighted_throw_count"] = 0
@@ -1699,6 +1709,14 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                 non_throws=count_non_throws(),
                 weighted_throw_count=F("throw_turn") * (4 - F("non_throws")),
                 _scaled_points=scaled_points(),
+                round_score=get_correct_round_score(),
+            )
+            .alias(
+                clearence=Case(
+                    When(round_score__lte=0, then=1),
+                    default=0,
+                    output_field=SmallIntegerField(),
+                ),
             )
             .values("player")
             .annotate(
@@ -1715,6 +1733,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                 match_count=Count("match", distinct=True),
                 rounds_total=Count("pk"),
                 throws_total=Count("pk") * 4 - Sum("non_throws"),
+                clearence_count=Sum("clearence"),
                 scaled_points=Sum("_scaled_points"),
                 weighted_throw_total=Sum("weighted_throw_count"),
                 season=F("season__year"),
@@ -1747,16 +1766,27 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request: Request, pk=None) -> Response | None:
         assert pk is not None
-        players_data = self.queryset.filter(
-            player=pk, match__match_type__lt=31, match__is_validated=True
-        ).alias(
-            # Cast the scores to integers for >= 6 counting
-            **scores_casted_to_int(),
-            non_throws=count_non_throws(),
-            weighted_throw_count=F("throw_turn") * (4 - F("non_throws")),
-            _scaled_points=scaled_points(),
-            _score_total=F("st") + F("nd") + F("rd") + F("th"),
-            _avg_round_score=F("_score_total") / (4 - F("non_throws")),
+        players_data = (
+            self.queryset.filter(
+                player=pk, match__match_type__lt=31, match__is_validated=True
+            )
+            .alias(
+                # Cast the scores to integers for >= 6 counting
+                **scores_casted_to_int(),
+                non_throws=count_non_throws(),
+                weighted_throw_count=F("throw_turn") * (4 - F("non_throws")),
+                _scaled_points=scaled_points(),
+                _score_total=F("st") + F("nd") + F("rd") + F("th"),
+                _avg_round_score=F("_score_total") / (4 - F("non_throws")),
+                round_score=get_correct_round_score(),
+            )
+            .alias(
+                clearence=Case(
+                    When(round_score__lte=0, then=1),
+                    default=0,
+                    output_field=SmallIntegerField(),
+                ),
+            )
         )
 
         season_data = (
@@ -1778,6 +1808,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                 scaled_points=Sum("_scaled_points"),
                 weighted_throw_total=Sum("weighted_throw_count"),
                 season=F("season__year"),
+                clearence_count=Sum("clearence"),
                 position_one_throws=(
                     4 * Count("pk", filter=Q(throw_turn=1))
                     - Sum("non_throws", filter=Q(throw_turn=1))
@@ -1843,6 +1874,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             zeros=Sum("zeros_total"),
             scores=Sum("score_total"),
             gte_six=Sum("gte_six_total"),
+            clearences=Sum("clearence_count"),
             scaled_points_total=Sum("scaled_points"),
             avg_score=rounded_divison("scores", "throws"),
             avg_scaled_points=rounded_divison("scaled_points_total", "throws"),

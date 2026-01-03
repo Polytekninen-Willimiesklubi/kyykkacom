@@ -66,6 +66,7 @@
                   <td> {{ item.pikes_total }}</td>
                   <td> {{ item.pike_percentage }}</td>
                   <td> {{ item.zeros_total }}</td>
+                  <td> {{ item.clearence_count }}</td>
                   <!-- <td> {{ item.zero_percentage }}</td> -->
                   <td> {{ item.gte_six_total }}</td>
                 </tr>
@@ -302,12 +303,12 @@ function chanceHeaderStat(val) {
   const headers = [
     'Erät', 'Kyykät', 'Heitot', 'KPH', 
     'kHP', 'Hauet', 'H%',
-    'VM' , 'JK'
+    'VM' , 'Tyh.', 'JK'
   ];
   const header_binds = [
     'rounds_total', 'score_total', 'throws_total', 'avg_score',
     'avg_position', 'pikes_total', 'pike_percentage', 'zeros_total', 
-    'gte_six_total'
+    'clearence_count', 'gte_six_total'
   ];
   // 'zero_percentage',
 
