@@ -60,7 +60,7 @@ export const headerPlayers = [
     { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
     { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
     { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
-    { title: 'Tyh.', key: 'clearence_count', width: '1%', align: 'center', tooltip: 'Tyhjennykset (Pelannut tyhjennetyssä erässä)' },
+    // { title: 'Tyh.', key: 'clearence_count', width: '1%', align: 'center', tooltip: 'Tyhjennykset (Pelannut tyhjennetyssä erässä)' },
     { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
