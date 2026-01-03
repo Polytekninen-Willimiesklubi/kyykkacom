@@ -60,6 +60,7 @@ export const headerPlayers = [
     { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
     { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
     { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
+    // { title: 'Tyh.', key: 'clearence_count', width: '1%', align: 'center', tooltip: 'Tyhjennykset (Pelannut tyhjennetyssä erässä)' },
     { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
@@ -76,6 +77,7 @@ export const headerAllPlayersPerSeason = [
     { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
     { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
     { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
+    { title: 'Tyh.', key: 'clearence_count', width: '1%', align: 'center', tooltip: 'Tyhjennykset (Pelannut tyhjennetyssä erässä)' },
     { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
@@ -91,6 +93,7 @@ export const headerAllPlayers = [
     { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
     { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
     { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
+    { title: 'Tyh.', key: 'clearence_count', width: '1%', align: 'center', tooltip: 'Tyhjennykset (Pelannut tyhjennetyssä erässä)' },
     { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
@@ -158,7 +161,8 @@ export const headerPlayerOverallStats = [
     { title: 'H%', key: 'pike_percentage', sortable: false, tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
     { title: 'VM', key: 'zeros', sortable: false, tooltip: 'Virkamiehet: Nollaheitot ilman haukia' },
     // { title: 'VM%', key: 'total_zero_percentage', sortable: false, tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
-    { title: 'JK', key: 'gte_six', sortable: false, tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
+    { title: 'Tyh.', key: 'clearences', align: 'center', tooltip: 'Tyhjennykset (Pelannut tyhjennetyssä erässä)' },
+    { title: 'JK', key: 'gte_six', sortable: false, tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
 export const headerPlayerSeasonStats = [
@@ -173,7 +177,8 @@ export const headerPlayerSeasonStats = [
     { title: 'H%', key: 'pike_percentage', tooltip: 'Hauki-prosentti: Hauet / Kaikki heitot' },
     { title: 'VM', key: 'zeros_total', tooltip: 'Virkamiehet: Nollaheitot ilman haukia' },
     // { title: 'VM%', key: 'zero_percentage', tooltip: 'Virkamies-prosentti: Nollat ilman haukia/ Kaikki heitot' },
-    { title: 'JK', key: 'pike_percentage', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
+    { title: 'Tyh.', key: 'clearence_count', align: 'center', tooltip: 'Tyhjennykset (Pelannut tyhjennetyssä erässä)' },
+    { title: 'JK', key: 'pike_percentage', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
 /********** TEAMS PAGE **********/
@@ -245,7 +250,8 @@ export const headersTeamPlayers = [
     { title: 'H', key: 'pikes_total', width: '1%', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
     { title: 'H%', key: 'pike_percentage', width: '1%', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
     { title: 'VM', key: 'zeros_total', width: '1%', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
-    { title: 'JK', key: 'gteSix_total', width: '1%', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' }
+    { title: 'JK', key: 'gteSix_total', width: '1%', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
+    { title: 'Tyh.', key: 'clearence_count', width: '1%', align: 'center', tooltip: 'Tyhjennykset (Pelannut tyhjennetyssä erässä)' }
 ];
 
 export const headersTeamMatch = [
