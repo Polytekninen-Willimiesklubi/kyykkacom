@@ -177,14 +177,14 @@ class IsCaptainForThrow(permissions.BasePermission):
             if request.user.is_superuser:
                 return True
 
-            home_team_captain = obj.match.home_team.players.filter(
-                is_captain=True
-            ).first()
-            if home_team_captain is None:
-                print(f"Team {obj.match.home_team} has no captain!")
+            player = request.user.playersinteam_set.get(
+                team_season__season=get_current_season()
+            )
+            if player is None or not player.is_captain:
                 return False
 
-            return request.user == home_team_captain.player
+            return player.team_season == obj.match.home_team
+
         except AttributeError:
             print("has_object_permission", request.user.id, obj)
             return False
@@ -222,21 +222,19 @@ class MatchDetailPermission(permissions.BasePermission):
     Else user needs to be captain of the away_team (patchin round scores)
     """
 
-    def has_object_permission(self, request: Request, view, obj: Throw):
+    def has_object_permission(self, request: Request, view, obj: Match):
         if request.user.is_superuser:
             return True
+        player = request.user.playersinteam_set.get(
+            team_season__season=get_current_season()
+        )
+        if player is None or not player.is_captain:
+            return False
+
         if "is_validated" in request.data:  # type: ignore
-            away_captain = obj.match.away_team.players.filter(is_captain=True).first()
-            if away_captain is None:
-                print(f"Team {obj.match.away_team} has no captain!")
-                return False
-            return request.user == away_captain.player
+            return player.team_season == obj.away_team
         else:
-            home_captain = obj.match.home_team.players.filter(is_captain=True).first()
-            if home_captain is None:
-                print(f"Team {obj.match.home_team} has no captain!")
-                return False
-            return request.user == home_captain.player
+            return player.team_season == obj.home_team
 
 
 class IsSuperUserOrAdmin(permissions.BasePermission):
