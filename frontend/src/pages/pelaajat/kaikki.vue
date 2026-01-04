@@ -205,17 +205,13 @@ function handleRedirect (value, row) {
 
 function updateHeaders() {
   if (playerStore.aggregationSetting === 1 && clearenceOption.value === undefined) {
-    console.log("jotain1")
     tableHeaders.value = headerAllPlayersPerSeason;
   } else if (playerStore.aggregationSetting === 1) {
     tableHeaders.value = headerAllPlayersPerSeasonOptional;
-    console.log("jotain2")
   } else if (clearenceOption.value === undefined) {
     tableHeaders.value = headerAllPlayers;
-    console.log("jotain3")
   } else {
     tableHeaders.value = headerAllPlayersOptional;
-    console.log("jotain4")
   }
 }
 
