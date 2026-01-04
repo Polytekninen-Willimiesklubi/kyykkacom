@@ -97,6 +97,39 @@ export const headerAllPlayers = [
     { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
+export const headerAllPlayersPerSeasonOptional = [
+    { title: 'Nimi', key: 'player_name', align: 'left', width: '30%' },
+    { title: 'Kausi', key: 'season', align: 'center', width: '10%' },
+    { title: 'Joukkue', key: 'team_name', align: 'center', width: '10%' },
+    { title: 'E', key: 'rounds_total', align: 'center', tooltip: 'Pelatut Erät' },
+    { title: 'K', key: 'score_total', align: 'center', tooltip: 'Poistetut Kyykät' },
+    { title: 'KPH', key: 'score_per_throw', align: 'center', tooltip: 'Kyykkää Per Heitto', sort: nanSort },
+    { title: 'SP', key: 'scaled_points', align: 'center', tooltip: 'Skaalatut Pisteet: S=2n*(h+w)/10, missä h: heittopaikka, w: Heittäjän 1./2. heitoilta 9, 3./4. 13, n: Poistetut kyykät' },
+    { title: 'SPPH', key: 'scaled_points_per_throw', align: 'center', tooltip: 'Skaalatut Pisteet Per Heitto', sort: nanSort },
+    { title: 'kHP', key: 'avg_throw_turn', align: 'center', tooltip: 'Keskimääräinen Heittopaikka', sort: nanSort },
+    { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
+    { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
+    { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
+    { title: 'TH', key: 'clearence_throws_total', width: '1%', align: 'center', tooltip: 'Tyhjennys heitot (Heitto joka tyhjensi erän)' },
+    { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
+];
+
+export const headerAllPlayersOptional = [
+    { title: 'Nimi', key: 'player_name', align: 'start', width: '30%' },
+    { title: 'Kaudet', key: 'season_count', align: 'center', width: '5%', tooltip: 'Kaikki pelatut kaudet' },
+    { title: 'E', key: 'rounds_total', align: 'center', tooltip: 'Pelatut Erät' },
+    { title: 'K', key: 'score_total', align: 'center', tooltip: 'Poistetut Kyykät' },
+    { title: 'KPH', key: 'score_per_throw', align: 'center', tooltip: 'Kyykkää Per Heitto', sort: nanSort },
+    { title: 'SP', key: 'scaled_points', align: 'center', tooltip: 'Skaalatut Pisteet: S=2n*(h+w)/10, missä h: heittopaikka, w: Heittäjän 1./2. heitoilta 9, 3./4. 13, n: Poistetut kyykät' },
+    { title: 'SPPH', key: 'scaled_points_per_throw', align: 'center', tooltip: 'Skaalatut Pisteet Per Heitto', sort: nanSort },
+    { title: 'kHP', key: 'avg_throw_turn', align: 'center', tooltip: 'Keskimääräinen Heittopaikka', sort: nanSort },
+    { title: 'H', key: 'pikes_total', align: 'center', tooltip: 'Heitetyt Hauet (Ohi heitto)' },
+    { title: 'H%', key: 'pike_percentage', align: 'center', tooltip: 'Hauki prosentti (heityt hauet/kaikki heitot)', sort: nanSort },
+    { title: 'VM', key: 'zeros_total', align: 'center', tooltip: 'Virkamiehet (ei-hauki-nolla-heitto)' },
+    { title: 'TH', key: 'clearence_throws_total', width: '1%', align: 'center', tooltip: 'Tyhjennys heitot (Heitto joka tyhjensi erän)' },
+    { title: 'JK', key: 'gte_six_total', align: 'center', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
+];
+
 
 /********** PLAYER PAGE **********/
 

@@ -690,6 +690,14 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     default=0,
                     output_field=SmallIntegerField(),
                 ),
+                clearence_throws=Case(
+                    When(Q(throw_turn=1) & Q(round_score__in=[-7, -6]), then=1),
+                    When(Q(throw_turn=2) & Q(round_score__in=[-5, -4]), then=1),
+                    When(Q(throw_turn=3) & Q(round_score__in=[-3, -2]), then=1),
+                    When(Q(throw_turn=4) & Q(round_score__in=[-1, 0]), then=1),
+                    default=0,
+                    type=SmallIntegerField(),
+                ),
             )
             .values("season__year", "player")
             .annotate(
@@ -702,6 +710,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 ),
                 rounds_total=Count("match"),
                 clearence_count=Sum("clearence"),
+                clearence_throws_total=Sum("clearence_throws"),
                 score_total=Sum("st") + Sum("nd") + Sum("rd") + Sum("th"),
                 score_per_throw=rounded_divison("score_total", "throws_total"),
                 scaled_points=Sum("_scaled_points"),
@@ -730,6 +739,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     "scaled_points": 0,
                     "gteSix_total": 0,
                     "clearence_count": 0,
+                    "clearence_throws_total": 0,
                     "weighted_throw_count": 0,
                 }
             for key in all_time_player_stats[player["player"]]:
@@ -766,6 +776,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     player["zeros_total"] = 0
                     player["throws_total"] = 0
                     player["clearence_count"] = 0
+                    player["clearence_throws_total"] = 0
                     player["scaled_points"] = 0
                     player["gteSix_total"] = 0
                     player["weighted_throw_count"] = 0
@@ -1717,6 +1728,14 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                     default=0,
                     output_field=SmallIntegerField(),
                 ),
+                clearence_throws=Case(
+                    When(Q(throw_turn=1) & Q(round_score__in=[-7, -6]), then=1),
+                    When(Q(throw_turn=2) & Q(round_score__in=[-5, -4]), then=1),
+                    When(Q(throw_turn=3) & Q(round_score__in=[-3, -2]), then=1),
+                    When(Q(throw_turn=4) & Q(round_score__in=[-1, 0]), then=1),
+                    default=0,
+                    type=SmallIntegerField(),
+                ),
             )
             .values("player")
             .annotate(
@@ -1734,6 +1753,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                 rounds_total=Count("pk"),
                 throws_total=Count("pk") * 4 - Sum("non_throws"),
                 clearence_count=Sum("clearence"),
+                clearence_throws_total=Sum("clearence_throws"),
                 scaled_points=Sum("_scaled_points"),
                 weighted_throw_total=Sum("weighted_throw_count"),
                 season=F("season__year"),
@@ -1786,6 +1806,14 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                     default=0,
                     output_field=SmallIntegerField(),
                 ),
+                clearence_throws=Case(
+                    When(Q(throw_turn=1) & Q(round_score__in=[-7, -6]), then=1),
+                    When(Q(throw_turn=2) & Q(round_score__in=[-5, -4]), then=1),
+                    When(Q(throw_turn=3) & Q(round_score__in=[-3, -2]), then=1),
+                    When(Q(throw_turn=4) & Q(round_score__in=[-1, 0]), then=1),
+                    default=0,
+                    type=SmallIntegerField(),
+                ),
             )
         )
 
@@ -1809,6 +1837,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                 weighted_throw_total=Sum("weighted_throw_count"),
                 season=F("season__year"),
                 clearence_count=Sum("clearence"),
+                clearence_throws_total=Sum("clearence_throws"),
                 position_one_throws=(
                     4 * Count("pk", filter=Q(throw_turn=1))
                     - Sum("non_throws", filter=Q(throw_turn=1))

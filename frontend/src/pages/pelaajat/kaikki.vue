@@ -52,7 +52,7 @@
             </template>
           </v-btn-toggle>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="2">
           <v-btn-toggle
             v-model="playerStore.playoffFiltter"
             variant="outlined"
@@ -82,7 +82,7 @@
             variant="outlined"
             divided
             mandatory
-            @update:model-value="tableHeaders = playerStore.aggregationSetting === 1 ? headerAllPlayersPerSeason : headerAllPlayers"
+            @update:model-value="updateHeaders()"
           >
             <v-tooltip
               location="top"
@@ -98,6 +98,28 @@
             >
               <template #activator="{ props }">
                 <v-btn v-bind="props" size="x-small" text="Per Kausi" :value="1"/>
+              </template>
+            </v-tooltip>
+          </v-btn-toggle>
+        </v-col>
+        <v-col cols="1">
+          <v-btn-toggle
+            v-model="clearenceOption"
+            variant="outlined"
+            @update:model-value="updateHeaders()"
+          >
+            <v-tooltip
+              location="top"
+              text="Asetukset (nyt vain tyhjennys heitto vs. pelasi tyhjennetyssä erässä)"
+            >
+              <template #activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  size="small"
+                  variant="outlined"
+                  icon="mdi-settings"
+                  
+                />
               </template>
             </v-tooltip>
           </v-btn-toggle>
@@ -156,7 +178,12 @@
 <script setup>
 import { usePlayerStore } from '@/stores/players.store';
 import { useTeamsStore } from '@/stores/teams.store'
-import { headerAllPlayers, headerAllPlayersPerSeason } from '@/stores/headers';
+import { 
+  headerAllPlayers, 
+  headerAllPlayersPerSeason,
+  headerAllPlayersOptional,
+  headerAllPlayersPerSeasonOptional 
+} from '@/stores/headers';
 
 const teamStore = useTeamsStore();
 const playerStore = usePlayerStore();
@@ -170,9 +197,26 @@ const sortBy = ref([{key: 'rounds_total', order:'desc'}]);
 const tableHeaders = ref(headerAllPlayersPerSeason);
 const search = ref('');
 const filtterEmpty = ref(undefined);
+const clearenceOption = ref(undefined);
 
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.player_id;
+}
+
+function updateHeaders() {
+  if (playerStore.aggregationSetting === 1 && clearenceOption.value === undefined) {
+    console.log("jotain1")
+    tableHeaders.value = headerAllPlayersPerSeason;
+  } else if (playerStore.aggregationSetting === 1) {
+    tableHeaders.value = headerAllPlayersPerSeasonOptional;
+    console.log("jotain2")
+  } else if (clearenceOption.value === undefined) {
+    tableHeaders.value = headerAllPlayers;
+    console.log("jotain3")
+  } else {
+    tableHeaders.value = headerAllPlayersOptional;
+    console.log("jotain4")
+  }
 }
 
 </script>
