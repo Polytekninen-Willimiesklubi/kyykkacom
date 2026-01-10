@@ -12,27 +12,7 @@
             hide-details
           />
         </v-col>
-        <v-col cols="2" align="center">
-          <v-btn-toggle
-            v-model="filtterEmpty"
-            variant="outlined"
-          >
-            <v-tooltip
-              location="top"
-              text="Suodata pelaamattomat pelaajat"
-            >
-              <template #activator="{ props }">
-                <v-btn
-                  size="small"
-                  v-bind="props"
-                  :value="1" 
-                  icon="mdi-filter-variant" 
-                  @click="playerStore.emptyFiltter = !playerStore.emptyFiltter"
-                />
-              </template>
-            </v-tooltip>
-          </v-btn-toggle>
-        </v-col>
+        <v-spacer/>
         <v-col cols="2">
           <v-btn-toggle
             v-model="playerStore.playersPositionsToggle"
@@ -52,6 +32,7 @@
             </template>
           </v-btn-toggle>
         </v-col>
+        <v-spacer/>
         <v-col cols="2">
           <v-btn-toggle
             v-model="playerStore.playoffFiltter"
@@ -76,13 +57,14 @@
             </template>
           </v-btn-toggle>
         </v-col>
+        <v-spacer/>
         <v-col cols="2">
           <v-btn-toggle
             v-model="playerStore.aggregationSetting"
             variant="outlined"
             divided
             mandatory
-            @update:model-value="updateHeaders()"
+            @update:model-value="updateHeaders"
           >
             <v-tooltip
               location="top"
@@ -102,27 +84,77 @@
             </v-tooltip>
           </v-btn-toggle>
         </v-col>
+        <v-spacer/>
         <v-col cols="1">
-          <v-btn-toggle
-            v-model="clearenceOption"
-            variant="outlined"
-            @update:model-value="updateHeaders()"
+          <v-menu
+            v-model="showMenu"
+            :target="menuTarget"
+            :close-on-content-click="false"
+            location="bottom"
+            max-width="300px"
           >
-            <v-tooltip
-              location="top"
-              text="Asetukset (nyt vain tyhjennys heitto vs. pelasi tyhjennetyssä erässä)"
-            >
-              <template #activator="{ props }">
-                <v-btn
-                  v-bind="props"
-                  size="small"
-                  variant="outlined"
-                  icon="mdi-settings"
-                  
+            <template #activator="{ props: menu }">
+              <v-tooltip
+                location="top"
+                text="Suodatus asetuksia"
+              >
+                <template #activator="{ props: tooltip }">
+                  <v-btn
+                    v-bind="mergeProps(menu, tooltip)"
+                    size="small"
+                    class="square-btn"
+                    variant="outlined"
+                    icon="mdi-settings"
+                    :active="settingsActive"
+                  />
+                </template>
+              </v-tooltip>
+            </template>
+            <v-list>
+              <v-list-item>
+                <v-switch
+                  v-model="clearenceOption"
+                  color="red"
+                  :label="'Vaihda tyhjennys (' + (clearenceOption ? 'TH' : 'Tyh.') + ')'"
+                  @update:model-value="updateHeaders();checkActive()"
                 />
-              </template>
-            </v-tooltip>
-          </v-btn-toggle>
+              </v-list-item>
+              <v-list-item>
+                <v-radio-group 
+                  color="red" 
+                  v-model="percentOption"
+                  @update:model-value="updateHeaders();checkActive()"
+                  inline
+                >
+                  <v-radio label="H%" value="H%"/>
+                  <v-radio label="VM%" value="VM%"/>
+                  <v-radio label="H+VM%" value="H+VM%"/>
+                </v-radio-group>
+              </v-list-item>
+              <v-list-item>
+                <v-row>
+                  <v-col cols="9">
+                    <v-switch
+                      v-model="playerStore.emptyFiltter"
+                      color="red"
+                      :label="'Näytä >' + playerStore.emptyFilterThreshold + ' erää pelanneet'"
+                      @update:model-value="updateHeaders();checkActive()"
+                    />
+                  </v-col>
+                  <v-col cols="3">
+                    <v-text-field 
+                      v-model="playerStore.emptyFilterThreshold"
+                      type="number"
+                      min="0"
+                      max="99"
+                      maxlength="2"
+                      hide-spin-buttons
+                    />
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </v-col>
       </v-row>
       <v-data-table
@@ -178,12 +210,8 @@
 <script setup>
 import { usePlayerStore } from '@/stores/players.store';
 import { useTeamsStore } from '@/stores/teams.store'
-import { 
-  headerAllPlayers, 
-  headerAllPlayersPerSeason,
-  headerAllPlayersOptional,
-  headerAllPlayersPerSeasonOptional 
-} from '@/stores/headers';
+import { headerAllPlayersTemplate } from '@/stores/headers';
+import { mergeProps } from 'vue';
 
 const teamStore = useTeamsStore();
 const playerStore = usePlayerStore();
@@ -194,30 +222,75 @@ teamStore.getTeams();
 
 // Setting sortBy stops the resetting after filtering is applied
 const sortBy = ref([{key: 'rounds_total', order:'desc'}]);
-const tableHeaders = ref(headerAllPlayersPerSeason);
+const tableHeaders = ref(headerAllPlayersTemplate);
 const search = ref('');
-const filtterEmpty = ref(undefined);
-const clearenceOption = ref(undefined);
+
+// Filter options
+const showMenu = ref(false);
+const menuTarget = ref(null);
+const clearenceOption = ref(false);
+const settingsActive = ref(false);
+const percentOption = ref("H%");
 
 function handleRedirect (value, row) {
   location.href = '/pelaajat/' + row.item.player_id;
 }
 
 function updateHeaders() {
-  if (playerStore.aggregationSetting === 1 && clearenceOption.value === undefined) {
-    tableHeaders.value = headerAllPlayersPerSeason;
-  } else if (playerStore.aggregationSetting === 1) {
-    tableHeaders.value = headerAllPlayersPerSeasonOptional;
-  } else if (clearenceOption.value === undefined) {
-    tableHeaders.value = headerAllPlayers;
-  } else {
-    tableHeaders.value = headerAllPlayersOptional;
-  }
+  // Filter headers from template: first by season settings
+  const seasonFilteredHeaders = headerAllPlayersTemplate.filter(header => {
+    if (playerStore.aggregationSetting === 1) {
+      return header.key !== 'season_count';
+    } else if (playerStore.aggregationSetting === 2) {
+      return header.key !== 'season' && header.key !== 'team_name';
+    }
+    return true;
+  });
+  // Then by percent option
+  const precentFilteredHeaders = seasonFilteredHeaders.filter(header => {
+    if (percentOption.value === "H%") {
+      return header.key !== 'zero_percentage' && header.key !== 'combined_percentage' && header.key !== 'combined_total';
+    } else if (percentOption.value === "VM%") {
+      return header.key !== 'pike_percentage' && header.key !== 'combined_percentage' && header.key !== 'combined_total';
+    } else if (percentOption.value === "H+VM%") {
+      return header.key !== 'pike_percentage' && header.key !== 'zero_percentage' && header.key !== 'pikes_total' && header.key !== 'zeros_total';
+    }
+    return true;
+  });
+  // Finally by clearence option
+  const headerAllPlayersPerSeason = precentFilteredHeaders.filter(header => {
+    if (clearenceOption.value) {
+      return header.key !== 'clearence_count';
+    } else {
+      return header.key !== 'clearence_throws_total';
+    }
+  });
+  
+  tableHeaders.value = headerAllPlayersPerSeason;
 }
 
+function checkActive() {
+  settingsActive.value = (clearenceOption.value || percentOption.value !== "H%" || playerStore.emptyFiltter);
+}
+
+
+updateHeaders();
 </script>
 <style scoped>
 tbody tr :hover {
   cursor: unset;
+}
+
+.square-btn {
+  min-width: 48px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-color: #e5e7eb;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 </style>

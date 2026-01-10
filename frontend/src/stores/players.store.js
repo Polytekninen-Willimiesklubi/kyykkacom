@@ -31,8 +31,9 @@ export const usePlayerStore = defineStore('players', () => {
   const playerMatchesPerMatch = ref([]);
   const playersPositionsToggle = ref([]); // Used in players index page
   const emptyFilter = ref(false);
+  const emptyFilterThreshold = ref(0);
   const playoffFilter = ref(0);
-  const aggregationSetting = ref(0); // 0: One season, 1: All season seperatly, 2: All players per season
+  const aggregationSetting = ref(0); // 0: One season, 1: All season seperatly 2: All players per season
 
   // Pre-Filtter that is for internal use only. This is applied before position filtter
   // and should lead better performance
@@ -103,6 +104,7 @@ export const usePlayerStore = defineStore('players', () => {
             score_total: 0,
             pikes_total: 0,
             zeros_total: 0,
+            combined_total: 0,
             gte_six_total: 0,
             match_count: 0,
             rounds_total: 0,
@@ -112,6 +114,8 @@ export const usePlayerStore = defineStore('players', () => {
             clearence_throws_total: 0,
             weighted_throw_total: 0,
             pike_percentage: Number.NaN,
+            zero_percentage: Number.NaN,
+            combined_percentage: Number.NaN,
             avg_throw_turn: Number.NaN,
             score_per_throw: Number.NaN,
             scaled_points_per_throw: Number.NaN,
@@ -123,6 +127,14 @@ export const usePlayerStore = defineStore('players', () => {
           }
           extractedData.pike_percentage = divide_round(
             extractedData.pikes_total * 100, extractedData.throws_total
+          );
+          extractedData.zero_percentage = divide_round(
+            extractedData.zeros_total * 100, extractedData.throws_total
+          );
+          extractedData.combined_total = extractedData.pikes_total + extractedData.zeros_total;
+          extractedData.combined_percentage = divide_round(
+            extractedData.combined_total * 100,
+            extractedData.throws_total
           );
           extractedData.avg_throw_turn = divide_round(
             extractedData.weighted_throw_total, extractedData.throws_total
@@ -137,7 +149,12 @@ export const usePlayerStore = defineStore('players', () => {
         }
         return acc;
       }, [])
+      if (emptyFilter.value) {
+        const roundReducedData = filteredData.filter(obj => obj.rounds_total > emptyFilterThreshold.value)
+        return roundReducedData;
+      }
       return filteredData;
+
     } else if (aggregationSetting.value === 0 || aggregationSetting.value === 2) {
       let listId = 0
       const filteredData = Object.values(jotain).reduce((acc, playerStats) => {
@@ -151,6 +168,7 @@ export const usePlayerStore = defineStore('players', () => {
           score_total: 0,
           pikes_total: 0,
           zeros_total: 0,
+          combined_total: 0,
           gte_six_total: 0,
           match_count: 0,
           rounds_total: 0,
@@ -160,6 +178,8 @@ export const usePlayerStore = defineStore('players', () => {
           clearence_count: 0,
           clearence_throws_total: 0,
           pike_percentage: Number.NaN,
+          zero_percentage: Number.NaN,
+          combined_percentage: Number.NaN,
           avg_throw_turn: Number.NaN,
           score_per_throw: Number.NaN,
           scaled_points_per_throw: Number.NaN,
@@ -171,6 +191,14 @@ export const usePlayerStore = defineStore('players', () => {
         }
         extractedData.pike_percentage = divide_round(
           extractedData.pikes_total * 100, extractedData.throws_total
+        );
+        extractedData.zero_percentage = divide_round(
+          extractedData.zeros_total * 100, extractedData.throws_total
+        );
+        extractedData.combined_total = extractedData.pikes_total + extractedData.zeros_total;
+        extractedData.combined_percentage = divide_round(
+          extractedData.combined_total * 100,
+          extractedData.throws_total
         );
         extractedData.avg_throw_turn = divide_round(
           extractedData.weighted_throw_total, extractedData.throws_total
@@ -184,7 +212,12 @@ export const usePlayerStore = defineStore('players', () => {
         acc.push(extractedData);
         return acc
       }, []);
-      return filteredData
+
+      if (emptyFilter.value) {
+        const roundReducedData = filteredData.filter(obj => obj.rounds_total > emptyFilterThreshold.value)
+        return roundReducedData;
+      }
+      return filteredData;
     }
   })
 
@@ -238,6 +271,7 @@ export const usePlayerStore = defineStore('players', () => {
     playerMatchesPerMatch,
     playersPositionsToggle,
     playersPostionFilttered,
+    emptyFilterThreshold,
     emptyFiltter: emptyFilter,
     playoffFiltter: playoffFilter,
     aggregationSetting,
