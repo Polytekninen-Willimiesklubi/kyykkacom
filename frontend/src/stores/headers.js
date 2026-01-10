@@ -91,7 +91,7 @@ export const headerAllPlayersTemplate = [
 /********** PLAYER PAGE **********/
 
 export const headersPlayerPeriod = [
-    { title: 'Aika', key: 'match_time' },
+    { title: 'Aika', key: 'time' },
     { title: 'Vastustaja', key: 'oppenent_name' },
     { title: 'Erä', key: 'throw_round' },
     { title: 'HP', key: 'throw_turn', tooltip: 'Heittopaikka' },
@@ -111,7 +111,7 @@ export const headersPlayerPeriod = [
 ];
 
 export const headersPlayerGames = [
-    { title: 'Aika', key: 'match_time' },
+    { title: 'Aika', key: 'time' },
     { title: 'Vastustaja', key: 'opponent_name' },
     { title: '1.HP', key: 'position_one', tooltip: '1. erän heittopaikka' },
     { title: '2.HP', key: 'position_two', tooltip: '2. erän heittopaikka' },

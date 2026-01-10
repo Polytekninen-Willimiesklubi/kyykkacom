@@ -99,7 +99,7 @@
                         <span> {{ column.title }} </span>
                         <v-tooltip v-if="column.tooltip"
                           activator="parent"
-                          location="bottom"
+                          location="top"
                           :text="column.tooltip"
                         />
                         <template v-if="isSorted(column)">
@@ -154,13 +154,13 @@
         <v-expansion-panel title="Ottelut">
           <v-expansion-panel-text>
             <v-text-field 
-                class="mb-10 mt-0" 
-                style="width: 50%;"
-                color="red"
-                v-model="matchSearch"
-                label="Etsi Otteluja"
-                single-line
-              />
+              class="mb-10 mt-0" 
+              style="width: 50%;"
+              color="red"
+              v-model="matchSearch"
+              label="Etsi Otteluja"
+              single-line
+            />
             <v-data-table 
               :mobile-breakpoint="0"
               @click:row="handleRedirectMatches"
@@ -170,6 +170,7 @@
               :loading="teamStore.singleLoading"
               loading-text="Ladataan otteluita..."
               no-data-text="Ei pelattuja otteluita :("
+              :sort-by="[{key: 'match_time', order:'desc'}]"
               :items="teamStore.matches"
               density="compact"
             >
@@ -185,7 +186,7 @@
                         {{ column.title }}
                         <v-tooltip v-if="column.tooltip"
                           activator="parent"
-                          location="bottom"
+                          location="top"
                           :text="column.tooltip"
                         />
                         <template v-if="isSorted(column)">

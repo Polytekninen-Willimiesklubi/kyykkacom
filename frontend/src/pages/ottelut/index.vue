@@ -33,7 +33,6 @@
                 </v-list-item>
               </template>
             </v-select>
-            {{ matchStore.selection }}
           </v-col>
           <v-spacer />
           <v-col cols="2" align="center" v-if="(

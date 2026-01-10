@@ -2071,6 +2071,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                     + F("match__home_second_round_score"),
                     output_field=SmallIntegerField(),
                 ),
+                season_name=F("season__year"),
             )
         )
 
