@@ -1,3 +1,4 @@
+import cup_30_2 from './cup_template_30_teams_2.json';
 import cup_30 from './cup_template_30_teams.json';
 import cup_22 from './cup_template_22_teams.json';
 import cup_16 from './cup_template_16_teams.json';
@@ -16,5 +17,6 @@ export const seasonsMappings = {
     5: cup_6,
     6: cup_12,
     7: super_cup_15,
-    8: cup_30
+    8: cup_30,
+    18: cup_30_2,
 }
