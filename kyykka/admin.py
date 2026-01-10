@@ -46,17 +46,31 @@ class TeamsInSeasonAdmin(admin.ModelAdmin):
 
 
 class PlayersInTeamAdmin(admin.ModelAdmin):
+    search_fields = ["current_abbreviation"]
     inlines = (PlayersInTeamInline,)
 
 
+class PlayerSearchAdmin(admin.ModelAdmin):
+    search_fields = [
+        "team_season__current_abbreviation",
+        "team_season__season__year",
+        "player__first_name",
+        "player__last_name",
+    ]
+
+
 class ThrowsAdmin(admin.ModelAdmin):
+    search_fields = [
+        "home_team__current_abbreviation",
+        "away_team__current_abbreviation",
+    ]
     inlines = (ThrowsInMatchInline,)
 
 
 admin.site.register(TeamsInSeason, PlayersInTeamAdmin)
 admin.site.register(Team)
 admin.site.register(Season, TeamsInSeasonAdmin)
-admin.site.register(PlayersInTeam)
+admin.site.register(PlayersInTeam, PlayerSearchAdmin)
 admin.site.register(Match, ThrowsAdmin)
 admin.site.register(Throw)
 admin.site.register(CurrentSeason)
