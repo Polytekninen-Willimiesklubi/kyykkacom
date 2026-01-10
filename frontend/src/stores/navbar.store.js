@@ -24,12 +24,14 @@ export const useNavBarStore = defineStore('navbar', () => {
     const playoffLines = computed(() => {
         if (playoffFormat.value === undefined) return [];
         if (seasonsMappings[playoffFormat.value] == undefined) return [];
+        if (selectedSeason.value.id == 27) return seasonsMappings[18].playoffLines;
         return seasonsMappings[playoffFormat.value].playoffLines
     });
 
     const secondStagePlayoffLines = computed(() => {
         if (playoffFormat.value === undefined) return [];
         if (seasonsMappings[playoffFormat.value] == undefined) return [];
+        if (selectedSeason.value.id == 27) return seasonsMappings[18].playoffLines;
         return seasonsMappings[playoffFormat.value].second_playofflines
     });
 

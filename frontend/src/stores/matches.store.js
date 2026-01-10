@@ -9,7 +9,8 @@ export default defineStore('matches', () => {
     const loaded = ref(false);
     const loading = ref(false);
     const selectedBrackets = ref([]);
-    const timeFilterMode = ref(null);
+    const timeFilterMode = ref(0);
+    const selectedTeamsFilter = shallowRef([]);
 
     const superWeekendMatches = computed(() => {
         return matches.value.filter(match => match.match_type >= 31);
@@ -29,15 +30,19 @@ export default defineStore('matches', () => {
 
     const selectedMatches = computed(() => {
         if (selection.value === 'Runkosarja') {
-            return selectionFilttering(regularSeasonMatches.value);
+            return teamFilter(selectionFilttering(regularSeasonMatches.value));
         } else if (selection.value === 'Pudotuspelit') {
-            return postSeasonMatches.value;
+            return teamFilter(timeFilter(postSeasonMatches.value));
         } else if (selection.value === 'Jatkosarja') {
-            return regularSeasonMatches.value.filter(match => match.match_type === 11);
+            return teamFilter(timeFilter(regularSeasonMatches.value.filter(match => match.match_type === 11)));
         } else if (selection.value === 'SuperWeekend') {
-            return superWeekendMatches.value;
+            return teamFilter(timeFilter(superWeekendMatches.value));
+        } else if (selection.value === 'Videot') {
+            return teamFilter(timeFilter(matches.value.filter(match => match.video_link != null)));
+        } else if (selection.value === 'Striimit') {
+            return teamFilter(timeFilter(matches.value.filter(match => match.stream_link != null)))
         } else {
-            return selectionFilttering(matches.value);
+            return teamFilter(selectionFilttering(matches.value));
         }
     });
 
@@ -89,6 +94,56 @@ export default defineStore('matches', () => {
     };
 
     // Internal function. No need to export
+    function teamFilter(matches) {
+        if (!selectedTeamsFilter.value.length) {
+            return matches;
+        }
+
+        return matches.filter((match) =>
+            selectedTeamsFilter.value.includes(match.home_team.id)
+            || selectedTeamsFilter.value.includes(match.away_team.id)
+        );
+    }
+
+    // Internal function. No need to export
+    function timeFilter(matches) {
+        const today = new Date();
+        let startTime;
+        let endTime;
+        if (!timeFilterMode.value) {
+            return matches;
+        } else if (timeFilterMode.value === 1) { // yesterday
+            endTime = today.getDate();
+            startTime = endTime + 1;
+        } else if (timeFilterMode.value === 2) { // today
+            startTime = today.getDate();
+            endTime = startTime + 1;
+        } else if (timeFilterMode.value === 3) { // tomorrow
+            startTime = today.getDate() + 1;
+            endTime = startTime + 1;
+        } else if (timeFilterMode.value === 4 || timeFilterMode.value === 5 || timeFilterMode.value === 6) { // last week, this week, next week
+            // Find out what day is monday relative to this day
+            const dayOfWeek = today.getDay();
+            const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; // Move to monday
+            startTime = today.getDate() + diffToMonday;
+            if (timeFilterMode.value === 4) { // last week
+                startTime -= 7;
+            } else if (timeFilterMode.value === 6) { // next week
+                startTime += 7;
+            }
+            endTime = startTime + 7;
+        } else {
+            throw new Error("Unrecognized time filter mode");
+        }
+        const timeStart = new Date(today.getFullYear(), today.getMonth(), startTime);
+        const timeEnd = new Date(today.getFullYear(), today.getMonth(), endTime);
+        return matches.filter(match => {
+            const timestampDate = new Date(match.match_time);
+            return timestampDate >= timeStart && timestampDate < timeEnd;
+        });
+    }
+
+    // Internal function. No need to export
     function selectionFilttering(matches) {
         if (!selectedBrackets.value.length && !timeFilterMode.value) {
             return matches;
@@ -101,35 +156,7 @@ export default defineStore('matches', () => {
             .filter((match) =>
                 accetableTeamIds.includes(match.home_team.id) || accetableTeamIds.includes(match.away_team.id)
             );
-        const today = new Date();
-        let startTime;
-        let endTime;
-        if (!timeFilterMode.value) {
-            return filtteredTeamsByBracket;
-        } else if (timeFilterMode.value === 3) { // today
-            startTime = today.getDate();
-            endTime = startTime + 1;
-        } else if (timeFilterMode.value === 4 || timeFilterMode.value === 6) { // this week and next
-            // Find out what day is monday relative to this day
-            const dayOfWeek = today.getDay();
-            const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; // Siirry maanantaihin
-            startTime = today.getDate() + diffToMonday;
-            if (timeFilterMode.value === 6) {
-                startTime += 7;
-            }
-            endTime = startTime + 7;
-        } else if (timeFilterMode.value === 5) { // tomorrow
-            startTime = today.getDate() + 1;
-            endTime = startTime + 1;
-        } else {
-            throw new Error("Something went wrong");
-        }
-        const timeStart = new Date(today.getFullYear(), today.getMonth(), startTime);
-        const timeEnd = new Date(today.getFullYear(), today.getMonth(), endTime);
-        return filtteredTeamsByBracket.filter(match => {
-            const timestampDate = new Date(match.match_time);
-            return timestampDate >= timeStart && timestampDate < timeEnd;
-        });
+        return timeFilter(filtteredTeamsByBracket);
     }
 
     return {
@@ -141,6 +168,7 @@ export default defineStore('matches', () => {
         postSeasonMatches,
         excludingSuperMatches,
         regularSeasonMatches,
+        selectedTeamsFilter,
         selectedMatches,
         selectedBrackets,
         timeFilterMode,

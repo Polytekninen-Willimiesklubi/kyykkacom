@@ -114,41 +114,93 @@
           />
         </v-col>
       </v-row>
-      <v-row>
-        <v-col cols="2">
-          <v-switch
-            class='pl-2'
-            v-model="sortGamesSwitch"
-            true-value="Peleittäin"
-            false-value="Erittäin"
-            :label="`${sortGamesSwitch}`"
-            @update:modelValue="filtterItems"
-          />
-        </v-col>
-        <v-col cols="2">
-          <v-switch
-            v-model="filterGamesSwitch"
-            true-value="Valitut kaudet"
-            false-value="Kaikki kaudet"
-            :label="`${filterGamesSwitch}`"
-            @update:modelValue="filtterItems"
-          />
-        </v-col>
-        <v-spacer/>
-      </v-row>
-      <v-row>
+      <v-row class="mt-10">
         <v-col cols="2">
           <v-text-field
-            class='pl-2'
+            class='pl-5'
             color="red"
             v-model="search"
             label="Etsi"
             single-line
             variant="outlined"
-          />
-        </v-col>
+            />
+          </v-col>
+          <v-col cols="1"/>
+          <v-col cols="2">
+            <v-btn-toggle
+              v-model="sortGamesSwitch"
+              variant="outlined"
+              @update:modelValue="filtterItems"
+              divided
+              mandatory
+            >
+              <v-tooltip
+                location="top"
+                text="Näytä ottelut peleittäin (1. ja 2. erä yhdessä)"
+              >
+                <template #activator="{ props }">
+                  <v-btn
+                    size="small"
+                    text="Peleittäin"
+                    value="Peleittäin"
+                    v-bind="props"
+                  />
+                </template>
+              </v-tooltip>
+              <v-tooltip
+                location="top"
+                text="Näytä ottelut erittäin"
+              >
+                <template #activator="{ props }">
+                  <v-btn
+                    size="small"
+                    text="Erittäin"
+                    value="Erittäin"
+                    v-bind="props"
+                  />
+                </template>
+              </v-tooltip>
+            </v-btn-toggle>
+          </v-col>
+          <v-col cols="1"/> <!-- Spacer -->
+          <v-col cols="3">
+            <v-btn-toggle
+              v-model="filterGamesSwitch"
+              variant="outlined"
+              @update:modelValue="filtterItems"
+              divided
+              mandatory
+            >
+              <v-tooltip
+                location="top"
+                text="Näytä kaikki ottelut kautta ajan"
+              >
+                <template #activator="{ props }">
+                  <v-btn
+                    size="small"
+                    text="Kaikki kaudet"
+                    value="Kaikki kaudet"
+                    v-bind="props"
+                  />
+                </template>
+              </v-tooltip>
+              <v-tooltip
+                location="top"
+                text="Näytä vain valitujen kausien ottelut (valitse kaudet ylläolevasta taulukosta)"
+              >
+                <template #activator="{ props }">
+                  <v-btn
+                    size="small"
+                    text="Valitut kaudet"
+                    value="Valitut kaudet"
+                    v-bind="props"
+                  />
+                </template>
+              </v-tooltip>
+            </v-btn-toggle>
+          </v-col>
       </v-row>
-      <v-row>
+      <v-row class="mt-0 pt-0" >
         <v-col>
           <v-data-table
             :mobile-breakpoint="0"
@@ -158,6 +210,7 @@
             :headers="matchHeaders"
             :items="matchItems"
             :loading="playerStore.loadingPlayer"
+            :sort-by="[{key: 'time', order:'desc'}]"
             no-data-text="Ei dataa :("
             loading-text="Ladataan kausia..."
             density="compact"
@@ -170,7 +223,7 @@
             <template v-for="header in matchHeaders"
               #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
             >
-              <v-tooltip :text="column.tooltip" v-if="column.tooltip">
+              <v-tooltip :text="column.tooltip" location="top" v-if="column.tooltip">
                 <template #activator="{ props }">
                   <div class="v-data-table-header__content" v-bind="props">
                     <span @click="() => toggleSort(column)">{{ column.title }}</span>
@@ -191,7 +244,7 @@
                 </div>
               </template>
             </template>
-            <template #item.match_time="{ item }">
+            <template #item.time="{ item }">
               <span>{{ date.formatByString(date.date(item.time), 'yyyy-MM-dd HH:mm') }}</span>
             </template>
             <template #item.own_team_score="{ item }">

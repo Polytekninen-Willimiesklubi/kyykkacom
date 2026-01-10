@@ -2,24 +2,43 @@
   <div class="flex-1-1-100">
     <v-card>
       <v-card-title>
-          <v-row>
-            <v-col>
-              Ottelut
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="3">
-              <v-select 
-                v-model="matchStore.selection"
-                color="red" 
-                :items="selectionOptions" 
-                @update:model-value="updateFilter"
-              />
-            </v-col>
-            <v-col cols="3" v-if="(
-                matchStore.selection === 'Runkosarja' || matchStore.selection === 'Kaikki ottelut'
-              ) && navStore.noBrackets >= 2"
-            > 
+        <v-row>
+          <v-col>Ottelut</v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="2">
+            <v-select 
+              v-model="matchStore.selection"
+              color="red" 
+              :items="selectionOptions" 
+              @update:model-value="updateFilter"
+            >
+              <template #append-item>
+                <v-divider class="mt-2" color="red" opacity="100" thickness="2"/>
+                <v-list-item
+                  title="Videot"
+                  @click="matchStore.selection = 'Videot'"
+                >
+                  <template v-slot:prepend>
+                    <v-icon color="red" icon="mdi-youtube" />
+                  </template>
+                </v-list-item>
+                <v-list-item
+                  title="Striimit"
+                  @click="matchStore.selection = 'Striimit'"
+                >
+                  <template v-slot:prepend>
+                    <v-icon color="red" icon="mdi-access-point" />
+                  </template>
+                </v-list-item>
+              </template>
+            </v-select>
+          </v-col>
+          <v-spacer />
+          <v-col cols="2" align="center" v-if="(
+              matchStore.selection === 'Runkosarja' || matchStore.selection === 'Kaikki ottelut'
+            ) && navStore.noBrackets >= 2"
+          > 
             <v-btn-toggle
               v-model="toggleMultiple"
               variant="outlined"
@@ -28,6 +47,7 @@
             >
               <template v-for="(num, index) in navStore.noBrackets">
                 <v-btn
+                  size="small"
                   :text="`Lohko ${String.fromCharCode(65+index)}`"
                   @click="matchStore.setSelectedBracket(index);"
                 />
@@ -35,45 +55,70 @@
             </v-btn-toggle>
           </v-col>
           <v-spacer v-else/>
-            <v-col cols="3">
-              <v-row>
-                <v-col cols="12" align="center" class="pa-0">
-                  <v-btn-toggle 
-                    v-model="matchStore.timeFilterMode"
-                    density="compact"
-                    variant="outlined"
-                    divided
-                  >
-                    <!-- There might be a bug in vuetify: if value is 0-1 it will higlight 
-                        button from the other group as it's 
-                    -->
-                    <v-btn size="small" text="Tänään" :value="3"/>
-                    <v-btn size="small" text="Viikolla" :value="4"/>
-                  </v-btn-toggle>
-                </v-col>
-                <v-col cols="12" align="center" class="pa-0">
-                  <v-btn-toggle 
-                    v-model="matchStore.timeFilterMode"
-                    density="compact"
-                    variant="outlined"
-                    divided
-                  >
-                    <v-btn size="small" text="Huomenna" :value="5"/>
-                    <v-btn size="small" text="Ensi viikolla" :value="6"/>
-                  </v-btn-toggle>
-                </v-col>
-              </v-row>
-            </v-col>
-            <v-col cols="3">
-              <v-text-field 
-                color="red" 
-                v-model="search" 
-                label="Search" 
-                single-line 
-                hide-details 
-              />
-            </v-col>
-          </v-row>
+          <v-spacer />
+          <v-col cols="3">
+            <v-select
+              prepend-inner-icon="mdi-filter"
+              v-model="matchStore.selectedTeamsFilter"
+              :items="sortedTeams"
+              item-title="current_abbreviation"
+              item-value="id"
+              color="red"
+              label="Joukkuesuodatin"
+              multiple
+              clearable
+            >
+              <template #prepend-item v-if="
+                authStore.teamSeasonId != null
+                && teamStore.allTeams.map(obj => obj.id).includes(authStore.teamSeasonId)
+              ">
+                <v-list-item
+                  title="Oma joukkue"
+                  @click="selectOwnTeam"
+                >
+                  <template v-slot:prepend>
+                    <v-checkbox-btn
+                      :color="ownTeamSelected ? 'red' : undefined"
+                      :model-value="ownTeamSelected"
+                    />
+                  </template>
+                </v-list-item>
+                <v-divider class="mt-2" color="red" opacity="100" thickness="2"/>
+              </template>
+              <template #selection="{ item, index }">
+                <v-chip text-color="red" v-if="index < 2">
+                  {{ item.title }}
+                </v-chip>
+
+                <span v-if="index === 2"
+                  class="text-red text-caption align-self-center"
+                >
+                  (+{{ matchStore.selectedTeamsFilter.length - 2 }} muuta)
+                </span>
+              </template>
+            </v-select>
+          </v-col>
+          <v-col cols="2" align="end">
+            <v-select
+              prepend-inner-icon="mdi-calendar-filter"
+              v-model="matchStore.timeFilterMode"
+              color="red"
+              :items="dateFilterOptions" 
+              item-title="text"
+              label="Aikasuodatin"
+            />
+          </v-col>
+          <v-col cols="2">
+            <v-text-field 
+              prepend-inner-icon="mdi-magnify"
+              color="red" 
+              v-model="search" 
+              label="Search" 
+              single-line 
+              hide-details 
+            />
+          </v-col>
+        </v-row>
       </v-card-title>
       <v-data-table
         :mobile-breakpoint="0"
@@ -212,6 +257,7 @@ import {
   headersMatchesPostSeason,
 } from '@/stores/headers';
 import { watch } from 'vue';
+import { useTeamsStore } from '@/stores/teams.store';
 
 const search = ref('');
 const matchHeaders = ref(null);
@@ -221,9 +267,41 @@ const toggleMultiple = ref([]);
 const authStore = useAuthStore();
 const matchStore = useMatchesStore();
 const navStore = useNavBarStore();
+const teamStore = useTeamsStore();
 const date = useDate();
 
 const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'Pudotuspelit', 'SuperWeekend'];
+
+function selectOwnTeam() {
+  const teamId = authStore.teamSeasonId;
+  if (matchStore.selectedTeamsFilter.includes(teamId)) {
+    // Remove own team from filter
+    matchStore.selectedTeamsFilter = matchStore.selectedTeamsFilter.filter(id => id !== teamId);
+  } else {
+    // Add own team to filter
+    matchStore.selectedTeamsFilter = [...matchStore.selectedTeamsFilter, teamId]
+  }
+}
+
+const ownTeamSelected = computed(() => {
+  return matchStore.selectedTeamsFilter.includes(authStore.teamSeasonId);
+});
+
+const sortedTeams = computed(() =>
+  [...teamStore.allTeams].sort((a, b) =>
+    a.current_abbreviation.localeCompare(b.current_abbreviation)
+  )
+)
+
+const dateFilterOptions = [
+  { text: 'Kaikki', value: 0 },
+  { text: 'Eilen', value: 1 },
+  { text: 'Tänään', value: 2 },
+  { text: 'Huomenna', value: 3 },
+  { text: 'Viime viikolla', value: 4 },
+  { text: 'Tällä viikolla', value: 5 },
+  { text: 'Ensi viikolla', value: 6 },
+];
 
 /**
  * @description Checks match list rows if background needs to change to alert captain.

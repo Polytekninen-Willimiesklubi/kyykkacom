@@ -67,8 +67,12 @@ watch(() => [matchesStore.loaded, teamStore.loaded, navStore.loaded], ([matchesR
   if (navStore.selectedSeason.playoff_format === 8) {
     isTwoStage.value = true;
   }
-
-  const json = seasonsMappings[navStore.selectedSeason.playoff_format]
+  let json;
+  if (navStore.selectedSeason.playoff_format === 8 && navStore.selectedSeason.id == 27) {
+    json = seasonsMappings[18]
+  } else {
+    json = seasonsMappings[navStore.selectedSeason.playoff_format]
+  }
   rounds.value = navStore.selectedSeason.no_brackets === 1 ? json.one_bracket : json.two_bracket;
   first.value = json.first_round;
   first_round.value = !!first.value;
