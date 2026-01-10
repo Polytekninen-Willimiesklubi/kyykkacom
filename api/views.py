@@ -264,6 +264,7 @@ class LoginAPI(generics.GenericAPIView):
                 player=user, team_season__season=current
             ).first()
             team_id = player_in_team.team_season.team.id
+            team_season_id = player_in_team.team_season.id
             role = getRole(user)
             # role = '1' if player_in_team.is_captain else '0'
         except (PlayersInTeam.DoesNotExist, AttributeError):
@@ -275,6 +276,7 @@ class LoginAPI(generics.GenericAPIView):
                 "user": serializers.UserSerializer(user).data,
                 "role": role,
                 "team_id": team_id,
+                "team_season_id": team_season_id,
             }
         )
         return response

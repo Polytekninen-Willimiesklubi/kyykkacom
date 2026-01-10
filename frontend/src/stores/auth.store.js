@@ -23,6 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
     const userId = ref(JSON.parse(localStorage.getItem("userId")));
     const roleId = ref(JSON.parse(localStorage.getItem('roleId')));
     const teamId = ref(JSON.parse(localStorage.getItem('teamId')));
+    const teamSeasonId = ref(JSON.parse(localStorage.getItem('teamSeasonId')));
     const playerName = ref(JSON.parse(localStorage.getItem('playerName')));
     const loggedIn = ref(JSON.parse(localStorage.getItem('loggedIn')));
 
@@ -85,10 +86,12 @@ export const useAuthStore = defineStore('auth', () => {
                 userId.value = data.user.id;
                 roleId.value = data.role;
                 teamId.value = data.team_id;
+                teamSeasonId.value = data.team_season_id;
                 playerName.value = data.user.player_name;
                 // store user details local storage to keep user logged in between page refreshes
                 localStorage.setItem('userId', JSON.stringify(data.user.id));
                 localStorage.setItem('teamId', JSON.stringify(data.team_id));
+                localStorage.setItem('teamSeasonId', JSON.stringify(data.team_season_id));
                 localStorage.setItem('roleId', JSON.stringify(data.role));
                 localStorage.setItem('playerName', JSON.stringify(data.user.player_name));
                 localStorage.setItem('loggedIn', JSON.stringify(true));
@@ -108,10 +111,12 @@ export const useAuthStore = defineStore('auth', () => {
         userId.value = null;
         roleId.value = null;
         teamId.value = null;
+        teamSeasonId.value = null;
         playerName.value = null;
         loggedIn.value = false;
         localStorage.removeItem('userId');
         localStorage.removeItem('teamId');
+        localStorage.removeItem('teamSeasonId');
         localStorage.removeItem('roleId');
         localStorage.removeItem('playerName');
         localStorage.setItem('loggedIn', JSON.stringify(false));
@@ -124,14 +129,16 @@ export const useAuthStore = defineStore('auth', () => {
      * @param {string} name
      * @param {boolean} loginStatus
      */
-    function changeLogin(userIndex, role = 0, teamIndex = null, name, loginStatus = true) {
+    function changeLogin(userIndex, role = 0, teamIndex = null, name, loginStatus = true, teamSeasonId = null) {
         userId.value = userIndex;
         roleId.value = role;
         teamId.value = teamIndex;
+        teamSeasonId.value = teamSeasonId;
         playerName.value = name;
         loggedIn.value = loginStatus;
         localStorage.setItem('userId', JSON.stringify(userIndex));
         localStorage.setItem('teamId', JSON.stringify(teamIndex));
+        localStorage.setItem('teamSeasonId', JSON.stringify(teamSeasonId));
         localStorage.setItem('roleId', JSON.stringify(role));
         localStorage.setItem('playerName', JSON.stringify(name));
         localStorage.setItem('loggedIn', JSON.stringify(loginStatus));
@@ -141,6 +148,7 @@ export const useAuthStore = defineStore('auth', () => {
         userId,
         roleId,
         teamId,
+        teamSeasonId,
         playerName,
         loggedIn,
         alert,
