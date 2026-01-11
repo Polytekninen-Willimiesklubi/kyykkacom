@@ -370,7 +370,11 @@ watch(() => navStore.seasonId, (newId) => {
   box-sizing: border-box;
 }
 
-tbody > tr > td:first-child {
+tbody tr :hover {
+  cursor: unset;
+}
+
+.match-datatable tr > td:first-child {
   padding-left: 4px !important;
   padding-right: 4px !important
 }
