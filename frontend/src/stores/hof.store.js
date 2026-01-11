@@ -428,7 +428,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const stars = ref([
-        { 'year': 2025, 'first': '⭐ ?, ?', 'second': '⭐ ?, ?' },
+        { 'year': 2025, 'first': '⭐ Sami Valjakka, Leevi Nevalainen', 'second': '⭐ Eero Koskikallio, Kaarlo Virtanen' },
         { 'year': 2024, 'first': '⭐ Sami Valjakka, Lauri Sorsa', 'second': '⭐ Eino Auvinen, Matias Ylätalo' },
         { 'year': 2023, 'first': '⭐ Totti Sillanpää, Juho Sallasmaa', 'second': '⭐ lassi onne, Veeti Sistonen' },
         { 'year': 2022, 'first': '⭐ Sami Valjakka, Antti Koivulahti', 'second': '⭐ Jarno Mikkola, Katja Rossi' },

@@ -219,9 +219,6 @@ export const headersAllTeamsPerSeason = [
 
 ];
 
-
-
-
 /********** TEAM PAGE **********/
 
 export const headersTeamReserve = [
@@ -276,6 +273,7 @@ export const headersTeamSeasonStats = [
 /********** MATCHES PAGE **********/
 
 export const headersMatches = [
+    { title: '', width: "1%", key: 'match_link', sortable: false },
     { title: 'Aika', key: 'match_time', width: '20%', align: 'left' },
     { title: 'Tyyppi', key: 'type_name', width: '10%', align: 'center' },
     { title: 'Kenttä', key: 'field', width: '1%', align: 'center' },

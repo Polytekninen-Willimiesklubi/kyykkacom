@@ -134,7 +134,18 @@
         :row-props="itemRowBackground"
         density="compact"
         items-per-page="20"
+        class="match-datatable"
       >
+      <template #item.match_link = "{item}">
+        <span>
+          <v-btn
+            size="30px"
+            icon="mdi-link-variant"
+            :href="'/ottelut/'+item.id"
+            class="link-btn"
+          />
+        </span>
+      </template>
       <template #item.match_time = "{ item }">
         <v-row>
           <v-col>
@@ -348,4 +359,20 @@ watch(() => navStore.seasonId, (newId) => {
 .actions_not_needed {
   background-color: white;
 }
+
+.link-btn {
+  border: 1px solid;
+  border-color: #e5e7eb;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+tbody > tr > td:first-child {
+  padding-left: 4px !important;
+  padding-right: 4px !important
+}
+
 </style>

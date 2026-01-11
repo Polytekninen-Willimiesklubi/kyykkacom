@@ -88,7 +88,6 @@
         <v-col cols="1">
           <v-menu
             v-model="showMenu"
-            :target="menuTarget"
             :close-on-content-click="false"
             location="bottom"
             max-width="300px"
@@ -227,7 +226,6 @@ const search = ref('');
 
 // Filter options
 const showMenu = ref(false);
-const menuTarget = ref(null);
 const clearenceOption = ref(false);
 const settingsActive = ref(false);
 const percentOption = ref("H%");
