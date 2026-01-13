@@ -57,7 +57,7 @@
           <v-spacer v-else/>
           <v-spacer />
           <v-col cols="3">
-            <v-select
+            <v-autocomplete
               prepend-inner-icon="mdi-filter"
               v-model="matchStore.selectedTeamsFilter"
               :items="sortedTeams"
@@ -65,6 +65,7 @@
               item-value="id"
               color="red"
               label="Joukkuesuodatin"
+              auto-select-first
               multiple
               clearable
             >
@@ -96,7 +97,7 @@
                   (+{{ matchStore.selectedTeamsFilter.length - 2 }} muuta)
                 </span>
               </template>
-            </v-select>
+            </v-autocomplete>
           </v-col>
           <v-col cols="2" align="end">
             <v-select
