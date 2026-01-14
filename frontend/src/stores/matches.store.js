@@ -114,7 +114,7 @@ export default defineStore('matches', () => {
             return matches;
         } else if (timeFilterMode.value === 1) { // yesterday
             endTime = today.getDate();
-            startTime = endTime + 1;
+            startTime = endTime - 1;
         } else if (timeFilterMode.value === 2) { // today
             startTime = today.getDate();
             endTime = startTime + 1;
