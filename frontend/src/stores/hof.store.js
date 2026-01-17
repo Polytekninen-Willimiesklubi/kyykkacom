@@ -2,7 +2,7 @@
 export const useHofStore = defineStore('hof', () => {
 
     const championship = ref([
-        { 'year': 2025, 'first': 'TBD', 'second': 'TBD', 'third': 'TBD', 'fourth': 'TBD' },
+        { 'year': 2026, 'first': 'TBD', 'second': 'TBD', 'third': 'TBD', 'fourth': 'TBD' },
         { 'year': 2025, 'first': 'MaHaLasKu', 'second': 'Dra', 'third': 'ALTF4', 'fourth': 'MCMC' },
         { 'year': 2024, 'first': 'Dra', 'second': 'MaHaLasku', 'third': 'SuLaKe', 'fourth': 'DiSKO' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'SÄTKY KY', 'third': 'DiSKO', 'fourth': 'VSOP' },
@@ -35,7 +35,7 @@ export const useHofStore = defineStore('hof', () => {
 
 
     const superData = ref([
-        { 'year': 2025, 'first': 'TBD', 'second': 'TBD' },
+        { 'year': 2026, 'first': 'TBD', 'second': 'TBD' },
         { 'year': 2025, 'first': 'MaHaLasKu', 'second': 'SuLake' },
         { 'year': 2024, 'first': 'Dra', 'second': 'VSOP' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
@@ -95,7 +95,7 @@ export const useHofStore = defineStore('hof', () => {
 
 
     const singleWinner = ref([
-        { 'year': 2025, 'first': 'TBD', 'second': 'TBD' },
+        { 'year': 2026, 'first': 'TBD', 'second': 'TBD' },
         { 'year': 2025, 'first': 'Totti Sillanpää', 'second': 'Mikko "Temmi" Kuusio' },
         { 'year': 2024, 'first': 'Leevi Hovatov', 'second': 'Mikko "Temmi" Kuusio' },
         { 'year': 2023, 'first': 'Atte Putkonen', 'second': 'Sami Valjakka' },
