@@ -726,6 +726,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 pike_percentage=rounded_divison("pikes_total", "throws_total", True),
                 avg_throw_turn=rounded_divison("weighted_throw_count", "throws_total"),
             )
+            .exclude(Q(player_name=" ") | Q(player_name=None))
         )
         all_time_player_stats = {}
         for player in players:
