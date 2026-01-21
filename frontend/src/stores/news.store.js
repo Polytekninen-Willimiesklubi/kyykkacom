@@ -24,13 +24,14 @@ export const useNewsStore = defineStore('news', () => {
     const writer = ref('');
 
     // Pagination
+    const noNewsPerPage = 5;
     const currentPageNro = ref(1);
     const totalPages = computed(() => {
-        return Math.ceil(allNews.value.length / 2);
+        return Math.ceil(allNews.value.length / noNewsPerPage);
     })
     const currentPageContent = computed(() => {
         const page = currentPageNro.value;
-        return [...allNews.value.slice(2 * (page - 1), 2 * page >= allNews.value.length ? undefined : 2 * page)];
+        return [...allNews.value.slice(noNewsPerPage * (page - 1), noNewsPerPage * page >= allNews.value.length ? undefined : noNewsPerPage * page)];
     })
 
     async function getNews() {
