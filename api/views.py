@@ -511,7 +511,6 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TeamsInSeason.objects.select_related("team").all()
 
     def list(self, request):
-        # other_queryset = Match.objects.filter(is_validated=True)
         season = get_season(request)
 
         if season is not None:
@@ -1114,6 +1113,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
 
         for result_set in (home_results, away_results):
             for result in result_set:
+                # Ignore superweekend games:
+                if result["match_type"] > 30:
+                    continue
                 index = result["id"]
                 if result["playoff"] and index not in single_results["playoff"]:
                     single_results["playoff"][index] = result.copy()
