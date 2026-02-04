@@ -128,7 +128,7 @@
     <v-list :nav="true">
 
       <template v-for="item in headersNavBar">
-        <v-list-item v-if="item.title !== 'Oma Joukkue' || userStore.teamId"
+        <v-list-item v-if="(item.title !== 'Oma Joukkue' || userStore.teamId) && item.title !== 'Info'"
           :to="item.title !== 'Oma Joukkue' ? item.route : item.route + userStore.teamId" 
           :prepend-icon="item.icon"
           :title="item.title"
@@ -143,6 +143,26 @@
         to="/pelaajat/kaikki"
         prepend-icon="mdi-format-list-bulleted-type"
         title="Kaikkien kausien pelaajat"
+      />
+      <v-list-item
+        to="/info/yleista"
+        prepend-icon="mdi-information-outline"
+        title="Yleisiä ohjeita"
+      />
+      <v-list-item
+        to="/info/saannot"
+        prepend-icon="mdi-book-open-variant"
+        title="Säännöt"
+      />
+      <v-list-item
+        to="/info/hof"
+        prepend-icon="mdi-trophy-variant"
+        title="Hall of Fame"
+      />
+      <v-list-item
+        to="/info/links"
+        prepend-icon="mdi-link-variant"
+        title="Muualla kyykkää"
       />
 
       <v-list-item>
