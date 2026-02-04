@@ -28,11 +28,10 @@
                   class="d-flex justify-center ma-2"
                   v-if="matchData.home_score_total"
                 >
-                  <v-chip
-                    :color="`${getColor(matchData.home_score_total,
-                      matchData.away_score_total)}`"
-                    :text=String(matchData.home_score_total)
-                  />
+                  <v-chip :color="getColor(matchData.home_score_total, matchData.away_score_total)"
+                  >
+                    <strong>{{matchData.home_score_total}}</strong>
+                  </v-chip>
                 </figcaption>
               </figure>
             </v-col>
@@ -59,11 +58,9 @@
                   class="d-flex justify-center ma-2"
                   v-if="matchData.home_score_total"
                 >
-                  <v-chip
-                    :color="getColor(matchData.away_score_total,
-                      matchData.home_score_total)"
-                    :text=String(matchData.away_score_total)
-                  />
+                  <v-chip :color="getColor(matchData.away_score_total, matchData.home_score_total)">
+                    <strong>{{matchData.away_score_total}}</strong>
+                  </v-chip>
                 </figcaption>
               </figure>
             </v-col>
