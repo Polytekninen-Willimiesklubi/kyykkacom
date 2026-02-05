@@ -55,7 +55,25 @@
             </v-btn-toggle>
           </v-col>
           <v-spacer v-else/>
-          <v-spacer />
+          <v-col cols=1>
+            <v-btn-toggle>
+              <v-tooltip
+                location="top"
+                text="Näytä ensimmäisen erän tulos"
+              >
+                <template #activator="{ props }">
+                  <v-btn
+                    size="small"
+                    v-bind="props"
+                    :value="1"
+                    variant="outlined"
+                    icon="mdi-numeric-1-box-multiple-outline"
+                    @click="firstRoundToggle = !firstRoundToggle"
+                  />
+                </template>
+              </v-tooltip>
+            </v-btn-toggle>
+          </v-col>
           <v-col cols="3">
             <v-autocomplete
               prepend-inner-icon="mdi-filter"
@@ -231,7 +249,7 @@
           <span class="score-main">
             {{ item.home_score_total }}
           </span>
-          <span class="score-round" v-if="item.home_first_round_score !== null">
+          <span class="score-round" v-if="item.home_first_round_score !== null && firstRoundToggle">
             ({{ item.home_first_round_score }})
           </span>
         </div>
@@ -241,7 +259,7 @@
           <span class="score-main">
             {{ item.away_score_total }}
           </span>
-          <span class="score-round" v-if="item.away_first_round_score !== null">
+          <span class="score-round" v-if="item.away_first_round_score !== null && firstRoundToggle">
             ({{ item.away_first_round_score }})
           </span>
         </div>
@@ -295,6 +313,7 @@ const search = ref('');
 const matchHeaders = ref(null);
 const groupBy = ref(null);
 const toggleMultiple = ref([]);
+const firstRoundToggle = ref(false);
 
 const authStore = useAuthStore();
 const matchStore = useMatchesStore();
