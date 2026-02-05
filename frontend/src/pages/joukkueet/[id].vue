@@ -197,21 +197,14 @@
                   </template>
                 </tr>
               </template>
-              <template #item.match_time="{ item }">
-                <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
-              </template>
               <template #item.own_team_total="{ item }">
-                <v-chip 
-                  :color="getColor(item.own_team_total, item.opposite_team_total)"
-                >
-                  {{ item.own_team_total }}
+                <v-chip :color="getColor(item.own_team_total, item.opposite_team_total)">
+                  <strong>{{ item.own_team_total }}</strong>
                 </v-chip>
               </template>
               <template #item.opposite_team_total="{ item }">
-                <v-chip
-                  :color="getColor(item.opposite_team_total, item.own_team_total)"
-                > 
-                  {{ item.opposite_team_total }} 
+                <v-chip :color="getColor(item.opposite_team_total, item.own_team_total)">
+                  <strong>{{ item.opposite_team_total }}</strong>
                 </v-chip>
               </template>
             </v-data-table>

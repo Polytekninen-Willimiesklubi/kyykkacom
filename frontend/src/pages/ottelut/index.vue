@@ -147,7 +147,7 @@
           />
         </span>
       </template>
-      <template #item.match_time = "{ item }">
+      <template #item.match_time = "{item}">
         <v-row>
           <v-col>
             <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span> 
@@ -225,6 +225,26 @@
           </v-col>
         </v-row>
 
+      </template>
+      <template #item.home_score_total = "{item}">
+        <div class="score-container">
+          <span class="score-main">
+            {{ item.home_score_total }}
+          </span>
+          <span class="score-round" v-if="item.home_first_round_score !== null">
+            ({{ item.home_first_round_score }})
+          </span>
+        </div>
+      </template>
+      <template #item.away_score_total = "{item}">
+        <div class="score-container">
+          <span class="score-main">
+            {{ item.away_score_total }}
+          </span>
+          <span class="score-round" v-if="item.away_first_round_score !== null">
+            ({{ item.away_first_round_score }})
+          </span>
+        </div>
       </template>
       <template #group-header="{item, columns, toggleGroup, isGroupOpen }">
         <tr>
@@ -378,6 +398,31 @@ tbody tr :hover {
 .match-datatable tr > td:first-child {
   padding-left: 4px !important;
   padding-right: 4px !important
+}
+
+td:has(.score-container) {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+
+.score-round {
+  position: absolute;
+  bottom: 2px;
+  right: 1px;
+  font-size: 0.5rem;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.score-container {
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+  padding-top: 0.7em;
+  padding-bottom: 5px;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 </style>

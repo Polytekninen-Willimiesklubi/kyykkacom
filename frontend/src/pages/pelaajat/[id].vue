@@ -248,16 +248,14 @@
               <span>{{ date.formatByString(date.date(item.time), 'yyyy-MM-dd HH:mm') }}</span>
             </template>
             <template #item.own_team_score="{ item }">
-              <v-chip
-                :color="getColor(item.own_team_score, item.opponent_score)"
-                :text="item.own_team_score.toString()"
-              />
+              <v-chip :color="getColor(item.own_team_score, item.opponent_score)">
+                <strong>{{ item.own_team_score }}</strong>
+              </v-chip>
             </template>
             <template #item.opponent_score="{ item }">
-              <v-chip 
-                :color="getColor(item.opponent_score, item.own_team_score)"
-                :text="item.opponent_score.toString()"
-              />
+              <v-chip :color="getColor(item.opponent_score, item.own_team_score)">
+                <strong>{{ item.opponent_score }}</strong>
+              </v-chip>
             </template>
           </v-data-table>
         </v-col>

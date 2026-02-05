@@ -35,7 +35,7 @@ export const useHofStore = defineStore('hof', () => {
 
 
     const superData = ref([
-        { 'year': 2026, 'first': 'TBD', 'second': 'TBD' },
+        { 'year': 2026, 'first': 'SuLake', 'second': 'STONKS', 'third': 'Dra', 'fourth': 'MÄYRÄKOIRA' },
         { 'year': 2025, 'first': 'MaHaLasKu', 'second': 'SuLake' },
         { 'year': 2024, 'first': 'Dra', 'second': 'VSOP' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
@@ -229,8 +229,8 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2022, 'name': "Jarno Mikkola" },
         { 'year': 2021, 'name': "-" },
         { 'year': 2020, 'name': "?" },
-        { 'year': 2019, 'name': "?" },
-        { 'year': 2018, 'name': "?" },
+        { 'year': 2019, 'name': "Masi Kähkönen" },
+        { 'year': 2018, 'name': "Masi Kähkönen" },
         { 'year': 2017, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2016, 'name': "?" },
         { 'year': 2015, 'name': "Juha Varis" },
@@ -411,7 +411,7 @@ export const useHofStore = defineStore('hof', () => {
     ])
 
     const sm = ref([
-        { 'year': 2025, 'first': '?', 'second': '?' },
+        { 'year': 2025, 'first': 'Cluster Prospects', 'second': 'MÄYRÄKOIRA' },
         { 'year': 2024, 'first': 'MaHaLasKu', 'second': 'DiSKO' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
         { 'year': 2022, 'first': 'Booga', 'second': "MaHaLasKu" },

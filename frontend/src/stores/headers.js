@@ -242,7 +242,7 @@ export const headersTeamPlayers = [
 ];
 
 export const headersTeamMatch = [
-    { title: 'Aika', key: 'match_time', align: 'center', tooltip: 'Pelausaika' },
+    { title: 'Aika', key: 'match_time', align: 'center', tooltip: 'Milloin peli pelattiin' },
     { title: 'Tyyppi', key: 'match_type', align: 'center', tooltip: 'Peli Tyyppi' },
     { title: 'Vastustaja', key: 'opposite_team', align: 'center', tooltip: 'Vastustaja joukkue' },
     { title: 'OJ 1', key: 'own_first', align: 'center', tooltip: 'Oman Joukkueen 1. Erä', width: '2%' },

@@ -22,7 +22,7 @@
             small
             class="mr-2"
           >
-            {{ roundScore }}
+            <strong>{{ roundScore }}</strong>
           </v-chip>
           <v-text-field v-else-if="showInput"
             @input="roundStore.patchRoundScore(props.teamSide, props.roundNumber, roundScore)" 
