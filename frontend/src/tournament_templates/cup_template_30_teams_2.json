@@ -39,7 +39,7 @@
             "type": 9,
             "id": 4,
             "next": 12,
-            "player1": { "id": "23", "name": "A2"},
+            "player1": { "id": "23", "name": "A1"},
             "player2": { "id": "26", "name": "A4"}
         },
         {
@@ -112,7 +112,7 @@
             "id": 12,
             "next": 20,
             "player1": { "id": "10", "name": "Y10"},
-            "player2": { "id": "-4", "name": "B6 (A2 / A4)"}
+            "player2": { "id": "-4", "name": "B6 (A1 / A4)"}
         },
         {
             "other_info":"Yhteen voittoon",
