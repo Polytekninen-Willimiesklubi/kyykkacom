@@ -1113,8 +1113,10 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
 
         for result_set in (home_results, away_results):
             for result in result_set:
-                # Ignore superweekend games:
-                assert result["match_type"] is not None, f"{result =}"
+                # Ignore teams that have not played any matches
+                if result["matches_played"] == 0:
+                    continue
+                # Ignore superweekend games
                 if result["match_type"] > 30:
                     continue
                 index = result["id"]
