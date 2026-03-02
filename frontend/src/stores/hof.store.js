@@ -2,7 +2,7 @@
 export const useHofStore = defineStore('hof', () => {
 
     const championship = ref([
-        { 'year': 2026, 'first': 'TBD', 'second': 'TBD', 'third': 'TBD', 'fourth': 'TBD' },
+        { 'year': 2026, 'first': 'Dra', 'second': 'SulaKe', 'third': 'MCMC', 'fourth': 'STONKS' },
         { 'year': 2025, 'first': 'MaHaLasKu', 'second': 'Dra', 'third': 'ALTF4', 'fourth': 'MCMC' },
         { 'year': 2024, 'first': 'Dra', 'second': 'MaHaLasku', 'third': 'SuLaKe', 'fourth': 'DiSKO' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'SÄTKY KY', 'third': 'DiSKO', 'fourth': 'VSOP' },
@@ -35,8 +35,8 @@ export const useHofStore = defineStore('hof', () => {
 
 
     const superData = ref([
-        { 'year': 2026, 'first': 'SuLake', 'second': 'STONKS', 'third': 'Dra', 'fourth': 'MÄYRÄKOIRA' },
-        { 'year': 2025, 'first': 'MaHaLasKu', 'second': 'SuLake' },
+        { 'year': 2026, 'first': 'SulaKe', 'second': 'STONKS', 'third': 'Dra', 'fourth': 'MÄYRÄKOIRA' },
+        { 'year': 2025, 'first': 'MaHaLasKu', 'second': 'SulaKe' },
         { 'year': 2024, 'first': 'Dra', 'second': 'VSOP' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
         { 'year': 2022, 'first': 'MaHaLasKu', 'second': "Ei" },
@@ -45,7 +45,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2019, 'first': 'Dra', 'second': "Darts" },
         { 'year': 2018, 'first': 'Darts', 'second': "YÖK" },
         { 'year': 2017, 'first': 'Dra', 'second': "?" },
-        { 'year': 2016, 'first': 'Dra', 'second': "?" },
+        { 'year': 2016, 'first': 'Dra', 'second': "GPK" },
         { 'year': 2015, 'first': 'Dra', 'second': "?" },
         { 'year': 2014, 'first': 'ASS', 'second': 'GPK', 'third': 'VajaKK', 'fourth': 'MINT' },
         { 'year': 2013, 'first': 'Panis', 'second': 'ASS', 'third': 'GPK', 'fourth': 'TS' },
@@ -64,7 +64,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const bracketWinners = ref([
-        { 'year': 2026, 'first': 'TBD' },
+        { 'year': 2026, 'first': 'MCMC' },
         { 'year': 2025, 'first': 'MaHaLasKu' },
         { 'year': 2024, 'first': 'Dra' },
         { 'year': 2023, 'first': 'SÄTKY KY' },
@@ -95,7 +95,7 @@ export const useHofStore = defineStore('hof', () => {
 
 
     const singleWinner = ref([
-        { 'year': 2026, 'first': 'TBD', 'second': 'TBD' },
+        { 'year': 2026, 'first': 'Leevi Hovatov', 'second': 'Atte Putkonen' },
         { 'year': 2025, 'first': 'Totti Sillanpää', 'second': 'Mikko "Temmi" Kuusio' },
         { 'year': 2024, 'first': 'Leevi Hovatov', 'second': 'Mikko "Temmi" Kuusio' },
         { 'year': 2023, 'first': 'Atte Putkonen', 'second': 'Sami Valjakka' },
