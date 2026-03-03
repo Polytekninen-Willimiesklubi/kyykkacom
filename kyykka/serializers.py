@@ -1263,10 +1263,10 @@ class TeamListSerializer(serializers.ModelSerializer):
             results_away["second"],
         )
         self.clearences = results_home["cleareances"] + results_away["cleareances"]
-        self.matches_won = results_home["wins"] + results_away["wins"]
+        self._matches_won = results_home["wins"] + results_away["wins"]
         self.matches_lost = results_home["losses"] + results_away["losses"]
         self.matches_tie = results_home["ties"] + results_away["ties"]
-        self.matches_played = self.matches_lost + self.matches_tie + self.matches_won
+        self.matches_played = self.matches_lost + self.matches_tie + self._matches_won
 
         match_score_home = results_home["home__sum"]
         match_score_away = results_away["away__sum"]
@@ -1289,7 +1289,7 @@ class TeamListSerializer(serializers.ModelSerializer):
 
     def get_matches_won(self, obj):
         self.count_match_results(obj)
-        return self.matches_won
+        return self._matches_won
 
     def get_matches_lost(self, obj):
         # Should be initialized in 'get_matches_won' - function
@@ -1300,15 +1300,15 @@ class TeamListSerializer(serializers.ModelSerializer):
         return self.matches_tie
 
     def get_points_total(self, obj):
-        self.points_total = (self.matches_won * 2) + (self.matches_tie)
-        return self.points_total
+        self._points_total = (self._matches_won * 2) + (self.matches_tie)
+        return self._points_total
 
     def get_match_average(self, obj):
         return self.match_average
 
     def get_points_average(self, obj):
         return (
-            round(self.points_total / self.matches_played, 2)
+            round(self._points_total / self.matches_played, 2)
             if self.matches_played
             else "NaN"
         )

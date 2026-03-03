@@ -1,9 +1,21 @@
+from __future__ import annotations
+
+import typing as t
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 # from utils.caching import reset_player_cache
+
+if t.TYPE_CHECKING:
+
+    class ScoreData(t.TypedDict):
+        first_round_score: int | None
+        second_round_score: int | None
+        total: int | None
+
 
 MATCH_TYPES = {
     0: "Ei tyyppiä / Undefined",
@@ -134,6 +146,25 @@ class PlayersInTeam(models.Model):
         )
 
 
+class GameResult(models.TextChoices):
+    NOT_PLAYED = "not_played"
+    ON_GOING = "on_going"
+    """"If match is on going. Maybe future use for live score updates."""
+    HOME_WIN = "home_win"
+    AWAY_WIN = "away_win"
+    DRAW = "draw"
+    HOME_WIN_BY_FORFEIT = "home_win_by_forfeit"
+    """Counted as home win, but the forfeiting team points can be null. Match results should 
+    not be counted towards Team result average, but the dividor should increase."""
+    AWAY_WIN_BY_FORFEIT = "away_win_by_forfeit"
+    """Counted as away win, but the forfeiting team points can be null. Match results should 
+    not be counted towards Team result average, but the dividor should increase."""
+    HOME_WIN_POINTLESS = "home_win_pointless"
+    """Counted as home win, but no points are awarded. Council decides these"""
+    AWAY_WIN_POINTLESS = "away_win_pointless"
+    """Counted as away win, but no points are awarded. Council decides these"""
+
+
 class Match(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     match_time = models.DateTimeField()
@@ -148,6 +179,12 @@ class Match(models.Model):
     away_team = models.ForeignKey(
         TeamsInSeason, on_delete=models.CASCADE, related_name="away_matches"
     )
+    result = models.CharField(
+        max_length=30,
+        choices=GameResult.choices,
+        null=True,
+        default=GameResult.NOT_PLAYED,
+    )
     is_validated = models.BooleanField(default=False)
     post_season = models.BooleanField(default=False)
     match_type = models.IntegerField(blank=True, null=True, choices=MATCH_TYPES_TUPLES)
@@ -157,6 +194,48 @@ class Match(models.Model):
 
     class Meta:
         verbose_name_plural = "Matches"
+
+    def get_opponent_team(self, team_id: int) -> TeamsInSeason:
+        if team_id == self.home_team.team.pk:
+            return self.away_team
+        elif team_id == self.away_team.team.pk:
+            return self.home_team
+        else:
+            raise ValueError("Team is not part of this match")
+
+    def get_team_score_data(self, team_id: int) -> ScoreData:
+        if team_id == self.home_team.team.pk:
+            if (
+                self.home_first_round_score is None
+                and self.home_second_round_score is None
+            ):
+                total = None
+            else:
+                total = (self.home_first_round_score or 0) + (
+                    self.home_second_round_score or 0
+                )
+            return {
+                "first_round_score": self.home_first_round_score,
+                "second_round_score": self.home_second_round_score,
+                "total": total,
+            }
+        elif team_id == self.away_team.team.pk:
+            if (
+                self.away_first_round_score is None
+                and self.away_second_round_score is None
+            ):
+                total = None
+            else:
+                total = (self.away_first_round_score or 0) + (
+                    self.away_second_round_score or 0
+                )
+            return {
+                "first_round_score": self.away_first_round_score,
+                "second_round_score": self.away_second_round_score,
+                "total": total,
+            }
+        else:
+            raise ValueError("Team is not part of this match")
 
     def __str__(self):
         match_type = (
@@ -251,3 +330,24 @@ def match_post_save_handler(sender, instance, created, **kwargs):
                         throw_turn=turn,
                         throw_round=r,
                     )
+    # Update match when validation status changes from False to True
+    elif (
+        not created
+        and instance.is_validated
+        and instance.result == GameResult.NOT_PLAYED
+    ):
+        # Calculate scores directly (can't use properties in signal handlers)
+        home_score = (instance.home_first_round_score or 0) + (
+            instance.home_second_round_score or 0
+        )
+        away_score = (instance.away_first_round_score or 0) + (
+            instance.away_second_round_score or 0
+        )
+
+        if home_score == away_score:
+            instance.result = GameResult.DRAW.value
+        elif home_score < away_score:
+            instance.result = GameResult.HOME_WIN.value
+        else:
+            instance.result = GameResult.AWAY_WIN.value
+        instance.save()
