@@ -25,7 +25,7 @@
         {
             "label": "Start Backend",
             "type": "shell",
-            "command": "python3 manage.py runserver localhost:8000",
+            "command": "source .master/bin/activate && python3 manage.py runserver localhost:8000",
             "options": {
                 "cwd": "${workspaceFolder}"
             }

@@ -527,7 +527,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(single_results)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk: int | str | None = None):
+        if pk is None:
+            return Response(status=400)
         all_time_stats: dict[str, int | float | t.Any] = {
             "score_total": 0,
             "match_count": 0,
@@ -829,39 +831,24 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 data[match.season.year]["matches"] = []
             if isinstance(pk, str):
                 pk = int(pk)
-            if match.home_team.team.pk == pk:
-                opposite_team = match.away_team.current_abbreviation
-                own_first = match.home_first_round_score
-                own_second = match.home_second_round_score
-                opp_first = match.away_first_round_score
-                opp_second = match.away_second_round_score
-            else:
-                opposite_team = match.home_team.current_abbreviation
-                own_first = match.away_first_round_score
-                own_second = match.away_second_round_score
-                opp_first = match.home_first_round_score
-                opp_second = match.home_second_round_score
-            if own_first is not None and own_second is not None:
-                own_team_total = own_first + own_second
-            else:
-                own_team_total = None
-            if opp_first is not None and opp_second is not None:
-                opp_team_total = opp_first + opp_second
-            else:
-                opp_team_total = None
+
+            own_scores = match.get_team_score_data(pk)
+            opponent_team = match.get_opponent_team(pk)
+            opp_scores = match.get_team_score_data(opponent_team.team.pk)
+
             if match.match_type is None:
                 match.match_type = 0  # Default to 0 if None
             m = {
                 "id": match.pk,
                 "match_time": match.match_time.strftime("%Y-%m-%d %H:%M"),
                 "match_type": MATCH_TYPES[match.match_type],
-                "opposite_team": opposite_team,
-                "own_first": own_first,
-                "own_second": own_second,
-                "opp_first": opp_first,
-                "opp_second": opp_second,
-                "own_team_total": own_team_total,
-                "opposite_team_total": opp_team_total,
+                "opposite_team": opponent_team.current_abbreviation,
+                "own_first": own_scores["first_round_score"],
+                "own_second": own_scores["second_round_score"],
+                "opp_first": opp_scores["first_round_score"],
+                "opp_second": opp_scores["second_round_score"],
+                "own_team_total": own_scores["total"],
+                "opposite_team_total": opp_scores["total"],
             }
             data[match.season.year]["matches"].append(m)
             data["all_time"]["matches"].append(m)
@@ -1001,6 +988,33 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     ),
                     default=F("home_matches__home_second_round_score"),
                 ),
+                points=Case(
+                    When(home_matches__result__exact=Value("home_win"), then=2),
+                    When(
+                        home_matches__result__exact=Value("home_win_by_forfeit"), then=2
+                    ),
+                    When(home_matches__result__exact=Value("draw"), then=1),
+                    default=0,
+                ),
+                won=Case(
+                    When(home_matches__result__exact=Value("home_win"), then=1),
+                    When(
+                        home_matches__result__exact=Value("home_win_by_forfeit"), then=1
+                    ),
+                    default=0,
+                ),
+                lost=Case(
+                    When(home_matches__result__exact=Value("away_win"), then=1),
+                    When(
+                        home_matches__result__exact=Value("away_win_by_forfeit"),
+                        then=1,
+                    ),
+                    default=0,
+                ),
+                draw=Case(
+                    When(home_matches__result__exact=Value("draw"), then=1),
+                    default=0,
+                ),
             )
             .values(
                 "id",
@@ -1017,15 +1031,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             .annotate(
                 season=F("season__year"),
                 playoff=F("home_matches__post_season"),
-                matches_lost=Count(
-                    "home_id", filter=Q(home_score__gt=F("home_opp_score"))
-                ),
-                matches_won=Count(
-                    "home_id", filter=Q(home_score__lt=F("home_opp_score"))
-                ),
-                matches_tie=Count(
-                    "home_id", filter=Q(home_score__exact=F("home_opp_score"))
-                ),
+                matches_lost=Sum("lost"),
+                matches_won=Sum("won"),
+                matches_tie=Sum("draw"),
                 matches_played=F("matches_lost") + F("matches_won") + F("matches_tie"),
                 weighted_sum=Sum("home_score"),
                 best_round=Min("best_round_match"),
@@ -1039,7 +1047,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                         filter=Q(home_matches__home_second_round_score__lte=0),
                     )
                 ),
-                points_total=F("matches_won") * 2 + F("matches_tie"),
+                points_total=Sum("points"),
                 match_type=F("home_matches__match_type"),
             )
         )
@@ -1061,6 +1069,33 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     ),
                     default=F("away_matches__away_second_round_score"),
                 ),
+                points=Case(
+                    When(away_matches__result__exact=Value("away_win"), then=2),
+                    When(
+                        away_matches__result__exact=Value("away_win_by_forfeit"), then=2
+                    ),
+                    When(away_matches__result__exact=Value("draw"), then=1),
+                    default=0,
+                ),
+                won=Case(
+                    When(away_matches__result__exact=Value("away_win"), then=1),
+                    When(
+                        away_matches__result__exact=Value("away_win_by_forfeit"), then=1
+                    ),
+                    default=0,
+                ),
+                lost=Case(
+                    When(away_matches__result__exact=Value("home_win"), then=1),
+                    When(
+                        away_matches__result__exact=Value("home_win_by_forfeit"),
+                        then=1,
+                    ),
+                    default=0,
+                ),
+                draw=Case(
+                    When(away_matches__result__exact=Value("draw"), then=1),
+                    default=0,
+                ),
             )
             .values(
                 "id",
@@ -1077,15 +1112,9 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             .annotate(
                 season=F("season__year"),
                 playoff=F("away_matches__post_season"),
-                matches_lost=Count(
-                    "away_id", filter=Q(away_score__gt=F("away_opp_score"))
-                ),
-                matches_won=Count(
-                    "away_id", filter=Q(away_score__lt=F("away_opp_score"))
-                ),
-                matches_tie=Count(
-                    "away_id", filter=Q(away_score__exact=F("away_opp_score"))
-                ),
+                matches_lost=Sum("lost"),
+                matches_won=Sum("won"),
+                matches_tie=Sum("draw"),
                 matches_played=F("matches_lost") + F("matches_won") + F("matches_tie"),
                 weighted_sum=Sum("away_score"),
                 best_round=Min("best_round_match"),
@@ -1099,7 +1128,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                         filter=Q(away_matches__away_second_round_score__lte=0),
                     )
                 ),
-                points_total=F("matches_won") * 2 + F("matches_tie"),
+                points_total=Sum("points"),
                 match_type=F("away_matches__match_type"),
             )
         )
