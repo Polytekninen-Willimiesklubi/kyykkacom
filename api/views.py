@@ -29,10 +29,10 @@ from rest_framework.response import Response
 
 import kyykka.serializers as serializers
 from kyykka.models import (
-    MATCH_TYPES,
     CurrentSeason,
     ExtraBracketStagePlacement,
     Match,
+    MatchTypes,
     News,
     PlayersInTeam,
     Season,
@@ -841,7 +841,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             m = {
                 "id": match.pk,
                 "match_time": match.match_time.strftime("%Y-%m-%d %H:%M"),
-                "match_type": MATCH_TYPES[match.match_type],
+                "match_type": MatchTypes(match.match_type).label,
                 "opposite_team": opponent_team.current_abbreviation,
                 "own_first": own_scores["first_round_score"],
                 "own_second": own_scores["second_round_score"],

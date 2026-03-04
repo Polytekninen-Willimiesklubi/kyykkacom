@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 
 # from utils.caching import reset_player_cache
 
@@ -17,44 +18,42 @@ if t.TYPE_CHECKING:
         total: int | None
 
 
-MATCH_TYPES = {
-    0: "Ei tyyppiä / Undefined",
-    1: "Runkosarja",
-    2: "Finaali",
-    3: "Pronssi",
-    4: "Välierä",
-    5: "Puolivälierä",
-    6: "Neljännesvälierä",
-    7: "Kahdeksannesvälierä",
-    8: "2. Kierros",
-    9: "1. Kierros",
-    10: "Runkosarjafinaali",
-    11: "Jatkosarja",
-    20: "Putoamiskarsinta",
-    31: "SuperWeekend: Alkulohko",
-    32: "SuperWeekend: Finaali",
-    33: "SuperWeekend: Pronssi",
-    34: "SuperWeekend: Välierä",
-    35: "SuperWeekend: Puolivälierä",
-    36: "SuperWeekend: Neljännesvälierä",
-    37: "SuperWeekend: Kahdeksannesvälierä",
-}
+class MatchTypes(models.IntegerChoices):
+    NOT_DEFINED = 0, _("Ei tyyppiä / Undefined")
+    REGULAR_SEASON = 1, _("Runkosarja")
+    FINAL = 2, _("Finaali")
+    BRONZE = 3, _("Pronssi")
+    SEMIFINAL = 4, _("Välierä")
+    QUARTERFINAL = 5, _("Puolivälierä")
+    EIGHTH_FINAL = 6, _("Neljännesvälierä")
+    SIXTEENTH_FINAL = 7, _("Kahdeksannesvälierä")
+    SECOND_ROUND = 8, _("2. Kierros")
+    FIRST_ROUND = 9, _("1. Kierros")
+    REGULAR_SEASON_FINAL = 10, _("Runkosarjafinaali")
+    CONTINUATION_SERIES = 11, _("Jatkosarja")
+    RELEGATION_PLAYOFF = 20, _("Putoamiskarsinta")
+    SUPERWEEKEND_GROUP_STAGE = 31, _("SuperWeekend: Alkulohko")
+    SUPERWEEKEND_FINAL = 32, _("SuperWeekend: Finaali")
+    SUPERWEEKEND_BRONZE = 33, _("SuperWeekend: Pronssi")
+    SUPERWEEKEND_SEMIFINAL = 34, _("SuperWeekend: Välierä")
+    SUPERWEEKEND_QUARTERFINAL = 35, _("SuperWeekend: Puolivälierä")
+    SUPERWEEKEND_EIGHTH_FINAL = 36, _("SuperWeekend: Neljännesvälierä")
+    SUPERWEEKEND_SIXTEENTH_FINAL = 37, _("SuperWeekend: Kahdeksannesvälierä")
 
-MATCH_TYPES_TUPLES = [(key, val) for key, val in MATCH_TYPES.items()]
 
-PLAYOFF_FORMAT = {
-    0: "Ei vielä päätetty / Undefined",
-    1: "Kiinteä 16 joukkueen Cup",
-    2: "Kiinteä 8 joukkueen Cup",
-    3: "Kiinteä 4 joukkueen Cup",
-    4: "Kiinteä 22 joukkueen Cup",
-    5: "1.Kierroksen Seedaus 6 joukkueen Cup",
-    6: "1.Kierroksen Seedaus 12 joukkueen Cup",
-    7: "SuperWeekend OKA seedaus 15 joukkueen Cup",
-    8: "Kiinteä 30 joukkueen Cup",
-}
-
-PLAYOFF_FORMAT_TUPLES = [(key, val) for key, val in PLAYOFF_FORMAT.items()]
+class PlayoffFormat(models.IntegerChoices):
+    NOT_DEFINED = 0, _("Ei vielä päätetty / Undefined")
+    FIXED_16_TEAM_CUP = 1, _("Kiinteä 16 joukkueen Cup")
+    FIXED_8_TEAM_CUP = 2, _("Kiinteä 8 joukkueen Cup")
+    FIXED_4_TEAM_CUP = 3, _("Kiinteä 4 joukkueen Cup")
+    FIXED_22_TEAM_CUP = 4, _("Kiinteä 22 joukkueen Cup")
+    FIRST_ROUND_SEEDING_6_TEAM_CUP = 5, _("1.Kierroksen Seedaus 6 joukkueen Cup")
+    FIRST_ROUND_SEEDING_12_TEAM_CUP = 6, _("1.Kierroksen Seedaus 12 joukkueen Cup")
+    SUPERWEEKEND_OKA_SEEDING_15_TEAM_CUP = (
+        7,
+        _("SuperWeekend OKA seedaus 15 joukkueen Cup"),
+    )
+    FIXED_30_TEAM_CUP = 8, _("Kiinteä 30 joukkueen Cup")
 
 
 class Player(models.Model):
@@ -74,7 +73,7 @@ class Season(models.Model):
     year = models.CharField(max_length=4, unique=True)
     no_brackets = models.IntegerField(default=1, blank=False)
     playoff_format = models.IntegerField(
-        default=0, blank=False, choices=PLAYOFF_FORMAT_TUPLES
+        default=0, blank=False, choices=PlayoffFormat.choices
     )
 
     def __str__(self):
@@ -123,7 +122,7 @@ class SuperWeekend(models.Model):
     winner = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE, null=True)
     super_weekend_no_brackets = models.IntegerField(default=0, blank=True, null=True)
     super_weekend_playoff_format = models.IntegerField(
-        default=0, blank=True, null=True, choices=PLAYOFF_FORMAT_TUPLES
+        default=0, blank=True, null=True, choices=PlayoffFormat.choices
     )
 
     def __str__(self):
@@ -187,7 +186,7 @@ class Match(models.Model):
     )
     is_validated = models.BooleanField(default=False)
     post_season = models.BooleanField(default=False)
-    match_type = models.IntegerField(blank=True, null=True, choices=MATCH_TYPES_TUPLES)
+    match_type = models.IntegerField(blank=True, null=True, choices=MatchTypes.choices)
     seriers = models.IntegerField(null=True, default=1)
     video_link = models.URLField(blank=True, null=True, max_length=100)
     stream_link = models.URLField(blank=True, null=True, max_length=100)
@@ -239,7 +238,9 @@ class Match(models.Model):
 
     def __str__(self):
         match_type = (
-            "Ei tyyppiä" if self.match_type is None else MATCH_TYPES[self.match_type]
+            "Ei tyyppiä"
+            if self.match_type is None
+            else MatchTypes(self.match_type).label
         )
         return (
             f"{self.match_time.strftime('%m/%d/%Y, %H:%M')} | {self.home_team} - "
@@ -267,8 +268,8 @@ class Throw(models.Model):
 
     def __str__(self):
         match_name = (
-            MATCH_TYPES[self.match.match_type]
-            if self.match.match_type in MATCH_TYPES
+            MatchTypes(self.match.match_type).label
+            if self.match.match_type in MatchTypes.values
             else "Ei valittu"
         )
         return (
