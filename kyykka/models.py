@@ -318,6 +318,54 @@ class News(models.Model):
         return f"{self.date.strftime('%d-%m-%y')} {self.header}"
 
 
+class PlacementOptions(models.IntegerChoices):
+    FIRST = 1
+    SECOND = 2
+    THIRD = 3
+    FOURTH = 4
+    TOP8 = 8
+    TOP16 = 16
+    TOP22 = 22
+    TOP30 = 30
+
+
+class Accolade(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+    description = models.TextField(blank=True, null=True)
+    is_player_accolade = models.BooleanField(default=True)
+    """If true, accolade is given to player, otherwise to team"""
+
+
+class PlayerAccolade(models.Model):
+    accolade = models.ForeignKey(Accolade, on_delete=models.CASCADE)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    justification = models.TextField(blank=True, null=True)
+    placement = models.IntegerField(
+        choices=PlacementOptions.choices, blank=True, null=True
+    )
+
+    def __str__(self):
+        return f"{self.player} {self.season.year} {self.accolade.name}"
+
+
+class TeamAccolade(models.Model):
+    accolade = models.ForeignKey(Accolade, on_delete=models.CASCADE)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    team = models.ForeignKey(
+        TeamsInSeason, on_delete=models.CASCADE, blank=True, null=True
+    )
+    non_team_name = models.CharField(max_length=128, blank=True, null=True)
+    """In case of accolade given to non-serious tournament like SM-kyykkä. Also unknown team 
+    can be marked with this field."""
+    placement = models.IntegerField(
+        choices=PlacementOptions.choices, blank=True, null=True
+    )
+
+    def __str__(self):
+        return f"{self.team} {self.season.year} {self.accolade.name}"
+
+
 @receiver(post_save, sender=Match)
 def match_post_save_handler(sender, instance, created, **kwargs):
     if created and instance:
