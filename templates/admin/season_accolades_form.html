@@ -1,0 +1,150 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<style>
+    .accolade-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .accolade-field {
+        background: #f8f8f8;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px;
+    }
+
+    .accolade-field label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .accolade-field select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        box-sizing: border-box;
+    }
+
+    .section-title {
+        grid-column: 1 / -1;
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 20px;
+        color: #333;
+    }
+
+    @media (max-width: 1200px) {
+        .accolade-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .accolade-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<h1>{{ title }}</h1>
+
+<div class="module">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="accolade-grid">
+            <div class="section-title">Joukkue Palkinnot ja Mitallit</div>
+
+            <div class="accolade-field">
+                {{ form.champion.label_tag }}
+                {{ form.champion }}
+            </div>
+            <div class="accolade-field">
+                {{ form.runner_up.label_tag }}
+                {{ form.runner_up }}
+            </div>
+            <div class="accolade-field">
+                {{ form.third_place.label_tag }}
+                {{ form.third_place }}
+            </div>
+            <div class="accolade-field">
+                {{ form.fourth_place.label_tag }}
+                {{ form.fourth_place }}
+            </div>
+            <div class="accolade-field">
+                {{ form.super_weekend_winner.label_tag }}
+                {{ form.super_weekend_winner }}
+            </div>
+            <div class="accolade-field">
+                {{ form.super_weekend_second.label_tag }}
+                {{ form.super_weekend_second }}
+            </div>
+            <div class="accolade-field">
+                {{ form.bracket_stage_winner.label_tag }}
+                {{ form.bracket_stage_winner }}
+            </div>
+        </div>
+
+        <div class="section-title">Henkilöpalkinnot</div>
+        <div class="accolade-grid">
+            <div class="accolade-field">
+                {{ form.kck_ahti.label_tag }}
+                {{ form.kck_ahti }}
+            </div>
+            <div class="accolade-field">
+                {{ form.player_of_the_year.label_tag }}
+                {{ form.player_of_the_year }}
+            </div>
+            <div class="accolade-field">
+                {{ form.opposite_genre_poy.label_tag }}
+                {{ form.opposite_genre_poy }}
+            </div>
+            <div class="accolade-field">
+                {{ form.best_newcomer.label_tag }}
+                {{ form.best_newcomer }}
+            </div>
+            <div class="accolade-field">
+                {{ form.best_finisher.label_tag }}
+                {{ form.best_finisher }}
+            </div>
+            <div class="accolade-field">
+                {{ form.best_playoff_player.label_tag }}
+                {{ form.best_playoff_player }}
+            </div>
+            <div class="accolade-field">
+                {{ form.best_bracket_player.label_tag }}
+                {{ form.best_bracket_player }}
+            </div>
+            <div class="accolade-field">
+                {{ form.pike_king.label_tag }}
+                {{ form.pike_king }}
+            </div>
+            <div class="accolade-field">
+                {{ form.mvp.label_tag }}
+                {{ form.mvp }}
+            </div>
+            <div class="accolade-field">
+                {{ form.evergreen_cutter.label_tag }}
+                {{ form.evergreen_cutter }}
+            </div>
+            <div class="accolade-field">
+                {{ form.individual_tournament_winner.label_tag }}
+                {{ form.individual_tournament_winner }}
+            </div>
+            <div class="accolade-field">
+                {{ form.individual_tournament_finalist.label_tag }}
+                {{ form.individual_tournament_finalist }}
+            </div>
+        </div>
+
+
+        <input type="submit" value="Apply Changes" class="default">
+    </form>
+</div>
+{% endblock %}

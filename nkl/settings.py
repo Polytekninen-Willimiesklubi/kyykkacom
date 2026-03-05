@@ -32,6 +32,7 @@ INTERNAL_IPS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -59,6 +60,23 @@ REST_FRAMEWORK = {
     # )
     # Use drf-spectacular for API schema generation
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+JAZZMIN_SETTINGS = {
+    "site_title": "NKL Admin",
+    "site_header": "NKL Admin",
+    "sit_logo": "kyykka_logo.png",
+    "welcome_sign": "Welcome to NKL Admin",
+    "custom_links": {
+        "Special Actions": [
+            {
+                "name": "NKL-Gaala palkinnot",
+                "url": "season-end-accolades",
+                "icon": "fa fa-trophy",
+                "permissions": ["auth.view_user"],
+            }
+        ]
+    },
 }
 
 # drf-spectacular settings
@@ -102,7 +120,7 @@ ROOT_URLCONF = "nkl.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR + "/templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

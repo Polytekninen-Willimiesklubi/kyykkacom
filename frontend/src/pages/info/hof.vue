@@ -97,7 +97,7 @@ import { useHofStore } from '@/stores/hof.store';
 const hof = useHofStore();
 
 const tab_one_data = [
-    {title: "Liiga mestaruus", cols: 5, slice: [undefined, undefined], data: hof.championship},
+    {title: "Liigamestaruus", cols: 5, slice: [undefined, undefined], data: hof.championship},
     {title: "SuperWeekend-Cup", cols: 4, slice: [0, 3], data: hof.superData},
     {title: "Runkosarjan Voittaja", cols: 3, slice: [0, 2], data: hof.bracketWinners},
     {title: "Henkkari-Cup", cols: 4, slice: [0, 3], data: hof.singleWinner},
@@ -145,6 +145,8 @@ const info = [
 
 
 const tab = ref(null);
+
+hof.getAllAccolades();
 
 </script>
 

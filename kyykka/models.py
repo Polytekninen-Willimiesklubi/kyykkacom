@@ -335,6 +335,9 @@ class Accolade(models.Model):
     is_player_accolade = models.BooleanField(default=True)
     """If true, accolade is given to player, otherwise to team"""
 
+    def __str__(self):
+        return self.name
+
 
 class PlayerAccolade(models.Model):
     accolade = models.ForeignKey(Accolade, on_delete=models.CASCADE)

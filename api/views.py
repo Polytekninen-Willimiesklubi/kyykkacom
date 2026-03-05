@@ -34,9 +34,11 @@ from kyykka.models import (
     Match,
     MatchTypes,
     News,
+    PlayerAccolade,
     PlayersInTeam,
     Season,
     SuperWeekend,
+    TeamAccolade,
     TeamsInSeason,
     Throw,
     User,
@@ -2119,5 +2121,55 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
                 # .values() needed, as the query doesn't have one yet.
                 "matches_per_period": matches_per_period.values(),
                 "matches_both_periods": matches_both_periods,
+            }
+        )
+
+
+class AllcoladeViewSet(viewsets.ViewSet):
+    """ViewSet for retrieving player and team accolades."""
+
+    def list(self, request: Request) -> Response:
+        """Retrieve all player and team accolades from all seasons."""
+        player_accolades = PlayerAccolade.objects.select_related(
+            "accolade", "season", "player"
+        )
+        team_accolades = TeamAccolade.objects.select_related(
+            "accolade", "season", "team"
+        )
+
+        player_data = serializers.PlayerAccoladeSerializer(
+            player_accolades, many=True
+        ).data
+        team_data = serializers.TeamAccoladeSerializer(team_accolades, many=True).data
+
+        return Response({"player_accolades": player_data, "team_accolades": team_data})
+
+    def retrieve(self, request: Request, pk: int | None = None) -> Response:
+        """Retrieve all accolades for the given season index (pk)."""
+        try:
+            season = Season.objects.get(id=pk)
+        except Season.DoesNotExist:
+            return Response(
+                {"detail": "Season not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        player_accolades = PlayerAccolade.objects.filter(season=season).select_related(
+            "accolade", "season", "player"
+        )
+        team_accolades = TeamAccolade.objects.filter(season=season).select_related(
+            "accolade", "season", "team"
+        )
+
+        player_data = serializers.PlayerAccoladeSerializer(
+            player_accolades, many=True
+        ).data
+        team_data = serializers.TeamAccoladeSerializer(team_accolades, many=True).data
+
+        return Response(
+            {
+                "season_id": season.pk,
+                "season_year": season.year,
+                "player_accolades": player_data,
+                "team_accolades": team_data,
             }
         )

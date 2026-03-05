@@ -7,15 +7,18 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from kyykka.models import (
+    Accolade,
     CurrentSeason,
     ExtraBracketStagePlacement,
     Match,
     News,
     Player,
+    PlayerAccolade,
     PlayersInTeam,
     Season,
     SuperWeekend,
     Team,
+    TeamAccolade,
     TeamsInSeason,
     Throw,
 )
@@ -1973,7 +1976,7 @@ class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
             away=F("away_first_round_score") + F("away_second_round_score"),
         )
 
-        self.matches_won = (
+        self._matches_won = (
             results_home.filter(home__lt=F("away")).count()
             + results_away.filter(away__lt=F("home")).count()
         )
@@ -1985,7 +1988,7 @@ class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
             results_home.filter(home__exact=F("away")).count()
             + results_away.filter(home__exact=F("away")).count()
         )
-        self.matches_played = self.matches_lost + self.matches_tie + self.matches_won
+        self._matches_played = self.matches_lost + self.matches_tie + self._matches_won
 
         match_score_home = results_home.aggregate(Sum("home"))["home__sum"]
         match_score_away = results_away.aggregate(Sum("away"))["away__sum"]
@@ -1998,17 +2001,17 @@ class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
             match_score_away = 0
         match_score_total = match_score_home + match_score_away
         self.match_average = (
-            round(match_score_total / self.matches_played, 2)
-            if self.matches_played
+            round(match_score_total / self._matches_played, 2)
+            if self._matches_played
             else "NaN"
         )
 
     def get_matches_played(self, obj):
-        return self.matches_played
+        return self._matches_played
 
     def get_matches_won(self, obj):
         self.count_match_results(obj)
-        return self.matches_won
+        return self._matches_won
 
     def get_matches_lost(self, obj):
         # Should be initialized in 'get_matches_won' - function
@@ -2019,7 +2022,7 @@ class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
         return self.matches_tie
 
     def get_points_total(self, obj):
-        self.points_total = (self.matches_won * 2) + (self.matches_tie)
+        self.points_total = (self._matches_won * 2) + (self.matches_tie)
         return self.points_total
 
     def get_match_average(self, obj):
@@ -2027,8 +2030,8 @@ class TeamListSuperWeekendSerializer(serializers.ModelSerializer):
 
     def get_points_average(self, obj):
         return (
-            round(self.points_total / self.matches_played, 2)
-            if self.matches_played
+            round(self.points_total / self._matches_played, 2)
+            if self._matches_played
             else "NaN"
         )
 
@@ -2066,3 +2069,55 @@ class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = "__all__"
+
+
+class AccoladeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Accolade
+        fields = "__all__"
+
+
+class PlayerAccoladeSerializer(serializers.ModelSerializer):
+    accolade = AccoladeSerializer(read_only=True)
+    player_name = serializers.SerializerMethodField()
+    season_year = serializers.CharField(source="season.year", read_only=True)
+
+    class Meta:
+        model = PlayerAccolade
+        fields = (
+            "id",
+            "accolade",
+            "season",
+            "season_year",
+            "player",
+            "player_name",
+            "justification",
+            "placement",
+        )
+
+    def get_player_name(self, obj):
+        return f"{obj.player.first_name} {obj.player.last_name}"
+
+
+class TeamAccoladeSerializer(serializers.ModelSerializer):
+    accolade = AccoladeSerializer(read_only=True)
+    team_name = serializers.SerializerMethodField()
+    season_year = serializers.CharField(source="season.year", read_only=True)
+
+    class Meta:
+        model = TeamAccolade
+        fields = (
+            "id",
+            "accolade",
+            "season",
+            "season_year",
+            "team",
+            "team_name",
+            "non_team_name",
+            "placement",
+        )
+
+    def get_team_name(self, obj):
+        if obj.team:
+            return obj.team.current_abbreviation
+        return obj.non_team_name

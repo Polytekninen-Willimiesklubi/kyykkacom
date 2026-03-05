@@ -1,5 +1,29 @@
+const baseUrl = `${import.meta.env.VITE_API_URL}/accolades/`;
 
 export const useHofStore = defineStore('hof', () => {
+
+    const accolades = ref([]);
+    const seasonAccolades = ref([]);
+
+    async function getAllAccolades() {
+        try {
+            const response = await fetch(baseUrl, { method: 'GET' });
+            const data = await response.json();
+            accolades.value = data;
+        } catch (error) {
+            console.error('Error fetching accolades:', error);
+        }
+    }
+
+    async function getAccoladeBySeason(id) {
+        try {
+            const response = await fetch(`${baseUrl}${id}`, { method: 'GET' });
+            const data = await response.json();
+            seasonAccolades.value = data;
+        } catch (error) {
+            console.error('Error fetching accolade by season:', error);
+        }
+    }
 
     const championship = ref([
         { 'year': 2026, 'first': 'Dra', 'second': 'SulaKe', 'third': 'MCMC', 'fourth': 'STONKS' },
@@ -445,6 +469,8 @@ export const useHofStore = defineStore('hof', () => {
     ])
 
     return {
+        getAllAccolades,
+        getAccoladeBySeason,
         championship,
         superData,
         bracketWinners,
