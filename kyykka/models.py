@@ -56,6 +56,21 @@ class PlayoffFormat(models.IntegerChoices):
     FIXED_30_TEAM_CUP = 8, _("Kiinteä 30 joukkueen Cup")
 
 
+class UserProxy(User):
+    """Application uses the default Django User model, but this proxy allows us to customize
+    some things about it, without affecting the default User model."""
+
+    class Meta:
+        proxy = True
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def __str__(self):
+        return self.full_name
+
+
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="player")
     number = models.CharField(max_length=2, default="99")
@@ -95,7 +110,7 @@ class TeamsInSeason(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     current_name = models.CharField(max_length=128)
     current_abbreviation = models.CharField(max_length=15)
-    players = models.ManyToManyField(User, through="PlayersInTeam")
+    players = models.ManyToManyField(UserProxy, through="PlayersInTeam")
     bracket = models.IntegerField(null=True)
     bracket_placement = models.IntegerField(
         blank=True, null=True
@@ -131,7 +146,7 @@ class SuperWeekend(models.Model):
 
 class PlayersInTeam(models.Model):
     team_season = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE)
-    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    player = models.ForeignKey(UserProxy, on_delete=models.CASCADE)
     is_captain = models.BooleanField(default=False)
 
     class Meta:
@@ -141,7 +156,7 @@ class PlayersInTeam(models.Model):
     def __str__(self) -> str:
         return (
             f"{self.team_season.season.year} {self.team_season.current_abbreviation} "
-            f"{self.player.first_name} {self.player.last_name}"
+            f"{self.player.full_name}"
         )
 
 
@@ -256,7 +271,9 @@ class Throw(models.Model):
     """
 
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    player = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    player = models.ForeignKey(
+        UserProxy, null=True, blank=True, on_delete=models.CASCADE
+    )
     team = models.ForeignKey(TeamsInSeason, on_delete=models.CASCADE)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     throw_round = models.IntegerField(db_index=True)
@@ -329,11 +346,18 @@ class PlacementOptions(models.IntegerChoices):
     TOP30 = 30
 
 
+class AccoladeStatusOptions(models.TextChoices):
+    TO_BE_DECIDED = "to_be_decided"
+    NOT_PLAYED = "not_played"
+    UNKNOWN = "unknown"
+    UNSURE = "unsure"
+    RESOLVED = "resolved"
+
+
 class Accolade(models.Model):
     name = models.CharField(max_length=128, unique=True)
+    icon = models.CharField(max_length=128, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    is_player_accolade = models.BooleanField(default=True)
-    """If true, accolade is given to player, otherwise to team"""
 
     def __str__(self):
         return self.name
@@ -342,14 +366,83 @@ class Accolade(models.Model):
 class PlayerAccolade(models.Model):
     accolade = models.ForeignKey(Accolade, on_delete=models.CASCADE)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    player = models.ForeignKey(
+        UserProxy, on_delete=models.CASCADE, blank=True, null=True
+    )
     justification = models.TextField(blank=True, null=True)
+    status = models.TextField(
+        choices=AccoladeStatusOptions.choices, default=AccoladeStatusOptions.RESOLVED
+    )
     placement = models.IntegerField(
         choices=PlacementOptions.choices, blank=True, null=True
     )
 
     def __str__(self):
-        return f"{self.player} {self.season.year} {self.accolade.name}"
+        if self.status == AccoladeStatusOptions.UNKNOWN:
+            player_name = "Ei tiedossa"
+        elif self.status == AccoladeStatusOptions.UNSURE:
+            tmp = "Ei pelattu" if self.player is None else self.player.full_name
+            player_name = tmp + " (?)"
+        elif self.status == AccoladeStatusOptions.NOT_PLAYED:
+            player_name = "Ei pelattu"
+        elif self.status == AccoladeStatusOptions.TO_BE_DECIDED:
+            player_name = "Vielä pelaamatta"
+        else:
+            player_name = self.player.full_name if self.player is not None else "-"
+        return f"{player_name} {self.season.year} {self.accolade.name}"
+
+
+class PairAccolade(models.Model):
+    accolade = models.ForeignKey(Accolade, on_delete=models.CASCADE)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    player1 = models.ForeignKey(
+        UserProxy,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="player_1",
+    )
+    player2 = models.ForeignKey(
+        UserProxy,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="player_2",
+    )
+    status = models.TextField(
+        choices=AccoladeStatusOptions.choices, default=AccoladeStatusOptions.RESOLVED
+    )
+    placement = models.IntegerField(
+        choices=PlacementOptions.choices, blank=True, null=True
+    )
+
+    def __str__(self) -> str:
+        if self.status == AccoladeStatusOptions.UNKNOWN:
+            player_names = "Ei tiedossa"
+        elif self.status == AccoladeStatusOptions.TO_BE_DECIDED:
+            player_names = "Vielä pelaamatta"
+        elif self.status == AccoladeStatusOptions.NOT_PLAYED:
+            player_names = "Ei pelattu"
+        else:
+            player_names = ""
+            if self.player1 is not None:
+                player_names += self.player1.full_name
+                if self.status == AccoladeStatusOptions.UNSURE:
+                    player_names += " (?)"
+            if self.player2 is not None:
+                if player_names:
+                    player_names += " "
+                player_names += self.player2.full_name
+                if self.status == AccoladeStatusOptions.UNSURE:
+                    player_names += " (?)"
+
+            if self.player1 is None and self.player2 is None:
+                player_names = "Ei pelattu"
+                if self.status == AccoladeStatusOptions.UNSURE:
+                    player_names += " (?)"
+
+        placement = f" {self.placement}. Sija" if self.placement else ""
+        return f"{self.season.year} {self.accolade.name} {placement} {player_names}"
 
 
 class TeamAccolade(models.Model):
@@ -361,12 +454,38 @@ class TeamAccolade(models.Model):
     non_team_name = models.CharField(max_length=128, blank=True, null=True)
     """In case of accolade given to non-serious tournament like SM-kyykkä. Also unknown team 
     can be marked with this field."""
+    status = models.TextField(
+        choices=AccoladeStatusOptions.choices, default=AccoladeStatusOptions.RESOLVED
+    )
     placement = models.IntegerField(
         choices=PlacementOptions.choices, blank=True, null=True
     )
 
     def __str__(self):
-        return f"{self.team} {self.season.year} {self.accolade.name}"
+        if self.status == AccoladeStatusOptions.UNKNOWN:
+            team_name = "Ei tiedossa"
+        elif self.status in [
+            AccoladeStatusOptions.UNSURE,
+            AccoladeStatusOptions.RESOLVED,
+        ]:
+            if self.team is None and self.non_team_name is None:
+                team_name = "Ei pelattu"
+            elif self.team is None and self.non_team_name is not None:
+                team_name = self.non_team_name
+            else:
+                assert self.team is not None
+                team_name = self.team.current_abbreviation
+            if self.status == AccoladeStatusOptions.UNSURE:
+                team_name += " (?)"
+        elif self.status == AccoladeStatusOptions.NOT_PLAYED:
+            team_name = "Ei pelattu"
+        elif self.status == AccoladeStatusOptions.TO_BE_DECIDED:
+            team_name = "Vielä pelaamatta"
+        else:
+            team_name = "ERROR! Jotain meni vikaan __str__ funktiossa."
+
+        placement = f" {self.placement}. Sija" if self.placement else ""
+        return f"{self.season.year} {self.accolade.name} {placement} {team_name}"
 
 
 @receiver(post_save, sender=Match)

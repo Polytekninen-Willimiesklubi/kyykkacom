@@ -171,6 +171,14 @@ export const headerPlayerSeasonStats = [
     { title: 'JK', key: 'pike_percentage', tooltip: 'Joulukuuset (yli viiden kyykän heitot)' },
 ];
 
+export const headerPlayerSeasonStatsRanking = [
+    ...headerPlayerSeasonStats.slice(0, 2),
+    { title: 'Sij.', key: 'ranking', width: '1%' },
+    ...headerPlayerSeasonStats.slice(2)
+];
+
+
+
 /********** TEAMS PAGE **********/
 
 export const headersTeams = [
@@ -379,3 +387,13 @@ export const headerHofMisc = [
     { title: 'Palkinto', key: 'name', align: 'center' },
     { title: 'Nimi', key: 'person', align: 'center' },
 ]
+
+export const headerHofMedals = [
+    { title: 'Nimi', key: 'name', align: 'center' },
+    { title: '🥇', key: 'first', align: 'center', tooltip: 'Liigamestaruuksien määrä (1. sija)' },
+    { title: '🥈', key: 'second', align: 'center', tooltip: 'Liigamestaruus 2. sijoitusten määrä' },
+    { title: '🥉', key: 'third', align: 'center', tooltip: 'Liigamestaruus 3. sijoitusten määrä' },
+    { title: '⭐', key: 'super', align: 'center', tooltip: 'SuperWeekend-Cupin mestaruuksien määrä' },
+    { title: '🏆', key: 'bracket', align: 'center', tooltip: 'Runkosarjamestaruuksien määrä' },
+];
+

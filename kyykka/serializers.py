@@ -2100,8 +2100,10 @@ class PlayerAccoladeSerializer(serializers.ModelSerializer):
 
 
 class TeamAccoladeSerializer(serializers.ModelSerializer):
+    team_id = serializers.CharField(source="team.team.id", read_only=True)
     accolade = AccoladeSerializer(read_only=True)
     team_name = serializers.SerializerMethodField()
+    org_name = serializers.SerializerMethodField()
     season_year = serializers.CharField(source="season.year", read_only=True)
 
     class Meta:
@@ -2112,12 +2114,19 @@ class TeamAccoladeSerializer(serializers.ModelSerializer):
             "season",
             "season_year",
             "team",
+            "team_id",
             "team_name",
             "non_team_name",
+            "org_name",
             "placement",
         )
 
-    def get_team_name(self, obj):
+    def get_team_name(self, obj: TeamAccolade):
         if obj.team:
             return obj.team.current_abbreviation
+        return obj.non_team_name
+
+    def get_org_name(self, obj: TeamAccolade):
+        if obj.team:
+            return obj.team.team.abbreviation
         return obj.non_team_name

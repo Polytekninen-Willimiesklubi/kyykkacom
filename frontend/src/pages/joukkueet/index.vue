@@ -27,6 +27,30 @@
         no-data-text="Ei dataa :("
         items-per-page="-1"
       >
+        <template #item.current_name = "{ item }">
+          <v-row>
+            <v-spacer />
+            <v-col cols="9">
+              <span>{{ item.current_name }}</span>
+            </v-col>
+            <v-col>
+              <v-row class="justify-start">
+                <template v-for="accolade in teamStore.seasonTeamAccolades[item.id]">
+                  <v-col cols="3">
+                    <accolade-icon :filename="accolade.icon">
+                      <v-tooltip
+                         activator='parent'
+                         :text="accolade?.name + ' ' + accolade.placement + '. Sija'"
+                         location="right"
+                       />
+                    </accolade-icon>
+                  </v-col>
+                </template>
+                <v-spacer />
+              </v-row>
+            </v-col>
+          </v-row>
+        </template>
         <template #bottom></template>
       </v-data-table>
     </v-card>

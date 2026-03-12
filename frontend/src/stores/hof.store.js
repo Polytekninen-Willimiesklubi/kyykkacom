@@ -1,9 +1,236 @@
 const baseUrl = `${import.meta.env.VITE_API_URL}/accolades/`;
 
 export const useHofStore = defineStore('hof', () => {
-
     const accolades = ref([]);
     const seasonAccolades = ref([]);
+    const playerAccolades = ref([]);
+    const teamAccolades = ref([]);
+
+    const medalTableTeams = computed(() => {
+        const per_name = {};
+
+        function add_new_entry(name, _id) {
+            if (name in per_name) return;
+            per_name[name] = {
+                "id": _id,
+                "name": name,
+                "first": 0,
+                "second": 0,
+                "third": 0,
+                "super": 0,
+                "bracket": 0,
+            }
+        }
+
+        for (const accolade of accolades.value["team_accolades"]) {
+            let org = accolade.org_name
+            let accolade_name = accolade.accolade.name
+            let placement = accolade.placement
+
+            if (accolade_name === "Liigamestaruus") {
+                if (placement == 1) {
+                    add_new_entry(org, accolade.team_id)
+                    per_name[org]["first"] += 1
+                } else if (placement == 2) {
+                    add_new_entry(org, accolade.team_id)
+                    per_name[org]["second"] += 1
+                } else if (placement == 3) {
+                    add_new_entry(org, accolade.team_id)
+                    per_name[org]["third"] += 1
+                }
+            } else if (accolade_name === "SuperWeekend-Cup" && placement == 1) {
+                add_new_entry(org, accolade.team_id)
+                per_name[org]["super"] += 1
+            } else if (accolade_name === "Runkosarjamestaruus" && placement == 1) {
+                add_new_entry(org, accolade.team_id)
+                per_name[org]["bracket"] += 1
+            }
+        }
+        return Object.values(per_name)
+    })
+
+    const medalTablePlayers = computed(() => {
+        const per_id = {};
+
+        function add_new_entry(name, _id, field) {
+            if (!(_id in per_id)) {
+
+                per_id[_id] = {
+                    "id": _id,
+                    "name": name,
+                    "first": 0,
+                    "second": 0,
+                    "third": 0,
+                    "super": 0,
+                    "bracket": 0,
+                }
+            }
+            per_id[_id][field] += 1
+        }
+
+        for (const accolade of accolades.value["player_team_accolades"]) {
+            let accolade_name = accolade.accolade_name
+            if (accolade_name === "Liigamestaruus") {
+                if (accolade.placement == 1) {
+                    add_new_entry(accolade.name, accolade.id, "first")
+                } else if (accolade.placement == 2) {
+                    add_new_entry(accolade.name, accolade.id, "second")
+                } else if (accolade.placement == 3) {
+                    add_new_entry(accolade.name, accolade.id, "third")
+                }
+            } else if (accolade_name === "SuperWeekend-Cup" && accolade.placement == 1) {
+
+                add_new_entry(accolade.name, accolade.id, "super")
+            } else if (accolade_name === "Runkosarjamestaruus" && accolade.placement == 1) {
+                add_new_entry(accolade.name, accolade.id, "bracket")
+            }
+        }
+        return Object.values(per_id)
+    })
+
+    const playerAccoladesBySeason = computed(() => {
+        const per_year = {};
+        for (const accolade of playerAccolades.value["player_accolades"]) {
+            let year = accolade.season_year;
+            if (!(year in per_year)) {
+                per_year[year] = {};
+            }
+            if (!("player_accolades" in per_year[year])) {
+                per_year[year]["player_accolades"] = [];
+            }
+            per_year[year]["player_accolades"].push(accolade);
+        }
+        for (const accolade of playerAccolades.value["team_accolades"]) {
+            let year = accolade.season_year;
+            if (!(year in per_year)) {
+                per_year[year] = {};
+            }
+            if (!("team_accolades" in per_year[year])) {
+                per_year[year]["team_accolades"] = [];
+            }
+            // Modify the icons for team accolades to give bronze medal and silver
+            if (accolade.accolade.name === "Liigamestaruus" && accolade.placement == 2) {
+                accolade.accolade.icon = "hopea.ico"
+            } else if (accolade.accolade.name === "Liigamestaruus" && accolade.placement == 3) {
+                accolade.accolade.icon = "pronssi.ico"
+            }
+
+            if (accolade.accolade.name === "Liigamestaruus") {
+                let tmp = "";
+                if ([8, 16].includes(accolade.placement)) {
+                    tmp = `Top${accolade.placement}`;
+                } else if (accolade.placement == 1) {
+                    tmp = "Mestaruus";
+                } else {
+                    tmp = `${accolade.placement}. sija`
+                }
+                if (Number(accolade.placement) > 3) {
+                    accolade.accolade.icon = null
+                }
+                accolade.accolade.name = "NKL " + tmp;
+            } else if (accolade.accolade.name === "SuperWeekend-Cup") {
+                if (accolade.placement == 1) {
+                    accolade.accolade.name = "SuperWeekend-Cup Mestaruus";
+                } else if (accolade.placement == 2) {
+                    accolade.accolade.name = "SuperWeekend-Cup Finalisti";
+                    accolade.accolade.icon = "hopea.ico"
+                } else {
+                    continue;
+                }
+            }
+
+            per_year[year]["team_accolades"].push(accolade);
+        }
+        return per_year;
+    })
+
+
+    const teamAccoladesBySeason = computed(() => {
+        const per_year = {};
+        for (const accolade of teamAccolades.value["player_accolades"]) {
+            let year = accolade.season_year;
+            // This output is going to team/[id] page, filter out NKL-outside trophies
+            if (accolade.accolade.name.startsWith("Henkkari-Cup")) {
+                continue;
+            }
+            if (!(year in per_year)) {
+                per_year[year] = {};
+            }
+            if (!("player_accolades" in per_year[year])) {
+                per_year[year]["player_accolades"] = [];
+            }
+            per_year[year]["player_accolades"].push(accolade);
+        }
+        for (const accolade of teamAccolades.value["team_accolades"]) {
+            let year = accolade.season_year;
+
+            if (!(year in per_year)) {
+                per_year[year] = {};
+            }
+            if (!("team_accolades" in per_year[year])) {
+                per_year[year]["team_accolades"] = [];
+            }
+            // Modify the icons for team accolades to give bronze medal and silver
+            if (accolade.accolade.name === "Liigamestaruus" && accolade.placement == 2) {
+                accolade.accolade.icon = "hopea.ico"
+            } else if (accolade.accolade.name === "Liigamestaruus" && accolade.placement == 3) {
+                accolade.accolade.icon = "pronssi.ico"
+            }
+
+            if (accolade.accolade.name === "Liigamestaruus") {
+                let tmp = "";
+                if ([8, 16].includes(accolade.placement)) {
+                    tmp = `Top${accolade.placement}`;
+                } else if (accolade.placement == 1) {
+                    tmp = "Mestaruus";
+                } else {
+                    tmp = `${accolade.placement}. sija`
+                }
+                if (Number(accolade.placement) > 3) {
+                    accolade.accolade.icon = null
+                }
+                accolade.accolade.name = "NKL " + tmp;
+            } else if (accolade.accolade.name === "SuperWeekend-Cup") {
+                if (accolade.placement == 1) {
+                    accolade.accolade.name = "SuperWeekend-Cup Mestaruus";
+                } else if (accolade.placement == 2) {
+                    accolade.accolade.name = "SuperWeekend-Cup Finalisti";
+                    accolade.accolade.icon = "hopea.ico"
+                } else {
+                    continue;
+                }
+            }
+
+            per_year[year]["team_accolades"].push(accolade);
+        }
+        return per_year;
+    })
+
+    async function getPlayerAccolades(playerId) {
+        try {
+            const response = await fetch(baseUrl + `?playerId=${playerId}`, { method: 'GET' });
+            const data = await response.json();
+            playerAccolades.value = data;
+        } catch (error) {
+            console.error('Error fetching accolades:', error);
+        }
+    }
+
+    async function getTeamAccolades(teamId) {
+        const response = await fetch(baseUrl + `?teamId=${teamId}`, { method: 'GET' });
+        const data = await response.json();
+        teamAccolades.value = data;
+    }
+
+    async function getAccoladeBySeason(seasonId) {
+        try {
+            const response = await fetch(baseUrl + `?seasonId=${seasonId}`, { method: 'GET' });
+            const data = await response.json();
+            seasonAccolades.value = data;
+        } catch (error) {
+            console.error('Error fetching accolade by season:', error);
+        }
+    }
 
     async function getAllAccolades() {
         try {
@@ -15,15 +242,6 @@ export const useHofStore = defineStore('hof', () => {
         }
     }
 
-    async function getAccoladeBySeason(id) {
-        try {
-            const response = await fetch(`${baseUrl}${id}`, { method: 'GET' });
-            const data = await response.json();
-            seasonAccolades.value = data;
-        } catch (error) {
-            console.error('Error fetching accolade by season:', error);
-        }
-    }
 
     const championship = ref([
         { 'year': 2026, 'first': 'Dra', 'second': 'SulaKe', 'third': 'MCMC', 'fourth': 'STONKS' },
@@ -471,6 +689,8 @@ export const useHofStore = defineStore('hof', () => {
     return {
         getAllAccolades,
         getAccoladeBySeason,
+        getPlayerAccolades,
+        getTeamAccolades,
         championship,
         superData,
         bracketWinners,
@@ -490,7 +710,13 @@ export const useHofStore = defineStore('hof', () => {
         tree,
         misc,
         sm,
-        stars
+        stars,
+        medalTableTeams,
+        medalTablePlayers,
+        playerAccolades,
+        playerAccoladesBySeason,
+        teamAccoladesBySeason,
+        teamAccolades,
     }
 
 })

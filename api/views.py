@@ -42,6 +42,7 @@ from kyykka.models import (
     TeamsInSeason,
     Throw,
     User,
+    UserProxy,
 )
 from utils.caching import (
     cache_reset_key,
@@ -518,13 +519,14 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         if season is not None:
             self.queryset = self.queryset.filter(season=season)
 
-        single_results = self._get_single_results()
+        single_results = self._get_single_results(season)
 
         single_results = {
             "all": list(single_results["all"].values()),
             "bracket": list(single_results["bracket"].values()),
             "playoff": list(single_results["playoff"].values()),
             "first_stage": list(single_results["first_stage"].values()),
+            "accolades": single_results["accolades"],
         }
 
         return Response(single_results)
@@ -901,12 +903,29 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     and result["weighted_sum"] is not None
                 ):
                     team_all_time["weighted_sum"] += result["weighted_sum"]
-                    team_all_time["best_round"] = min(
-                        result["best_round"], team_all_time["best_round"]
-                    )
-                    team_all_time["best_match"] = min(
-                        result["best_match"], team_all_time["best_match"]
-                    )
+                    if (
+                        team_all_time["best_round"] is None
+                        and result["best_round"] is not None
+                    ):
+                        team_all_time["best_round"] = result["best_round"]
+                    elif result["best_round"] is None:
+                        pass
+
+                    else:
+                        team_all_time["best_round"] = min(
+                            result["best_round"], team_all_time["best_round"]
+                        )
+                    if (
+                        team_all_time["best_match"] is None
+                        and result["best_match"] is not None
+                    ):
+                        team_all_time["best_match"] = result["best_match"]
+                    elif result["best_round"] is None:
+                        pass
+                    else:
+                        team_all_time["best_match"] = min(
+                            result["best_match"], team_all_time["best_match"]
+                        )
                 elif (
                     team_all_time["weighted_sum"] is None
                     and result["weighted_sum"] is not None
@@ -973,7 +992,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         }
         return Response((single_results, all_time_results))
 
-    def _get_single_results(self):
+    def _get_single_results(self, season: Season | None = None):
         home_results = (
             self.queryset.alias(
                 home_score=F("home_matches__home_first_round_score")
@@ -1265,6 +1284,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                     team_season_all_results["best_match"] = result["best_match"]
 
         for result in single_results["all"].values():
+            if result.get("weighted_sum") is None:
+                result["weighted_sum"] = 0
             result["match_average"] = (
                 round(result["weighted_sum"] / result["matches_played"], 2)
                 if result["matches_played"]
@@ -1272,6 +1293,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
         for result in single_results["bracket"].values():
+            if result.get("weighted_sum") is None:
+                result["weighted_sum"] = 0
             result["match_average"] = (
                 round(result["weighted_sum"] / result["matches_played"], 2)
                 if result["matches_played"]
@@ -1286,6 +1309,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 single_results["first_stage"][result["id"]] = result.copy()
 
         for result in single_results["first_stage"].values():
+            if result.get("weighted_sum") is None:
+                result["weighted_sum"] = 0
             result["points_average"] = (
                 round(result["points_total"] / result["matches_played"], 2)
                 if result["matches_played"]
@@ -1302,6 +1327,29 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 ).order_by()
                 if len(seq):
                     result["bracket_placement"] = seq[0].placement
+
+        single_results["accolades"] = {}
+        accolades = TeamAccolade.objects.filter(status="resolved").select_related(
+            "team", "accolade", "season"
+        )
+        if season is not None:
+            accolades = accolades.filter(season=season)
+        all_team_ids = [team["id"] for team in single_results["all"].values()]
+        accolades = accolades.filter(team__in=all_team_ids)
+        for accolade in accolades:
+            if accolade.team is None:
+                continue
+            elif accolade.team.pk not in single_results["accolades"]:
+                single_results["accolades"][accolade.team.pk] = []
+
+            single_results["accolades"][accolade.team.pk].append(
+                {
+                    "name": accolade.accolade.name,
+                    "season": accolade.season.year,
+                    "placement": accolade.placement,
+                    "icon": accolade.accolade.icon,
+                }
+            )
 
         return single_results
 
@@ -1750,7 +1798,6 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             season = get_season(request)
             self.queryset = self.queryset.filter(season=season)
         # TODO cache this bitch if already calculated once
-        # TODO superweekend should be ignored
         throws = (
             self.queryset.filter(match__match_type__lt=31, match__is_validated=True)
             .alias(
@@ -1810,16 +1857,41 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
         if season is not None:
             players = players.filter(team_season__season=season)
         players = players.exclude(player__in=ids)
-        for player in players:
-            throws.append(
+
+        throws.extend(
+            [
                 {
-                    "player": player.player.id,  # type: ignore
-                    "player_name": f"{player.player.first_name} {player.player.last_name}",
+                    "player": player.player.pk,
+                    "player_name": player.player.full_name,
                     "team_name": player.team_season.current_abbreviation,
                     "season": player.team_season.season.year,
                     "playoff": False,
                 }
+                for player in players
+            ]
+        )
+
+        # Add player accolades to data
+        accolades_qs = (
+            PlayerAccolade.objects.filter(season=season)
+            .annotate(
+                user=F("player__player"),
+                name=F("accolade__name"),
+                description=F("accolade__description"),
+                icon=F("accolade__icon"),
             )
+            .values()
+        )
+        accolades_by_player: dict[int, list] = {}
+        for accolade in accolades_qs:
+            _id = accolade["user"]
+            if _id not in accolades_by_player:
+                accolades_by_player[_id] = []
+            accolades_by_player[_id].append(accolade)
+
+        for player_data in throws:
+            if (_id := player_data["player"]) in accolades_by_player:
+                player_data["accolades"] = accolades_by_player[_id]
 
         return Response(throws)
 
@@ -1955,7 +2027,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
             else Value("NaN"),
             pike_percentage=rounded_divison("pikes", "throws", True),
         )
-        user = User.objects.get(pk=pk)
+        user = UserProxy.objects.get(pk=pk)
 
         matches_per_period = players_data.annotate(
             own_team_score=Case(
@@ -2115,7 +2187,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
         return Response(
             {
                 "id": user.pk,
-                "player_name": f"{user.first_name} {user.last_name}",
+                "player_name": user.full_name,
                 "stats_per_seasons": season_data,
                 "all_time_stats": all_time_stats,
                 # .values() needed, as the query doesn't have one yet.
@@ -2130,6 +2202,11 @@ class AllcoladeViewSet(viewsets.ViewSet):
 
     def list(self, request: Request) -> Response:
         """Retrieve all player and team accolades from all seasons."""
+
+        season_id = request.query_params.get("seasonId")
+        player_id = request.query_params.get("playerId")
+        team_id = request.query_params.get("teamId")
+
         player_accolades = PlayerAccolade.objects.select_related(
             "accolade", "season", "player"
         )
@@ -2137,12 +2214,149 @@ class AllcoladeViewSet(viewsets.ViewSet):
             "accolade", "season", "team"
         )
 
+        if season_id is not None:
+            player_accolades = player_accolades.filter(season=season_id)
+            team_accolades = team_accolades.filter(season=season_id)
+        if player_id is not None:
+            player_accolades = player_accolades.filter(player=player_id)
+            player_teams = TeamsInSeason.objects.filter(
+                playersinteam__player=player_id
+            ).distinct()
+            team_accolades = team_accolades.filter(team__in=player_teams)
+        if team_id is not None:
+            team_accolades = team_accolades.filter(team__team=team_id)
+
+            accetable_players = set(
+                PlayersInTeam.objects.filter(team_season__team=team_id)
+                .annotate(season=F("team_season__season"))
+                .values_list("player", "season")
+            )
+
+            player_accolades = [
+                player_accolade
+                for player_accolade in player_accolades
+                if (player_accolade.player_id, player_accolade.season_id)
+                in accetable_players
+            ]
+
         player_data = serializers.PlayerAccoladeSerializer(
             player_accolades, many=True
         ).data
         team_data = serializers.TeamAccoladeSerializer(team_accolades, many=True).data
 
-        return Response({"player_accolades": player_data, "team_accolades": team_data})
+        if team_id is not None:
+            # Add bracket stage accolades if team didn't won
+            bracket_placements = (
+                TeamsInSeason.objects.filter(team=team_id)
+                .annotate(
+                    org_name=F("team__abbreviation"), season_year=F("season__year")
+                )
+                .values()
+            )
+            # HACK Id that is likely be outside of reachable ids
+            _id = 10_000
+            for team_placement in bracket_placements:
+                # print(team_placement)
+                placement = team_placement["bracket_placement"]
+                name = team_placement["current_abbreviation"]
+
+                _id += 1
+                if team_placement["season_year"] in ("2021", "2023", "2024"):
+                    # This is always a winner as MAHaLasKu is the only loser finalist
+                    if placement == 1 and name != "MaHaLasKu":
+                        continue
+                    name = f"Runkosarjan lohkon {placement}. sija"
+                    if placement == 1:
+                        icon = "hopea.ico"
+                    else:
+                        icon = None
+                else:
+                    if placement == 1:
+                        continue
+                    elif placement == 2:
+                        icon = "hopea.ico"
+                    elif placement == 3:
+                        icon = "pronssi.ico"
+                    else:
+                        icon = None
+                    name = f"Runkosarjan {placement}.sija"
+                team_data.append(
+                    {
+                        "id": _id,
+                        "accolade": {
+                            "name": name,
+                            "description": "",
+                            "icon": icon,
+                        },
+                        "season": team_placement["season_id"],
+                        "season_year": team_placement["season_year"],
+                        "team": team_placement["id"],
+                        "team_id": team_placement["team_id"],
+                        "placement": placement,
+                        "non_team_name": "",
+                        "org_name": team_placement["org_name"],
+                    }
+                )
+
+        # Get player accolades that come from team accolades
+        player_team_accolades: list[dict[str, t.Any]] = []
+        majors = ["Runkosarjamestaruus", "Liigamestaruus", "SuperWeekend-Cup"]
+        for team_accolade in team_accolades:
+            if team_accolade.accolade.name not in majors:
+                continue
+            if team_accolade.placement is None or team_accolade is None:
+                continue
+            if (
+                team_accolade.accolade.name != "Liigamestaruus"
+                and team_accolade.placement != 1
+            ):
+                continue
+            if (
+                team_accolade.accolade.name == "Liigamestaruus"
+                and team_accolade.placement > 3
+            ):
+                continue
+
+            players = PlayersInTeam.objects.filter(team_season=team_accolade.team)
+            player_user_ids = {player.player.pk for player in players}
+            matches_per_player = (
+                Throw.objects.filter(
+                    player__in=player_user_ids, team=team_accolade.team
+                )
+                .values("player")
+                .annotate(total_matches=Count("match", distinct=True))
+                .filter(total_matches__gte=2)
+            )
+            trophy_players = {player["player"] for player in matches_per_player}
+
+            def add_accolade(player: PlayersInTeam, accolade: TeamAccolade):
+                player_team_accolades.append(
+                    {
+                        "id": player.player.pk,
+                        "name": player.player.full_name,
+                        "season": accolade.season.year,
+                        "accolade_name": accolade.accolade.name,
+                        "placement": accolade.placement,
+                    }
+                )
+
+            for player in players:
+                if team_accolade.accolade.name == "SuperWeekend-Cup":
+                    add_accolade(player, team_accolade)
+                elif (
+                    team_accolade.accolade.name
+                    in ["Liigamestaruus", "Runkosarjamestaruus"]
+                    and player.player.pk in trophy_players
+                ):
+                    add_accolade(player, team_accolade)
+
+        return Response(
+            {
+                "player_accolades": player_data,
+                "team_accolades": team_data,
+                "player_team_accolades": player_team_accolades,
+            }
+        )
 
     def retrieve(self, request: Request, pk: int | None = None) -> Response:
         """Retrieve all accolades for the given season index (pk)."""

@@ -75,28 +75,236 @@ class ThrowsAdmin(admin.ModelAdmin):
 
 
 def season_end_accolades(request, season_id: int | None = None):
+    season = None
+    initial = {}
     if season_id is None:
         try:
             current_season = CurrentSeason.objects.first()
             if current_season is None:
                 messages.error(request, "No current season set.")
                 return redirect("admin:index")
-            season_id = current_season.season.pk
+            season = current_season.season
         except CurrentSeason.DoesNotExist:
             messages.error(request, "No current season set.")
             return redirect("admin:index")
+    else:
+        try:
+            season = Season.objects.get(id=season_id)
+        except Season.DoesNotExist:
+            messages.error(request, f"Season '{season_id}' not found.")
+            return redirect("admin:index")
 
-    form = SeasonAccoladeForm(request.POST or None, initial={"season_id": season_id})
+    initial["season_id"] = season.pk
+
+    # Mapping of form field names to their labels for accolade matching
+    label_to_field = {
+        "KCK Ahti": "kck_ahti",
+        "Vuoden Kyykkääjä": "player_of_the_year",
+        "Vuoden nais-/mieskyykkääjä": "opposite_genre_poy",
+        "Vuoden Tulokas": "best_newcomer",
+        "Vuoden Viimeistelijä": "best_finisher",
+        "Pudotuspelien paras": "best_playoff_player",
+        "Runkosarjan paras": "best_bracket_player",
+        "Haukikuningas/-tar": "pike_king",
+        "Vuoden MVP": "mvp",
+        "Vuoden Kuusenkaataja": "evergreen_cutter",
+        "Henkkari-Cupin Voittaja": "individual_tournament_winner",
+        "Henkkari-Cupin Finalisti": "individual_tournament_finalist",
+        "Liigamestari": "champion",
+        "Hopea mitallisti": "runner_up",
+        "Pronssi mitallisti": "third_place",
+        "Neljäs sija": "fourth_place",
+        "SuperWeekend-Cupin Voittaja": "super_weekend_winner",
+        "SuperWeekend-Cupin Finalisti": "super_weekend_second",
+        "Runkosarjan voittaja": "bracket_stage_winner",
+    }
+    player_accolades = PlayerAccolade.objects.filter(season=season)
+
+    for player_accolade in player_accolades:
+        if player_accolade.accolade.name not in label_to_field.keys():
+            continue
+        initial[label_to_field[player_accolade.accolade.name]] = (
+            player_accolade.player.pk
+        )
+
+    team_accolades = TeamAccolade.objects.filter(season=season)
+    # Set the initial values if are accolades already setted for this season
+    for team_accolade in team_accolades:
+        if team_accolade.team is None:
+            # Unknown team, skip
+            continue
+        if team_accolade.accolade.name == "Liigamestaruus":
+            if team_accolade.placement == 1:
+                initial["champion"] = team_accolade.team.pk
+            elif team_accolade.placement == 2:
+                initial["runner_up"] = team_accolade.team.pk
+            elif team_accolade.placement == 3:
+                initial["third_place"] = team_accolade.team.pk
+            elif team_accolade.placement == 4:
+                initial["fourth_place"] = team_accolade.team.pk
+
+            elif team_accolade.placement == 8:
+                if "top8" not in initial:
+                    initial["top8"] = []
+                initial["top8"].append(team_accolade.team.pk)
+            elif team_accolade.placement == 16:
+                if "top16" not in initial:
+                    initial["top16"] = []
+                initial["top16"].append(team_accolade.team.pk)
+        elif team_accolade.accolade.name == "SuperWeekend-Cup":
+            if team_accolade.placement == 1:
+                initial["super_weekend_winner"] = team_accolade.team.pk
+            elif team_accolade.placement == 2:
+                initial["super_weekend_second"] = team_accolade.team.pk
+        elif team_accolade.accolade.name == "Runkosarjamestaruus":
+            if team_accolade.placement == 1:
+                initial["bracket_stage_winner"] = team_accolade.team.pk
+
+    form = SeasonAccoladeForm(request.POST or None, initial=initial)
+
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
-            pass
-        # Process the form data and save accolades
-        messages.success(request, "Accolades saved successfully!")
-        return redirect("admin:index")
+            # Create reverse mapping from field names to accolade names
+            field_to_label = {v: k for k, v in label_to_field.items()}
 
-    season = Season.objects.filter(id=season_id).first()
-    if not season:
-        messages.error(request, "Season not found.")
+            # ===== PROCESS PLAYER ACCOLADES =====
+            player_fields = [
+                "kck_ahti",
+                "player_of_the_year",
+                "opposite_genre_poy",
+                "best_newcomer",
+                "best_finisher",
+                "best_playoff_player",
+                "best_bracket_player",
+                "pike_king",
+                "mvp",
+                "evergreen_cutter",
+                "individual_tournament_winner",
+                "individual_tournament_finalist",
+            ]
+
+            for field_name in player_fields:
+                posted_player = form.cleaned_data.get(field_name)
+                accolade_name = field_to_label.get(field_name)
+
+                if not accolade_name:
+                    continue
+
+                placement = None
+                if accolade_name.startswith("Henkkari-Cupin"):
+                    if accolade_name.endswith("Voittaja"):
+                        placement = 1
+                    elif accolade_name.endswith("Finalisti"):
+                        placement = 2
+                    accolade_name = "Henkkari-Cup"
+                print(
+                    "Processing field:",
+                    field_name,
+                    "Accolade:",
+                    accolade_name,
+                    "Placement:",
+                    placement,
+                )
+                accolade = Accolade.objects.get(name=accolade_name)
+                existing_accolade = PlayerAccolade.objects.filter(
+                    season=season, accolade=accolade
+                ).first()
+
+                if posted_player:
+                    # Data was posted - create or update
+
+                    if existing_accolade:
+                        # Update if player changed
+                        if existing_accolade.player.pk != posted_player.pk:
+                            existing_accolade.player = posted_player
+                            existing_accolade.save()
+                    else:
+                        # Create new
+                        PlayerAccolade.objects.create(
+                            season=season,
+                            accolade=accolade,
+                            player=posted_player,
+                            placement=placement,
+                        )
+                else:
+                    # No data posted - delete if exists
+                    if existing_accolade:
+                        existing_accolade.delete()
+
+            # ===== PROCESS TEAM ACCOLADES =====
+            # Handle single-selection team fields (champion, runner_up, etc.)
+            single_team_fields = {
+                "champion": (1, "Liigamestaruus"),
+                "runner_up": (2, "Liigamestaruus"),
+                "third_place": (3, "Liigamestaruus"),
+                "fourth_place": (4, "Liigamestaruus"),
+                "super_weekend_winner": (1, "SuperWeekend-Cup"),
+                "super_weekend_second": (2, "SuperWeekend-Cup"),
+                "bracket_stage_winner": (1, "Runkosarjamestaruus"),
+            }
+
+            for field_name, (placement, accolade_name) in single_team_fields.items():
+                posted_team = form.cleaned_data.get(field_name)
+                accolade = Accolade.objects.get(name=accolade_name)
+                existing_accolade = TeamAccolade.objects.filter(
+                    season=season, accolade=accolade, placement=placement
+                ).first()
+
+                if posted_team:
+                    # Data was posted - create or update
+                    if existing_accolade:
+                        # Update if team changed
+                        if (
+                            not existing_accolade.team
+                            or existing_accolade.team.pk != posted_team
+                        ):
+                            existing_accolade.team = posted_team
+                            existing_accolade.save()
+                    else:
+                        TeamAccolade.objects.create(
+                            season=season,
+                            accolade=accolade,
+                            team=posted_team,
+                            placement=placement,
+                        )
+                else:
+                    # No data posted - delete if exists
+                    if existing_accolade:
+                        existing_accolade.delete()
+
+            # Handle multi-selection team fields (top8, top16)
+            multi_team_fields = {
+                "top8": (8, "Liigamestaruus"),
+                "top16": (16, "Liigamestaruus"),
+            }
+
+            for field_name, (placement, accolade_name) in multi_team_fields.items():
+                posted_teams = form.cleaned_data.get(field_name, [])
+                accolade = Accolade.objects.get(name=accolade_name)
+                existing_accolades = TeamAccolade.objects.filter(
+                    season=season, accolade=accolade, placement=placement
+                )
+
+                # Convert to set of IDs for comparison
+                posted_ids_set = set(int(team.pk) for team in posted_teams)
+                existing_ids_set = set(
+                    existing_accolades.values_list("team_id", flat=True)
+                )
+
+                # Delete accolades that are no longer in posted data
+                to_delete = existing_ids_set - posted_ids_set
+                if to_delete:
+                    existing_accolades.filter(team_id__in=to_delete).delete()
+
+                # Create new accolades
+                to_create = posted_ids_set - existing_ids_set
+                for team_id in to_create:
+                    team = TeamsInSeason.objects.get(pk=team_id)
+                    TeamAccolade.objects.create(
+                        season=season, accolade=accolade, team=team, placement=placement
+                    )
+
+        messages.success(request, "Accolades saved successfully!")
         return redirect("admin:index")
 
     context = dict(
@@ -104,7 +312,6 @@ def season_end_accolades(request, season_id: int | None = None):
         form=form,
         title=f"Kauden {season.year} Palkinnot ja Kunnianosoitukset",
     )
-
     return render(request, "admin/season_accolades_form.html", context)
 
 

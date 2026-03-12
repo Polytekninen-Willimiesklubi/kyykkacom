@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AccoladeIcon: typeof import('./src/components/AccoladeIcon.vue')['default']
     Graph: typeof import('./src/components/Graph.vue')['default']
     LogIn: typeof import('./src/components/LogIn.vue')['default']
     NavBar: typeof import('./src/components/NavBar.vue')['default']

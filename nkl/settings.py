@@ -71,7 +71,7 @@ JAZZMIN_SETTINGS = {
         "Special Actions": [
             {
                 "name": "NKL-Gaala palkinnot",
-                "url": "season-end-accolades",
+                "url": "/admin/season-end-accolades/",
                 "icon": "fa fa-trophy",
                 "permissions": ["auth.view_user"],
             }
