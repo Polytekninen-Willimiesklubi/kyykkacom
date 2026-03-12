@@ -2262,7 +2262,7 @@ class AllcoladeViewSet(viewsets.ViewSet):
 
                 _id += 1
                 if team_placement["season_year"] in ("2021", "2023", "2024"):
-                    # This is always a winner as MAHaLasKu is the only loser finalist
+                    # This is always a winner as MaHaLasKu is the only loser finalist
                     if placement == 1 and name != "MaHaLasKu":
                         continue
                     name = f"Runkosarjan lohkon {placement}. sija"
@@ -2279,7 +2279,7 @@ class AllcoladeViewSet(viewsets.ViewSet):
                         icon = "pronssi.ico"
                     else:
                         icon = None
-                    name = f"Runkosarjan {placement}.sija"
+                    name = f"Runkosarja {placement}.sija"
                 team_data.append(
                     {
                         "id": _id,
