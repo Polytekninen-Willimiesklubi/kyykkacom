@@ -12,14 +12,8 @@
           />
         </v-col>
         <v-col cols="2" align="center">
-          <v-btn-toggle
-            v-model="filtterEmpty"
-            variant="outlined"
-          >
-            <v-tooltip
-              location="top"
-              text="Suodata pelaamattomat pelaajat"
-            >
+          <v-btn-toggle v-model="filtterEmpty" variant="outlined">
+            <v-tooltip location="top" text="Suodata pelaamattomat pelaajat">
               <template #activator="{ props }">
                 <v-btn
                   size="small"
@@ -45,7 +39,7 @@
                 :text="'Näytä vain heittopaikan '+ i +' statsit'"
               >
                 <template #activator="{ props }">
-                  <v-btn v-bind="props" size="x-small" :text="i+'.'" :value="i"/>
+                  <v-btn v-bind="props" size="x-small" :text="i + '.'" :value="i" />
                 </template>
               </v-tooltip>
             </template>
@@ -59,19 +53,15 @@
             mandatory
           >
             <template v-for="(list, i) in [
-                ['Kaikki', 'kaikkien pelien'],
-                ['Runko', 'runkosarjapelien'],
-                ['Pudotus', 'pudotuspelien']
-              ]"
-            >
-              <v-tooltip
-                  location="top"
-                  :text="'Näytä '+ list[1] +' statsit'"
-                >
-                  <template #activator="{ props }">
-                    <v-btn v-bind="props" size="x-small" :text="list[0]" :value="i"/>
-                  </template>
-                </v-tooltip>
+              ['Kaikki', 'kaikkien pelien'],
+              ['Runko', 'runkosarjapelien'],
+              ['Pudotus', 'pudotuspelien']
+            ]">
+              <v-tooltip location="top" :text="'Näytä ' + list[1] + ' statsit'">
+                <template #activator="{ props }">
+                  <v-btn v-bind="props" size="x-small" :text="list[0]" :value="i" />
+                </template>
+              </v-tooltip>
             </template>
           </v-btn-toggle>
         </v-col>
@@ -100,8 +90,8 @@
                           just add another span to other side -->
                 <span v-if="column.align !== 'left'" style="width:14px"></span>
                 <span @click="() => toggleSort(column)">{{ column.title }}</span>
-                <v-icon v-if="column.sortable" 
-                  class="v-data-table-header__sort-icon" 
+                <v-icon v-if="column.sortable"
+                  class="v-data-table-header__sort-icon"
                   :icon="getSortIcon(column)"
                   size="x-small"
                 />
@@ -121,6 +111,19 @@
               />
             </div>
           </template>
+        </template>
+        <template #item.player_name="{ item }">
+          <div class="d-flex align-center gap-2">
+            <span>{{ item.player_name }}</span>
+            <template v-for="accolade in item.accolades">
+              <accolade-icon 
+                :filename="accolade.icon"
+                :size="accolade.name == 'Haukikuningas/-tar' || accolade.name == 'Pudotuspelien Paras' || accolade.name == 'Vuoden Kyykkääjä' ? '36' : '24'"
+              >
+                <v-tooltip activator='parent' :text="accolade?.name" location="right" />
+              </accolade-icon>
+            </template>
+          </div>
         </template>
         <template #bottom></template> <!-- This hides the pagination controls-->
       </v-data-table>
@@ -145,9 +148,9 @@ teamStore.getTeams();
 const search = ref('');
 const filtterEmpty = ref(undefined);
 // Setting sortBy stops the resetting after filtering is applied
-const sortBy = ref([{key: 'rounds_total', order:'desc'}])
+const sortBy = ref([{ key: 'rounds_total', order: 'desc' }])
 
-function handleRedirect (value, row) {
+function handleRedirect(value, row) {
   location.href = '/pelaajat/' + row.item.player_id;
 }
 

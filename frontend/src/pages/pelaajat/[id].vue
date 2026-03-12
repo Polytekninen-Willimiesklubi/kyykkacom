@@ -37,7 +37,7 @@
             <v-data-table
               :mobile-breakpoint="0"
               class="seasonStats"
-              :headers="headerPlayerSeasonStats"
+              :headers="playerStore.playerHasAccolades ? headerPlayerSeasonStatsRanking : headerPlayerSeasonStats"
               height="20em"
               no-data-text="Ei pelattuja kausia"
               loading-text="Ladataan kausia..."
@@ -58,6 +58,9 @@
                 >
                   <td> {{ item.season }}</td>
                   <td> {{ item.team_name }}</td>
+                  <template v-if="playerStore.playerHasAccolades">
+                    <td> {{ item.ranking }}</td>
+                  </template>
                   <td> {{ item.rounds_total }}</td>
                   <td> {{ item.score_total }}</td>
                   <td> {{ item.throws_total }}</td>
@@ -114,178 +117,238 @@
           />
         </v-col>
       </v-row>
-      <v-row class="mt-10">
-        <v-col cols="2">
-          <v-text-field
-            class='pl-5'
-            color="red"
-            v-model="search"
-            label="Etsi"
-            single-line
-            variant="outlined"
-            />
-          </v-col>
-          <v-col cols="1"/>
-          <v-col cols="2">
-            <v-btn-toggle
-              v-model="sortGamesSwitch"
-              variant="outlined"
-              @update:modelValue="filtterItems"
-              divided
-              mandatory
-            >
-              <v-tooltip
-                location="top"
-                text="Näytä ottelut peleittäin (1. ja 2. erä yhdessä)"
+      <v-tabs-window v-model="tab">
+        <v-tabs-window-item value="matches">
+          <v-row class="mt-10">
+            <v-col cols="2">
+              <v-text-field
+                class='pl-5'
+                color="red"
+                v-model="search"
+                label="Etsi"
+                single-line
+                variant="outlined"
+                />
+            </v-col>
+            <v-col cols="1"/> <!-- Spacer -->
+            <v-col cols="2">
+              <v-btn-toggle
+                v-model="sortGamesSwitch"
+                variant="outlined"
+                @update:modelValue="filtterItems"
+                divided
+                mandatory
               >
-                <template #activator="{ props }">
-                  <v-btn
-                    size="small"
-                    text="Peleittäin"
-                    value="Peleittäin"
-                    v-bind="props"
-                  />
-                </template>
-              </v-tooltip>
-              <v-tooltip
-                location="top"
-                text="Näytä ottelut erittäin"
-              >
-                <template #activator="{ props }">
-                  <v-btn
-                    size="small"
-                    text="Erittäin"
-                    value="Erittäin"
-                    v-bind="props"
-                  />
-                </template>
-              </v-tooltip>
-            </v-btn-toggle>
-          </v-col>
-          <v-col cols="1"/> <!-- Spacer -->
-          <v-col cols="3">
-            <v-btn-toggle
-              v-model="filterGamesSwitch"
-              variant="outlined"
-              @update:modelValue="filtterItems"
-              divided
-              mandatory
-            >
-              <v-tooltip
-                location="top"
-                text="Näytä kaikki ottelut kautta ajan"
-              >
-                <template #activator="{ props }">
-                  <v-btn
-                    size="small"
-                    text="Kaikki kaudet"
-                    value="Kaikki kaudet"
-                    v-bind="props"
-                  />
-                </template>
-              </v-tooltip>
-              <v-tooltip
-                location="top"
-                text="Näytä vain valitujen kausien ottelut (valitse kaudet ylläolevasta taulukosta)"
-              >
-                <template #activator="{ props }">
-                  <v-btn
-                    size="small"
-                    text="Valitut kaudet"
-                    value="Valitut kaudet"
-                    v-bind="props"
-                  />
-                </template>
-              </v-tooltip>
-            </v-btn-toggle>
-          </v-col>
-      </v-row>
-      <v-row class="mt-0 pt-0" >
-        <v-col>
-          <v-data-table
-            :mobile-breakpoint="0"
-            class="matchesClass"
-            @click:row="handleRedirect"
-            :search="search"
-            :headers="matchHeaders"
-            :items="matchItems"
-            :loading="playerStore.loadingPlayer"
-            :sort-by="[{key: 'time', order:'desc'}]"
-            no-data-text="Ei dataa :("
-            loading-text="Ladataan kausia..."
-            density="compact"
-          >
-            <!-- This is somewhat modified solution from this 
-             https://github.com/vuetifyjs/vuetify/issues/17590#issuecomment-2571395957
-             Idea is to just add tooltip, but you need then add all the normal functionalities,
-             not to override them.
-            -->
-            <template v-for="header in matchHeaders"
-              #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
-            >
-              <v-tooltip :text="column.tooltip" location="top" v-if="column.tooltip">
-                <template #activator="{ props }">
-                  <div class="v-data-table-header__content" v-bind="props">
-                    <span @click="() => toggleSort(column)">{{ column.title }}</span>
-                    <v-icon v-if="column.sortable" 
-                      class="v-data-table-header__sort-icon" 
-                      :icon="getSortIcon(column)" 
+                <v-tooltip
+                  location="top"
+                  text="Näytä ottelut peleittäin (1. ja 2. erä yhdessä)"
+                >
+                  <template #activator="{ props }">
+                    <v-btn
+                      size="small"
+                      text="Peleittäin"
+                      value="Peleittäin"
+                      v-bind="props"
                     />
-                  </div>
-                </template>
-              </v-tooltip>
-              <template v-else>
-                <div class="v-data-table-header__content">
-                  <span @click="() => toggleSort(column)">{{ column.title }}</span>
-                    <v-icon v-if="column.sortable" 
-                      class="v-data-table-header__sort-icon" 
-                      :icon="getSortIcon(column)" 
+                  </template>
+                </v-tooltip>
+                <v-tooltip
+                  location="top"
+                  text="Näytä ottelut erittäin"
+                >
+                  <template #activator="{ props }">
+                    <v-btn
+                      size="small"
+                      text="Erittäin"
+                      value="Erittäin"
+                      v-bind="props"
                     />
+                  </template>
+                </v-tooltip>
+              </v-btn-toggle>
+            </v-col>
+            <v-col cols="1"/> <!-- Spacer -->
+            <v-col cols="3">
+              <v-btn-toggle
+                v-model="filterGamesSwitch"
+                variant="outlined"
+                @update:modelValue="filtterItems"
+                divided
+                mandatory
+              >
+                <v-tooltip
+                  location="top"
+                  text="Näytä kaikki ottelut kautta ajan"
+                >
+                  <template #activator="{ props }">
+                    <v-btn
+                      size="small"
+                      text="Kaikki kaudet"
+                      value="Kaikki kaudet"
+                      v-bind="props"
+                    />
+                  </template>
+                </v-tooltip>
+                <v-tooltip
+                  location="top"
+                  text="Näytä vain valitujen kausien ottelut (valitse kaudet ylläolevasta taulukosta)"
+                >
+                  <template #activator="{ props }">
+                    <v-btn
+                      size="small"
+                      text="Valitut kaudet"
+                      value="Valitut kaudet"
+                      v-bind="props"
+                    />
+                  </template>
+                </v-tooltip>
+              </v-btn-toggle>
+            </v-col>
+            <v-col cols="2">
+              <v-btn
+                text="Saavutukset"
+                append-icon="mdi-arrow-right"
+                @click="() => { tab = 'achievements'}"
+              />
+            </v-col>
+          </v-row>
+          <v-row class="mt-0 pt-0" >
+            <v-col>
+              <v-data-table
+                :mobile-breakpoint="0"
+                class="matchesClass"
+                @click:row="handleRedirect"
+                :search="search"
+                :headers="matchHeaders"
+                :items="matchItems"
+                :loading="playerStore.loadingPlayer"
+                :sort-by="[{key: 'time', order:'desc'}]"
+                no-data-text="Ei dataa :("
+                loading-text="Ladataan kausia..."
+                density="compact"
+              >
+                <!-- This is somewhat modified solution from this 
+                 https://github.com/vuetifyjs/vuetify/issues/17590#issuecomment-2571395957
+                 Idea is to just add tooltip, but you need then add all the normal functionalities,
+                 not to override them.
+                -->
+                <template v-for="header in matchHeaders"
+                  #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
+                >
+                  <v-tooltip :text="column.tooltip" location="top" v-if="column.tooltip">
+                    <template #activator="{ props }">
+                      <div class="v-data-table-header__content" v-bind="props">
+                        <span @click="() => toggleSort(column)">{{ column.title }}</span>
+                        <v-icon v-if="column.sortable" 
+                          class="v-data-table-header__sort-icon" 
+                          :icon="getSortIcon(column)" 
+                        />
+                      </div>
+                    </template>
+                  </v-tooltip>
+                  <template v-else>
+                    <div class="v-data-table-header__content">
+                      <span @click="() => toggleSort(column)">{{ column.title }}</span>
+                        <v-icon v-if="column.sortable" 
+                          class="v-data-table-header__sort-icon" 
+                          :icon="getSortIcon(column)" 
+                        />
+                    </div>
+                  </template>
+                </template>
+                <template #item.time="{ item }">
+                  <span>{{ date.formatByString(date.date(item.time), 'yyyy-MM-dd HH:mm') }}</span>
+                </template>
+                <template #item.own_team_score="{ item }">
+                  <v-chip :color="getColor(item.own_team_score, item.opponent_score)">
+                    <strong>{{ item.own_team_score }}</strong>
+                  </v-chip>
+                </template>
+                <template #item.opponent_score="{ item }">
+                  <v-chip :color="getColor(item.opponent_score, item.own_team_score)">
+                    <strong>{{ item.opponent_score }}</strong>
+                  </v-chip>
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
+        </v-tabs-window-item>
+        <v-tabs-window-item value="achievements">
+          <v-row class="mt-10 pl-5">
+            <v-col cols="2">
+              <v-btn
+                text="Ottelut"
+                prepend-icon="mdi-arrow-left"
+                @click="() => { tab = 'matches'}"
+              />
+            </v-col>
+            <v-spacer />
+          </v-row>
+          <v-row class="pl-5 pb-10">
+            <v-col cols="12">
+              <v-list 
+                class="w-100"
+                style="overflow: hidden" 
+                v-for="[season, achievements] in Object.entries(
+                  hofStore.playerAccoladesBySeason
+                ).sort((a, b) => b[0] - a[0])" 
+                :key="season"
+              >
+                <div class="season-header">
+                  <v-list-item-title class="season-title">Kausi {{ season }}</v-list-item-title>
                 </div>
-              </template>
-            </template>
-            <template #item.time="{ item }">
-              <span>{{ date.formatByString(date.date(item.time), 'yyyy-MM-dd HH:mm') }}</span>
-            </template>
-            <template #item.own_team_score="{ item }">
-              <v-chip :color="getColor(item.own_team_score, item.opponent_score)">
-                <strong>{{ item.own_team_score }}</strong>
-              </v-chip>
-            </template>
-            <template #item.opponent_score="{ item }">
-              <v-chip :color="getColor(item.opponent_score, item.own_team_score)">
-                <strong>{{ item.opponent_score }}</strong>
-              </v-chip>
-            </template>
-          </v-data-table>
-        </v-col>
-      </v-row>
+                <v-row style="overflow: hidden">
+                  <v-col cols="6" v-if="!!achievements['team_accolades']">
+                    <template v-for="accolade in achievements['team_accolades']" :key="accolade.id">
+                      <div class="achievement-badge">
+                        <accolade-icon :filename="accolade.accolade.icon" />
+                        <span class="pl-5" style="font-weight: 600;">{{ accolade.accolade.name }}</span>
+                      </div>
+                    </template>
+                  </v-col>
+                  <v-col cols="6" class="pr-8" v-if="!!achievements['player_accolades']">
+                    <template v-for="accolade in achievements['player_accolades']" :key="accolade.id">
+                      <div class="achievement-badge">
+                        <accolade-icon :filename="accolade.accolade.icon" />
+                        <span class="pl-5" style="font-weight: 600;">{{ accolade.accolade.name }}</span>
+                      </div>
+                    </template>
+                  </v-col>
+                </v-row>
+              </v-list>
+            </v-col>
+          </v-row>
+        </v-tabs-window-item>
+      </v-tabs-window>
     </v-card>
   </div>
 </template>
 <script setup>
 import { useNavBarStore } from '@/stores/navbar.store';
 import { usePlayerStore } from '@/stores/players.store';
+import { useHofStore } from '@/stores/hof.store';
 import { useDate } from 'vuetify';
 import { useRoute } from 'vue-router/auto';
-import { 
+import {
   headersPlayerPeriod,
   headersPlayerGames,
   headerPlayerOverallStats,
-  headerPlayerSeasonStats
+  headerPlayerSeasonStats,
+  headerPlayerSeasonStatsRanking,
 } from '@/stores/headers';
 
 const route = useRoute('/pelaajat/[id]');
 
 const playerStore = usePlayerStore();
 const navStore = useNavBarStore();
+const hofStore = useHofStore();
 const date = useDate();
 
 const styles = ['blue-row', 'red-row', 'green-row', 'yellow-row', 'purple-row'];
 const allColors = ['#B3E5FC', '#EF9A9A', '#A5D6A7', '#DCE775', '#BA68C8'];
 const currentSelection = [];
 const columnCurrentSelection = [];
-const columnColors =  ['KPH', '', '', '', ''];
+const columnColors = ['KPH', '', '', '', ''];
 const colors = ['', '', '', '', ''];
 let colorInitialized = false;
 
@@ -302,9 +365,11 @@ const canvas3Data = ref([]);
 const matchItems = ref([]);
 const matchHeaders = ref(headersPlayerPeriod);
 
+const tab = ref('matches');
+
 function filtterItems() {
   let arr
-  if(sortGamesSwitch.value === 'Erittäin') {
+  if (sortGamesSwitch.value === 'Erittäin') {
     arr = playerStore.player.matches_per_period;
     matchHeaders.value = headersPlayerPeriod;
   } else {
@@ -342,7 +407,7 @@ function handleRedirect(value, row) {
   location.href = '/ottelut/' + row.item.match_id;
 }
 
-function getColor (val1, val2) {
+function getColor(val1, val2) {
   if (val1 < val2) return 'green-accent-4';
   else if (val1 > val2) return 'red-accent-4';
   else return 'yellow-accent-4';
@@ -352,13 +417,13 @@ function chanceHeaderStat(val) {
   const headerClassList = val.target.classList;
   const head = val.target.innerText;
   const headers = [
-    'Erät', 'Kyykät', 'Heitot', 'KPH', 
+    'Erät', 'Kyykät', 'Heitot', 'KPH',
     'kHP', 'Hauet', 'H%',
-    'VM' , 'Tyh.', 'JK'
+    'VM', 'Tyh.', 'JK'
   ];
   const header_binds = [
     'rounds_total', 'score_total', 'throws_total', 'avg_score',
-    'avg_position', 'pikes_total', 'pike_percentage', 'zeros_total', 
+    'avg_position', 'pikes_total', 'pike_percentage', 'zeros_total',
     'clearence_count', 'gte_six_total'
   ];
   // 'zero_percentage',
@@ -402,16 +467,16 @@ function chanceHeaderStat(val) {
   }
 }
 
-function chanceSeason (value) {
-  const headerClassList = value.target.tagName === "TD" 
-    ? value.target.parentNode.classList 
+function chanceSeason(value) {
+  const headerClassList = value.target.tagName === "TD"
+    ? value.target.parentNode.classList
     : value.target.classList;
-  const clickedSeason =  value.target.tagName === "TD" 
+  const clickedSeason = value.target.tagName === "TD"
     ? value.target.parentNode.children[0].innerText
     : value.target.children[0].innerText;
 
   if (currentSelection.includes(clickedSeason)) { // Remove clicked season from datas
-    
+
     let index = canvas1Data.value.map(e => e.label).indexOf('Kausi ' + clickedSeason);
     canvas1Data.value.splice(index, 1);
     canvas1DataNormalized.value.splice(index, 1);
@@ -422,7 +487,7 @@ function chanceSeason (value) {
 
     index = currentSelection.indexOf(clickedSeason);
     currentSelection.splice(index, 1);
-    
+
     index = colors.indexOf(clickedSeason);
     colors[index] = '';
     headerClassList.remove(styles[index]);
@@ -430,64 +495,64 @@ function chanceSeason (value) {
     let tmp = playerStore.player.stats_per_seasons;
     let index = tmp.map(ele => ele.season).indexOf(clickedSeason);
     const selected_season = tmp[index];
-    
+
     index = colors.indexOf(''); // First valid color
     colors[index] = clickedSeason;
     const color = allColors[index];
     headerClassList.add(styles[index]);
 
-    const totalThrow = selected_season.zeros_total 
-                      + selected_season.pikes_total 
-                      + selected_season.ones_total 
-                      + selected_season.twos_total
-                      + selected_season.threes_total
-                      + selected_season.fours_total
-                      + selected_season.fives_total
-                      + selected_season.gte_six_total
+    const totalThrow = selected_season.zeros_total
+      + selected_season.pikes_total
+      + selected_season.ones_total
+      + selected_season.twos_total
+      + selected_season.threes_total
+      + selected_season.fours_total
+      + selected_season.fives_total
+      + selected_season.gte_six_total
 
-    canvas1DataNormalized.value = [ ...canvas1DataNormalized.value,
-      {
-        label: 'Kausi ' + selected_season.season,
-        backgroundColor: color,
-        data: [
-          Math.round((selected_season.zeros_total + selected_season.pikes_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.ones_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.twos_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.threes_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.fours_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.fives_total) / totalThrow * 100 * 100 ) / 100,
-          Math.round((selected_season.gte_six_total) / totalThrow * 100 * 100 ) / 100,
-        ]
-      }
+    canvas1DataNormalized.value = [...canvas1DataNormalized.value,
+    {
+      label: 'Kausi ' + selected_season.season,
+      backgroundColor: color,
+      data: [
+        Math.round((selected_season.zeros_total + selected_season.pikes_total) / totalThrow * 100 * 100) / 100,
+        Math.round((selected_season.ones_total) / totalThrow * 100 * 100) / 100,
+        Math.round((selected_season.twos_total) / totalThrow * 100 * 100) / 100,
+        Math.round((selected_season.threes_total) / totalThrow * 100 * 100) / 100,
+        Math.round((selected_season.fours_total) / totalThrow * 100 * 100) / 100,
+        Math.round((selected_season.fives_total) / totalThrow * 100 * 100) / 100,
+        Math.round((selected_season.gte_six_total) / totalThrow * 100 * 100) / 100,
+      ]
+    }
     ];
 
-    canvas1Data.value = [ ...canvas1Data.value,  // To make it reactive, we must make new array
-      {
-        label: 'Kausi ' + selected_season.season,
-        backgroundColor: color,
-        data: [
-          selected_season.zeros_total + selected_season.pikes_total,
-          selected_season.ones_total,
-          selected_season.twos_total,
-          selected_season.threes_total,
-          selected_season.fours_total,
-          selected_season.fives_total,
-          selected_season.gte_six_total
-        ]
-      }
+    canvas1Data.value = [...canvas1Data.value,  // To make it reactive, we must make new array
+    {
+      label: 'Kausi ' + selected_season.season,
+      backgroundColor: color,
+      data: [
+        selected_season.zeros_total + selected_season.pikes_total,
+        selected_season.ones_total,
+        selected_season.twos_total,
+        selected_season.threes_total,
+        selected_season.fours_total,
+        selected_season.fives_total,
+        selected_season.gte_six_total
+      ]
+    }
     ];
 
-    canvas3Data.value = [ ...canvas3Data.value,  // To make it reactive, we must make new array
-      {  
-        label: 'Kausi ' + selected_season.season,
-        backgroundColor: color,
-        data: [
-          selected_season.avg_score_position_one,
-          selected_season.avg_score_position_two,
-          selected_season.avg_score_position_three,
-          selected_season.avg_score_position_four
-        ]
-      }
+    canvas3Data.value = [...canvas3Data.value,  // To make it reactive, we must make new array
+    {
+      label: 'Kausi ' + selected_season.season,
+      backgroundColor: color,
+      data: [
+        selected_season.avg_score_position_one,
+        selected_season.avg_score_position_two,
+        selected_season.avg_score_position_three,
+        selected_season.avg_score_position_four
+      ]
+    }
     ];
 
     currentSelection.push(clickedSeason);
@@ -500,7 +565,7 @@ function chanceSeason (value) {
  * @returns {boolean} True if season is first item in 'currentSelection' and only once else False 
  */
 function initalColor(season) {
-  if(colorInitialized || season !== currentSelection[0]) {
+  if (colorInitialized || season !== currentSelection[0]) {
     return false;
   }
   colorInitialized = true;
@@ -516,36 +581,36 @@ watch(() => playerStore.loadedData, () => {
   if (stats_per_seasons && stats_per_seasons.length !== 0) {
     let index = stats_per_seasons.map(ele => ele.id).indexOf(navStore.seasonId);
     // If the selected season is not in players history take the latest
-    index = (index === -1) ? stats_per_seasons.length -1 : index;
+    index = (index === -1) ? stats_per_seasons.length - 1 : index;
     const currentSelcSeason = stats_per_seasons[index];
     const seasonString = currentSelcSeason.season;
     currentSelection.push(seasonString);
     colors[0] = seasonString;
     columnCurrentSelection.push('KPH');
 
-    const totalThrow = currentSelcSeason.zeros_total 
-                      + currentSelcSeason.pikes_total 
-                      + currentSelcSeason.ones_total 
-                      + currentSelcSeason.twos_total
-                      + currentSelcSeason.threes_total
-                      + currentSelcSeason.fours_total
-                      + currentSelcSeason.fives_total
-                      + currentSelcSeason.gte_six_total
+    const totalThrow = currentSelcSeason.zeros_total
+      + currentSelcSeason.pikes_total
+      + currentSelcSeason.ones_total
+      + currentSelcSeason.twos_total
+      + currentSelcSeason.threes_total
+      + currentSelcSeason.fours_total
+      + currentSelcSeason.fives_total
+      + currentSelcSeason.gte_six_total
 
     const init1Normalized = {
       label: 'Kausi ' + currentSelcSeason.season,
       backgroundColor: '#B3E5FC',
       data: [
-        Math.round((currentSelcSeason.zeros_total + currentSelcSeason.pikes_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.ones_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.twos_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.threes_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.fours_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.fives_total) / totalThrow * 100 * 100 ) / 100,
-        Math.round((currentSelcSeason.gte_six_total) / totalThrow * 100 * 100 ) / 100,
+        Math.round((currentSelcSeason.zeros_total + currentSelcSeason.pikes_total) / totalThrow * 100 * 100) / 100,
+        Math.round((currentSelcSeason.ones_total) / totalThrow * 100 * 100) / 100,
+        Math.round((currentSelcSeason.twos_total) / totalThrow * 100 * 100) / 100,
+        Math.round((currentSelcSeason.threes_total) / totalThrow * 100 * 100) / 100,
+        Math.round((currentSelcSeason.fours_total) / totalThrow * 100 * 100) / 100,
+        Math.round((currentSelcSeason.fives_total) / totalThrow * 100 * 100) / 100,
+        Math.round((currentSelcSeason.gte_six_total) / totalThrow * 100 * 100) / 100,
       ]
     };
-  
+
     const init1 = {
       label: 'Kausi ' + currentSelcSeason.season,
       backgroundColor: '#B3E5FC',
@@ -570,7 +635,7 @@ watch(() => playerStore.loadedData, () => {
       borderColor: '#B3E5FC',
       data: canvas2_data_tmp
     };
-    
+
     const init3 = {
       label: 'Kausi ' + currentSelcSeason.season,
       backgroundColor: '#B3E5FC',
@@ -591,7 +656,7 @@ watch(() => playerStore.loadedData, () => {
   const headerRow = document.getElementsByClassName('allTimeHeaders')[0];
   for (let i = 0; i < headerRow.childNodes.length; i++) {
     const text = headerRow.childNodes[i].innerText;
-    if ( text === 'KPH' ) {
+    if (text === 'KPH') {
       headerRow.childNodes[i].classList.add('blue-row');
       break;
     }
@@ -599,32 +664,31 @@ watch(() => playerStore.loadedData, () => {
   // Initialize the match list by calling the filtterItems() once
   filtterItems();
 },
-{once: true})
+  { once: true })
 </script>
 
 
 <style>
-
 tbody tr :hover {
-    cursor: unset;
+  cursor: unset;
 }
 
-.left-border-period > .v-data-table__wrapper > table > tbody > tr > td:nth-child(5) {
+.left-border-period>.v-data-table__wrapper>table>tbody>tr>td:nth-child(5) {
   border-left: 1px solid grey;
   text-align: center;
 }
 
-.left-border-period > .v-data-table__wrapper > table > tbody > tr > td:nth-child(9) {
+.left-border-period>.v-data-table__wrapper>table>tbody>tr>td:nth-child(9) {
   border-left: 1px solid grey;
   text-align: center;
 }
 
-.left-border-match > .v-data-table__wrapper > table > tbody > tr > td:nth-child(5) {
+.left-border-match>.v-data-table__wrapper>table>tbody>tr>td:nth-child(5) {
   border-left: 1px solid grey;
   text-align: center;
 }
 
-.left-border-match > .v-data-table__wrapper > table > tbody > tr > td:nth-child(13) {
+.left-border-match>.v-data-table__wrapper>table>tbody>tr>td:nth-child(13) {
   border-left: 1px solid grey;
   text-align: center;
 }
@@ -672,4 +736,59 @@ tbody tr :hover {
   justify-content: center;
 }
 
+.achievements-item {
+  /* flex-direction: column !important; */
+  align-items: stretch !important;
+  padding: 16px 0 !important;
+}
+
+.season-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-left: 16px;
+}
+
+.season-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding-right: 12px;
+  white-space: nowrap;
+}
+
+.season-header::before {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, currentColor 100%, transparent 50%);
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.season-header::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, currentColor 100%, transparent 50%);
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.achievements-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-left: 16px;
+  padding-bottom: 4px;
+}
+
+.achievement-badge {
+  padding: 6px 12px;
+  margin: 3px 6px;
+  margin-bottom: 6px;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
 </style>

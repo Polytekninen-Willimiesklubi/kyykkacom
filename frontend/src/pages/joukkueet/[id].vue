@@ -210,6 +210,64 @@
             </v-data-table>
           </v-expansion-panel-text>
         </v-expansion-panel>
+        <v-expansion-panel title="Saavutukset" v-if="teamStore.selectedSeasonId === 'allTime'">
+          <v-expansion-panel-text>
+            <v-row class="pl-5 pb-10">
+              <v-col cols="12">
+                <div class="accolades-header">
+                  <span class="accolades-title">Joukkue Palkinnot</span>
+                  <span class="accolades-title">Pelaaja Palkinnot</span>
+                </div>
+                <v-list 
+                  class="w-100"
+                  style="overflow: hidden" 
+                  v-for="[season, achievements] in Object.entries(
+                    hofStore.teamAccoladesBySeason
+                  ).sort((a, b) => b[0] - a[0])" 
+                  :key="season"
+                >
+                  <div class="season-header">
+                    <v-list-item-title class="season-title">Kausi {{ season }}</v-list-item-title>
+                  </div>
+                  <v-row style="overflow: hidden">
+                    <v-col cols="6">
+                      <template v-for="accolade in achievements['team_accolades']" :key="accolade.id">
+                        <div class="achievement-badge">
+                          <v-row>
+                            <v-col cols="1">
+                              <accolade-icon :filename="accolade.accolade.icon" />
+                            </v-col>
+                            <v-col cols="11">
+                              <span style="font-weight: 600;">{{ accolade.accolade.name }}</span>
+                            </v-col>
+                          </v-row>
+                        </div>
+                      </template>
+                    </v-col>
+                    <v-divider vertical inset :thickness="1" style="border-color: #000000 !important; color: #000000" />
+                    <v-col cols="6" class="pr-8">
+                      <template v-for="accolade in achievements['player_accolades']" :key="accolade.id">
+                        <div class="achievement-badge">
+                          <v-row>
+                            <v-col cols="1">
+                              <accolade-icon :filename="accolade.accolade.icon" />
+                            </v-col>
+                            <v-col cols="3">
+                              <span style="font-weight: 600;">{{ accolade.accolade.name }}</span>
+                            </v-col>
+                            <v-col cols="8">
+                              <span style="font-weight: 600;">{{ accolade.player_name }}</span>
+                            </v-col>
+                          </v-row>
+                        </div>
+                      </template>
+                    </v-col>
+                  </v-row>
+                </v-list>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
       </v-expansion-panels>
     </v-card>
   </div>
@@ -223,9 +281,9 @@
 <script setup>
 import { useTeamsStore } from '@/stores/teams.store';
 import { useAuthStore } from '@/stores/auth.store';
-import { useDate } from 'vuetify'
+import { useHofStore } from '@/stores/hof.store';
 import { useRoute } from 'vue-router/auto';
-import { 
+import {
   headersTeamPlayers,
   headersTeamMatch,
   headersTeamReserve,
@@ -234,20 +292,20 @@ import {
 
 const teamStore = useTeamsStore();
 const authStore = useAuthStore();
+const hofStore = useHofStore();
 
 const route = useRoute('/joukkueet/[id]');
-const date = useDate();
 
 const search = ref('');
 const matchSearch = ref('');
 const panel = ref([0]);
 
 
-function handleRedirect (value, row) {
+function handleRedirect(value, row) {
   location.href = '/pelaajat/' + row.item.player
 }
 
-function handleRedirectMatches (value, row) {
+function handleRedirectMatches(value, row) {
   location.href = '/ottelut/' + row.item.id
 }
 
@@ -257,6 +315,8 @@ function getColor(val1, val2) {
   else return 'yellow-accent-4'
 }
 
+
+hofStore.getTeamAccolades(route.params.id)
 teamStore.getTeamPlayers(route.params.id)
 if (authStore.loggedIn && (authStore.isCaptain || authStore.isSuperUser)) {
   teamStore.getReserve(route.params.id)
@@ -269,3 +329,109 @@ watch(() => route.params.id, () => {
 });
 
 </script>
+
+<style scoped>
+.achievements-item {
+  /* flex-direction: column !important; */
+  align-items: stretch !important;
+  padding: 16px 0 !important;
+}
+
+.season-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-left: 16px;
+}
+
+.season-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding-right: 12px;
+  white-space: nowrap;
+}
+
+.season-header::before {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, currentColor 100%, transparent 50%);
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.season-header::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, currentColor 100%, transparent 50%);
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.accolades-header {
+  position: relative;
+  height: 2.5rem;
+  margin-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.accolades-title {
+  position: absolute;
+  font-size: 1.1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  top: 50%;
+}
+
+.accolades-title:nth-child(1) {
+  left: 25%;
+  transform: translate(-50%, -50%);
+}
+
+.accolades-title:nth-child(2) {
+  left: 75%;
+  transform: translate(-50%, -50%);
+}
+
+.accolades-header::before {
+  content: '';
+  position: absolute;
+  height: 2px;
+  /* background: linear-gradient(to right, currentColor 100%, transparent 0%); */
+  top: 50%;
+  left: 16px;
+  right: 50%;
+  margin-right: 8px;
+}
+
+.accolades-header::after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  /* background: linear-gradient(to left, currentColor 100%, transparent 0%); */
+  top: 50%;
+  left: 50%;
+  right: 16px;
+  margin-left: 8px;
+}
+
+.achievements-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-left: 16px;
+  padding-bottom: 4px;
+}
+
+.achievement-badge {
+  padding: 6px 12px;
+  margin: 3px 6px;
+  margin-bottom: 6px;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+</style>

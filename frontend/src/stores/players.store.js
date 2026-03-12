@@ -1,3 +1,4 @@
+import { useHofStore } from "./hof.store";
 import { useNavBarStore } from "./navbar.store";
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/players/`;
@@ -20,6 +21,18 @@ const fields = [
   "scaled_points",
   "weighted_throw_total",
 ]
+
+const placement_registery = {
+  1: "🏆",
+  2: "🥈",
+  3: "🥉",
+  4: "4. sija",
+  5: "5. sija",
+  6: "6. sija",
+  7: "7. sija",
+  8: "Top8",
+  16: "Top16",
+}
 export const usePlayerStore = defineStore('players', () => {
   const _ids = ref({})
   const loading = ref(false);
@@ -27,6 +40,7 @@ export const usePlayerStore = defineStore('players', () => {
   const loadedData = ref(false);
   const players = ref([]);
   const player = ref({})
+  const playerHasAccolades = ref(false);
   const playerMatchesPerPeriod = ref([]);
   const playerMatchesPerMatch = ref([]);
   const playersPositionsToggle = ref([]); // Used in players index page
@@ -89,7 +103,6 @@ export const usePlayerStore = defineStore('players', () => {
         }]
       }
     }
-
     if (aggregationSetting.value === 1) {
       let listId = 0
       const filteredData = Object.values(jotain).reduce((acc, playerStats) => {
@@ -101,6 +114,7 @@ export const usePlayerStore = defineStore('players', () => {
             player_name: yearStat[0]["player_name"],
             team_name: yearStat[0]["team_name"],
             season: yearStat[0]["season"],
+            accolades: yearStat[0]["accolades"] ?? [],
             score_total: 0,
             pikes_total: 0,
             zeros_total: 0,
@@ -164,6 +178,7 @@ export const usePlayerStore = defineStore('players', () => {
           player_name: playerStats[0]["player_name"],
           team_name: playerStats[0]["team_name"],
           season: playerStats[0]["season"],
+          accolades: playerStats[0]["accolades"] ?? [],
           season_count: new Set(playerStats.map(obj => obj.season)).size,
           score_total: 0,
           pikes_total: 0,
@@ -246,13 +261,29 @@ export const usePlayerStore = defineStore('players', () => {
     loadingPlayer.value = true;
     loadedData.value = false;
     const navStore = useNavBarStore();
+    const hofStore = useHofStore();
     const question = playerIndex + '/?season=' + navStore.seasonId;
     try {
       const response = await fetch(baseUrl + question, { method: 'GET' });
       const payload = await response.json();
+      await hofStore.getPlayerAccolades(playerIndex);
 
       player.value = payload;
       player.value.all_time_stats["season"] = "All Time"
+
+      if (hofStore.playerAccolades["team_accolades"].length > 0) {
+        playerHasAccolades.value = true;
+      }
+
+      const liigemestaruusAccolades = Object.fromEntries(
+        hofStore.playerAccolades["team_accolades"]
+          .filter(accolade => accolade.accolade.name === "Liigamestaruus")
+          .map(accolade => [accolade.season_year, accolade.placement])
+      );
+
+      player.value.stats_per_seasons.forEach(season => {
+        season.ranking = placement_registery[liigemestaruusAccolades[season.season]] || '-';
+      });
 
     } catch (error) {
       console.log(error)
@@ -267,6 +298,7 @@ export const usePlayerStore = defineStore('players', () => {
     loadedData,
     players,
     player,
+    playerHasAccolades,
     playerMatchesPerPeriod,
     playerMatchesPerMatch,
     playersPositionsToggle,

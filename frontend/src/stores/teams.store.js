@@ -12,6 +12,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
     const selectedSeasonId = ref(null);
     const unReservedPlayers = ref([]);
     const allTeams = ref(JSON.parse(localStorage.getItem('allTeams')) ? JSON.parse(localStorage.getItem('allTeams')) : []);
+    const seasonTeamAccolades = ref(JSON.parse(localStorage.getItem('seasonTeamAccolades')) ? JSON.parse(localStorage.getItem('seasonTeamAccolades')) : {});
     const secondStage = ref(JSON.parse(localStorage.getItem('secondStage')) ? JSON.parse(localStorage.getItem('secondStage')) : []);
     const loading = ref(false);
     const loaded = ref(false);
@@ -175,6 +176,35 @@ export const useTeamsStore = defineStore('joukkue', () => {
             }
             localStorage.setItem('allTeams', JSON.stringify(allTeams.value));
             localStorage.setItem('secondStage', JSON.stringify(secondStage.value));
+
+            seasonTeamAccolades.value = {};
+            for (const [teamId, accolades] of Object.entries(payload["accolades"])) {
+                for (const accolade of accolades) {
+                    if (accolade.name === "Runkosarjamestaruus" && accolade.placement == 1) {
+                        if (!(teamId in seasonTeamAccolades.value)) {
+                            seasonTeamAccolades.value[teamId] = [];
+                        }
+                        seasonTeamAccolades.value[teamId].push(accolade);
+                    } else if (accolade.name === "SuperWeekend-Cup" && accolade.placement == 1) {
+                        if (!(teamId in seasonTeamAccolades.value)) {
+                            seasonTeamAccolades.value[teamId] = [];
+                        }
+                        seasonTeamAccolades.value[teamId].push(accolade);
+                    } else if (accolade.name == "Liigamestaruus" && [1, 2, 3].includes(accolade.placement)) {
+                        if (!(teamId in seasonTeamAccolades.value)) {
+                            seasonTeamAccolades.value[teamId] = [];
+                        }
+                        if (accolade.placement == 2) {
+                            accolade.icon = "hopea.ico"
+                        } else if (accolade.placement == 3) {
+                            accolade.icon = "pronssi.ico"
+                        }
+                        seasonTeamAccolades.value[teamId].push(accolade);
+                    }
+                }
+            }
+            localStorage.setItem('seasonTeamAccolades', JSON.stringify(seasonTeamAccolades.value));
+
             loading.value = false;
             loaded.value = true;
         } catch (error) {
@@ -309,8 +339,8 @@ export const useTeamsStore = defineStore('joukkue', () => {
         } catch (error) {
             console.log(error);
         }
-
     }
+
     return {
         allTeams,
         loading,
@@ -318,6 +348,7 @@ export const useTeamsStore = defineStore('joukkue', () => {
         allTimeStats,
         seasonsStats,
         selectedSeasonId,
+        seasonTeamAccolades,
         unReservedPlayers,
         seasonStats,
         seasonPlayers,
