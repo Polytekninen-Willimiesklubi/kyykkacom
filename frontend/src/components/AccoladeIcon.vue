@@ -1,8 +1,7 @@
 <template>
     <v-icon :size="size">
         <img 
-            :src="imageIndex[props.filename]"
-            alt="@/assets/kyykkalogo120px.png"
+            :src="failed ? defaultIcon : imageIndex[props.filename]"
         />
         <slot></slot>
     </v-icon>
@@ -10,6 +9,7 @@
 
 
 <script setup>
+import defaultIcon from "@/assets/kyykkalogo120px.png";
 import hauki from "@/assets/accolades/hauki.png";
 import hopea from "@/assets/accolades/hopea.ico";
 import joulukuusen_kaataja from "@/assets/accolades/joulukuusen_kaataja.png";
@@ -56,7 +56,7 @@ const imageIndex = {
 
 if (props.filename === null || props.filename === undefined) {
     failed.value = true;
-    console.warn("AccoladeIcon component used without filename prop (" + props.filename + ")")
+    // console.warn("AccoladeIcon component used without filename prop (" + props.filename + ")")
 }
 
 </script>
