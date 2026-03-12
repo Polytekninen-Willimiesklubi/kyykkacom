@@ -118,7 +118,7 @@
             <template v-for="accolade in item.accolades">
               <accolade-icon 
                 :filename="accolade.icon"
-                :size="accolade.name == 'Haukikuningas/-tar' || accolade.name == 'Pudotuspelien Paras' || accolade.name == 'Vuoden Kyykkääjä' ? '36' : '24'"
+                :size="accolade.name == 'Haukikuningas/-tar' || accolade.name == 'Pudotuspelien Paras' || accolade.name == 'Vuoden Kyykkääjä' || accolade.name == 'Vuoden Kuusenkaataja' ? '32' : '24'"
               >
                 <v-tooltip activator='parent' :text="accolade?.name" location="right" />
               </accolade-icon>
