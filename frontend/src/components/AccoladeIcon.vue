@@ -2,7 +2,7 @@
     <v-icon :size="size">
         <img 
             :src="imageIndex[props.filename]"
-            alt="src/assets/kyykkalogo120px.png"
+            alt="@/assets/kyykkalogo120px.png"
         />
         <slot></slot>
     </v-icon>

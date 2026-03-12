@@ -2279,7 +2279,7 @@ class AllcoladeViewSet(viewsets.ViewSet):
                         icon = "pronssi.ico"
                     else:
                         icon = None
-                    name = f"Runkosarja {placement}.sija"
+                    name = f"Runkosarja {placement}. sija"
                 team_data.append(
                     {
                         "id": _id,
