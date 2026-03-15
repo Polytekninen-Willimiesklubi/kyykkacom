@@ -365,6 +365,8 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const jaskanKarttu = ref([
+        { 'year': 2026, 'name': 'Jarno Mikkola' },
+        { 'year': 2026, 'name': 'Totti Sillanpää' },
         { 'year': 2024, 'name': 'Lassi Onne' },
         { 'year': 2022, 'name': 'Heikki Lohilahti' },
         { 'year': 2016, 'name': 'Anssi Tura' },
@@ -376,6 +378,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const KCKAhti = ref([
+        { 'year': 2026, 'name': 'Oskari Ekholm' },
         { 'year': 2025, 'name': 'Jarno Mikkola' },
         { 'year': 2024, 'name': '-' },
         { 'year': 2023, 'name': "Saara Inkinen" },
@@ -405,6 +408,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const hauki = ref([
+        { 'year': 2026, 'name': 'Joona Vähätiitto' },
         { 'year': 2025, 'name': 'Lauri Sorsa' },
         { 'year': 2024, 'name': 'Armi Rissanen' },
         { 'year': 2023, 'name': "Saara Inkinen" },
@@ -436,6 +440,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const last = ref([
+        { 'year': 2026, 'name': "Eero Ryhänen" },
         { 'year': 2025, 'name': "Jyri 'Kode' Koistinen" },
         { 'year': 2024, 'name': "Jyri 'Kode' Koistinen" },
         { 'year': 2023, 'name': "Totti Sillanpää" },
@@ -465,6 +470,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const p_o_y = ref([
+        { 'year': 2026, 'name': "Atte Putkonen" },
         { 'year': 2025, 'name': "Totti Sillanpää" },
         { 'year': 2024, 'name': "-" },
         { 'year': 2023, 'name': "Armi Rissanen" },
@@ -496,12 +502,14 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const mvp = ref([
+        { 'year': 2026, 'name': "Juho Hautaniemi" },
         { 'year': 2025, 'name': "Sami Valjakka" },
         { 'year': 2024, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2023, 'name': "Atte Putkonen" },
     ])
 
     const man_woman = ref([
+        { 'year': 2026, 'name': "Inka Hatara" },
         { 'year': 2025, 'name': "Vilma Rantanen" },
         { 'year': 2024, 'name': "Totti Sillanpää/Armi Rissanen" },
         { 'year': 2023, 'name': "Markus Laitinen" },
@@ -521,6 +529,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const bracketBest = ref([
+        { 'year': 2026, 'name': "Niko Grön" },
         { 'year': 2025, 'name': "Totti Sillanpää" },
         { 'year': 2024, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2023, 'name': "Niko Grön" },
@@ -552,6 +561,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const playoffBest = ref([
+        { 'year': 2026, 'name': "Samuli Kantola" },
         { 'year': 2025, 'name': "Erik 'Eki' Kuitunen" },
         { 'year': 2024, 'name': "Leevi Hovatov" },
         { 'year': 2023, 'name': "Leevi Hovatov" },
@@ -583,6 +593,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const rookie = ref([
+        { 'year': 2025, 'name': "Leevi Nevalainen" },
         { 'year': 2025, 'name': "Veikka Rantala" },
         { 'year': 2024, 'name': "Eino Auvinen" },
         { 'year': 2023, 'name': "Eetu Knutars" },
@@ -614,6 +625,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const tree = ref([
+        { 'year': 2026, 'name': "Samuli Kantola" },
         { 'year': 2025, 'name': "Joona Lappalainen" },
         { 'year': 2024, 'name': "Mikko 'Temmi' Kuusio" },
         { 'year': 2023, 'name': "Joona Lappalainen" },
@@ -621,6 +633,8 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const misc = ref([
+        { 'year': 2026, 'name': 'Vuoden Fifty-Sixty', 'person': "Herkko Teittinen" },
+        { 'year': 2026, 'name': 'Vuoden Heitto', 'person': "Ekin 10 kyykän + papin heitto puolivälierässä" },
         { 'year': 2025, 'name': 'Vuoden Heitto', 'person': "Masin kuuden kyykän lakaisu finaalissa" },
         { 'year': 2025, 'name': 'Vuoden Sulaminen', 'person': "AMK:n parkkipaikat ennen PoWiCupia" },
         { 'year': 2025, 'name': 'Vuoden Byrokraatti', 'person': "Atso Härkönen" },
@@ -653,6 +667,7 @@ export const useHofStore = defineStore('hof', () => {
     ])
 
     const sm = ref([
+        { 'year': 2026, 'first': 'TBD', 'second': 'TBD' },
         { 'year': 2025, 'first': 'Cluster Prospects', 'second': 'MÄYRÄKOIRA' },
         { 'year': 2024, 'first': 'MaHaLasKu', 'second': 'DiSKO' },
         { 'year': 2023, 'first': 'MaHaLasKu', 'second': 'VSOP' },
