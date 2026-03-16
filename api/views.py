@@ -1884,7 +1884,7 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
         )
         accolades_by_player: dict[int, list] = {}
         for accolade in accolades_qs:
-            _id = accolade["user"]
+            _id = accolade["player_id"]
             if _id not in accolades_by_player:
                 accolades_by_player[_id] = []
             accolades_by_player[_id].append(accolade)

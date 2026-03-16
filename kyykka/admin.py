@@ -123,9 +123,15 @@ def season_end_accolades(request, season_id: int | None = None):
     for player_accolade in player_accolades:
         if player_accolade.accolade.name not in label_to_field.keys():
             continue
-        initial[label_to_field[player_accolade.accolade.name]] = (
-            player_accolade.player.pk
-        )
+        if player_accolade.accolade.name == "Henkkari-Cup":
+            if player_accolade.placement == 1:
+                initial["individual_tournament_winner"] = player_accolade.player.pk
+            elif player_accolade.placement == 2:
+                initial["individual_tournament_finalist"] = player_accolade.player.pk
+        else:
+            initial[label_to_field[player_accolade.accolade.name]] = (
+                player_accolade.player.pk
+            )
 
     team_accolades = TeamAccolade.objects.filter(season=season)
     # Set the initial values if are accolades already setted for this season

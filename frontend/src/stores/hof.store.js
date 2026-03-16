@@ -593,7 +593,7 @@ export const useHofStore = defineStore('hof', () => {
     ]);
 
     const rookie = ref([
-        { 'year': 2025, 'name': "Leevi Nevalainen" },
+        { 'year': 2026, 'name': "Leevi Nevalainen" },
         { 'year': 2025, 'name': "Veikka Rantala" },
         { 'year': 2024, 'name': "Eino Auvinen" },
         { 'year': 2023, 'name': "Eetu Knutars" },
