@@ -1885,8 +1885,15 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
         accolades_by_player: dict[int, list] = {}
         for accolade in accolades_qs:
             _id = accolade["player_id"]
+            if accolade["name"] == "Henkkari-Cup":
+                if accolade["placement"] == 1:
+                    accolade["name"] = "Henkkari-Cupin Mestari"
+                else:
+                    continue
+
             if _id not in accolades_by_player:
                 accolades_by_player[_id] = []
+
             accolades_by_player[_id].append(accolade)
 
         for player_data in throws:

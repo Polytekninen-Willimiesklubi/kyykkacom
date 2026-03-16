@@ -89,8 +89,8 @@ def season_end_accolades(request, season_id: int | None = None):
         "Vuoden nais-/mieskyykkääjä": "opposite_genre_poy",
         "Vuoden Tulokas": "best_newcomer",
         "Vuoden Viimeistelijä": "best_finisher",
-        "Pudotuspelien paras": "best_playoff_player",
-        "Runkosarjan paras": "best_bracket_player",
+        "Pudotuspelien Paras": "best_playoff_player",
+        "Runkosarjan Paras": "best_bracket_player",
         "Haukikuningas/-tar": "pike_king",
         "Vuoden MVP": "mvp",
         "Vuoden Kuusenkaataja": "evergreen_cutter",
@@ -107,17 +107,17 @@ def season_end_accolades(request, season_id: int | None = None):
     player_accolades = models.PlayerAccolade.objects.filter(season=season)
 
     for player_accolade in player_accolades:
-        if player_accolade.accolade.name not in label_to_field.keys():
-            continue
         if player_accolade.accolade.name == "Henkkari-Cup":
             if player_accolade.placement == 1:
                 initial["individual_tournament_winner"] = player_accolade.player.pk
             elif player_accolade.placement == 2:
                 initial["individual_tournament_finalist"] = player_accolade.player.pk
-        else:
+        elif player_accolade.accolade.name in label_to_field.keys():
             initial[label_to_field[player_accolade.accolade.name]] = (
                 player_accolade.player.pk
             )
+        else:
+            continue
 
     team_accolades = models.TeamAccolade.objects.filter(season=season)
     # Set the initial values if are accolades already setted for this season
@@ -199,7 +199,7 @@ def season_end_accolades(request, season_id: int | None = None):
                 )
                 accolade = models.Accolade.objects.get(name=accolade_name)
                 existing_accolade = models.PlayerAccolade.objects.filter(
-                    season=season, accolade=accolade
+                    season=season, accolade=accolade, placement=placement
                 ).first()
 
                 if posted_player:
@@ -207,7 +207,7 @@ def season_end_accolades(request, season_id: int | None = None):
 
                     if existing_accolade:
                         # Update if player changed
-                        if existing_accolade.player.pk != posted_player.pk:
+                        if existing_accolade.player.pk != posted_player:
                             existing_accolade.player = posted_player
                             existing_accolade.save()
                     else:

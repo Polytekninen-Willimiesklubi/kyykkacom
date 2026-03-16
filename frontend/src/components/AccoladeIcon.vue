@@ -52,7 +52,6 @@ const imageIndex = {
     "runkomestari.ico": runkomestari,
     "runkosarja_paras.ico": runkosarja_paras,
     "superweekend.ico": superweekend,
-    "tulokas.ico": tulokas,
     "vuoden_kyykkaaja.svg": vuoden_kyykkaaja,
     "vuoden_tulokas.svg": vuoden_tulokas,
     "star_trophy.svg": star_trophy,
