@@ -3,22 +3,8 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import path
 
+import kyykka.models as models
 from kyykka.admin_forms import SeasonAccoladeForm
-from kyykka.models import (
-    Accolade,
-    CurrentSeason,
-    ExtraBracketStagePlacement,
-    Match,
-    News,
-    PlayerAccolade,
-    PlayersInTeam,
-    Season,
-    SuperWeekend,
-    Team,
-    TeamAccolade,
-    TeamsInSeason,
-    Throw,
-)
 
 # Register your models here.
 
@@ -29,17 +15,17 @@ class PlayersInTeamInline(admin.TabularInline):
     because the "through" attribute is used with the Team players ManyToManyField
     """
 
-    model = PlayersInTeam
+    model = models.PlayersInTeam
     extra = 1
 
 
 class TeamsInSeasonInline(admin.TabularInline):
-    model = TeamsInSeason
+    model = models.TeamsInSeason
     extra = 1
 
 
 class ThrowsInMatchInline(admin.TabularInline):
-    model = Throw
+    model = models.Throw
     fields = ["player", "score_first", "score_second", "score_third", "score_fourth"]
     can_delete = False
     extra = 0
@@ -79,18 +65,18 @@ def season_end_accolades(request, season_id: int | None = None):
     initial = {}
     if season_id is None:
         try:
-            current_season = CurrentSeason.objects.first()
+            current_season = models.CurrentSeason.objects.first()
             if current_season is None:
                 messages.error(request, "No current season set.")
                 return redirect("admin:index")
             season = current_season.season
-        except CurrentSeason.DoesNotExist:
+        except models.CurrentSeason.DoesNotExist:
             messages.error(request, "No current season set.")
             return redirect("admin:index")
     else:
         try:
-            season = Season.objects.get(id=season_id)
-        except Season.DoesNotExist:
+            season = models.Season.objects.get(id=season_id)
+        except models.Season.DoesNotExist:
             messages.error(request, f"Season '{season_id}' not found.")
             return redirect("admin:index")
 
@@ -118,7 +104,7 @@ def season_end_accolades(request, season_id: int | None = None):
         "SuperWeekend-Cupin Finalisti": "super_weekend_second",
         "Runkosarjan voittaja": "bracket_stage_winner",
     }
-    player_accolades = PlayerAccolade.objects.filter(season=season)
+    player_accolades = models.PlayerAccolade.objects.filter(season=season)
 
     for player_accolade in player_accolades:
         if player_accolade.accolade.name not in label_to_field.keys():
@@ -133,7 +119,7 @@ def season_end_accolades(request, season_id: int | None = None):
                 player_accolade.player.pk
             )
 
-    team_accolades = TeamAccolade.objects.filter(season=season)
+    team_accolades = models.TeamAccolade.objects.filter(season=season)
     # Set the initial values if are accolades already setted for this season
     for team_accolade in team_accolades:
         if team_accolade.team is None:
@@ -211,8 +197,8 @@ def season_end_accolades(request, season_id: int | None = None):
                     "Placement:",
                     placement,
                 )
-                accolade = Accolade.objects.get(name=accolade_name)
-                existing_accolade = PlayerAccolade.objects.filter(
+                accolade = models.Accolade.objects.get(name=accolade_name)
+                existing_accolade = models.PlayerAccolade.objects.filter(
                     season=season, accolade=accolade
                 ).first()
 
@@ -226,7 +212,7 @@ def season_end_accolades(request, season_id: int | None = None):
                             existing_accolade.save()
                     else:
                         # Create new
-                        PlayerAccolade.objects.create(
+                        models.PlayerAccolade.objects.create(
                             season=season,
                             accolade=accolade,
                             player=posted_player,
@@ -251,8 +237,8 @@ def season_end_accolades(request, season_id: int | None = None):
 
             for field_name, (placement, accolade_name) in single_team_fields.items():
                 posted_team = form.cleaned_data.get(field_name)
-                accolade = Accolade.objects.get(name=accolade_name)
-                existing_accolade = TeamAccolade.objects.filter(
+                accolade = models.Accolade.objects.get(name=accolade_name)
+                existing_accolade = models.TeamAccolade.objects.filter(
                     season=season, accolade=accolade, placement=placement
                 ).first()
 
@@ -267,7 +253,7 @@ def season_end_accolades(request, season_id: int | None = None):
                             existing_accolade.team = posted_team
                             existing_accolade.save()
                     else:
-                        TeamAccolade.objects.create(
+                        models.TeamAccolade.objects.create(
                             season=season,
                             accolade=accolade,
                             team=posted_team,
@@ -286,8 +272,8 @@ def season_end_accolades(request, season_id: int | None = None):
 
             for field_name, (placement, accolade_name) in multi_team_fields.items():
                 posted_teams = form.cleaned_data.get(field_name, [])
-                accolade = Accolade.objects.get(name=accolade_name)
-                existing_accolades = TeamAccolade.objects.filter(
+                accolade = models.Accolade.objects.get(name=accolade_name)
+                existing_accolades = models.TeamAccolade.objects.filter(
                     season=season, accolade=accolade, placement=placement
                 )
 
@@ -305,8 +291,8 @@ def season_end_accolades(request, season_id: int | None = None):
                 # Create new accolades
                 to_create = posted_ids_set - existing_ids_set
                 for team_id in to_create:
-                    team = TeamsInSeason.objects.get(pk=team_id)
-                    TeamAccolade.objects.create(
+                    team = models.TeamsInSeason.objects.get(pk=team_id)
+                    models.TeamAccolade.objects.create(
                         season=season, accolade=accolade, team=team, placement=placement
                     )
 
@@ -321,19 +307,20 @@ def season_end_accolades(request, season_id: int | None = None):
     return render(request, "admin/season_accolades_form.html", context)
 
 
-admin.site.register(TeamsInSeason, PlayersInTeamAdmin)
-admin.site.register(Team)
-admin.site.register(Season, TeamsInSeasonAdmin)
-admin.site.register(PlayersInTeam, PlayerSearchAdmin)
-admin.site.register(Match, ThrowsAdmin)
-admin.site.register(Throw)
-admin.site.register(CurrentSeason)
-admin.site.register(SuperWeekend)
-admin.site.register(News)
-admin.site.register(ExtraBracketStagePlacement)
-admin.site.register(Accolade)
-admin.site.register(TeamAccolade)
-admin.site.register(PlayerAccolade)
+admin.site.register(models.TeamsInSeason, PlayersInTeamAdmin)
+admin.site.register(models.Team)
+admin.site.register(models.Season, TeamsInSeasonAdmin)
+admin.site.register(models.PlayersInTeam, PlayerSearchAdmin)
+admin.site.register(models.Match, ThrowsAdmin)
+admin.site.register(models.Throw)
+admin.site.register(models.CurrentSeason)
+admin.site.register(models.SuperWeekend)
+admin.site.register(models.News)
+admin.site.register(models.ExtraBracketStagePlacement)
+admin.site.register(models.Accolade)
+admin.site.register(models.TeamAccolade)
+admin.site.register(models.PlayerAccolade)
+admin.site.register(models.PairAccolade)
 
 
 get_urls = admin.site.get_urls

@@ -12,6 +12,7 @@ from kyykka.models import (
     ExtraBracketStagePlacement,
     Match,
     News,
+    PairAccolade,
     Player,
     PlayerAccolade,
     PlayersInTeam,
@@ -2130,3 +2131,30 @@ class TeamAccoladeSerializer(serializers.ModelSerializer):
         if obj.team:
             return obj.team.team.abbreviation
         return obj.non_team_name
+
+
+class PairAccoladeSerializer(serializers.ModelSerializer):
+    player1_name = serializers.SerializerMethodField()
+    player2_name = serializers.SerializerMethodField()
+    accolade = AccoladeSerializer(read_only=True)
+    season_year = serializers.CharField(source="season.year", read_only=True)
+
+    class Meta:
+        model = PairAccolade
+        fields = (
+            "id",
+            "accolade",
+            "season",
+            "season_year",
+            "player1",
+            "player2",
+            "player1_name",
+            "player2_name",
+            "placement",
+        )
+
+    def get_player1_name(self, obj):
+        return f"{obj.player1.first_name} {obj.player1.last_name}"
+
+    def get_player2_name(self, obj):
+        return f"{obj.player2.first_name} {obj.player2.last_name}"

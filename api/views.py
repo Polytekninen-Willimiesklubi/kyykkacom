@@ -34,6 +34,7 @@ from kyykka.models import (
     Match,
     MatchTypes,
     News,
+    PairAccolade,
     PlayerAccolade,
     PlayersInTeam,
     Season,
@@ -1875,7 +1876,6 @@ class ThrowsAPI(viewsets.ReadOnlyModelViewSet):
         accolades_qs = (
             PlayerAccolade.objects.filter(season=season)
             .annotate(
-                user=F("player__player"),
                 name=F("accolade__name"),
                 description=F("accolade__description"),
                 icon=F("accolade__icon"),
@@ -2213,16 +2213,23 @@ class AllcoladeViewSet(viewsets.ViewSet):
         team_accolades = TeamAccolade.objects.select_related(
             "accolade", "season", "team"
         )
+        pair_accolades = PairAccolade.objects.select_related(
+            "accolade", "season", "player1", "player2"
+        )
 
         if season_id is not None:
             player_accolades = player_accolades.filter(season=season_id)
             team_accolades = team_accolades.filter(season=season_id)
+            pair_accolades = pair_accolades.filter(season=season_id)
         if player_id is not None:
             player_accolades = player_accolades.filter(player=player_id)
             player_teams = TeamsInSeason.objects.filter(
                 playersinteam__player=player_id
             ).distinct()
             team_accolades = team_accolades.filter(team__in=player_teams)
+            pair_accolades = pair_accolades.filter(
+                Q(player1=player_id) | Q(player2=player_id)
+            )
         if team_id is not None:
             team_accolades = team_accolades.filter(team__team=team_id)
 
@@ -2243,6 +2250,7 @@ class AllcoladeViewSet(viewsets.ViewSet):
             player_accolades, many=True
         ).data
         team_data = serializers.TeamAccoladeSerializer(team_accolades, many=True).data
+        pair_data = serializers.PairAccoladeSerializer(pair_accolades, many=True).data
 
         if team_id is not None:
             # Add bracket stage accolades if team didn't won
@@ -2355,6 +2363,7 @@ class AllcoladeViewSet(viewsets.ViewSet):
                 "player_accolades": player_data,
                 "team_accolades": team_data,
                 "player_team_accolades": player_team_accolades,
+                "pair_accolades": pair_data,
             }
         )
 
@@ -2373,11 +2382,15 @@ class AllcoladeViewSet(viewsets.ViewSet):
         team_accolades = TeamAccolade.objects.filter(season=season).select_related(
             "accolade", "season", "team"
         )
+        pair_accolades = PairAccolade.objects.filter(season=season).select_related(
+            "accolade", "season", "player1", "player2"
+        )
 
         player_data = serializers.PlayerAccoladeSerializer(
             player_accolades, many=True
         ).data
         team_data = serializers.TeamAccoladeSerializer(team_accolades, many=True).data
+        pair_data = serializers.PairAccoladeSerializer(pair_accolades, many=True).data
 
         return Response(
             {

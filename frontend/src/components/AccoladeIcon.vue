@@ -9,6 +9,8 @@
 
 
 <script setup>
+import apila from "@/assets/accolades/apila_palkinto.png";
+import star_trophy from "@/assets/accolades/star_trophy.svg";
 import defaultIcon from "@/assets/kyykkalogo120px.png";
 import hauki from "@/assets/accolades/hauki.png";
 import hopea from "@/assets/accolades/hopea.ico";
@@ -37,6 +39,7 @@ const failed = ref(false);
 
 // FIXME Do better
 const imageIndex = {
+    "apila_palkinto.png": apila,
     "hauki.png": hauki,
     "hopea.ico": hopea,
     "joulukuusen_kaataja.png": joulukuusen_kaataja,
@@ -52,6 +55,7 @@ const imageIndex = {
     "tulokas.ico": tulokas,
     "vuoden_kyykkaaja.svg": vuoden_kyykkaaja,
     "vuoden_tulokas.svg": vuoden_tulokas,
+    "star_trophy.svg": star_trophy,
 };
 
 if (props.filename === null || props.filename === undefined) {

@@ -90,6 +90,39 @@ export const useHofStore = defineStore('hof', () => {
 
     const playerAccoladesBySeason = computed(() => {
         const per_year = {};
+
+        for (const accolade of playerAccolades.value["pair_accolades"]) {
+            let year = accolade.season_year
+            if (!(year in per_year)) {
+                per_year[year] = {};
+            }
+            // NOTE put the pari accolades to same container as team accolades
+            if (!("team_accolades" in per_year[year])) {
+                per_year[year]["team_accolades"] = [];
+            }
+
+            if (accolade.accolade.name === "Parikyykkäliiga") {
+                if (accolade.placement == 1) {
+                    accolade.accolade.name += " Mestaruus";
+                } else if (accolade.placement == 2) {
+                    accolade.accolade.name += " Finalisti";
+                    accolade.accolade.icon = "hopea.ico"
+                } else {
+                    continue;
+                }
+            } else if (accolade.accolade.name === "Kyykkää tähtien kanssa") {
+                if (accolade.placement == 1) {
+                    accolade.accolade.name += " Mestaruus";
+                } else if (accolade.placement == 2) {
+                    accolade.accolade.name += " Finalisti";
+                    accolade.accolade.icon = "hopea.ico"
+                } else {
+                    continue;
+                }
+            }
+            per_year[year]["team_accolades"].push(accolade);
+        }
+
         for (const accolade of playerAccolades.value["player_accolades"]) {
             let year = accolade.season_year;
             if (!(year in per_year)) {
@@ -97,6 +130,16 @@ export const useHofStore = defineStore('hof', () => {
             }
             if (!("player_accolades" in per_year[year])) {
                 per_year[year]["player_accolades"] = [];
+            }
+
+            if (accolade.accolade.name === "Henkkari-Cup") {
+                if (accolade.placement == 1) {
+                    accolade.accolade.name = "Henkkari-Cup Mestaruus";
+                } else if (accolade.placement == 2) {
+                    accolade.accolade.name = "Henkkari-Cup Finalisti";
+                } else {
+                    continue;
+                }
             }
             per_year[year]["player_accolades"].push(accolade);
         }
