@@ -18,6 +18,7 @@
                                     :title="table.title"
                                     :headers="headersHof.slice(...table.slice)"
                                     :items="table.data"
+                                    :icon="table.icon"
                                 >
                                     <template #bottom_legend
                                         v-if="table.title == 'Runkosarjan Voittaja'"
@@ -41,6 +42,7 @@
                                     :title="table.title"
                                     :headers="headerHofPerson"
                                     :items="table.data"
+                                    :icon="table.icon"
                                 />
                             </v-col>
                         </template>
@@ -189,27 +191,27 @@ const hof = useHofStore();
 const toggleMultiple = ref(0);
 
 const tab_one_data = [
-    { title: "Liigamestaruus", cols: 5, slice: [undefined, undefined], data: hof.championship },
-    { title: "SuperWeekend-Cup", cols: 4, slice: [0, 3], data: hof.superData },
-    { title: "Runkosarjan Voittaja", cols: 3, slice: [0, 2], data: hof.bracketWinners },
-    { title: "Henkkari-Cup", cols: 4, slice: [0, 3], data: hof.singleWinner },
-    { title: "Parikyykkäliiga", cols: 4, slice: [0, 3], data: hof.pairWinners },
-    { title: "SM-Kyykkä", cols: 4, slice: [0, 3], data: hof.sm },
-    { title: "Kyykkää tähtien kanssa", cols: 4, slice: [0, 3], data: hof.stars }
+    { title: "Liigamestaruus", cols: 5, slice: [undefined, undefined], data: hof.championship, icon: "mestari.ico" },
+    { title: "SuperWeekend-Cup", cols: 4, slice: [0, 3], data: hof.superData, icon: "superweekend.ico" },
+    { title: "Runkosarjan Voittaja", cols: 3, slice: [0, 2], data: hof.bracketWinners, icon: "runkomestari.ico" },
+    { title: "Henkkari-Cup", cols: 4, slice: [0, 3], data: hof.singleWinner, icon: null },
+    { title: "Parikyykkäliiga", cols: 4, slice: [0, 3], data: hof.pairWinners, icon: "apila_palkinto.png" },
+    { title: "SM-Kyykkä", cols: 4, slice: [0, 3], data: hof.sm, icon: null },
+    { title: "Kyykkää tähtien kanssa", cols: 4, slice: [0, 3], data: hof.stars, icon: "star_trophy.svg" }
 ];
 
 const tab_two_data = [
-    { title: "Jaskan Karttu", data: hof.jaskanKarttu },
-    { title: "KCK Ahti", data: hof.KCKAhti },
-    { title: "Vuoden Kyykkäjä", data: hof.p_o_y },
-    { title: "Haukikuningas/-tar", data: hof.hauki },
-    { title: "Vuoden MVP", data: hof.mvp },
-    { title: "Runkosarjan Paras", data: hof.bracketBest },
-    { title: "Pudotuspelien Paras", data: hof.playoffBest },
-    { title: "Vuoden Viimeistelijä", data: hof.last },
-    { title: "Vuoden Tulokas", data: hof.rookie },
-    { title: "Vuoden nais-/mieskyykkääjä", data: hof.man_woman },
-    { title: "Vuoden Kuusenkaataja", data: hof.tree },
+    { title: "Jaskan Karttu", data: hof.jaskanKarttu, icon: null },
+    { title: "KCK Ahti", data: hof.KCKAhti, icon: null },
+    { title: "Vuoden Kyykkäjä", data: hof.p_o_y, icon: "vuoden_kyykkaaja.svg" },
+    { title: "Haukikuningas/-tar", data: hof.hauki, icon: "hauki.png" },
+    { title: "Vuoden MVP", data: hof.mvp, icon: "mvp.png" },
+    { title: "Runkosarjan Paras", data: hof.bracketBest, icon: "runkosarja_paras.ico" },
+    { title: "Pudotuspelien Paras", data: hof.playoffBest, icon: "pudotus.ico" },
+    { title: "Vuoden Viimeistelijä", data: hof.last, icon: "lakaisija.png" },
+    { title: "Vuoden Tulokas", data: hof.rookie, icon: "vuoden_tulokas.svg" },
+    { title: "Vuoden nais-/mieskyykkääjä", data: hof.man_woman, icon: null },
+    { title: "Vuoden Kuusenkaataja", data: hof.tree, icon: "joulukuusen_kaataja.png" },
 ];
 
 const info = [

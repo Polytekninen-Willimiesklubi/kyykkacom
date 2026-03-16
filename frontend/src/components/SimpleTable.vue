@@ -4,6 +4,17 @@
         class="ma-5" 
         style="align-self: start;"
     >
+        <template #title v-if="props.title">
+            <v-row>
+                <v-col cols="3">
+                    <span>{{props.title}}</span>
+                </v-col>
+                <v-spacer />
+                <v-col class="d-flex justify-end">
+                    <accolade-icon :filename="props.icon" size="32"/>
+                </v-col>
+            </v-row>
+        </template>
         <v-data-table
             :mobile-breakpoint="0"
             class="hof_table"
@@ -56,6 +67,7 @@ const props = defineProps({
     title: String,
     headers: Array,
     items: Array,
+    icon: String,
     sortable: {
         type: Boolean,
         default: false
@@ -68,6 +80,6 @@ const props = defineProps({
 </script>
 <style scoped>
 .hof_table tr {
-  text-align: center;
+    text-align: center;
 }
 </style>
