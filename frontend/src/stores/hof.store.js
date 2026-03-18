@@ -314,7 +314,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2002, 'first': 'ITKK', 'second': 'LMTVO', 'third': 'KCK', 'fourth': 'PKMM' },
         { 'year': 2001, 'first': 'PKMM', 'second': 'TPNMP', 'third': 'SMS', 'fourth': 'ITKK99' },
         { 'year': 2000, 'first': 'ITKK99', 'second': 'KCK', 'third': 'SMS', 'fourth': 'TPNMP' },
-        { 'year': 1999, 'first': 'TPNMP', 'second': '?', 'third': '?', 'fourth': '?' },
+        { 'year': 1999, 'first': 'TPNMP', 'second': 'LSD', 'third': '?', 'fourth': '?' },
         { 'year': 1998, 'first': 'PKMM', 'second': 'Pentit', 'third': '-', 'fourth': '-' },
     ]);
 
@@ -334,7 +334,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2015, 'first': 'Dra', 'second': "?" },
         { 'year': 2014, 'first': 'ASS', 'second': 'GPK', 'third': 'VajaKK', 'fourth': 'MINT' },
         { 'year': 2013, 'first': 'Panis', 'second': 'ASS', 'third': 'GPK', 'fourth': 'TS' },
-        { 'year': 2012, 'first': '?', 'second': '?' },
+        { 'year': 2012, 'first': 'ASS', 'second': '?' },
         { 'year': 2011, 'first': 'ASS', 'second': 'HeMi' },
         { 'year': 2010, 'first': '?', 'second': '?' },
         { 'year': 2009, 'first': '?', 'second': '?' },
@@ -342,7 +342,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2007, 'first': 'LMTVO', 'second': 'ITKK', 'third': 'Dra', 'fourth': 'PKMM' },
         { 'year': 2006, 'first': 'GPK', 'second': 'Dra', },
         { 'year': 2005, 'first': 'ITKK', 'second': 'Dra' },
-        { 'year': 2004, 'first': '?', 'second': '?', },
+        { 'year': 2004, 'first': 'LSD', 'second': 'Dra', },
         { 'year': 2003, 'first': 'Dra', 'second': 'PKMM', },
         { 'year': 2002, 'first': 'KCK', 'second': 'LMTVO', },
         { 'year': 2001, 'first': 'KCK', 'second': 'SMS', },

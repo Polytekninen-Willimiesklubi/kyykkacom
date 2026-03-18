@@ -72,6 +72,7 @@
         variant="outlined" 
         :length="newsStore.totalPages" 
         v-model="newsStore.currentPageNro"
+        :total-visible="7"
       />
     </v-card>
   </div>
@@ -89,15 +90,24 @@ newsStore.getNews();
 
 </script>
 <style scoped>
-
-.success{
+.success {
   animation: fadeIn 5s;
   visibility: hidden;
 }
-@keyframes fadeIn {
-  0% {opacity: 0; visibility: visible;}
-  10% {opacity: 1;}
-  100% {opacity: 0; visibility: hidden;}
-}
 
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    visibility: visible;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
 </style>
