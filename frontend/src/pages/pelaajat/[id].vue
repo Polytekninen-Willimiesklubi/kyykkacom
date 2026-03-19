@@ -404,7 +404,11 @@ function filtterItems() {
 }
 
 function handleRedirect(value, row) {
-  location.href = '/ottelut/' + row.item.match_id;
+  if (sortGamesSwitch.value === 'Peleittäin') {
+    location.href = '/ottelut/' + row.item.match;
+  } else {
+    location.href = '/ottelut/' + row.item.match_id;
+  }
 }
 
 function getColor(val1, val2) {
