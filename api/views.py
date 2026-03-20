@@ -2540,7 +2540,7 @@ class RecordViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Top 10 round results
         # Prepare match by filttering non valitaded
-        top_matches = Match.objects.select_related("home_team", "away_team").filter(
+        top_rounds = Match.objects.select_related("home_team", "away_team").filter(
             is_validated=True
         )
 
@@ -2551,26 +2551,13 @@ class RecordViewSet(viewsets.ReadOnlyModelViewSet):
             for r, _round in enumerate(["first", "second"], 1):
                 round_string = f"{team}_{_round}_round_score"
 
-                round_query = (
-                    top_matches.filter(**{f"{round_string}__isnull": False})
-                    .order_by(round_string, "match_time")
-                    .values(
-                        "id",
-                        round_string,
-                        "match_time",
-                        "match_type",
-                        "home_team__current_abbreviation",
-                        "away_team__current_abbreviation",
-                        "home_team__team",
-                        "away_team__team",
-                        "video_link",
-                        "stream_link",
-                    )[:100]
-                )
+                round_query = top_rounds.filter(
+                    **{f"{round_string}__isnull": False}
+                ).order_by(round_string, "match_time")
                 round_query = list(round_query)
 
                 for match in round_query:
-                    score = match[round_string]
+                    score = getattr(match, round_string)
                     if len(round_results) >= 10 and score > worst_current_score:
                         break
                     elif len(round_results) >= 10 and score < worst_current_score:
@@ -2589,16 +2576,23 @@ class RecordViewSet(viewsets.ReadOnlyModelViewSet):
                         if worst_current_score is None or score > worst_current_score:
                             worst_current_score = score
 
+                    if team == "home":
+                        tmp = match.home_team.current_abbreviation
+                        team_id = match.home_team.team.pk
+                    else:
+                        tmp = match.away_team.current_abbreviation
+                        team_id = match.away_team.team.pk
+
                     result = {
                         "score": score,
-                        "match_id": match["id"],
-                        "match_time": match["match_time"],
-                        "match_type": MatchTypes(match["match_type"]).label,
-                        "team_name": match[f"{team}_team__current_abbreviation"],
-                        "team_id": match[f"{team}_team__team"],
+                        "match_id": match.pk,
+                        "match_time": match.match_time,
+                        "match_type": MatchTypes(match.match_type).label,
+                        "team_name": tmp,
+                        "team_id": team_id,
                         "round": r,
-                        "video_link": match["video_link"],
-                        "stream_link": match["stream_link"],
+                        "video_link": match.video_link,
+                        "stream_link": match.stream_link,
                     }
                     round_results.append(result)
 
