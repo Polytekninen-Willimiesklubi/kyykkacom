@@ -9,6 +9,7 @@ from django.db.models import (
     Count,
     F,
     FloatField,
+    IntegerField,
     Max,
     Min,
     Q,
@@ -17,7 +18,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Concat, Round
+from django.db.models.functions import Cast, Concat, Least, Round
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -2271,7 +2272,6 @@ class AllcoladeViewSet(viewsets.ViewSet):
             # HACK Id that is likely be outside of reachable ids
             _id = 10_000
             for team_placement in bracket_placements:
-                # print(team_placement)
                 placement = team_placement["bracket_placement"]
                 name = team_placement["current_abbreviation"]
 
@@ -2389,15 +2389,15 @@ class AllcoladeViewSet(viewsets.ViewSet):
         team_accolades = TeamAccolade.objects.filter(season=season).select_related(
             "accolade", "season", "team"
         )
-        pair_accolades = PairAccolade.objects.filter(season=season).select_related(
-            "accolade", "season", "player1", "player2"
-        )
+        # pair_accolades = PairAccolade.objects.filter(season=season).select_related(
+        #     "accolade", "season", "player1", "player2"
+        # )
 
         player_data = serializers.PlayerAccoladeSerializer(
             player_accolades, many=True
         ).data
         team_data = serializers.TeamAccoladeSerializer(team_accolades, many=True).data
-        pair_data = serializers.PairAccoladeSerializer(pair_accolades, many=True).data
+        # pair_data = serializers.PairAccoladeSerializer(pair_accolades, many=True).data
 
         return Response(
             {
@@ -2405,5 +2405,808 @@ class AllcoladeViewSet(viewsets.ViewSet):
                 "season_year": season.year,
                 "player_accolades": player_data,
                 "team_accolades": team_data,
+            }
+        )
+
+
+class RecordViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Throw.objects.select_related("match", "player").all()
+
+    def list(self, request: Request) -> Response:
+        """List all records."""
+
+        # Get all the best scores (up to 3) and all the throwers
+
+        throw_records: list[list[dict[str, t.Any]] | None] = [None, None, None]
+        current_records = [-999, -999, -999]
+
+        loop_order = [
+            ("score_first", "st"),
+            ("score_second", "nd"),
+            ("score_third", "rd"),
+            ("score_fourth", "th"),
+        ]
+
+        pre_filttered_throws = (
+            self.queryset.filter(match__is_validated=True)
+            .annotate(
+                st=Cast(F("score_first"), IntegerField()),
+                nd=Cast(F("score_second"), IntegerField()),
+                rd=Cast(F("score_third"), IntegerField()),
+                th=Cast(F("score_fourth"), IntegerField()),
+            )
+            .filter(Q(st__gt=6) | Q(nd__gt=6) | Q(rd__gt=6) | Q(th__gt=6))
+            .annotate(
+                name=Concat(
+                    "player__first_name",
+                    Value(" "),
+                    "player__last_name",
+                ),
+                time=F("match__match_time"),
+            )
+        )
+
+        for throw_order, new_field in enumerate(["st", "nd", "rd", "th"], 1):
+            throws = pre_filttered_throws.order_by(
+                f"-{new_field}", "match__match_time"
+            ).values(
+                new_field,
+                "name",
+                "player",
+                "time",
+                "match",
+                "match__match_type",
+                "throw_round",
+                "throw_turn",
+            )
+
+            for throw in throws:
+                score = throw[new_field]
+                if score < current_records[2]:
+                    break
+                record = {
+                    "score": score,
+                    "player_name": throw["name"],
+                    "player_id": throw["player"],
+                    "match_time": throw["time"],
+                    "match_id": throw["match"],
+                    "match_type": MatchTypes(throw["match__match_type"]).label,
+                    "throw_order": throw_order,
+                    "throw_round": throw["throw_round"],
+                    "throw_turn": throw["throw_turn"],
+                }
+
+                if score > current_records[0]:
+                    current_records[2] = current_records[1]
+                    current_records[1] = current_records[0]
+                    current_records[0] = score
+
+                    throw_records[2] = throw_records[1]
+                    throw_records[1] = throw_records[0]
+                    throw_records[0] = [record]
+                elif score == current_records[0]:
+                    assert isinstance(throw_records[0], list)
+                    throw_records[0].append(record)
+                # Second
+                elif score > current_records[1]:
+                    current_records[2] = current_records[1]
+                    current_records[1] = score
+
+                    throw_records[2] = throw_records[1]
+                    throw_records[1] = [record]
+                elif score == current_records[1]:
+                    assert isinstance(throw_records[1], list)
+                    throw_records[1].append(record)
+                # Third
+                elif score > current_records[2]:
+                    current_records[2] = score
+                    throw_records[2] = [record]
+                elif score == current_records[2]:
+                    assert isinstance(throw_records[2], list)
+                    throw_records[2].append(record)
+
+        # Count all the throws that are >= 6
+        last_shown_score = current_records[2]
+        counts = {score: 0 for score in range(6, last_shown_score)}
+        for field, new_field in loop_order:
+            throws = (
+                Throw.objects.filter(match__is_validated=True)
+                .annotate(
+                    **{new_field: Cast(F(field), IntegerField())},
+                    name=Concat(
+                        "player__first_name",
+                        Value(" "),
+                        "player__last_name",
+                    ),
+                )
+                .aggregate(
+                    **{
+                        f"count_{score}": Count(
+                            new_field, filter=Q(**{f"{new_field}": score})
+                        )
+                        for score in range(6, last_shown_score)
+                    }
+                )
+            )
+
+            for score in range(6, last_shown_score):
+                counts[score] += throws.get(f"count_{score}", 0)
+
+        throw_records_flatten = []
+        for group in throw_records:
+            if group is not None:
+                throw_records_flatten.extend(group)
+        throw_records_flatten.sort(key=lambda x: (-x["score"], x["match_time"]))
+
+        # Top 10 round results
+        top_matches = (
+            Match.objects.select_related("home_team", "away_team")
+            .filter(is_validated=True)
+            .annotate(
+                max_score=Least(
+                    "home_first_round_score",
+                    "home_second_round_score",
+                    "away_first_round_score",
+                    "away_second_round_score",
+                )
+            )
+            .order_by("max_score", "match_time")
+            .values(
+                "id",
+                "home_first_round_score",
+                "home_second_round_score",
+                "away_first_round_score",
+                "away_second_round_score",
+                "match_time",
+                "match_type",
+                "home_team__current_abbreviation",
+                "away_team__current_abbreviation",
+                "home_team__team",
+                "away_team__team",
+                "video_link",
+                "stream_link",
+            )[:50]
+        )  # Get little buffer
+        top_matches = list(top_matches)
+
+        round_results: list[dict[str, t.Any]] = []
+        worst_current_score = None
+
+        for team in ["home", "away"]:
+            for r, _round in enumerate(["first", "second"], 1):
+                round_string = f"{team}_{_round}_round_score"
+
+                # remove null values
+                filtered_matches = [
+                    match for match in top_matches if match[round_string] is not None
+                ]
+
+                filtered_matches.sort(key=lambda x: (x[round_string], x["match_time"]))
+
+                for match in filtered_matches:
+                    score = match[round_string]
+                    if len(round_results) >= 10 and score > worst_current_score:
+                        break
+                    elif len(round_results) >= 10 and score < worst_current_score:
+                        # remove the worst score(s)
+                        i = 0
+                        new_worst = -20
+                        while i < len(round_results):
+                            if round_results[i]["score"] == worst_current_score:
+                                round_results.pop(i)
+                                continue
+                            if round_results[i]["score"] > new_worst:
+                                new_worst = round_results[i]["score"]
+                            i += 1
+                        worst_current_score = new_worst
+                    elif len(round_results) < 10:
+                        if worst_current_score is None or score > worst_current_score:
+                            worst_current_score = score
+
+                    result = {
+                        "score": score,
+                        "match_id": match["id"],
+                        "match_time": match["match_time"],
+                        "match_type": MatchTypes(match["match_type"]).label,
+                        "team_name": match[f"{team}_team__current_abbreviation"],
+                        "team_id": match[f"{team}_team__team"],
+                        "round": r,
+                        "video_link": match["video_link"],
+                        "stream_link": match["stream_link"],
+                    }
+                    round_results.append(result)
+
+        # Top 10 match results
+        top_matches = (
+            Match.objects.select_related("home_team", "away_team")
+            .filter(is_validated=True)
+            .annotate(
+                home_result=F("home_first_round_score") + F("home_second_round_score"),
+                away_result=F("away_first_round_score") + F("away_second_round_score"),
+                max_score=Least(
+                    F("home_result"),
+                    F("away_result"),
+                    output_field=SmallIntegerField(),
+                ),
+            )
+            .order_by("max_score", "match_time")
+            .values(
+                "id",
+                "home_result",
+                "home_first_round_score",
+                "home_second_round_score",
+                "away_result",
+                "away_first_round_score",
+                "away_second_round_score",
+                "match_time",
+                "match_type",
+                "home_team__current_abbreviation",
+                "away_team__current_abbreviation",
+                "home_team__team",
+                "away_team__team",
+                "video_link",
+                "stream_link",
+            )[:50]
+        )  # Get little buffer
+        top_matches = list(top_matches)
+
+        match_results: list[dict[str, t.Any]] = []
+        worst_current_score = None
+        for team in ["home", "away"]:
+            # remove null values
+            filtered_matches = [
+                match for match in top_matches if match[f"{team}_result"] is not None
+            ]
+
+            filtered_matches.sort(key=lambda x: (x[f"{team}_result"], x["match_time"]))
+
+            for match in filtered_matches:
+                score = match[f"{team}_result"]
+                if len(match_results) >= 10 and score > worst_current_score:
+                    break
+                elif len(match_results) >= 10 and score < worst_current_score:
+                    # remove the worst score(s)
+                    i = 0
+                    new_worst = -20
+                    while i < len(match_results):
+                        if match_results[i]["score"] == worst_current_score:
+                            match_results.pop(i)
+                            continue
+                        if match_results[i]["score"] > new_worst:
+                            new_worst = match_results[i]["score"]
+                        i += 1
+                    worst_current_score = new_worst
+                elif len(match_results) < 10:
+                    if worst_current_score is None or score > worst_current_score:
+                        worst_current_score = score
+
+                result = {
+                    "score": score,
+                    "match_id": match["id"],
+                    "match_time": match["match_time"],
+                    "match_type": MatchTypes(match["match_type"]).label,
+                    "team_name": match[f"{team}_team__current_abbreviation"],
+                    "team_id": match[f"{team}_team__team"],
+                    "first_round": match[f"{team}_first_round_score"],
+                    "second_round": match[f"{team}_second_round_score"],
+                    "video_link": match["video_link"],
+                    "stream_link": match["stream_link"],
+                }
+                match_results.append(result)
+
+        # Top 10 most points earned per round
+        top_round_points = (
+            self.queryset.filter(match__is_validated=True)
+            .annotate(
+                st=Cast(F("score_first"), IntegerField()),
+                nd=Cast(F("score_second"), IntegerField()),
+                rd=Cast(F("score_third"), IntegerField()),
+                th=Cast(F("score_fourth"), IntegerField()),
+                score=F("st") + F("nd") + F("rd") + F("th"),
+                match_time=F("match__match_time"),
+                match_type=F("match__match_type"),
+                player_name=Concat(
+                    "player__first_name",
+                    Value(" "),
+                    "player__last_name",
+                ),
+                video_link=F("match__video_link"),
+                stream_link=F("match__stream_link"),
+            )
+            .order_by("-score", "match_time")
+            .values(
+                "score",
+                "player_name",
+                "player",
+                "match_time",
+                "match",
+                "match_type",
+                "throw_round",
+                "throw_turn",
+                "video_link",
+                "stream_link",
+            )[:100]
+        )
+        top_round_points = list(top_round_points)
+
+        # Include only all that are tied with the tenth best result
+        tenth_score = top_round_points[9]["score"]
+        i = 10
+        while i < len(top_round_points):
+            if top_round_points[i]["score"] < tenth_score:
+                break
+            i += 1
+        player_round_records = top_round_points[:i]
+
+        # Top 10 most points earned in a match
+        top_match_points = (
+            self.queryset.filter(match__is_validated=True)
+            .annotate(
+                st=Cast(F("score_first"), IntegerField()),
+                nd=Cast(F("score_second"), IntegerField()),
+                rd=Cast(F("score_third"), IntegerField()),
+                th=Cast(F("score_fourth"), IntegerField()),
+            )
+            .values("match", "player")
+            .annotate(
+                score=Sum(F("st") + F("nd") + F("rd") + F("th")),
+                match_time=Max(F("match__match_time")),
+                player_name=Concat(
+                    "player__first_name",
+                    Value(" "),
+                    "player__last_name",
+                ),
+                match_type=Max(F("match__match_type")),
+                video_link=Max(F("match__video_link")),
+                stream_link=Max(F("match__stream_link")),
+            )
+            .order_by("-score", "match_time")
+            .values(
+                "score",
+                "player_name",
+                "player",
+                "match_time",
+                "match",
+                "match_type",
+                "video_link",
+                "stream_link",
+            )[:50]
+        )
+        top_match_points = list(top_match_points)
+
+        # Include only all that are tied with the tenth best result
+        tenth_score = top_match_points[9]["score"]
+        i = 10
+        while i < len(top_match_points):
+            if top_match_points[i]["score"] < tenth_score:
+                break
+            i += 1
+        player_match_records = top_match_points[:i]
+
+        # Convert to actual match type strings
+        for _round in player_round_records:
+            _round["match_type"] = MatchTypes(_round["match_type"]).label
+
+        for _match in player_match_records:
+            _match["match_type"] = MatchTypes(_match["match_type"]).label
+
+        # Get all individual throw records ordered by time, filtered by match_type < 30
+        all_throws = (
+            self.queryset.filter(match__is_validated=True, match__match_type__lt=30)
+            .annotate(
+                player_name=Concat(
+                    "player__first_name",
+                    Value(" "),
+                    "player__last_name",
+                ),
+                match_time=F("match__match_time"),
+            )
+            .order_by("player", "match_time", "throw_round")
+            .values(
+                "player",
+                "player_name",
+                "match_time",
+                "score_first",
+                "score_second",
+                "score_third",
+                "score_fourth",
+            )
+        )
+
+        # Process each player's throws to find longest streak
+        all_streaks = []
+        current_streak = None
+        for throw_record in all_throws:
+            player_id = throw_record["player"]
+            if current_streak is None:
+                current_streak = {
+                    "player_id": player_id,
+                    "player_name": throw_record["player_name"],
+                    "streak": 0,
+                    "start_time": None,
+                    "end_time": None,
+                }
+
+            elif current_streak["player_id"] != player_id:
+                # Save the completed streak for the previous player
+                if current_streak["streak"] > 0:
+                    all_streaks.append(current_streak)
+
+                # Start a new streak for the new player
+                current_streak = {
+                    "player_id": player_id,
+                    "player_name": throw_record["player_name"],
+                    "streak": 0,
+                    "start_time": throw_record["match_time"],
+                    "end_time": None,
+                }
+
+            # Check each of the 4 throws
+            for score_field in [
+                "score_first",
+                "score_second",
+                "score_third",
+                "score_fourth",
+            ]:
+                score_str = throw_record[score_field]
+                if score_str is None:
+                    continue
+
+                score_str = score_str.strip().lower()
+                # Skip if score is empty or None
+                if score_str is None or score_str == "" or score_str == "e":
+                    continue
+                elif score_str == "h" or score_str == "0" or score_str.startswith("−"):
+                    if current_streak["streak"] > 0:
+                        current_streak["end_time"] = throw_record["match_time"]
+                        all_streaks.append(current_streak)
+
+                    # Start a new streak for the new player
+                    current_streak = {
+                        "player_id": player_id,
+                        "player_name": throw_record["player_name"],
+                        "streak": 0,
+                        "start_time": throw_record["match_time"],
+                        "end_time": None,
+                    }
+                else:
+                    current_streak["streak"] += 1
+        else:
+            if current_streak is not None and current_streak["streak"] > 0:
+                all_streaks.append(current_streak)
+
+        all_streaks.sort(key=lambda x: (-x["streak"], x["player_name"]))
+        # Include all others that are tied with the tenth best result
+        tenth_streak = all_streaks[9]["streak"]
+        i = 10
+        while i < len(all_streaks):
+            if all_streaks[i]["streak"] < tenth_streak:
+                break
+            i += 1
+        player_streak_records = all_streaks[:i]
+
+        # Longest current streak of non-zero with current players
+        current_players = (
+            PlayersInTeam.objects.filter(team_season__season=get_current_season())
+            .values("player", "player__first_name", "player__last_name")
+            .distinct()
+        )
+        # for player in current_players:
+        current_player_ids = [player["player"] for player in current_players]
+
+        longest_current_streaks = [
+            streak
+            for streak in all_streaks
+            if streak["player_id"] in current_player_ids and streak["end_time"] is None
+        ]
+        longest_current_streaks.sort(key=lambda x: (-x["streak"], x["player_name"]))
+        # Include all others that are tied with the tenth best result
+        if len(longest_current_streaks) > 10:
+            tenth_streak = longest_current_streaks[9]["streak"]
+            i = 10
+            while i < len(longest_current_streaks):
+                if longest_current_streaks[i]["streak"] < tenth_streak:
+                    break
+                i += 1
+            longest_current_streaks = longest_current_streaks[:i]
+
+        longest_streak_per_position = {}
+        longest_current_streak_per_position = {}
+        for throw_turn in range(1, 5):
+            filtered_query = (
+                self.queryset.filter(match__is_validated=True, throw_turn=throw_turn)
+                .annotate(
+                    score=Cast(F(field), IntegerField()),
+                    player_name=Concat(
+                        "player__first_name",
+                        Value(" "),
+                        "player__last_name",
+                    ),
+                    match_time=F("match__match_time"),
+                )
+                .order_by("player", "match_time", "throw_round")
+                .values(
+                    "score_first",
+                    "score_second",
+                    "score_third",
+                    "score_fourth",
+                    "player_name",
+                    "player",
+                    "match_time",
+                )
+            )
+
+            # Process each player's throws to find longest streak
+            count = 0
+            all_streaks = []
+            current_streak = None
+            for throw_record in filtered_query:
+                player_id = throw_record["player"]
+                if current_streak is None:
+                    current_streak = {
+                        "player_id": player_id,
+                        "player_name": throw_record["player_name"],
+                        "streak": 0,
+                        "start_time": None,
+                        "end_time": None,
+                    }
+
+                elif current_streak["player_id"] != player_id:
+                    # Save the completed streak for the previous player
+                    if current_streak["streak"] > 0:
+                        count += 1
+                        all_streaks.append(current_streak)
+
+                    # Start a new streak for the new player
+                    current_streak = {
+                        "player_id": player_id,
+                        "player_name": throw_record["player_name"],
+                        "streak": 0,
+                        "start_time": throw_record["match_time"],
+                        "end_time": None,
+                    }
+
+                # Check each of the 4 throws
+                for score_field in [
+                    "score_first",
+                    "score_second",
+                    "score_third",
+                    "score_fourth",
+                ]:
+                    score_str = throw_record[score_field]
+                    if score_str is None:
+                        continue
+
+                    score_str = score_str.strip().lower()
+                    # Skip if score is empty or 'e'
+                    if score_str == "" or score_str == "e":
+                        continue
+                    elif (
+                        score_str == "h"
+                        or score_str == "0"
+                        or score_str.startswith("−")
+                    ):
+                        if current_streak["streak"] > 0:
+                            current_streak["end_time"] = throw_record["match_time"]
+                            all_streaks.append(current_streak)
+
+                        # Start a new streak for the new player
+                        current_streak = {
+                            "player_id": player_id,
+                            "player_name": throw_record["player_name"],
+                            "streak": 0,
+                            "start_time": throw_record["match_time"],
+                            "end_time": None,
+                        }
+                    else:
+                        current_streak["streak"] += 1
+            else:
+                if current_streak is not None and current_streak["streak"] > 0:
+                    all_streaks.append(current_streak)
+
+            all_streaks.sort(key=lambda x: (-x["streak"], x["player_name"]))
+            # Include all others that are tied with the tenth best result
+            if len(all_streaks) > 10:
+                tenth_streak = all_streaks[9]["streak"]
+                i = 10
+                while i < len(all_streaks):
+                    if all_streaks[i]["streak"] < tenth_streak:
+                        break
+                    i += 1
+                longest_streak_per_position[throw_turn] = all_streaks[:i]
+            else:
+                longest_streak_per_position[throw_turn] = all_streaks
+
+            # Current streaks
+            longest_current_streaks_pos = [
+                streak
+                for streak in all_streaks
+                if streak["player_id"] in current_player_ids
+                and streak["end_time"] is None
+            ]
+            longest_current_streaks_pos.sort(
+                key=lambda x: (-x["streak"], x["player_name"])
+            )
+            # Include all others that are tied with the tenth best result
+            if len(longest_current_streaks_pos) > 10:
+                tenth_streak = longest_current_streaks_pos[9]["streak"]
+                i = 10
+                while i < len(longest_current_streaks_pos):
+                    if longest_current_streaks_pos[i]["streak"] < tenth_streak:
+                        break
+                    i += 1
+                longest_current_streaks_pos = longest_current_streaks_pos[:i]
+            longest_current_streak_per_position[throw_turn] = (
+                longest_current_streaks_pos
+            )
+
+        def add_placements(
+            results: list[dict[str, t.Any]],
+            field: str,
+            time_field: str,
+            order: bool = True,
+        ) -> None:
+
+            results.sort(
+                key=lambda x: (
+                    (-x[field], x[time_field]) if order else (x[field], x[time_field])
+                )
+            )
+            latest = -100
+            for i, result in enumerate(results, 1):
+                if result[field] != latest:
+                    latest = result[field]
+                    result["placement"] = f"{i}."
+                else:
+                    result["placement"] = None
+
+        add_placements(round_results, "score", "match_time", order=False)
+        add_placements(match_results, "score", "match_time", order=False)
+        add_placements(player_round_records, "score", "match_time")
+        add_placements(player_match_records, "score", "match_time")
+        add_placements(player_streak_records, "streak", "start_time")
+        add_placements(longest_current_streaks, "streak", "start_time")
+        for pos in range(1, 5):
+            add_placements(longest_streak_per_position[pos], "streak", "start_time")
+            add_placements(
+                longest_current_streak_per_position[pos], "streak", "start_time"
+            )
+
+        player_positon_streaks = {
+            "all": player_streak_records,
+            **longest_streak_per_position,
+        }
+        current_position_streaks = {
+            "all": longest_current_streaks,
+            **longest_current_streak_per_position,
+        }
+
+        # Longest streak of each result (h, 0-8)
+        all_throws_for_score = (
+            self.queryset.filter(match__is_validated=True, match__match_type__lt=30)
+            .annotate(
+                player_name=Concat(
+                    "player__first_name",
+                    Value(" "),
+                    "player__last_name",
+                ),
+                match_time=F("match__match_time"),
+            )
+            .order_by("player", "match_time", "throw_round")
+            .values(
+                "player",
+                "player_name",
+                "match_time",
+                "match",
+                "score_first",
+                "score_second",
+                "score_third",
+                "score_fourth",
+            )
+        )
+
+        score_types = ["h", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
+        score_streaks = {}
+
+        for score_type in score_types:
+            all_streaks = []
+            current_streak = None
+
+            for throw_record in all_throws_for_score:
+                player_id = throw_record["player"]
+                if player_id is None:
+                    continue
+                if current_streak is None:
+                    current_streak = {
+                        "player_id": player_id,
+                        "player_name": throw_record["player_name"],
+                        "streak": 0,
+                        "start_match": throw_record["match"],
+                        "start_time": None,
+                        "end_time": None,
+                    }
+                elif current_streak["player_id"] != player_id:
+                    # Save the completed streak for the previous player
+                    if current_streak["streak"] > 0:
+                        all_streaks.append(current_streak)
+
+                    # Start a new streak for the new player
+                    current_streak = {
+                        "player_id": player_id,
+                        "player_name": throw_record["player_name"],
+                        "streak": 0,
+                        "start_match": None,
+                        "start_time": throw_record["match_time"],
+                        "end_time": None,
+                    }
+
+                # Check each of the 4 throws for the target score
+                for score_field in [
+                    "score_first",
+                    "score_second",
+                    "score_third",
+                    "score_fourth",
+                ]:
+                    score_str = throw_record[score_field]
+                    if score_str is None:
+                        continue
+
+                    score_str = score_str.strip().lower()
+
+                    if score_str == score_type:
+                        # Matching score - continue streak
+                        if current_streak["start_time"] is None:
+                            current_streak["start_time"] = throw_record["match_time"]
+                            current_streak["start_match"] = throw_record["match"]
+
+                        current_streak["streak"] += 1
+                    else:
+                        # Non-matching score - reset streak
+                        if current_streak["streak"] > 0:
+                            current_streak["end_time"] = throw_record["match_time"]
+                            all_streaks.append(current_streak)
+
+                        # Start a new streak for the new player
+                        current_streak = {
+                            "player_id": player_id,
+                            "player_name": throw_record["player_name"],
+                            "streak": 0,
+                            "start_match": throw_record["match"],
+                            "start_time": None,
+                            "end_time": None,
+                        }
+
+            # Don't forget the last streak
+            if current_streak is not None and current_streak["streak"] > 0:
+                all_streaks.append(current_streak)
+
+            all_streaks.sort(key=lambda x: (-x["streak"], x["player_name"]))
+
+            # Include all that are tied with the tenth best result
+            if len(all_streaks) > 1:
+                first_streak = all_streaks[0]["streak"]
+                i = 1
+                while i < len(all_streaks):
+                    if all_streaks[i]["streak"] < first_streak:
+                        break
+                    i += 1
+                score_streaks[score_type] = all_streaks[:i]
+            else:
+                score_streaks[score_type] = all_streaks
+
+            # Add placements for this score type
+            add_placements(score_streaks[score_type], "streak", "start_time")
+
+        return Response(
+            {
+                "throw_records": throw_records_flatten,
+                "counts": counts,
+                "round_records": round_results,
+                "match_records": match_results,
+                "player_round_records": player_round_records,
+                "player_match_records": player_match_records,
+                "player_positions_streak": player_positon_streaks,
+                "player_positions_streak_current": current_position_streaks,
+                "score_type_streaks": score_streaks,
             }
         )
