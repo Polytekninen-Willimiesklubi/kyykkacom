@@ -2565,7 +2565,7 @@ class RecordViewSet(viewsets.ReadOnlyModelViewSet):
                 "away_team__team",
                 "video_link",
                 "stream_link",
-            )[:300]
+            )
         )  # Get little buffer
         top_matches = list(top_matches)
 
