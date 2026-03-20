@@ -6,6 +6,7 @@
                 <v-tab value="two">Henkilölle myönnetyt</v-tab>
                 <v-tab value="three">Palkinto info</v-tab>
                 <v-tab value="four">MitalliTaulukko</v-tab>
+                <v-tab value="five">Ennätyksiä</v-tab>
             </v-tabs>
         </v-col>
         <v-col cols="12">
@@ -18,7 +19,6 @@
                                     :title="table.title"
                                     :headers="headersHof.slice(...table.slice)"
                                     :items="table.data"
-                                    :icon="table.icon"
                                 >
                                     <template #bottom_legend
                                         v-if="table.title == 'Runkosarjan Voittaja'"
@@ -95,7 +95,7 @@
                                                 v-model="toggleMultiple"
                                                 variant="outlined"
                                                 divided
-                                                mandotory
+                                                mandatory
                                             >
                                                 <v-btn
                                                     size="small"
@@ -153,7 +153,7 @@
                                                     </template>
                                                 </template>
                                                 <template #item.name = "{ item }">
-                                                    <span class="">
+                                                    <span>
                                                         <a class="a_link_no_under"
                                                             :href="(toggleMultiple ? `pelaajat/${item.id}` : `joukkueet/${item.id}`)"
                                                         >
@@ -172,6 +172,458 @@
                     </v-row>
                     <v-spacer></v-spacer>
                 </v-tabs-window-item>
+                <v-tabs-window-item value="five">
+                    <v-row>
+                        <v-col cols="12">
+                            <v-card title="Ennätyksiä">
+                                <v-card class="ma-4" title="Yksittäisen heiton tulos">
+                                    <v-data-table
+                                        :headers="headerHofRecords"
+                                        :items="recordsWithEmptyGroups"
+                                        class="elevation-0"
+                                        :loading="hof.recordsLoading"
+                                        :group-by="[{key: 'score', order: 'desc'}]"
+                                        :items-per-page="10"
+                                        density="compact"
+                                    >
+                                        <template #item.data-table-group = "{item}">
+                                            <span v-if="!item._empty">
+                                                <v-btn
+                                                    size="30px"
+                                                    icon="mdi-link-variant"
+                                                    :href="'/ottelut/'+item.match_id"
+                                                    class="link-btn"
+                                                />
+                                            </span>
+                                        </template>
+                                        <template #item.player_name="{ item }">
+                                            <span v-if="!item._empty">
+                                                <a class="a_link_no_under"
+                                                    :href="`pelaajat/${item.player_id}`"
+                                                >
+                                                    {{ item.player_name }}
+                                                </a>
+                                            </span>
+                                            <span v-else>
+                                                {{ item.player_name }}
+                                            </span>
+                                        </template>
+                                        <template #item.match_time="{ item }">
+                                            <span v-if="!item._empty">
+                                                {{ date.formatByString(date.date(item.match_time), 'dd.MM.yyyy') }}
+                                            </span>
+                                        </template>
+                                        <template #group-header="{item, columns, toggleGroup, isGroupOpen }">
+                                            <template
+                                                :ref="(el) => {
+                                                    if (!isGroupOpen(item)) toggleGroup(item);
+                                                }"
+                                            />
+                                            <tr>
+                                                <td :colspan="columns.length">
+                                                    <div style="text-align: center; font-weight: bold;">
+                                                        {{ item.items[0].raw.score }} Kyykkää ({{ hof.records.counts[item.items[0].raw.score] || item.items.length }} heittoa)
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </v-data-table>
+                                </v-card>
+                                <v-card class="ma-4" title="Top 10+ Erätulos">
+                                    <v-data-table
+                                        :headers="headerHofRecordsPeriod"
+                                        :items="hof.records.round_records"
+                                        class="elevation-0"
+                                        :loading="hof.recordsLoading"
+                                        :items-per-page="-1"
+                                        :sort-by="[{key: 'score', order: 'asc'}, {key: 'match_time', order: 'asc'}]"
+                                        :hide-default-footer="true"
+                                        density="compact"
+                                    >
+                                        <template #item.match_link="{item}">
+                                            <span>
+                                                <v-btn
+                                                    size="30px"
+                                                    icon="mdi-link-variant"
+                                                    :href="'/ottelut/'+item.match_id"
+                                                    class="link-btn"
+                                                />
+                                            </span>
+                                        </template>
+                                        <template #item.other_links="{item}">
+                                            <div class="d-flex align-center" style="gap: 8px">
+                                                <span v-if="item.video_link">
+                                                    <v-btn
+                                                        size="30px"
+                                                        icon="mdi-youtube"
+                                                        :href="item.video_link"
+                                                        class="link-btn"
+                                                    />
+                                                </span>
+                                                <span v-if="item.stream_link">
+                                                    <v-btn
+                                                        size="30px"
+                                                        icon="mdi-access-point"
+                                                        :href="item.stream_link"
+                                                        class="link-btn"
+                                                    />
+                                                </span>
+                                            </div>
+                                        </template>
+                                        <template #item.team_name="{ item }">
+                                            <span>
+                                                <a class="a_link_no_under"
+                                                    :href="`joukkueet/${item.team_id}`"
+                                                >
+                                                    {{ item.team_name }}
+                                                </a>
+                                            </span>
+                                        </template>
+                                        <template #item.match_time="{ item }">
+                                            <span>
+                                                {{ date.formatByString(date.date(item.match_time), 'dd.MM.yyyy') }}
+                                            </span>
+                                        </template>
+                                    </v-data-table>
+                                </v-card>
+                                <v-card class="ma-4" title="Top 10+ Ottelutulos">
+                                    <v-data-table
+                                        :headers="headerHofRecordsMatch"
+                                        :items="hof.records.match_records"
+                                        class="elevation-0"
+                                        :loading="hof.recordsLoading"
+                                        :items-per-page="-1"
+                                        :sort-by="[{key: 'score', order: 'asc'}, {key: 'match_time', order: 'asc'}]"
+                                        :hide-default-footer="true"
+                                        density="compact"
+                                    >
+                                        <template #item.match_link="{item}">
+                                            <span>
+                                                <v-btn
+                                                    size="30px"
+                                                    icon="mdi-link-variant"
+                                                    :href="'/ottelut/'+item.match_id"
+                                                    class="link-btn"
+                                                />
+                                            </span>
+                                        </template>
+                                        <template #item.other_links="{item}">
+                                            <div class="d-flex align-center" style="gap: 8px">
+                                                <span v-if="item.video_link">
+                                                    <v-btn
+                                                        size="30px"
+                                                        icon="mdi-youtube"
+                                                        :href="item.video_link"
+                                                        class="link-btn"
+                                                    />
+                                                </span>
+                                                <span v-if="item.stream_link">
+                                                    <v-btn
+                                                        size="30px"
+                                                        icon="mdi-access-point"
+                                                        :href="item.stream_link"
+                                                        class="link-btn"
+                                                    />
+                                                </span>
+                                            </div>
+                                        </template>
+                                        <template #item.team_name="{ item }">
+                                            <span>
+                                                <a class="a_link_no_under"
+                                                    :href="`joukkueet/${item.team_id}`"
+                                                >
+                                                    {{ item.team_name }}
+                                                </a>
+                                            </span>
+                                        </template>
+                                        <template #item.match_time="{ item }">
+                                            <span>
+                                                {{ date.formatByString(date.date(item.match_time), 'dd.MM.yyyy') }}
+                                            </span>
+                                        </template>
+                                    </v-data-table>
+                                </v-card>
+                                <v-card class="ma-4" title="Top 10+ Erässä eniten pelaajan poistamia kyykkiä">
+                                    <v-data-table
+                                        :headers="headerHofRecordsPlayerRound"
+                                        :items="hof.records.player_round_records"
+                                        class="elevation-0"
+                                        :loading="hof.recordsLoading"
+                                        :items-per-page="-1"
+                                        :sort-by="[{key: 'score', order: 'desc'}, {key: 'match_time', order: 'asc'}]"
+                                        :hide-default-footer="true"
+                                        density="compact"
+                                    >
+                                        <template #item.match_link="{item}">
+                                            <span>
+                                                <v-btn
+                                                    size="30px"
+                                                    icon="mdi-link-variant"
+                                                    :href="'/ottelut/'+item.match"
+                                                    class="link-btn"
+                                                />
+                                            </span>
+                                        </template>
+                                        <template #item.other_links="{item}">
+                                            <div class="d-flex align-center" style="gap: 8px">
+                                                <span v-if="item.video_link">
+                                                    <v-btn
+                                                        size="30px"
+                                                        icon="mdi-youtube"
+                                                        :href="item.video_link"
+                                                        class="link-btn"
+                                                    />
+                                                </span>
+                                                <span v-if="item.stream_link">
+                                                    <v-btn
+                                                        size="30px"
+                                                        icon="mdi-access-point"
+                                                        :href="item.stream_link"
+                                                        class="link-btn"
+                                                    />
+                                                </span>
+                                            </div>
+                                        </template>
+                                        <template #item.player_name="{ item }">
+                                            <span>
+                                                <a class="a_link_no_under"
+                                                    :href="`pelaajat/${item.player}`"
+                                                >
+                                                    {{ item.player_name }}
+                                                </a>
+                                            </span>
+                                        </template>
+                                        <template #item.match_time="{ item }">
+                                            <span>
+                                                {{ date.formatByString(date.date(item.match_time), 'dd.MM.yyyy') }}
+                                            </span>
+                                        </template>
+                                    </v-data-table>
+                                </v-card>
+                                <v-card class="ma-4" title="Top 10+ Ottelussa eniten pelaajan poistamia kyykkiä">
+                                    <v-data-table
+                                        :headers="headerHofRecordsPlayerMatch"
+                                        :items="hof.records.player_match_records"
+                                        class="elevation-0"
+                                        :loading="hof.recordsLoading"
+                                        :items-per-page="-1"
+                                        :sort-by="[{key: 'score', order: 'desc'}, {key: 'match_time', order: 'asc'}]"
+                                        :hide-default-footer="true"
+                                        density="compact"
+                                    >
+                                        <template #item.match_link="{item}">
+                                            <span>
+                                                <v-btn
+                                                    size="30px"
+                                                    icon="mdi-link-variant"
+                                                    :href="'/ottelut/'+item.match"
+                                                    class="link-btn"
+                                                />
+                                            </span>
+                                        </template>
+                                        <template #item.other_links="{item}">
+                                            <div class="d-flex align-center" style="gap: 8px">                                          
+                                                <span v-if="item.video_link" style="">
+                                                    <v-btn
+                                                        size="30px"
+                                                        icon="mdi-youtube"
+                                                        :href="item.video_link"
+                                                        class="link-btn"
+                                                    />
+                                                </span>
+                                                <span v-if="item.stream_link">
+                                                    <v-btn
+                                                        size="30px"
+                                                        icon="mdi-access-point"
+                                                        :href="item.stream_link"
+                                                        class="link-btn"
+                                                    />
+                                                </span>
+                                            </div>
+                                        </template>
+                                        <template #item.player_name="{ item }">
+                                            <span>
+                                                <a class="a_link_no_under"
+                                                    :href="`pelaajat/${item.player}`"
+                                                >
+                                                    {{ item.player_name }}
+                                                </a>
+                                            </span>
+                                        </template>
+                                        <template #item.match_time="{ item }">
+                                            <span>
+                                                {{ date.formatByString(date.date(item.match_time), 'dd.MM.yyyy') }}
+                                            </span>
+                                        </template>
+                                    </v-data-table>
+                                </v-card>
+                                <v-card class="ma-4" title="Top 10+ Pisimmät nollattomat heittoputket">
+                                    <div class="d-flex justify-center align-center">
+                                        <span style="font-weight: bold;">Heittopaikka</span>
+                                    </div>
+                                    <div class="d-flex justify-center align-center">
+                                        <v-btn-toggle
+                                            v-model="toggleNonZero"
+                                            variant="outlined"
+                                            divided
+                                            mandatory
+                                        >
+                                            <v-btn
+                                                size="small"
+                                                text="Kaikki"
+                                                value="all"
+                                            />
+                                            <template v-for="i in 4" :key="i">
+                                                <v-btn
+                                                size="small"
+                                                :text="`${i}`"
+                                                :value="i"
+                                                />
+                                            </template>
+                                        </v-btn-toggle>
+                                    </div>
+                                    <v-data-table
+                                        :headers="headerHofRecordsPlayerNonZero"
+                                        :items="nonZeroData"
+                                        class="elevation-0"
+                                        :loading="hof.recordsLoading"
+                                        :items-per-page="-1"
+                                        :sort-by="[{key: 'streak', order: 'desc'}, {key: 'start_time', order: 'asc'}]"
+                                        :hide-default-footer="true"
+                                        density="compact"
+                                    >
+                                        <template #item.player_name="{ item }">
+                                            <span>
+                                                <a class="a_link_no_under"
+                                                    :href="`pelaajat/${item.player_id}`"
+                                                >
+                                                    {{ item.player_name }}
+                                                </a>
+                                            </span>
+                                        </template>
+                                        <template #item.match_time="{ item }">
+                                            <span>
+                                                {{ date.formatByString(date.date(item.start_time), 'dd.MM.yyyy') }} - {{ item.end_time ? date.formatByString(date.date(item.end_time), 'dd.MM.yyyy') : '' }} 
+                                            </span>
+                                        </template>
+                                    </v-data-table>
+                                </v-card> 
+                                <v-card 
+                                    class="ma-4" 
+                                    title="Top 10+ Pisimmät vielä katkeamattomat nollattomat heittoputket"
+                                    subtitle="Vain aktiivisen pelaajan (=ilmottautunut nykyiseen kauteen) heittoputket."    
+                                >
+                                    <div class="d-flex justify-center align-center">
+                                        <span style="font-weight: bold;">Heittopaikka</span>
+                                    </div>
+                                    <div class="d-flex justify-center">
+                                        <v-btn-toggle
+                                            v-model="toggleNonZeroCurrent"
+                                            variant="outlined"
+                                            divided
+                                            mandatory
+                                        >
+                                            <v-btn
+                                                size="small"
+                                                text="Kaikki"
+                                                value="all"
+                                            />
+                                            <template v-for="i in 4" :key="i">
+                                                <v-btn
+                                                    size="small"
+                                                    :text="`${i}`"
+                                                    :value="i"
+                                                />
+                                            </template>
+                                        </v-btn-toggle>
+                                    </div>
+                                    <v-data-table
+                                        :headers="headerHofRecordsPlayerNonZeroCurrent"
+                                        :items="nonZeroCurrentData"
+                                        class="elevation-0"
+                                        :loading="hof.recordsLoading"
+                                        :items-per-page="-1"
+                                        :sort-by="[{key: 'streak', order: 'desc'}, {key: 'start_time', order: 'asc'}]"
+                                        :hide-default-footer="true"
+                                        density="compact"
+                                    >
+                                        <template #item.player_name="{ item }">
+                                            <span>
+                                                <a class="a_link_no_under"
+                                                    :href="`pelaajat/${item.player_id}`"
+                                                >
+                                                    {{ item.player_name }}
+                                                </a>
+                                            </span>
+                                        </template>
+                                        <template #item.start_time="{ item }">
+                                            <span>
+                                                {{ date.formatByString(date.date(item.start_time), 'dd.MM.yyyy') }} 
+                                            </span>
+                                        </template>
+                                    </v-data-table>
+                                </v-card>
+                                <v-card class="ma-4" title="Pisimmät yhden pelaajan heittotuloksen heittoputket">
+                                    <v-data-table
+                                        :headers="headerHofRecordsResultStreak"
+                                        :items="streakData"
+                                        class="elevation-0"
+                                        :loading="hof.recordsLoading"
+                                        :items-per-page="-1"
+                                        :group-by="[{key: 'score_type'}]"
+                                        :hide-default-footer="true"
+                                        density="compact"
+                                    >
+                                        <template #item.data-table-group = "{item}">
+                                            <span>
+                                                <v-btn
+                                                    size="30px"
+                                                    icon="mdi-link-variant"
+                                                    :href="'/ottelut/'+item.start_match"
+                                                    class="link-btn"
+                                                />
+                                            </span>
+                                        </template>
+                                        <template #item.player_name="{ item }">
+                                            <span>
+                                                <a class="a_link_no_under"
+                                                    :href="`pelaajat/${item.player_id}`"
+                                                >
+                                                    {{ item.player_name }}
+                                                </a>
+                                            </span>
+                                        </template>
+                                        <template #item.match_time="{ item }">
+                                            <span>
+                                                {{ date.formatByString(date.date(item.start_time), 'dd.MM.yyyy') }} - {{ item.end_time ? date.formatByString(date.date(item.end_time), 'dd.MM.yyyy') : '' }} 
+                                            </span>
+                                        </template>
+                                        <template #group-header="{item, columns, toggleGroup, isGroupOpen }">
+                                            <template
+                                                :ref="(el) => {
+                                                    if (!isGroupOpen(item)) toggleGroup(item);
+                                                }"
+                                            />
+                                            <tr>
+                                                <td :colspan="columns.length">
+                                                    <div style="text-align: center; font-weight: bold;" v-if="item.items[0].raw.score_type !== 'h' && item.items[0].raw.score_type !== '0'">
+                                                        {{ item.items[0].raw.score_type }} Kyykkää
+                                                    </div>
+                                                    <div style="text-align: center; font-weight: bold;" v-if="item.items[0].raw.score_type === '0'">
+                                                        Virkamiehiä (0 Kyykkää)
+                                                    </div>
+                                                    <div style="text-align: center; font-weight: bold;" v-if="item.items[0].raw.score_type === 'h'">
+                                                        Haukkia (Ohi heitto)
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </v-data-table>
+                                </v-card>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                </v-tabs-window-item>
             </v-tabs-window>
         </v-col>
     </v-row>
@@ -184,11 +636,17 @@
 </route>
 
 <script setup>
-import { headersHof, headerHofPerson, headerHofMisc, headerHofMedals } from '@/stores/headers';
+import { headersHof, headerHofPerson, headerHofMisc, headerHofMedals, headerHofRecords, headerHofRecordsPeriod, headerHofRecordsMatch, headerHofRecordsPlayerRound, headerHofRecordsPlayerMatch, headerHofRecordsPlayerNonZero, headerHofRecordsPlayerNonZeroCurrent, headerHofRecordsResultStreak } from '@/stores/headers';
 import { useHofStore } from '@/stores/hof.store';
+import { useDate } from 'vuetify';
 
+
+const date = useDate();
 const hof = useHofStore();
+
 const toggleMultiple = ref(0);
+const toggleNonZero = ref("all");
+const toggleNonZeroCurrent = ref("all");
 
 const tab_one_data = [
     { title: "Liigamestaruus", cols: 5, slice: [undefined, undefined], data: hof.championship, icon: "mestari.ico" },
@@ -240,7 +698,77 @@ const info = [
 
 const tab = ref(null);
 
+const recordsWithEmptyGroups = computed(() => {
+    if (!hof.records?.throw_records || !hof.records?.counts) {
+        return hof.records?.throw_records || [];
+    }
+
+    const records = [...hof.records.throw_records];
+    const counts = hof.records.counts;
+
+    // Get all scores that have counts
+    const allScores = Object.keys(counts).map(Number);
+
+    // Find scores that have counts but no records
+    const recordsScores = new Set(records.map(r => r.score));
+    const emptyScores = allScores.filter(score => !recordsScores.has(score));
+
+    // Add placeholder items for the 3 highest empty scores
+    const topEmptyScores = emptyScores.sort((a, b) => b - a).slice(0, 3);
+    for (const score of topEmptyScores) {
+        records.push({
+            score: score,
+            player_name: '—',
+            player_id: null,
+            match_time: null,
+            match_id: null,
+            match_type: '—',
+            throw_order: '-',
+            throw_round: '-',
+            throw_turn: '-',
+            _empty: true
+        });
+    }
+
+    return records.sort((a, b) => b.score - a.score);
+});
+
 hof.getAllAccolades();
+hof.getRecords();
+
+const nonZeroData = computed(() => {
+    if (hof.recordsLoading) return [];
+    return hof.records?.player_positions_streak[toggleNonZero.value] || [];
+});
+
+
+const nonZeroCurrentData = computed(() => {
+    if (hof.recordsLoading) return [];
+    return hof.records?.player_positions_streak_current[toggleNonZeroCurrent.value] || [];
+});
+
+const streakData = computed(() => {
+    if (hof.recordsLoading) return [];
+    for (const score_type in hof.records?.score_type_streaks || {}) {
+        hof.records.score_type_streaks[score_type].forEach(record => {
+            record.score_type = score_type;
+        });
+    }
+    const unpackked = [
+        ...(hof.records?.score_type_streaks ? Object.values(hof.records.score_type_streaks).flat() : [])
+    ];
+
+    // Reorder 'h' throws to the bottom of the data
+    unpackked.sort((a, b) => {
+        if (a.score_type === 'h' && b.score_type !== 'h') return 1;
+        if (a.score_type !== 'h' && b.score_type === 'h') return -1;
+        if (a.score_type !== b.score_type) return b.score_type.localeCompare(a.score_type);
+        return 0;
+    });
+    console.log(unpackked)
+
+    return unpackked;
+});
 
 </script>
 
@@ -280,5 +808,15 @@ hof.getAllAccolades();
 
 .legend_text {
     font-size: 0.8em;
+}
+
+.link-btn {
+    border: 1px solid;
+    border-color: #e5e7eb;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 </style>

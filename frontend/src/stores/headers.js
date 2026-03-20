@@ -397,3 +397,64 @@ export const headerHofMedals = [
     { title: '🏆', key: 'bracket', align: 'center', tooltip: 'Runkosarjamestaruuksien määrä' },
 ];
 
+
+export const headerHofRecords = [
+    { key: 'data-table-group', width: '1%', sortable: false },
+    { title: 'Nimi', key: 'player_name', align: 'center', sortable: false },
+    { title: 'Aika', key: 'match_time', align: 'center', sortable: false },
+    { title: 'Tyyppi', key: 'match_type', align: 'center', sortable: false },
+    { title: 'Erä', key: 'throw_round', align: 'center', sortable: false },
+    { title: 'HeittoP.', key: 'throw_turn', align: 'center', tooltip: 'Heittopaikka', sortable: false },
+    { title: 'Heitto Nro.', key: 'throw_order', align: 'center', tooltip: 'Heittäjän mones heitto', sortable: false },
+]
+
+export const headerHofRecordsPeriod = [
+    { title: '', width: "1%", key: 'match_link', sortable: false },
+    { title: '', width: "7%", key: 'other_links', sortable: false },
+    { title: 'Sij.', width: "1%", key: 'placement', align: 'center', sortable: false },
+    { title: 'Tulos', key: 'score', align: 'center', sortable: false },
+    { title: 'Joukkue', key: 'team_name', align: 'center', sortable: false },
+    { title: 'Aika', key: 'match_time', align: 'center', sortable: false },
+    { title: 'Tyyppi', key: 'match_type', align: 'center', sortable: false },
+    { title: 'Erä', key: 'round', align: 'center', sortable: false },
+]
+
+export const headerHofRecordsMatch = [
+    ...headerHofRecordsPeriod.slice(0, -1),
+    { title: '1. Erä', key: 'first_round', align: 'center', sortable: false },
+    { title: '2. Erä', key: 'second_round', align: 'center', sortable: false },
+];
+
+export const headerHofRecordsPlayerRound = [
+    { title: '', width: "1%", key: 'match_link', sortable: false },
+    { title: '', width: "7%", key: 'other_links', sortable: false },
+    { title: 'Sij.', width: "1%", key: 'placement', align: 'center', sortable: false },
+    { title: 'Tulos', key: 'score', align: 'center', sortable: false },
+    ...headerHofRecords.slice(1, -1)
+];
+
+
+export const headerHofRecordsPlayerMatch = [
+    ...headerHofRecordsPlayerRound.slice(0, -2)
+];
+
+export const headerHofRecordsPlayerNonZero = [
+    { title: 'Sij.', width: "1%", key: 'placement', align: 'center', sortable: false },
+    { title: 'Putki', key: 'streak', align: 'center', sortable: false },
+    { title: 'Nimi', key: 'player_name', align: 'center', sortable: false },
+    { title: 'Aika', key: 'match_time', align: 'center', sortable: false },
+];
+
+export const headerHofRecordsPlayerNonZeroCurrent = [
+    { title: 'Sij.', width: "1%", key: 'placement', align: 'center', sortable: false },
+    { title: 'Putki', key: 'streak', align: 'center', sortable: false },
+    { title: 'Nimi', key: 'player_name', align: 'center', sortable: false },
+    { title: 'Aloitusaika', key: 'start_time', align: 'center', sortable: false },
+];
+
+export const headerHofRecordsResultStreak = [
+    { title: 'Aloitus', key: 'data-table-group', width: '1%', sortable: false },
+    { title: 'Putki', key: 'streak', align: 'center', sortable: false },
+    { title: 'Nimi', key: 'player_name', align: 'center', sortable: false },
+    { title: 'Aika', key: 'match_time', align: 'center', sortable: false },
+];

@@ -1,7 +1,10 @@
 const baseUrl = `${import.meta.env.VITE_API_URL}/accolades/`;
+const recordsUrl = `${import.meta.env.VITE_API_URL}/records/`;
 
 export const useHofStore = defineStore('hof', () => {
     const accolades = ref([]);
+    const records = ref([]);
+    const recordsLoading = ref(false);
     const seasonAccolades = ref([]);
     const playerAccolades = ref([]);
     const teamAccolades = ref([]);
@@ -285,6 +288,21 @@ export const useHofStore = defineStore('hof', () => {
         }
     }
 
+    async function getRecords() {
+        try {
+            recordsLoading.value = true;
+
+            const response = await fetch(recordsUrl, { method: 'GET' });
+            const data = await response.json();
+            records.value = data;
+        } catch (error) {
+            console.error('Error fetching records:', error);
+
+        } finally {
+            recordsLoading.value = false;
+        }
+    }
+
 
     const championship = ref([
         { 'year': 2026, 'first': 'Dra', 'second': 'SulaKe', 'third': 'MCMC', 'fourth': 'STONKS' },
@@ -393,7 +411,7 @@ export const useHofStore = defineStore('hof', () => {
         { 'year': 2016, 'first': '-', 'second': "-" },
         { 'year': 2015, 'first': '-', 'second': "-" },
         { 'year': 2014, 'first': 'Juha Varis', 'second': "Petteri Westerholm", 'third': "Tiina Viitanen" },
-        { 'year': 2013, 'first': 'Petteri Westerholm', 'second': "Anssi Tura (?)" },
+        { 'year': 2013, 'first': 'Petteri Westerholm', 'second': "Anssi Tura" },
         { 'year': 2012, 'first': 'Petteri Westerholm', 'second': "Juha Varis" },
         { 'year': 2011, 'first': 'Petteri Westerholm', 'second': "?" },
         { 'year': 2010, 'first': 'Mikko "Temmi" Kuusio', 'second': "?" },
@@ -749,6 +767,7 @@ export const useHofStore = defineStore('hof', () => {
         getAccoladeBySeason,
         getPlayerAccolades,
         getTeamAccolades,
+        getRecords,
         championship,
         superData,
         bracketWinners,
@@ -775,6 +794,8 @@ export const useHofStore = defineStore('hof', () => {
         playerAccoladesBySeason,
         teamAccoladesBySeason,
         teamAccolades,
+        records,
+        recordsLoading,
     }
 
 })

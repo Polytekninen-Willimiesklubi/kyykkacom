@@ -60,6 +60,7 @@ urlpatterns = [
         views.AllcoladeViewSet.as_view({"get": "retrieve"}),
         name="accolades-detail",
     ),
+    path("records/", views.RecordViewSet.as_view({"get": "list"}), name="records-list"),
 ]
 
 router = SimpleRouter()
