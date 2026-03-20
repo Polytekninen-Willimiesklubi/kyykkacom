@@ -2539,35 +2539,10 @@ class RecordViewSet(viewsets.ReadOnlyModelViewSet):
         throw_records_flatten.sort(key=lambda x: (-x["score"], x["match_time"]))
 
         # Top 10 round results
-        top_matches = (
-            Match.objects.select_related("home_team", "away_team")
-            .filter(is_validated=True)
-            .annotate(
-                max_score=Least(
-                    "home_first_round_score",
-                    "home_second_round_score",
-                    "away_first_round_score",
-                    "away_second_round_score",
-                )
-            )
-            .order_by("max_score", "match_time")
-            .values(
-                "id",
-                "home_first_round_score",
-                "home_second_round_score",
-                "away_first_round_score",
-                "away_second_round_score",
-                "match_time",
-                "match_type",
-                "home_team__current_abbreviation",
-                "away_team__current_abbreviation",
-                "home_team__team",
-                "away_team__team",
-                "video_link",
-                "stream_link",
-            )
-        )  # Get little buffer
-        top_matches = list(top_matches)
+        # Prepare match by filttering non valitaded
+        top_matches = Match.objects.select_related("home_team", "away_team").filter(
+            is_validated=True
+        )
 
         round_results: list[dict[str, t.Any]] = []
         worst_current_score = None
@@ -2576,14 +2551,25 @@ class RecordViewSet(viewsets.ReadOnlyModelViewSet):
             for r, _round in enumerate(["first", "second"], 1):
                 round_string = f"{team}_{_round}_round_score"
 
-                # remove null values
-                filtered_matches = [
-                    match for match in top_matches if match[round_string] is not None
-                ]
+                round_query = (
+                    top_matches.filter(**{f"{round_string}__isnull": False})
+                    .order_by(round_string, "match_time")
+                    .values(
+                        "id",
+                        round_string,
+                        "match_time",
+                        "match_type",
+                        "home_team__current_abbreviation",
+                        "away_team__current_abbreviation",
+                        "home_team__team",
+                        "away_team__team",
+                        "video_link",
+                        "stream_link",
+                    )[:100]
+                )
+                round_query = list(round_query)
 
-                filtered_matches.sort(key=lambda x: (x[round_string], x["match_time"]))
-
-                for match in filtered_matches:
+                for match in round_query:
                     score = match[round_string]
                     if len(round_results) >= 10 and score > worst_current_score:
                         break
