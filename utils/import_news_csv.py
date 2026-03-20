@@ -8,8 +8,8 @@ from kyykka.models import News
 
 def old_news():
 
-    with open("new_nkl_news.csv", encoding="utf-8") as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=";", escapechar='"')
+    with open("new_nkl_news.csv", encoding="utf-8", newline="") as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=";", escapechar="\\")
         next(readCSV)  # Skip header row
         with transaction.atomic():
             for row in readCSV:
@@ -18,6 +18,9 @@ def old_news():
                 date = row[2]
                 time = row[3]
                 article = row[4]
+
+                if article.startswith('"') and article.endswith('"'):
+                    article = article[1:-1]
 
                 datetime_str = f"{date} {time}"
                 datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
