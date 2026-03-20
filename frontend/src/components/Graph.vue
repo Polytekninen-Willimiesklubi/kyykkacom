@@ -22,6 +22,22 @@
           title: {
             text: props.title,
             display: true
+          },
+          tooltip: {
+            callbacks: {
+              label(context) {
+                const dataset = context.dataset;
+                const rawValue = context.parsed?.x ?? context.parsed?.y;
+                const value = Number.isFinite(rawValue) ? rawValue.toFixed(2) : rawValue;
+
+                if (Array.isArray(dataset.throwCounts)) {
+                  const throwCount = dataset.throwCounts[context.dataIndex];
+                  return `${dataset.label}: KPH ${value}, Heitot ${throwCount}`;
+                }
+
+                return `${dataset.label}: ${value}`;
+              },
+            },
           }
         }
       }"
@@ -52,8 +68,8 @@
 
 <script setup>
 import { Bar, Line } from 'vue-chartjs';
-import { 
-  Chart as ChartJS, Title, Tooltip, Legend, BarElement, 
+import {
+  Chart as ChartJS, Title, Tooltip, Legend, BarElement,
   CategoryScale, LinearScale, PointElement, LineElement,
 } from 'chart.js';
 
