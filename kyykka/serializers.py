@@ -2154,11 +2154,11 @@ class PairAccoladeSerializer(serializers.ModelSerializer):
         )
 
     def get_player1_name(self, obj):
-        if obj is None:
+        if obj.player1 is None:
             return "Tuntematon"
         return f"{obj.player1.first_name} {obj.player1.last_name}"
 
     def get_player2_name(self, obj):
-        if obj is None:
+        if obj.player2 is None:
             return "Tuntematon"
         return f"{obj.player2.first_name} {obj.player2.last_name}"
