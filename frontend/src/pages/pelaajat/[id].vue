@@ -550,6 +550,12 @@ function chanceSeason(value) {
     {
       label: 'Kausi ' + selected_season.season,
       backgroundColor: color,
+      throwCounts: [
+        selected_season.position_one_throws,
+        selected_season.position_two_throws,
+        selected_season.position_three_throws,
+        selected_season.position_four_throws,
+      ],
       data: [
         selected_season.avg_score_position_one,
         selected_season.avg_score_position_two,
@@ -643,6 +649,12 @@ watch(() => playerStore.loadedData, () => {
     const init3 = {
       label: 'Kausi ' + currentSelcSeason.season,
       backgroundColor: '#B3E5FC',
+      throwCounts: [
+        currentSelcSeason.position_one_throws,
+        currentSelcSeason.position_two_throws,
+        currentSelcSeason.position_three_throws,
+        currentSelcSeason.position_four_throws,
+      ],
       data: [
         currentSelcSeason.avg_score_position_one,
         currentSelcSeason.avg_score_position_two,
