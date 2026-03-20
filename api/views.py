@@ -2539,62 +2539,55 @@ class RecordViewSet(viewsets.ReadOnlyModelViewSet):
         throw_records_flatten.sort(key=lambda x: (-x["score"], x["match_time"]))
 
         # Top 10 round results
-        # Prepare match by filttering non valitaded
-        top_rounds = Match.objects.select_related("home_team", "away_team").filter(
-            is_validated=True
+        top_matches_all = (
+            Match.objects.select_related("home_team", "away_team")
+            .filter(is_validated=True)
+            .values(
+                "id",
+                "home_first_round_score",
+                "home_second_round_score",
+                "away_first_round_score",
+                "away_second_round_score",
+                "match_time",
+                "match_type",
+                "home_team__current_abbreviation",
+                "away_team__current_abbreviation",
+                "home_team__team",
+                "away_team__team",
+                "video_link",
+                "stream_link",
+            )
         )
 
-        round_results: list[dict[str, t.Any]] = []
-        worst_current_score = None
+        all_round_scores = []
+        for match in top_matches_all:
+            for team in ["home", "away"]:
+                for _round in ["first", "second"]:
+                    score = match[f"{team}_{_round}_round_score"]
+                    r = 1 if _round == "first" else 2
+                    if score is not None:
+                        all_round_scores.append(
+                            {
+                                "score": score,
+                                "match_id": match["id"],
+                                "match_time": match["match_time"],
+                                "match_type": MatchTypes(match["match_type"]).label,
+                                "team_name": match[
+                                    f"{team}_team__current_abbreviation"
+                                ],
+                                "team_id": match[f"{team}_team__team"],
+                                "round": r,
+                                "video_link": match["video_link"],
+                                "stream_link": match["stream_link"],
+                            }
+                        )
 
-        for team in ["home", "away"]:
-            for r, _round in enumerate(["first", "second"], 1):
-                round_string = f"{team}_{_round}_round_score"
+        # Sort ONCE globally
+        all_round_scores.sort(key=lambda x: (x["score"], x["match_time"]))
 
-                round_query = top_rounds.filter(
-                    **{f"{round_string}__isnull": False}
-                ).order_by(round_string, "match_time")
-                round_query = list(round_query)
-
-                for match in round_query:
-                    score = getattr(match, round_string)
-                    if len(round_results) >= 10 and score > worst_current_score:
-                        break
-                    elif len(round_results) >= 10 and score < worst_current_score:
-                        # remove the worst score(s)
-                        i = 0
-                        new_worst = -20
-                        while i < len(round_results):
-                            if round_results[i]["score"] == worst_current_score:
-                                round_results.pop(i)
-                                continue
-                            if round_results[i]["score"] > new_worst:
-                                new_worst = round_results[i]["score"]
-                            i += 1
-                        worst_current_score = new_worst
-                    elif len(round_results) < 10:
-                        if worst_current_score is None or score > worst_current_score:
-                            worst_current_score = score
-
-                    if team == "home":
-                        tmp = match.home_team.current_abbreviation
-                        team_id = match.home_team.team.pk
-                    else:
-                        tmp = match.away_team.current_abbreviation
-                        team_id = match.away_team.team.pk
-
-                    result = {
-                        "score": score,
-                        "match_id": match.pk,
-                        "match_time": match.match_time,
-                        "match_type": MatchTypes(match.match_type).label,
-                        "team_name": tmp,
-                        "team_id": team_id,
-                        "round": r,
-                        "video_link": match.video_link,
-                        "stream_link": match.stream_link,
-                    }
-                    round_results.append(result)
+        # Take top 10 + ties
+        tenth_score = all_round_scores[9]["score"]
+        round_results = [s for s in all_round_scores if s["score"] <= tenth_score]
 
         # Top 10 match results
         top_matches = (
