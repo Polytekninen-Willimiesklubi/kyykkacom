@@ -21,8 +21,8 @@
     >
       <v-form
         validate-on="submit"
-        @submit.prevent="awaitSubmitCheck(jotain)"
-        ref="jotain"
+        @submit.prevent="awaitSubmitCheck()"
+        ref="form"
       >
         <v-container>
           <v-row>
@@ -41,7 +41,7 @@
             <v-col cols="6">
               <v-text-field 
                 color="red darken-1" 
-                v-model="store.credentials.first_name" 
+                v-model="credentials.first_name" 
                 :rules="[v => !!v || 'Etunimi puuttuu.']"
                 label="Etunimi"
               />
@@ -50,10 +50,10 @@
               <!-- TODO api kysely onko username käytössä -->
               <v-text-field 
                 color="red darken-1" 
-                v-model="store.credentials.username" 
+                v-model="credentials.username" 
                 :rules="[
                   v => !!v || 'Sähköposti puuttuu.',
-                  v => store.validEmail(v) || 'Anna sähköposti mallia foo@bar.xyz.'
+                  v => validEmail(v) || 'Anna sähköposti mallia foo@bar.xyz'
                 ]"
                 label="Sähköposti"
                 type="email"
@@ -64,7 +64,7 @@
             <v-col cols="6">
               <v-text-field 
                 color="red darken-1" 
-                v-model="store.credentials.last_name" 
+                v-model="credentials.last_name" 
                 :rules="[v => !!v || 'Sukunimi puuttuu.']"
                 label="Sukunimi"
               />
@@ -72,7 +72,7 @@
             <v-col cols="6">
               <v-text-field
                 color="red darken-1"
-                v-model="store.credentials.password"
+                v-model="credentials.password"
                 :rules="[
                   v => !!v || 'Salasana puuttuu.',
                   v => v.length >= 6 || 'Salasana pitää olla vähintään 6 merkkiä pitkä.'
@@ -87,10 +87,10 @@
             <v-col cols="6">
               <v-text-field
                 color="red darken-1"
-                v-model="store.credentials.password_check"
+                v-model="credentials.password_check"
                 :rules="[
                   v => !!v || 'Anna Salasana uudelleen.',
-                  () => store.credentials.password === store.credentials.password_check 
+                  () => credentials.password === credentials.password_check 
                     || 'Salasanat eivät täsmää.',
                 ]"
                 label="Salasana uudelleen"
@@ -102,7 +102,7 @@
             <v-spacer/>
             <v-col cols="3">
               <v-btn
-                :loading="store.loading"
+                :loading="loading"
                 class="mb-2"
                 color="red darken-1"
                 text="Register"
@@ -125,25 +125,60 @@
   </v-dialog>
 </template>
 
-<script setup>
-import { useRegisterStore } from '@/stores/register.store';
+<script setup lang="ts">
+import { ref } from 'vue';
+import { VForm } from 'vuetify/components';
+import { fetchWrapper, getPayload } from '@/utils/fetchWrapper';
+import { useAuthStore } from '@/stores/auth.store';
+const registerAPIUrl = `${import.meta.env.VITE_API_URL}/register/`;
 
-const store = useRegisterStore();
-
-const jotain = ref();
-const dialog = ref(false);
-const alert = ref(false);
-
-async function awaitSubmitCheck() {
-  alert.value = false;
-  const { valid } = await jotain.value.validate();
-  if (valid) {
-    let jotain = await store.register();
-    alert.value = !jotain;
-  }
+interface Credentials {
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  password?: string;
+  password_check?: string;
+  number: number;
+  [key: string]: any;
 }
 
-</script>
+const credentials = ref < Credentials > ({
+  number: 0,
+});
+const loading = ref < boolean > (false);
+const alert = ref < boolean > (false);
 
-<style scoped>
-</style>
+const form = ref < InstanceType < typeof VForm > | null > (null);
+const dialog = ref(false);
+
+async function register() {
+  loading.value = true;
+  try {
+    const response = await fetchWrapper(registerAPIUrl, credentials.value, 'POST');
+    if (response && response.ok) {
+      alert.value = false;
+      const data = await getPayload(response);
+      if (data && data.user) {
+        const authStore = useAuthStore();
+        authStore.changeLogin(data.user.id, data.role, null, data.user.player_name);
+      }
+    } else {
+      alert.value = true;
+    }
+  } catch (error) {
+    alert.value = true;
+  } finally {
+    loading.value = false;
+  }
+}
+async function awaitSubmitCheck() {
+  (await form.value?.validate())?.valid && await register();
+}
+
+function validEmail(email: string): boolean {
+  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+}
+
+
+</script>
