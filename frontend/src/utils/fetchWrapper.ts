@@ -1,20 +1,20 @@
 import { getCookie, fetchNewToken } from './cookies';
 
-type PayLoad = Record<string, any> | undefined;
+type PayLoad = Record<string, any> | null;
 
 export async function fetchWrapper(
     url: string,
     postData?: Record<string, any>,
     method?: string,
     getOnlyPayload?: false,
-): Promise<Response>
+): Promise<Response | undefined>
 
 export async function fetchWrapper(
     url: string,
     postData: Record<string, any>,
     method: string,
     getOnlyPayload: true,
-): Promise<PayLoad>
+): Promise<PayLoad | undefined>
 
 
 export async function fetchWrapper(
@@ -22,7 +22,7 @@ export async function fetchWrapper(
     postData: Record<string, any> = {},
     method: string = 'GET',
     getOnlyPayload: boolean = false,
-): Promise<PayLoad | Response> {
+): Promise<PayLoad | Response | undefined> {
     const headers: Record<string, string> = {
         'X-CSRFToken': getCookie('csrftoken'),
         'content-type': 'application/json',
@@ -38,13 +38,13 @@ export async function fetchWrapper(
     try {
         const response = await fetch(url, requestOpt);
 
-        if (!response.ok && response.status === 403) {
+        if (!response.ok && [401, 403].includes(response.status)) {
             await fetchNewToken();
             headers['X-CSRFToken'] = getCookie('csrftoken');
             requestOpt.headers = headers;
             const secondResponse = await fetch(url, requestOpt);
             if (!secondResponse.ok) {
-                console.log("Post request was denied: " + secondResponse);
+                console.log("Request of type " + method + " was denied: " + secondResponse);
             }
             return getOnlyPayload ? await getPayload(secondResponse) : secondResponse;
         }
@@ -55,8 +55,8 @@ export async function fetchWrapper(
     }
 }
 
-export async function getPayload(res: Response): Promise<Record<string, any> | undefined> {
+export async function getPayload(res: Response): Promise<Record<string, any> | null> {
     const isJson = res.headers?.get('content-type')?.includes('application/json');
     const data = (isJson ? await res.json() : null) as Record<string, any> | null;
-    return data || undefined;
+    return data || null;
 }
