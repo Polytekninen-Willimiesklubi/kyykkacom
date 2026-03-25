@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { fetchNewToken, getCookie, useAuthStore } from '@/stores/auth.store';
+import { useAuthStore } from '@/stores/auth.store';
+import { fetchNewToken, getCookie } from '@/utils/cookies';
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/register/`;
 
