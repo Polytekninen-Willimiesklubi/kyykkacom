@@ -15,6 +15,13 @@
                   {{ date.formatByString(date.date(matchData.match_time), 'yyyy-MM-dd HH:mm') }}
                 </span>
               </h3>
+              <v-icon v-if="showEdit" @click="showInput = !showInput" icon="mdi-pencil">
+                <v-tooltip
+                  activator='parent'
+                  location="right"
+                  text="Muokkaa tulosta"
+                />
+              </v-icon>
             </v-col>
           </v-row>
           <v-row justify="center" align="center">
@@ -71,10 +78,14 @@
     <v-row>
       <v-col>
         <v-card color="secondary">
-          <round 
-            v-if="dataReady" 
+          <round v-if="dataReady"
+            :roundScore="matchData.home_first_round_score"
+            :players="matchData.home_team.players"
+            :teamName="matchData.home_team.current_abbreviation"
+            :roundData="matchData.first_round.home"
             :matchData="matchData" 
-            roundNumber="1" 
+            roundNumber="1"
+            :showInput="showInput"
             teamSide="home"
             :color="getColor(matchData.home_first_round_score,
               matchData.away_first_round_score)"
@@ -83,10 +94,13 @@
       </v-col>
       <v-col>
         <v-card color="secondary">
-          <round 
-            v-if="dataReady" 
-            :matchData="matchData" 
-            roundNumber="1" 
+          <round v-if="dataReady" 
+            :roundScore="matchData.away_first_round_score"
+            roundNumber="1"
+            :showInput="showInput"
+            :players="matchData.away_team.players"
+            :teamName="matchData.away_team.current_abbreviation"
+            :roundData="matchData.first_round.away"
             teamSide="away"
             :color="getColor(matchData.away_first_round_score,
               matchData.home_first_round_score)"
@@ -97,10 +111,13 @@
     <v-row>
       <v-col>
         <v-card color="secondary">
-          <round 
-            v-if="dataReady" 
+          <round v-if="dataReady" 
             :matchData="matchData" 
-            roundNumber="2" 
+            roundNumber="2"
+            :showInput="showInput"
+            :players="matchData.home_team.players"
+            :teamName="matchData.home_team.current_abbreviation"
+            :roundData="matchData.second_round.home"
             teamSide="home"
             :color="getColor(matchData.home_second_round_score,
               matchData.away_second_round_score)"
@@ -109,10 +126,13 @@
       </v-col>
       <v-col>
         <v-card color="secondary">
-          <round 
-            v-if="dataReady" 
+          <round v-if="dataReady" 
             :matchData="matchData" 
-            roundNumber="2" 
+            roundNumber="2"
+            :showInput="showInput"
+            :players="matchData.away_team.players"
+            :teamName="matchData.away_team.current_abbreviation"
+            :roundData="matchData.second_round.away"
             teamSide="away"
             :color="getColor(matchData.away_second_round_score,
               matchData.home_second_round_score)"
@@ -133,17 +153,38 @@
   </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useMatchStore } from '@/stores/match.store';
 import { useDate } from 'vuetify';
-import { useRoute } from 'vue-router/auto';
+import { useRoute } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { watch, ref } from 'vue';
 
 const matchStore = useMatchStore();
 const route = useRoute('/ottelut/[id]');
 const date = useDate();
 
-const {matchData, dataReady, isAwayCaptain} = storeToRefs(matchStore);
+const showEdit = ref<boolean>(false);
+const showInput = ref<boolean>(false);
+
+const { matchData, dataReady, isAwayCaptain } = storeToRefs(matchStore);
 matchStore.getMatchData(route.params.id);
+
+watch(dataReady, (newValue) => {
+  if (newValue) {
+    if (
+      localStorage.roleId == 2 || (
+        !matchData.value.is_validated
+        && localStorage.teamId == matchData.value.home_team.team_id
+        && localStorage.roleId == 1
+      )
+    ) {
+      showEdit.value = true;
+    } else {
+      showEdit.value = false;
+    }
+  }
+});
 
 /**
  * Returns red/yellow/green depending is it higher, lower or tie
@@ -151,7 +192,7 @@ matchStore.getMatchData(route.params.id);
  * @param {*} team2Score The team score that you are comparing teamScore param
  * @returns {*} Color string: 'green' if lower, 'yellow' if tie and 'red' if higher
  */
-function getColor(teamScore, team2Score) {
+function getColor(teamScore: number, team2Score: number) {
   if (teamScore < team2Score) {
     return 'green-accent-4';
   } else if (teamScore > team2Score) {

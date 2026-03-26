@@ -9,24 +9,24 @@
         </v-col>
         <v-spacer />
         <v-col cols="8" style="text-align:center">
-          {{ teamName }}
+          {{ props.teamName }}
         </v-col>
         <v-col
           cols="2"
           style="text-align:right; padding-right: 1em;"
         >
-          <v-chip v-if="!showInput && (roundScore || roundScore == '0')"
+          <v-chip v-if="!props.showInput && score !== null "
             style="float:right;"
             :color="color"
             label
             small
             class="mr-2"
           >
-            <strong>{{ roundScore }}</strong>
+            <strong>{{ score }}</strong>
           </v-chip>
-          <v-text-field v-else-if="showInput"
-            @input="roundStore.patchRoundScore(props.teamSide, props.roundNumber, roundScore)" 
-            v-model="roundScore" 
+          <v-text-field v-else-if="props.showInput"
+            @input="patchRoundScore(props.teamSide, score)"
+            v-model="score" 
             class="centered-input" 
             label="Tulos" 
             maxlength="3"
@@ -36,11 +36,11 @@
     </v-card-title>
     <!-- TODO loading -->
     <v-data-table 
-      v-if="!showInput"
+      v-if="!props.showInput"
       :mobile-breakpoint="0" 
       :headers="headersRound"
       @click:row="handleRedirect"
-      :items="data"
+      :items="props.roundData"
       no-data-text="Ei dataa :("
       :no-filter="true"
     >
@@ -52,41 +52,41 @@
       :mobile-breakpoint="0" 
       v-model="select"
       :headers="headersRound"
-      :items="data"
+      :items="props.roundData"
       :items-per-page="4"
     >
       <template v-slot:headers class="text-xs-center"></template>
-      <template v-slot:item="props" >
+      <template v-slot:item="row">
         <tr>
           <td>
             <v-select 
               item-color="red"
               color="red"
-              v-model="selected[props.index].player"
+              v-model="selected[row.index].player"
               class="text-center pr-1" 
               placeholder="Valitse pelaaja"
-              :items="players"
+              :items="props.players"
               item-title="player_name"
               item-value="id"
-              @update:model-value="(playerId) => roundStore.updateThrower(selected[props.index].id, playerId)"
+              @update:model-value="(player) => updateThrower(selected[row.index].id, player.id)"
               single-line
             />
           </td>
-          <td v-for="throwString in ['first', 'second', 'third', 'fourth']">
+          <td v-for="throwString in throwStrings" :key="throwString">
             <v-text-field 
               color="red"
               class="centered-input"
               maxlength="2"
-              v-model="selected[props.index]['score_'+ throwString]"
+              v-model="selected[row.index][getScoreField(throwString)]"
               @input="
-                roundStore.updateThrowScore('score_'+ throwString, selected[props.index]);
-                updateThrowTotal(selected[props.index])
+                updateThrowScore(getScoreField(throwString), selected[row.index]);
+                updateThrowTotal(selected[row.index])
               "
               @keypress="isNumber($event)"
             />
           </td>
           <td class="centered-input" style="font-size:18px">
-            {{selected[props.index]['score_total']}}
+            {{selected[row.index].score_total}}
           </td>
         </tr>
       </template>
@@ -95,84 +95,136 @@
   </v-card>
 </template>
 
-<script setup>
-import { headersRound } from '@/stores/headers';
-import { useRoundStore } from '@/stores/round.store'
+<script setup lang="ts">
+import { ref, Ref } from 'vue';
+import { headersRound } from '@/stores/headers2';
+import { fetchWrapper } from '@/utils/fetchWrapper';
 
-const props = defineProps({
-    color: String,
-    matchData: Object,
-    roundNumber: String,
-    teamSide: String,
-});
+const throwStrings = ['first', 'second', 'third', 'fourth'] as const;
 
-const roundStore = useRoundStore();
+type ScoreString = typeof throwStrings[number]
+type ScoreField = `score_${ScoreString}`
 
-const roundString = props.roundNumber === '1' ? 'first_round' : 'second_round';
+interface RoundPlayer {
+  id: string | number
+  player_name: string
+}
 
-const data = props.matchData[roundString][props.teamSide];
-const roundScore = ref(props.matchData[props.teamSide + '_' + roundString + '_score']);
-const players = props.matchData[props.teamSide+'_team'].players;
-const teamName = props.matchData[props.teamSide+'_team'].current_abbreviation;
+interface ThrowRow {
+  id: string | number
+  player: RoundPlayer | null
+  score_first: string | number | null
+  score_second: string | number | null
+  score_third: string | number | null
+  score_fourth: string | number | null
+  score_total: number
+}
 
-const select = ref([]);
-const selected = ref([]);
-const showInput = ref(false);
+interface RoundProps {
+  color?: string
+  showInput: boolean
+  roundNumber: "1" | "2"
+  roundScore: number
+  roundData: ThrowRow[]
+  players: RoundPlayer[]
+  teamName: string
+  teamSide: string
+}
 
-data.forEach(function (item) {
-  if (Object.keys(item.player).length === 0) {
+const props = defineProps<RoundProps>()
+
+const score: Ref<number | null> = ref(null);
+const select: Ref<ThrowRow[]> = ref([]);
+const selected: Ref<ThrowRow[]> = ref([]);
+
+const roundIndex = +props.roundNumber - 1 as 0 | 1;
+
+const roundScoreUrl = `${import.meta.env.VITE_API_URL}/matches/`;
+const throwUrl = `${import.meta.env.VITE_API_URL}/throws/update/`;
+
+
+props.roundData.forEach((item) => {
+  if (item.player && Object.keys(item.player).length === 0) {
     item.player = null;
   }
   selected.value.push(item);
 })
 
-if (
-  localStorage.roleId == 2 || (
-    !props.matchData.is_validated
-    && localStorage.teamId == props.matchData.home_team.team_id
-    && localStorage.roleId == 1
-  )
-) {
-  showInput.value = true;
-} else {
-  showInput.value = false;
+
+function getScoreField(scoreString: ScoreString): ScoreField {
+  return `score_${scoreString}`;
 }
 
-function handleRedirect (value, row) {
+function handleRedirect(value: any, row: any) {
   if (row.item.player === null) {
     return;
   }
-  if (row.item.player.id !== undefined || row.item.player.id !== null) {
+  if (row.item.player.id !== undefined && row.item.player.id !== null) {
     location.href = '/pelaajat/' + row.item.player.id;
   }
 }
 
-function isNumber(evt) {
-  // Checks that the value is an H or a numeric value from the ASCII table.
-  // not verified atm?
-  evt = (evt) || window.event
-  const charCode = (evt.which) ? evt.which : evt.keyCode
-  if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 72 && charCode !== 104 && charCode !== 69 && charCode !== 101) {
-    evt.preventDefault()
-  } else {
-    return true
+/* *
+ * This function checks if the key pressed is a number (0-9) or 'H'/'E' (case-insensitive).
+ */
+function isNumber(evt: KeyboardEvent) {
+  const key = evt.key;
+  if (key.length > 1) {
+    return; // Allow control keys (Enter, Backspace, etc.)
   }
+  if (/^[0-9EeHh]$/.test(key)) {
+    return; // Allow numeric keys and 'E', 'H', 'e', 'h'
+  }
+  evt.preventDefault(); // Prevent any other keys
 }
 
-function updateThrowTotal(throwerObject) {
-  throwerObject["score_total"] = 0
-  
-  for (let order of ["first", "second", "third", "fourth"]) {
-    let score = throwerObject[`score_${order}`];
+function updateThrowTotal(throwerObject: ThrowRow) {
+  throwerObject.score_total = 0
+
+  for (let score of [
+    throwerObject.score_first,
+    throwerObject.score_second,
+    throwerObject.score_third,
+    throwerObject.score_fourth
+  ]) {
     let number;
-    if (score === null || score.toLowerCase() === "h" || score.toLowerCase() === "e" ) {
+    if (typeof score === "number") {
+      number = score
+    } else if (score === null || score.toLowerCase() === "h" || score.toLowerCase() === "e") {
       number = 0
     } else {
       number = (!isNaN(parseInt(score))) ? parseInt(score) : 0;
     }
-    throwerObject["score_total"] += number
+    throwerObject.score_total += number
   }
 }
+
+/*****************/
+/* Update Asyncs */
+/*****************/
+
+async function patchRoundScore(teamSide: string, roundScore: number | null) {
+  const round = ['first', 'second'];
+
+  const splittedUrl = location.href.split('/');
+  const idx = splittedUrl[splittedUrl.length - 1];
+  const reqUrl = roundScoreUrl + idx
+  fetchWrapper(reqUrl, { [`${teamSide}_${round[roundIndex]}_round_score`]: roundScore }, "PATCH")
+}
+
+async function updateThrowScore(throwString: string, throwObject: Record<string, any>) {
+  const reqUrl = throwUrl + throwObject.id + "/"
+  fetchWrapper(reqUrl, { [throwString]: throwObject[throwString] }, "PATCH")
+}
+
+async function updateThrower(throwObjectId: string | number, playerId: string | number | null | undefined) {
+  if (playerId === undefined) {
+    playerId = null;
+  }
+  const reqUrl = throwUrl + throwObjectId + "/"
+  fetchWrapper(reqUrl, { "player": playerId }, "PATCH")
+}
+
 
 </script>
 

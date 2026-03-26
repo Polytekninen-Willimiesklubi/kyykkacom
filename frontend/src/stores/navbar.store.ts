@@ -3,7 +3,7 @@ import { ref, computed } from 'vue';
 import { useTeamsStore } from '@/stores/teams.store';
 import { seasonsMappings } from '@/tournament_templates';
 import type { Season } from '@/types/api';
-import { getLocal, setLocal, setLocalWithRef } from '@/utils/localUtils'
+import { getLocal, setLocal, setLocalWithRef } from '@/utils/localUtils';
 import { fetchWrapper } from '@/utils/fetchWrapper';
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/seasons`;
