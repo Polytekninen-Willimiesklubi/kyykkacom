@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "linux": "bash .github/hooks/scripts/guard-dangerous-commands.sh",
+        "timeout": 10
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "linux": "bash .github/hooks/scripts/frontend-typecheck-after-edits.sh",
+        "timeout": 90
+      }
+    ]
+  }
+}
