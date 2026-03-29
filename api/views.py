@@ -199,8 +199,8 @@ class IsCaptainForTeam(permissions.BasePermission):
     """Permission check to verify if user is captain in the right team for reserving players"""
 
     def has_permission(self, request: Request, view):
-        # if request.user.is_superuser:
-        #     return True
+        if request.user.is_superuser:
+            return True
         try:
             current = CurrentSeason.objects.first()
             assert current is not None
