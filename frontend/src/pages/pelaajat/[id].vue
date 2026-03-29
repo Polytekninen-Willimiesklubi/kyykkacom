@@ -4,7 +4,9 @@
       <v-row>
         <v-col>
           <v-card class="ma-2">
-            <v-card-title align="center">{{playerStore.player.player_name}}</v-card-title>
+            <v-card-title align="center">
+              {{ playerStore.player.player_name }}
+            </v-card-title>
             <v-data-table
               :mobile-breakpoint="0"
               :headers="headerPlayerOverallStats"
@@ -17,7 +19,8 @@
                   <template v-for="column in columns" :key="column.key">
                     <td class="cursor-pointer" @click="chanceHeaderStat">
                       {{ column.title }}
-                      <v-tooltip v-if="column.tooltip"
+                      <v-tooltip
+                        v-if="column.tooltip"
                         activator="parent"
                         location="top"
                         :text="column.tooltip"
@@ -26,7 +29,8 @@
                   </template>
                 </tr>
               </template>
-              <template #bottom></template> <!-- This hides the pagination controls-->
+              <template #bottom />
+              <!-- This hides the pagination controls-->
             </v-data-table>
           </v-card>
         </v-col>
@@ -37,7 +41,11 @@
             <v-data-table
               :mobile-breakpoint="0"
               class="seasonStats"
-              :headers="playerStore.playerHasAccolades ? headerPlayerSeasonStatsRanking : headerPlayerSeasonStats"
+              :headers="
+                playerStore.playerHasAccolades
+                  ? headerPlayerSeasonStatsRanking
+                  : headerPlayerSeasonStats
+              "
               height="20em"
               no-data-text="Ei pelattuja kausia"
               loading-text="Ladataan kausia..."
@@ -51,31 +59,36 @@
                 tried so many ways: setup code watchers, onMounted. Always hits the 'no-data-text'
                 problem
               -->
-              <template #item = {item}>
+              <template #item="{ item }">
                 <tr
-                  :class="{'blue-row': initalColor(item.season)}"
-                  @click="(val) => {chanceSeason(val); filtterItems();}"
+                  :class="{ 'blue-row': initalColor(item.season) }"
+                  @click="
+                    (val) => {
+                      chanceSeason(val);
+                      filtterItems();
+                    }
+                  "
                 >
-                  <td> {{ item.season }}</td>
-                  <td> {{ item.team_name }}</td>
+                  <td>{{ item.season }}</td>
+                  <td>{{ item.team_name }}</td>
                   <template v-if="playerStore.playerHasAccolades">
-                    <td> {{ item.ranking }}</td>
+                    <td>{{ item.ranking }}</td>
                   </template>
-                  <td> {{ item.rounds_total }}</td>
-                  <td> {{ item.score_total }}</td>
-                  <td> {{ item.throws_total }}</td>
-                  <td> {{ item.avg_score }}</td>
-                  <td> {{ item.avg_position }}</td>
-                  <td> {{ item.pikes_total }}</td>
-                  <td> {{ item.pike_percentage }}</td>
-                  <td> {{ item.zeros_total }}</td>
-                  <td> {{ item.clearence_count }}</td>
+                  <td>{{ item.rounds_total }}</td>
+                  <td>{{ item.score_total }}</td>
+                  <td>{{ item.throws_total }}</td>
+                  <td>{{ item.avg_score }}</td>
+                  <td>{{ item.avg_position }}</td>
+                  <td>{{ item.pikes_total }}</td>
+                  <td>{{ item.pike_percentage }}</td>
+                  <td>{{ item.zeros_total }}</td>
+                  <td>{{ item.clearence_count }}</td>
                   <!-- <td> {{ item.zero_percentage }}</td> -->
-                  <td> {{ item.gte_six_total }}</td>
+                  <td>{{ item.gte_six_total }}</td>
                 </tr>
-
               </template>
-              <template #bottom></template> <!-- This hides the pagination controls-->
+              <template #bottom />
+              <!-- This hides the pagination controls-->
             </v-data-table>
           </v-card>
         </v-col>
@@ -87,13 +100,13 @@
             title="Heittotuloksen jakauma"
             :datasets="normalizedSwitch ? canvas1DataNormalized : canvas1Data"
             :labels="['0', '1', '2', '3', '4', '5', '≥6']"
-            :yLabel="normalizedSwitch ? '%' : 'Kyykkää'"
+            :y-label="normalizedSwitch ? '%' : 'Kyykkää'"
             type="bar"
           />
           <v-btn
             class="mt-2"
-            @click="normalizedSwitch = !normalizedSwitch"
             :text="normalizedSwitch ? '%' : '01'"
+            @click="normalizedSwitch = !normalizedSwitch"
           />
         </v-col>
         <v-col cols="4">
@@ -111,8 +124,8 @@
             title="Heittokeskiarvo heittopaikan mukaan"
             :datasets="canvas3Data"
             :labels="['1', '2', '3', '4']"
-            :horizontal=true
-            yLabel="Heittopaikka"
+            :horizontal="true"
+            y-label="Heittopaikka"
             type="bar"
           />
         </v-col>
@@ -122,71 +135,49 @@
           <v-row class="mt-10">
             <v-col cols="2">
               <v-text-field
-                class='pl-5'
-                color="red"
                 v-model="search"
+                class="pl-5"
+                color="red"
                 label="Etsi"
                 single-line
                 variant="outlined"
-                />
+              />
             </v-col>
-            <v-col cols="1"/> <!-- Spacer -->
+            <v-col cols="1" />
+            <!-- Spacer -->
             <v-col cols="2">
               <v-btn-toggle
                 v-model="sortGamesSwitch"
                 variant="outlined"
-                @update:modelValue="filtterItems"
                 divided
                 mandatory
+                @update:model-value="filtterItems"
               >
-                <v-tooltip
-                  location="top"
-                  text="Näytä ottelut peleittäin (1. ja 2. erä yhdessä)"
-                >
+                <v-tooltip location="top" text="Näytä ottelut peleittäin (1. ja 2. erä yhdessä)">
                   <template #activator="{ props }">
-                    <v-btn
-                      size="small"
-                      text="Peleittäin"
-                      value="Peleittäin"
-                      v-bind="props"
-                    />
+                    <v-btn size="small" text="Peleittäin" value="Peleittäin" v-bind="props" />
                   </template>
                 </v-tooltip>
-                <v-tooltip
-                  location="top"
-                  text="Näytä ottelut erittäin"
-                >
+                <v-tooltip location="top" text="Näytä ottelut erittäin">
                   <template #activator="{ props }">
-                    <v-btn
-                      size="small"
-                      text="Erittäin"
-                      value="Erittäin"
-                      v-bind="props"
-                    />
+                    <v-btn size="small" text="Erittäin" value="Erittäin" v-bind="props" />
                   </template>
                 </v-tooltip>
               </v-btn-toggle>
             </v-col>
-            <v-col cols="1"/> <!-- Spacer -->
+            <v-col cols="1" />
+            <!-- Spacer -->
             <v-col cols="3">
               <v-btn-toggle
                 v-model="filterGamesSwitch"
                 variant="outlined"
-                @update:modelValue="filtterItems"
                 divided
                 mandatory
+                @update:model-value="filtterItems"
               >
-                <v-tooltip
-                  location="top"
-                  text="Näytä kaikki ottelut kautta ajan"
-                >
+                <v-tooltip location="top" text="Näytä kaikki ottelut kautta ajan">
                   <template #activator="{ props }">
-                    <v-btn
-                      size="small"
-                      text="Kaikki kaudet"
-                      value="Kaikki kaudet"
-                      v-bind="props"
-                    />
+                    <v-btn size="small" text="Kaikki kaudet" value="Kaikki kaudet" v-bind="props" />
                   </template>
                 </v-tooltip>
                 <v-tooltip
@@ -208,40 +199,46 @@
               <v-btn
                 text="Saavutukset"
                 append-icon="mdi-arrow-right"
-                @click="() => { tab = 'achievements'}"
+                @click="
+                  () => {
+                    tab = 'achievements';
+                  }
+                "
               />
             </v-col>
           </v-row>
-          <v-row class="mt-0 pt-0" >
+          <v-row class="mt-0 pt-0">
             <v-col>
               <v-data-table
                 :mobile-breakpoint="0"
                 class="matchesClass"
-                @click:row="handleRedirect"
                 :search="search"
                 :headers="matchHeaders"
                 :items="matchItems"
                 :loading="playerStore.loadingPlayer"
-                :sort-by="[{key: 'time', order:'desc'}]"
+                :sort-by="[{ key: 'time', order: 'desc' }]"
                 no-data-text="Ei dataa :("
                 loading-text="Ladataan kausia..."
                 density="compact"
+                @click:row="handleRedirect"
               >
                 <!-- This is somewhat modified solution from this 
                  https://github.com/vuetifyjs/vuetify/issues/17590#issuecomment-2571395957
                  Idea is to just add tooltip, but you need then add all the normal functionalities,
                  not to override them.
                 -->
-                <template v-for="header in matchHeaders"
+                <template
+                  v-for="header in matchHeaders"
                   #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
                 >
-                  <v-tooltip :text="column.tooltip" location="top" v-if="column.tooltip">
+                  <v-tooltip v-if="column.tooltip" :text="column.tooltip" location="top">
                     <template #activator="{ props }">
                       <div class="v-data-table-header__content" v-bind="props">
                         <span @click="() => toggleSort(column)">{{ column.title }}</span>
-                        <v-icon v-if="column.sortable" 
-                          class="v-data-table-header__sort-icon" 
-                          :icon="getSortIcon(column)" 
+                        <v-icon
+                          v-if="column.sortable"
+                          class="v-data-table-header__sort-icon"
+                          :icon="getSortIcon(column)"
                         />
                       </div>
                     </template>
@@ -249,10 +246,11 @@
                   <template v-else>
                     <div class="v-data-table-header__content">
                       <span @click="() => toggleSort(column)">{{ column.title }}</span>
-                        <v-icon v-if="column.sortable" 
-                          class="v-data-table-header__sort-icon" 
-                          :icon="getSortIcon(column)" 
-                        />
+                      <v-icon
+                        v-if="column.sortable"
+                        class="v-data-table-header__sort-icon"
+                        :icon="getSortIcon(column)"
+                      />
                     </div>
                   </template>
                 </template>
@@ -279,38 +277,49 @@
               <v-btn
                 text="Ottelut"
                 prepend-icon="mdi-arrow-left"
-                @click="() => { tab = 'matches'}"
+                @click="
+                  () => {
+                    tab = 'matches';
+                  }
+                "
               />
             </v-col>
             <v-spacer />
           </v-row>
           <v-row class="pl-5 pb-10">
             <v-col cols="12">
-              <v-list 
-                class="w-100"
-                style="overflow: hidden" 
+              <v-list
                 v-for="[season, achievements] in Object.entries(
-                  hofStore.playerAccoladesBySeason
-                ).sort((a, b) => b[0] - a[0])" 
+                  hofStore.playerAccoladesBySeason,
+                ).sort((a, b) => b[0] - a[0])"
                 :key="season"
+                class="w-100"
+                style="overflow: hidden"
               >
                 <div class="season-header">
-                  <v-list-item-title class="season-title">Kausi {{ season }}</v-list-item-title>
+                  <v-list-item-title class="season-title"> Kausi {{ season }} </v-list-item-title>
                 </div>
                 <v-row style="overflow: hidden">
-                  <v-col cols="6" v-if="!!achievements['team_accolades']">
+                  <v-col v-if="!!achievements['team_accolades']" cols="6">
                     <template v-for="accolade in achievements['team_accolades']" :key="accolade.id">
                       <div class="achievement-badge">
                         <accolade-icon :filename="accolade.accolade.icon" />
-                        <span class="pl-5" style="font-weight: 600;">{{ accolade.accolade.name }}</span>
+                        <span class="pl-5" style="font-weight: 600">{{
+                          accolade.accolade.name
+                        }}</span>
                       </div>
                     </template>
                   </v-col>
-                  <v-col cols="6" class="pr-8" v-if="!!achievements['player_accolades']">
-                    <template v-for="accolade in achievements['player_accolades']" :key="accolade.id">
+                  <v-col v-if="!!achievements['player_accolades']" cols="6" class="pr-8">
+                    <template
+                      v-for="accolade in achievements['player_accolades']"
+                      :key="accolade.id"
+                    >
                       <div class="achievement-badge">
                         <accolade-icon :filename="accolade.accolade.icon" />
-                        <span class="pl-5" style="font-weight: 600;">{{ accolade.accolade.name }}</span>
+                        <span class="pl-5" style="font-weight: 600">{{
+                          accolade.accolade.name
+                        }}</span>
                       </div>
                     </template>
                   </v-col>
@@ -324,487 +333,511 @@
   </div>
 </template>
 <script setup>
-import { useNavBarStore } from '@/stores/navbar.store';
-import { usePlayerStore } from '@/stores/players.store';
-import { useHofStore } from '@/stores/hof.store';
-import { useDate } from 'vuetify';
-import { useRoute } from 'vue-router/auto';
-import {
-  headersPlayerPeriod,
-  headersPlayerGames,
-  headerPlayerOverallStats,
-  headerPlayerSeasonStats,
-  headerPlayerSeasonStatsRanking,
-} from '@/stores/headers';
+  import { useNavBarStore } from '@/stores/navbar.store';
+  import { usePlayerStore } from '@/stores/players.store';
+  import { useHofStore } from '@/stores/hof.store';
+  import { useDate } from 'vuetify';
+  import { useRoute } from 'vue-router/auto';
+  import {
+    headersPlayerPeriod,
+    headersPlayerGames,
+    headerPlayerOverallStats,
+    headerPlayerSeasonStats,
+    headerPlayerSeasonStatsRanking,
+  } from '@/stores/headers';
 
-const route = useRoute('/pelaajat/[id]');
+  const route = useRoute('/pelaajat/[id]');
 
-const playerStore = usePlayerStore();
-const navStore = useNavBarStore();
-const hofStore = useHofStore();
-const date = useDate();
+  const playerStore = usePlayerStore();
+  const navStore = useNavBarStore();
+  const hofStore = useHofStore();
+  const date = useDate();
 
-const styles = ['blue-row', 'red-row', 'green-row', 'yellow-row', 'purple-row'];
-const allColors = ['#B3E5FC', '#EF9A9A', '#A5D6A7', '#DCE775', '#BA68C8'];
-const currentSelection = [];
-const columnCurrentSelection = [];
-const columnColors = ['KPH', '', '', '', ''];
-const colors = ['', '', '', '', ''];
-let colorInitialized = false;
+  const styles = ['blue-row', 'red-row', 'green-row', 'yellow-row', 'purple-row'];
+  const allColors = ['#B3E5FC', '#EF9A9A', '#A5D6A7', '#DCE775', '#BA68C8'];
+  const currentSelection = [];
+  const columnCurrentSelection = [];
+  const columnColors = ['KPH', '', '', '', ''];
+  const colors = ['', '', '', '', ''];
+  let colorInitialized = false;
 
-const search = ref('')
-const sortGamesSwitch = ref('Erittäin');
-const filterGamesSwitch = ref('Kaikki kaudet');
-const canvas2Labels = ref([]);
-const canvas1Data = ref([]);
-const canvas1DataNormalized = ref([]);
-const normalizedSwitch = ref(false);
-const canvas2Data = ref([]);
-const canvas3Data = ref([]);
+  const search = ref('');
+  const sortGamesSwitch = ref('Erittäin');
+  const filterGamesSwitch = ref('Kaikki kaudet');
+  const canvas2Labels = ref([]);
+  const canvas1Data = ref([]);
+  const canvas1DataNormalized = ref([]);
+  const normalizedSwitch = ref(false);
+  const canvas2Data = ref([]);
+  const canvas3Data = ref([]);
 
-const matchItems = ref([]);
-const matchHeaders = ref(headersPlayerPeriod);
+  const matchItems = ref([]);
+  const matchHeaders = ref(headersPlayerPeriod);
 
-const tab = ref('matches');
+  const tab = ref('matches');
 
-function filtterItems() {
-  let arr
-  if (sortGamesSwitch.value === 'Erittäin') {
-    arr = playerStore.player.matches_per_period;
-    matchHeaders.value = headersPlayerPeriod;
-  } else {
-    arr = playerStore.player.matches_both_periods;
-    matchHeaders.value = headersPlayerGames;
-  }
+  function filtterItems() {
+    let arr;
+    if (sortGamesSwitch.value === 'Erittäin') {
+      arr = playerStore.player.matches_per_period;
+      matchHeaders.value = headersPlayerPeriod;
+    } else {
+      arr = playerStore.player.matches_both_periods;
+      matchHeaders.value = headersPlayerGames;
+    }
 
-  let return_arr
-  if (filterGamesSwitch.value === 'Kaikki kaudet') {
-    return_arr = arr
-  } else {
-    return_arr = arr.filter(ele => currentSelection.includes(ele.season_name))
-  }
+    let return_arr;
+    if (filterGamesSwitch.value === 'Kaikki kaudet') {
+      return_arr = arr;
+    } else {
+      return_arr = arr.filter((ele) => currentSelection.includes(ele.season_name));
+    }
 
-  if (search.value == '') {
-    matchItems.value = return_arr;
-    return;
-  }
-  matchItems.value = return_arr.filter(match => {
-    let found = false;
-    for (const key in match) {
-      if (key === 'id') { continue; }
-      const ele = typeof match[key] !== 'string' ? String(match[key]) : match[key]
-      if (ele.toLowerCase().includes(search.value.toLowerCase())) {
-        found = true;
-        break;
+    if (search.value == '') {
+      matchItems.value = return_arr;
+      return;
+    }
+    matchItems.value = return_arr.filter((match) => {
+      let found = false;
+      for (const key in match) {
+        if (key === 'id') {
+          continue;
+        }
+        const ele = typeof match[key] !== 'string' ? String(match[key]) : match[key];
+        if (ele.toLowerCase().includes(search.value.toLowerCase())) {
+          found = true;
+          break;
+        }
       }
-    }
-    return found;
-  })
-
-}
-
-function handleRedirect(value, row) {
-  if (sortGamesSwitch.value === 'Peleittäin') {
-    location.href = '/ottelut/' + row.item.match;
-  } else {
-    location.href = '/ottelut/' + row.item.match_id;
-  }
-}
-
-function getColor(val1, val2) {
-  if (val1 < val2) return 'green-accent-4';
-  else if (val1 > val2) return 'red-accent-4';
-  else return 'yellow-accent-4';
-}
-
-function chanceHeaderStat(val) {
-  const headerClassList = val.target.classList;
-  const head = val.target.innerText;
-  const headers = [
-    'Erät', 'Kyykät', 'Heitot', 'KPH',
-    'kHP', 'Hauet', 'H%',
-    'VM', 'Tyh.', 'JK'
-  ];
-  const header_binds = [
-    'rounds_total', 'score_total', 'throws_total', 'avg_score',
-    'avg_position', 'pikes_total', 'pike_percentage', 'zeros_total',
-    'clearence_count', 'gte_six_total'
-  ];
-  // 'zero_percentage',
-
-  if (!headers.includes(head)) { return; }
-
-  if (columnCurrentSelection.includes(head)) {
-    let index = canvas2Data.value.map(ele => ele.label).indexOf(head);
-    canvas2Data.value.splice(index, 1);
-
-    canvas2Data.value = [...canvas2Data.value];
-
-    index = columnCurrentSelection.indexOf(head);
-    columnCurrentSelection.splice(index, 1);
-
-    index = columnColors.indexOf(head);
-    columnColors[index] = '';
-    headerClassList.remove(styles[index]);
-  } else if (columnCurrentSelection.length < 5) { // Only allow max 5 graphs
-    let index = columnColors.indexOf('');
-    const color = allColors[index];
-    headerClassList.add(styles[index]);
-
-    columnColors[index] = head;
-
-    const stat_per_season = [];
-    index = headers.indexOf(head);
-    playerStore.player.stats_per_seasons.forEach(stats => {
-      stat_per_season.push(stats[header_binds[index]])
+      return found;
     });
-    canvas2Data.value.push({
-      label: head,
-      data: stat_per_season,
-      backgroundColor: color,
-      borderColor: color,
-    });
-
-    canvas2Data.value = [...canvas2Data.value];
-
-    columnCurrentSelection.push(head);
   }
-}
 
-function chanceSeason(value) {
-  const headerClassList = value.target.tagName === "TD"
-    ? value.target.parentNode.classList
-    : value.target.classList;
-  const clickedSeason = value.target.tagName === "TD"
-    ? value.target.parentNode.children[0].innerText
-    : value.target.children[0].innerText;
-
-  if (currentSelection.includes(clickedSeason)) { // Remove clicked season from datas
-
-    let index = canvas1Data.value.map(e => e.label).indexOf('Kausi ' + clickedSeason);
-    canvas1Data.value.splice(index, 1);
-    canvas1DataNormalized.value.splice(index, 1);
-    canvas3Data.value.splice(index, 1); // Same index can be used to splice canvas3, because we always update both everywhere
-    canvas1Data.value = [...canvas1Data.value]; // To make it reactive, we must make new array
-    canvas3Data.value = [...canvas3Data.value];
-    canvas1DataNormalized.value = [...canvas1DataNormalized.value]
-
-    index = currentSelection.indexOf(clickedSeason);
-    currentSelection.splice(index, 1);
-
-    index = colors.indexOf(clickedSeason);
-    colors[index] = '';
-    headerClassList.remove(styles[index]);
-  } else if (currentSelection.length < 5) { // Add Clicked season, only allow max 5
-    let tmp = playerStore.player.stats_per_seasons;
-    let index = tmp.map(ele => ele.season).indexOf(clickedSeason);
-    const selected_season = tmp[index];
-
-    index = colors.indexOf(''); // First valid color
-    colors[index] = clickedSeason;
-    const color = allColors[index];
-    headerClassList.add(styles[index]);
-
-    const totalThrow = selected_season.zeros_total
-      + selected_season.pikes_total
-      + selected_season.ones_total
-      + selected_season.twos_total
-      + selected_season.threes_total
-      + selected_season.fours_total
-      + selected_season.fives_total
-      + selected_season.gte_six_total
-
-    canvas1DataNormalized.value = [...canvas1DataNormalized.value,
-    {
-      label: 'Kausi ' + selected_season.season,
-      backgroundColor: color,
-      data: [
-        Math.round((selected_season.zeros_total + selected_season.pikes_total) / totalThrow * 100 * 100) / 100,
-        Math.round((selected_season.ones_total) / totalThrow * 100 * 100) / 100,
-        Math.round((selected_season.twos_total) / totalThrow * 100 * 100) / 100,
-        Math.round((selected_season.threes_total) / totalThrow * 100 * 100) / 100,
-        Math.round((selected_season.fours_total) / totalThrow * 100 * 100) / 100,
-        Math.round((selected_season.fives_total) / totalThrow * 100 * 100) / 100,
-        Math.round((selected_season.gte_six_total) / totalThrow * 100 * 100) / 100,
-      ]
+  function handleRedirect(value, row) {
+    if (sortGamesSwitch.value === 'Peleittäin') {
+      location.href = '/ottelut/' + row.item.match;
+    } else {
+      location.href = '/ottelut/' + row.item.match_id;
     }
+  }
+
+  function getColor(val1, val2) {
+    if (val1 < val2) return 'green-accent-4';
+    else if (val1 > val2) return 'red-accent-4';
+    else return 'yellow-accent-4';
+  }
+
+  function chanceHeaderStat(val) {
+    const headerClassList = val.target.classList;
+    const head = val.target.innerText;
+    const headers = ['Erät', 'Kyykät', 'Heitot', 'KPH', 'kHP', 'Hauet', 'H%', 'VM', 'Tyh.', 'JK'];
+    const header_binds = [
+      'rounds_total',
+      'score_total',
+      'throws_total',
+      'avg_score',
+      'avg_position',
+      'pikes_total',
+      'pike_percentage',
+      'zeros_total',
+      'clearence_count',
+      'gte_six_total',
     ];
+    // 'zero_percentage',
 
-    canvas1Data.value = [...canvas1Data.value,  // To make it reactive, we must make new array
-    {
-      label: 'Kausi ' + selected_season.season,
-      backgroundColor: color,
-      data: [
-        selected_season.zeros_total + selected_season.pikes_total,
-        selected_season.ones_total,
-        selected_season.twos_total,
-        selected_season.threes_total,
-        selected_season.fours_total,
-        selected_season.fives_total,
-        selected_season.gte_six_total
-      ]
+    if (!headers.includes(head)) {
+      return;
     }
-    ];
 
-    canvas3Data.value = [...canvas3Data.value,  // To make it reactive, we must make new array
-    {
-      label: 'Kausi ' + selected_season.season,
-      backgroundColor: color,
-      throwCounts: [
-        selected_season.position_one_throws,
-        selected_season.position_two_throws,
-        selected_season.position_three_throws,
-        selected_season.position_four_throws,
-      ],
-      data: [
-        selected_season.avg_score_position_one,
-        selected_season.avg_score_position_two,
-        selected_season.avg_score_position_three,
-        selected_season.avg_score_position_four
-      ]
-    }
-    ];
+    if (columnCurrentSelection.includes(head)) {
+      let index = canvas2Data.value.map((ele) => ele.label).indexOf(head);
+      canvas2Data.value.splice(index, 1);
 
-    currentSelection.push(clickedSeason);
-  }
-}
+      canvas2Data.value = [...canvas2Data.value];
 
-/**
- * Returns True for one season index for to initially color one row in aggregated year stats
- * @param {number} season Season index
- * @returns {boolean} True if season is first item in 'currentSelection' and only once else False 
- */
-function initalColor(season) {
-  if (colorInitialized || season !== currentSelection[0]) {
-    return false;
-  }
-  colorInitialized = true;
-  return true;
-}
+      index = columnCurrentSelection.indexOf(head);
+      columnCurrentSelection.splice(index, 1);
 
-playerStore.getPlayer(route.params.id);
-watch(() => playerStore.loadedData, () => {
-  if (playerStore.loadedData === false) {
-    return;
-  }
-  const stats_per_seasons = playerStore.player.stats_per_seasons;
-  if (stats_per_seasons && stats_per_seasons.length !== 0) {
-    let index = stats_per_seasons.map(ele => ele.id).indexOf(navStore.seasonId);
-    // If the selected season is not in players history take the latest
-    index = (index === -1) ? stats_per_seasons.length - 1 : index;
-    const currentSelcSeason = stats_per_seasons[index];
-    const seasonString = currentSelcSeason.season;
-    currentSelection.push(seasonString);
-    colors[0] = seasonString;
-    columnCurrentSelection.push('KPH');
+      index = columnColors.indexOf(head);
+      columnColors[index] = '';
+      headerClassList.remove(styles[index]);
+    } else if (columnCurrentSelection.length < 5) {
+      // Only allow max 5 graphs
+      let index = columnColors.indexOf('');
+      const color = allColors[index];
+      headerClassList.add(styles[index]);
 
-    const totalThrow = currentSelcSeason.zeros_total
-      + currentSelcSeason.pikes_total
-      + currentSelcSeason.ones_total
-      + currentSelcSeason.twos_total
-      + currentSelcSeason.threes_total
-      + currentSelcSeason.fours_total
-      + currentSelcSeason.fives_total
-      + currentSelcSeason.gte_six_total
+      columnColors[index] = head;
 
-    const init1Normalized = {
-      label: 'Kausi ' + currentSelcSeason.season,
-      backgroundColor: '#B3E5FC',
-      data: [
-        Math.round((currentSelcSeason.zeros_total + currentSelcSeason.pikes_total) / totalThrow * 100 * 100) / 100,
-        Math.round((currentSelcSeason.ones_total) / totalThrow * 100 * 100) / 100,
-        Math.round((currentSelcSeason.twos_total) / totalThrow * 100 * 100) / 100,
-        Math.round((currentSelcSeason.threes_total) / totalThrow * 100 * 100) / 100,
-        Math.round((currentSelcSeason.fours_total) / totalThrow * 100 * 100) / 100,
-        Math.round((currentSelcSeason.fives_total) / totalThrow * 100 * 100) / 100,
-        Math.round((currentSelcSeason.gte_six_total) / totalThrow * 100 * 100) / 100,
-      ]
-    };
+      const stat_per_season = [];
+      index = headers.indexOf(head);
+      playerStore.player.stats_per_seasons.forEach((stats) => {
+        stat_per_season.push(stats[header_binds[index]]);
+      });
+      canvas2Data.value.push({
+        label: head,
+        data: stat_per_season,
+        backgroundColor: color,
+        borderColor: color,
+      });
 
-    const init1 = {
-      label: 'Kausi ' + currentSelcSeason.season,
-      backgroundColor: '#B3E5FC',
-      data: [
-        currentSelcSeason.zeros_total + currentSelcSeason.pikes_total,
-        currentSelcSeason.ones_total,
-        currentSelcSeason.twos_total,
-        currentSelcSeason.threes_total,
-        currentSelcSeason.fours_total,
-        currentSelcSeason.fives_total,
-        currentSelcSeason.gte_six_total
-      ]
-    };
-    const canvas2_data_tmp = [];
-    for (const s of stats_per_seasons) {
-      canvas2_data_tmp.push(s.avg_score);
-      canvas2Labels.value.push(s.season);
-    }
-    const init2 = {
-      label: 'KPH',
-      backgroundColor: '#B3E5FC',
-      borderColor: '#B3E5FC',
-      data: canvas2_data_tmp
-    };
+      canvas2Data.value = [...canvas2Data.value];
 
-    const init3 = {
-      label: 'Kausi ' + currentSelcSeason.season,
-      backgroundColor: '#B3E5FC',
-      throwCounts: [
-        currentSelcSeason.position_one_throws,
-        currentSelcSeason.position_two_throws,
-        currentSelcSeason.position_three_throws,
-        currentSelcSeason.position_four_throws,
-      ],
-      data: [
-        currentSelcSeason.avg_score_position_one,
-        currentSelcSeason.avg_score_position_two,
-        currentSelcSeason.avg_score_position_three,
-        currentSelcSeason.avg_score_position_four
-      ]
-    };
-    canvas1DataNormalized.value = [init1Normalized]
-    canvas1Data.value = [init1];
-    canvas2Data.value = [init2];
-    canvas3Data.value = [init3];
-  }
-
-  // Initialize the selected allTime header color
-  const headerRow = document.getElementsByClassName('allTimeHeaders')[0];
-  for (let i = 0; i < headerRow.childNodes.length; i++) {
-    const text = headerRow.childNodes[i].innerText;
-    if (text === 'KPH') {
-      headerRow.childNodes[i].classList.add('blue-row');
-      break;
+      columnCurrentSelection.push(head);
     }
   }
-  // Initialize the match list by calling the filtterItems() once
-  filtterItems();
-},
-  { once: true })
+
+  function chanceSeason(value) {
+    const headerClassList =
+      value.target.tagName === 'TD' ? value.target.parentNode.classList : value.target.classList;
+    const clickedSeason =
+      value.target.tagName === 'TD'
+        ? value.target.parentNode.children[0].innerText
+        : value.target.children[0].innerText;
+
+    if (currentSelection.includes(clickedSeason)) {
+      // Remove clicked season from datas
+
+      let index = canvas1Data.value.map((e) => e.label).indexOf('Kausi ' + clickedSeason);
+      canvas1Data.value.splice(index, 1);
+      canvas1DataNormalized.value.splice(index, 1);
+      canvas3Data.value.splice(index, 1); // Same index can be used to splice canvas3, because we always update both everywhere
+      canvas1Data.value = [...canvas1Data.value]; // To make it reactive, we must make new array
+      canvas3Data.value = [...canvas3Data.value];
+      canvas1DataNormalized.value = [...canvas1DataNormalized.value];
+
+      index = currentSelection.indexOf(clickedSeason);
+      currentSelection.splice(index, 1);
+
+      index = colors.indexOf(clickedSeason);
+      colors[index] = '';
+      headerClassList.remove(styles[index]);
+    } else if (currentSelection.length < 5) {
+      // Add Clicked season, only allow max 5
+      let tmp = playerStore.player.stats_per_seasons;
+      let index = tmp.map((ele) => ele.season).indexOf(clickedSeason);
+      const selected_season = tmp[index];
+
+      index = colors.indexOf(''); // First valid color
+      colors[index] = clickedSeason;
+      const color = allColors[index];
+      headerClassList.add(styles[index]);
+
+      const totalThrow =
+        selected_season.zeros_total +
+        selected_season.pikes_total +
+        selected_season.ones_total +
+        selected_season.twos_total +
+        selected_season.threes_total +
+        selected_season.fours_total +
+        selected_season.fives_total +
+        selected_season.gte_six_total;
+
+      canvas1DataNormalized.value = [
+        ...canvas1DataNormalized.value,
+        {
+          label: 'Kausi ' + selected_season.season,
+          backgroundColor: color,
+          data: [
+            Math.round(
+              ((selected_season.zeros_total + selected_season.pikes_total) / totalThrow) *
+                100 *
+                100,
+            ) / 100,
+            Math.round((selected_season.ones_total / totalThrow) * 100 * 100) / 100,
+            Math.round((selected_season.twos_total / totalThrow) * 100 * 100) / 100,
+            Math.round((selected_season.threes_total / totalThrow) * 100 * 100) / 100,
+            Math.round((selected_season.fours_total / totalThrow) * 100 * 100) / 100,
+            Math.round((selected_season.fives_total / totalThrow) * 100 * 100) / 100,
+            Math.round((selected_season.gte_six_total / totalThrow) * 100 * 100) / 100,
+          ],
+        },
+      ];
+
+      canvas1Data.value = [
+        ...canvas1Data.value, // To make it reactive, we must make new array
+        {
+          label: 'Kausi ' + selected_season.season,
+          backgroundColor: color,
+          data: [
+            selected_season.zeros_total + selected_season.pikes_total,
+            selected_season.ones_total,
+            selected_season.twos_total,
+            selected_season.threes_total,
+            selected_season.fours_total,
+            selected_season.fives_total,
+            selected_season.gte_six_total,
+          ],
+        },
+      ];
+
+      canvas3Data.value = [
+        ...canvas3Data.value, // To make it reactive, we must make new array
+        {
+          label: 'Kausi ' + selected_season.season,
+          backgroundColor: color,
+          throwCounts: [
+            selected_season.position_one_throws,
+            selected_season.position_two_throws,
+            selected_season.position_three_throws,
+            selected_season.position_four_throws,
+          ],
+          data: [
+            selected_season.avg_score_position_one,
+            selected_season.avg_score_position_two,
+            selected_season.avg_score_position_three,
+            selected_season.avg_score_position_four,
+          ],
+        },
+      ];
+
+      currentSelection.push(clickedSeason);
+    }
+  }
+
+  /**
+   * Returns True for one season index for to initially color one row in aggregated year stats
+   * @param {number} season Season index
+   * @returns {boolean} True if season is first item in 'currentSelection' and only once else False
+   */
+  function initalColor(season) {
+    if (colorInitialized || season !== currentSelection[0]) {
+      return false;
+    }
+    colorInitialized = true;
+    return true;
+  }
+
+  playerStore.getPlayer(route.params.id);
+  watch(
+    () => playerStore.loadedData,
+    () => {
+      if (playerStore.loadedData === false) {
+        return;
+      }
+      const stats_per_seasons = playerStore.player.stats_per_seasons;
+      if (stats_per_seasons && stats_per_seasons.length !== 0) {
+        let index = stats_per_seasons.map((ele) => ele.id).indexOf(navStore.seasonId);
+        // If the selected season is not in players history take the latest
+        index = index === -1 ? stats_per_seasons.length - 1 : index;
+        const currentSelcSeason = stats_per_seasons[index];
+        const seasonString = currentSelcSeason.season;
+        currentSelection.push(seasonString);
+        colors[0] = seasonString;
+        columnCurrentSelection.push('KPH');
+
+        const totalThrow =
+          currentSelcSeason.zeros_total +
+          currentSelcSeason.pikes_total +
+          currentSelcSeason.ones_total +
+          currentSelcSeason.twos_total +
+          currentSelcSeason.threes_total +
+          currentSelcSeason.fours_total +
+          currentSelcSeason.fives_total +
+          currentSelcSeason.gte_six_total;
+
+        const init1Normalized = {
+          label: 'Kausi ' + currentSelcSeason.season,
+          backgroundColor: '#B3E5FC',
+          data: [
+            Math.round(
+              ((currentSelcSeason.zeros_total + currentSelcSeason.pikes_total) / totalThrow) *
+                100 *
+                100,
+            ) / 100,
+            Math.round((currentSelcSeason.ones_total / totalThrow) * 100 * 100) / 100,
+            Math.round((currentSelcSeason.twos_total / totalThrow) * 100 * 100) / 100,
+            Math.round((currentSelcSeason.threes_total / totalThrow) * 100 * 100) / 100,
+            Math.round((currentSelcSeason.fours_total / totalThrow) * 100 * 100) / 100,
+            Math.round((currentSelcSeason.fives_total / totalThrow) * 100 * 100) / 100,
+            Math.round((currentSelcSeason.gte_six_total / totalThrow) * 100 * 100) / 100,
+          ],
+        };
+
+        const init1 = {
+          label: 'Kausi ' + currentSelcSeason.season,
+          backgroundColor: '#B3E5FC',
+          data: [
+            currentSelcSeason.zeros_total + currentSelcSeason.pikes_total,
+            currentSelcSeason.ones_total,
+            currentSelcSeason.twos_total,
+            currentSelcSeason.threes_total,
+            currentSelcSeason.fours_total,
+            currentSelcSeason.fives_total,
+            currentSelcSeason.gte_six_total,
+          ],
+        };
+        const canvas2_data_tmp = [];
+        for (const s of stats_per_seasons) {
+          canvas2_data_tmp.push(s.avg_score);
+          canvas2Labels.value.push(s.season);
+        }
+        const init2 = {
+          label: 'KPH',
+          backgroundColor: '#B3E5FC',
+          borderColor: '#B3E5FC',
+          data: canvas2_data_tmp,
+        };
+
+        const init3 = {
+          label: 'Kausi ' + currentSelcSeason.season,
+          backgroundColor: '#B3E5FC',
+          throwCounts: [
+            currentSelcSeason.position_one_throws,
+            currentSelcSeason.position_two_throws,
+            currentSelcSeason.position_three_throws,
+            currentSelcSeason.position_four_throws,
+          ],
+          data: [
+            currentSelcSeason.avg_score_position_one,
+            currentSelcSeason.avg_score_position_two,
+            currentSelcSeason.avg_score_position_three,
+            currentSelcSeason.avg_score_position_four,
+          ],
+        };
+        canvas1DataNormalized.value = [init1Normalized];
+        canvas1Data.value = [init1];
+        canvas2Data.value = [init2];
+        canvas3Data.value = [init3];
+      }
+
+      // Initialize the selected allTime header color
+      const headerRow = document.getElementsByClassName('allTimeHeaders')[0];
+      for (let i = 0; i < headerRow.childNodes.length; i++) {
+        const text = headerRow.childNodes[i].innerText;
+        if (text === 'KPH') {
+          headerRow.childNodes[i].classList.add('blue-row');
+          break;
+        }
+      }
+      // Initialize the match list by calling the filtterItems() once
+      filtterItems();
+    },
+    { once: true },
+  );
 </script>
 
-
 <style>
-tbody tr :hover {
-  cursor: unset;
-}
+  tbody tr :hover {
+    cursor: unset;
+  }
 
-.left-border-period>.v-data-table__wrapper>table>tbody>tr>td:nth-child(5) {
-  border-left: 1px solid grey;
-  text-align: center;
-}
+  .left-border-period > .v-data-table__wrapper > table > tbody > tr > td:nth-child(5) {
+    border-left: 1px solid grey;
+    text-align: center;
+  }
 
-.left-border-period>.v-data-table__wrapper>table>tbody>tr>td:nth-child(9) {
-  border-left: 1px solid grey;
-  text-align: center;
-}
+  .left-border-period > .v-data-table__wrapper > table > tbody > tr > td:nth-child(9) {
+    border-left: 1px solid grey;
+    text-align: center;
+  }
 
-.left-border-match>.v-data-table__wrapper>table>tbody>tr>td:nth-child(5) {
-  border-left: 1px solid grey;
-  text-align: center;
-}
+  .left-border-match > .v-data-table__wrapper > table > tbody > tr > td:nth-child(5) {
+    border-left: 1px solid grey;
+    text-align: center;
+  }
 
-.left-border-match>.v-data-table__wrapper>table>tbody>tr>td:nth-child(13) {
-  border-left: 1px solid grey;
-  text-align: center;
-}
+  .left-border-match > .v-data-table__wrapper > table > tbody > tr > td:nth-child(13) {
+    border-left: 1px solid grey;
+    text-align: center;
+  }
 
-.head-font {
-  margin: auto;
-  vertical-align: middle !important;
-  height: 32px;
-  font-size: 0.75rem;
-}
+  .head-font {
+    margin: auto;
+    vertical-align: middle !important;
+    height: 32px;
+    font-size: 0.75rem;
+  }
 
-.purple-row {
-  background-color: #BA68C8 !important;
-}
+  .purple-row {
+    background-color: #ba68c8 !important;
+  }
 
-.yellow-row {
-  background-color: #DCE775 !important;
-}
+  .yellow-row {
+    background-color: #dce775 !important;
+  }
 
-.green-row {
-  background-color: #A5D6A7 !important;
-}
+  .green-row {
+    background-color: #a5d6a7 !important;
+  }
 
-.blue-row {
-  background-color: #B3E5FC !important;
-}
+  .blue-row {
+    background-color: #b3e5fc !important;
+  }
 
-.red-row {
-  background-color: #EF9A9A !important;
-}
+  .red-row {
+    background-color: #ef9a9a !important;
+  }
 
-.matchesClass tr {
-  text-align: center;
-}
+  .matchesClass tr {
+    text-align: center;
+  }
 
-.allTimeStats tr {
-  text-align: center;
-}
+  .allTimeStats tr {
+    text-align: center;
+  }
 
-.seasonStats tr {
-  text-align: center;
-}
+  .seasonStats tr {
+    text-align: center;
+  }
 
-.v-data-table-header__content {
-  justify-content: center;
-}
+  .v-data-table-header__content {
+    justify-content: center;
+  }
 
-.achievements-item {
-  /* flex-direction: column !important; */
-  align-items: stretch !important;
-  padding: 16px 0 !important;
-}
+  .achievements-item {
+    /* flex-direction: column !important; */
+    align-items: stretch !important;
+    padding: 16px 0 !important;
+  }
 
-.season-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-left: 16px;
-}
+  .season-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-left: 16px;
+  }
 
-.season-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  padding-right: 12px;
-  white-space: nowrap;
-}
+  .season-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding-right: 12px;
+    white-space: nowrap;
+  }
 
-.season-header::before {
-  content: '';
-  flex: 1;
-  height: 2px;
-  background: linear-gradient(to right, currentColor 100%, transparent 50%);
-  margin-left: 12px;
-  margin-right: 12px;
-}
+  .season-header::before {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(to right, currentColor 100%, transparent 50%);
+    margin-left: 12px;
+    margin-right: 12px;
+  }
 
-.season-header::after {
-  content: '';
-  flex: 1;
-  height: 2px;
-  background: linear-gradient(to right, currentColor 100%, transparent 50%);
-  margin-left: 12px;
-  margin-right: 12px;
-}
+  .season-header::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(to right, currentColor 100%, transparent 50%);
+    margin-left: 12px;
+    margin-right: 12px;
+  }
 
-.achievements-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding-left: 16px;
-  padding-bottom: 4px;
-}
+  .achievements-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-left: 16px;
+    padding-bottom: 4px;
+  }
 
-.achievement-badge {
-  padding: 6px 12px;
-  margin: 3px 6px;
-  margin-bottom: 6px;
-  background-color: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
+  .achievement-badge {
+    padding: 6px 12px;
+    margin: 3px 6px;
+    margin-bottom: 6px;
+    background-color: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
 </style>

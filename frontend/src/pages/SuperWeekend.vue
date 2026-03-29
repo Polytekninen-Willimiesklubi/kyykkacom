@@ -2,13 +2,13 @@
   <div class="pr-10 pt-5 mr-2">
     <v-btn
       class="mb-5"
-      @click="showFormat = !showFormat"
       :text="!showFormat ? 'Vain Formaatti' : 'Tulokset'"
+      @click="showFormat = !showFormat"
     />
     <side-bar
       title="Alkulohko"
       :headers="superSidebarHeaders"
-      :sortBy="[{key: 'super_weekend_bracket_placement', order: 'asc'}]"
+      :sort-by="[{ key: 'super_weekend_bracket_placement', order: 'asc' }]"
       :teams="superStore.bracketedTeams"
       :lines="superStore.playoffLines"
     />
@@ -28,23 +28,21 @@
 </template>
 
 <route lang="yaml">
-  meta:
-    layout: "withoutSidebar"
+meta:
+  layout: 'withoutSidebar'
 </route>
 
 <script setup>
-import useMatchesStore from '@/stores/matches.store';
-import { useSuperStore } from '@/stores/superweekend.store';
-import { superSidebarHeaders } from '@/stores/headers'
+  import useMatchesStore from '@/stores/matches.store';
+  import { useSuperStore } from '@/stores/superweekend.store';
+  import { superSidebarHeaders } from '@/stores/headers';
 
-const showFormat = ref(false);
+  const showFormat = ref(false);
 
-const matchesStore = useMatchesStore();
-const superStore = useSuperStore();
+  const matchesStore = useMatchesStore();
+  const superStore = useSuperStore();
 
-superStore.getAllData();
-
+  superStore.getAllData();
 </script>
 
-<style>
-</style>
+<style></style>

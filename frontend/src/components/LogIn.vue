@@ -2,27 +2,27 @@
   <v-dialog v-model="dialog" persistent width="600px">
     <template #activator="{ props: activatorProps }">
       <v-btn
-        @click="dialog = !dialog"
         v-bind="activatorProps"
         text="Kirjaudu"
-        class="hidden-lg-and-up mb-5 ml-1" 
+        class="hidden-lg-and-up mb-5 ml-1"
         width="100%"
+        @click="dialog = !dialog"
       />
       <v-btn
-        @click="dialog = !dialog"
         v-bind="activatorProps"
         class="hidden-md-and-down"
         text="Kirjaudu"
+        @click="dialog = !dialog"
       />
     </template>
     <v-card title="Kirjaudu sisään">
       <v-container>
         <v-row>
           <v-col>
-            <v-alert 
-              :model-value="authStore.alert" 
-              type="error" 
-              transition="scale-transition" 
+            <v-alert
+              :model-value="authStore.alert"
+              type="error"
+              transition="scale-transition"
               outlined
             >
               <b>Kirjautuminen epäonnistui</b>
@@ -31,10 +31,10 @@
         </v-row>
         <v-row>
           <v-col cols="7">
-            <v-text-field 
-              v-model="authStore.credentials.username" 
-              color="red darken-1" 
-              label="Sähköposti" 
+            <v-text-field
+              v-model="authStore.credentials.username"
+              color="red darken-1"
+              label="Sähköposti"
               required
             />
           </v-col>
@@ -51,16 +51,12 @@
         </v-row>
       </v-container>
       <template #actions>
-        <v-container>  
-          <v-btn
-            color="red darken-1" 
-            text="Kirjaudu" 
-            @click="authStore.logIn()"
-          />
+        <v-container>
+          <v-btn color="red darken-1" text="Kirjaudu" @click="authStore.logIn()" />
           <v-btn
             color="red darken-1"
             text="Sulje"
-            @click="dialog = !dialog, authStore.alert = false"
+            @click="((dialog = !dialog), (authStore.alert = false))"
           />
         </v-container>
       </template>
@@ -69,10 +65,9 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/stores/auth.store';
+  import { useAuthStore } from '@/stores/auth.store';
 
-const dialog = ref(false);
+  const dialog = ref(false);
 
-const authStore = useAuthStore();
-
+  const authStore = useAuthStore();
 </script>

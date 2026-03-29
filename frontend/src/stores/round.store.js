@@ -5,12 +5,12 @@ const throwUrl = `${import.meta.env.VITE_API_URL}/throws/update/`;
 
 async function patchRequest(data, reqUrl) {
   const requestOpt = {
-    'method': 'PATCH',
-    'headers': {
+    method: 'PATCH',
+    headers: {
       'X-CSRFToken': getCookie('csrftoken'),
       'content-type': 'application/json',
     },
-    'body': JSON.stringify(data),
+    body: JSON.stringify(data),
     credentials: 'include',
   };
   try {
@@ -20,11 +20,11 @@ async function patchRequest(data, reqUrl) {
       requestOpt.headers['X-CSRFToken'] = getCookie('csrftoken');
       const secondResponse = await fetch(reqUrl, requestOpt);
       if (!secondResponse.ok) {
-        console.log("Patch request was denied: " + secondResponse);
+        console.log('Patch request was denied: ' + secondResponse);
       }
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 }
 
@@ -35,23 +35,23 @@ export const useRoundStore = defineStore('round', () => {
 
     const splittedUrl = location.href.split('/');
     const idx = splittedUrl[splittedUrl.length - 1];
-    const reqUrl = roundScoreUrl + idx
+    const reqUrl = roundScoreUrl + idx;
     patchRequest({ [`${teamSide}_${round[index]}_round_score`]: roundScore }, reqUrl);
   }
 
   async function updateThrowScore(throwString, throwObject) {
-    const reqUrl = throwUrl + throwObject.id + "/"
-    patchRequest({ [throwString]: throwObject[throwString] }, reqUrl)
+    const reqUrl = throwUrl + throwObject.id + '/';
+    patchRequest({ [throwString]: throwObject[throwString] }, reqUrl);
   }
 
   async function updateThrower(throwObjectId, playerId) {
-    const reqUrl = throwUrl + throwObjectId + "/"
-    patchRequest({ "player": playerId }, reqUrl)
+    const reqUrl = throwUrl + throwObjectId + '/';
+    patchRequest({ player: playerId }, reqUrl);
   }
 
   return {
     patchRoundScore,
     updateThrowScore,
-    updateThrower
-  }
+    updateThrower,
+  };
 });

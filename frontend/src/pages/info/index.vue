@@ -1,14 +1,12 @@
 <template>
-    <Navbar />
+  <Navbar />
 </template>
 
 <route lang="yaml">
-    meta:
-        layout: "false"
+meta:
+  layout: 'false'
 </route>
 
-<script setup>
-</script>
+<script setup></script>
 
-<style>
-</style>
+<style></style>

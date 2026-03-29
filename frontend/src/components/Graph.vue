@@ -1,10 +1,11 @@
 <template>
   <v-card>
-    <Bar v-if="props.type === 'bar'"
+    <Bar
+      v-if="props.type === 'bar'"
       :id="props.id"
-      :data="{ 
+      :data="{
         labels: props.labels,
-        datasets: props.datasets
+        datasets: props.datasets,
       }"
       :options="{
         responsive: true,
@@ -13,15 +14,15 @@
           y: {
             beginAtZero: true,
             title: {
-              display: (props.yLabel !== undefined),
+              display: props.yLabel !== undefined,
               text: props.yLabel,
-            }
-          }
+            },
+          },
         },
-        plugins:{
+        plugins: {
           title: {
             text: props.title,
-            display: true
+            display: true,
           },
           tooltip: {
             callbacks: {
@@ -38,13 +39,14 @@
                 return `${dataset.label}: ${value}`;
               },
             },
-          }
-        }
+          },
+        },
       }"
     />
-    <Line v-else 
+    <Line
+      v-else
       :id="props.id_name"
-      :data="{ 
+      :data="{
         labels: props.labels,
         datasets: props.datasets,
       }"
@@ -52,47 +54,61 @@
         responsive: true,
         scales: {
           y: {
-            beginAtZero: true
-          }
+            beginAtZero: true,
+          },
         },
-        plugins:{
+        plugins: {
           title: {
             text: props.title,
-            display: true
-          }
-        }
+            display: true,
+          },
+        },
       }"
     />
   </v-card>
 </template>
 
 <script setup>
-import { Bar, Line } from 'vue-chartjs';
-import {
-  Chart as ChartJS, Title, Tooltip, Legend, BarElement,
-  CategoryScale, LinearScale, PointElement, LineElement,
-} from 'chart.js';
+  import { Bar, Line } from 'vue-chartjs';
+  import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+  } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement)
+  ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+  );
 
-const props = defineProps({
-  id: String,
-  width_px: String,
-  height_px: String,
-  title: String,
-  labels: Array,
-  horizontal: {
-    type: Boolean,
-    default: false,
-  },
-  type: String,
-  datasets: Array,
-  yLabel: String,
-})
+  const props = defineProps({
+    id: String,
+    width_px: String,
+    height_px: String,
+    title: String,
+    labels: Array,
+    horizontal: {
+      type: Boolean,
+      default: false,
+    },
+    type: String,
+    datasets: Array,
+    yLabel: String,
+  });
 
-const horizontal = computed(() => {
-  return props.horizontal ? 'y' : 'x';
-})
-
-
+  const horizontal = computed(() => {
+    return props.horizontal ? 'y' : 'x';
+  });
 </script>

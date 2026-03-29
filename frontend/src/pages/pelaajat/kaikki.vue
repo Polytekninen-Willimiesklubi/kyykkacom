@@ -4,15 +4,9 @@
     <v-card title="Kaikki Pelaajat">
       <v-row align="center">
         <v-col cols="2" class="mb-2 ml-2" justify="left">
-          <v-text-field
-            color="red"
-            v-model="search"
-            label="Etsi"
-            single-line
-            hide-details
-          />
+          <v-text-field v-model="search" color="red" label="Etsi" single-line hide-details />
         </v-col>
-        <v-spacer/>
+        <v-spacer />
         <v-col cols="2">
           <v-btn-toggle
             v-model="playerStore.playersPositionsToggle"
@@ -21,43 +15,33 @@
             multiple
           >
             <template v-for="i in 4">
-              <v-tooltip
-                location="top"
-                :text="'Näytä vain heittopaikan '+ i +' statsit'"
-              >
+              <v-tooltip location="top" :text="'Näytä vain heittopaikan ' + i + ' statsit'">
                 <template #activator="{ props }">
-                  <v-btn v-bind="props" size="x-small" :text="i+'.'" :value="i"/>
+                  <v-btn v-bind="props" size="x-small" :text="i + '.'" :value="i" />
                 </template>
               </v-tooltip>
             </template>
           </v-btn-toggle>
         </v-col>
-        <v-spacer/>
+        <v-spacer />
         <v-col cols="2">
-          <v-btn-toggle
-            v-model="playerStore.playoffFiltter"
-            variant="outlined"
-            divided
-            mandatory
-          >
-            <template v-for="(list, i) in [
+          <v-btn-toggle v-model="playerStore.playoffFiltter" variant="outlined" divided mandatory>
+            <template
+              v-for="(list, i) in [
                 ['Kaikki', 'kaikkien pelien'],
                 ['Runko', 'runkosarjapelien'],
-                ['Pudotus', 'pudotuspelien']
+                ['Pudotus', 'pudotuspelien'],
               ]"
             >
-              <v-tooltip
-                  location="top"
-                  :text="'Näytä '+ list[1] +' statsit'"
-                >
-                  <template #activator="{ props }">
-                    <v-btn v-bind="props" size="x-small" :text="list[0]" :value="i"/>
-                  </template>
-                </v-tooltip>
+              <v-tooltip location="top" :text="'Näytä ' + list[1] + ' statsit'">
+                <template #activator="{ props }">
+                  <v-btn v-bind="props" size="x-small" :text="list[0]" :value="i" />
+                </template>
+              </v-tooltip>
             </template>
           </v-btn-toggle>
         </v-col>
-        <v-spacer/>
+        <v-spacer />
         <v-col cols="2">
           <v-btn-toggle
             v-model="playerStore.aggregationSetting"
@@ -66,25 +50,19 @@
             mandatory
             @update:model-value="updateHeaders"
           >
-            <v-tooltip
-              location="top"
-              :text="'Näytä kaikki pelaajan kaudet tiivistettynä.'"
-            >
+            <v-tooltip location="top" :text="'Näytä kaikki pelaajan kaudet tiivistettynä.'">
               <template #activator="{ props }">
-                <v-btn v-bind="props" size="x-small" text="Kaikki kaudet" :value="2"/>
+                <v-btn v-bind="props" size="x-small" text="Kaikki kaudet" :value="2" />
               </template>
             </v-tooltip>
-            <v-tooltip
-              location="top"
-              :text="'Näytä pelaajat kausittain'"
-            >
+            <v-tooltip location="top" :text="'Näytä pelaajat kausittain'">
               <template #activator="{ props }">
-                <v-btn v-bind="props" size="x-small" text="Per Kausi" :value="1"/>
+                <v-btn v-bind="props" size="x-small" text="Per Kausi" :value="1" />
               </template>
             </v-tooltip>
           </v-btn-toggle>
         </v-col>
-        <v-spacer/>
+        <v-spacer />
         <v-col cols="1">
           <v-menu
             v-model="showMenu"
@@ -93,10 +71,7 @@
             max-width="300px"
           >
             <template #activator="{ props: menu }">
-              <v-tooltip
-                location="top"
-                text="Suodatus asetuksia"
-              >
+              <v-tooltip location="top" text="Suodatus asetuksia">
                 <template #activator="{ props: tooltip }">
                   <v-btn
                     v-bind="mergeProps(menu, tooltip)"
@@ -115,19 +90,25 @@
                   v-model="clearenceOption"
                   color="red"
                   :label="'Vaihda tyhjennys (' + (clearenceOption ? 'TH' : 'Tyh.') + ')'"
-                  @update:model-value="updateHeaders();checkActive()"
+                  @update:model-value="
+                    updateHeaders();
+                    checkActive();
+                  "
                 />
               </v-list-item>
               <v-list-item>
-                <v-radio-group 
-                  color="red" 
+                <v-radio-group
                   v-model="percentOption"
-                  @update:model-value="updateHeaders();checkActive()"
+                  color="red"
                   inline
+                  @update:model-value="
+                    updateHeaders();
+                    checkActive();
+                  "
                 >
-                  <v-radio label="H%" value="H%"/>
-                  <v-radio label="VM%" value="VM%"/>
-                  <v-radio label="H+VM%" value="H+VM%"/>
+                  <v-radio label="H%" value="H%" />
+                  <v-radio label="VM%" value="VM%" />
+                  <v-radio label="H+VM%" value="H+VM%" />
                 </v-radio-group>
               </v-list-item>
               <v-list-item>
@@ -137,11 +118,14 @@
                       v-model="playerStore.emptyFiltter"
                       color="red"
                       :label="'Näytä >' + playerStore.emptyFilterThreshold + ' erää pelanneet'"
-                      @update:model-value="updateHeaders();checkActive()"
+                      @update:model-value="
+                        updateHeaders();
+                        checkActive();
+                      "
                     />
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field 
+                    <v-text-field
                       v-model="playerStore.emptyFilterThreshold"
                       type="number"
                       min="0"
@@ -159,8 +143,7 @@
       <v-data-table
         :mobile-breakpoint="0"
         :headers="tableHeaders"
-        @click:row="handleRedirect"
-        :sortBy="sortBy"
+        :sort-by="sortBy"
         :items="playerStore.playersPostionFilttered"
         :loading="playerStore.loading"
         :search="search"
@@ -168,33 +151,38 @@
         loading-text="Ladataan kaikkia pelaajia..."
         items-per-page="50"
         density="compact"
+        @click:row="handleRedirect"
       >
-        <template v-for="header in tableHeaders"
-            #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
+        <template
+          v-for="header in tableHeaders"
+          #[`header.${header.key}`]="{ column, toggleSort, getSortIcon }"
         >
-          <v-tooltip :text="column.tooltip" v-if="column.tooltip" location="top">
+          <v-tooltip v-if="column.tooltip" :text="column.tooltip" location="top">
             <template #activator="{ props }">
               <div class="v-data-table-header__content" v-bind="props">
                 <!-- HACK To properly center column header with the sort icon
                           just add another span to other side -->
-                <span v-if="column.align !== 'left'" style="width:14px"></span>
+                <span v-if="column.align !== 'left'" style="width: 14px" />
                 <span @click="() => toggleSort(column)">{{ column.title }}</span>
-                <v-icon v-if="column.sortable" 
-                  class="v-data-table-header__sort-icon" 
+                <v-icon
+                  v-if="column.sortable"
+                  class="v-data-table-header__sort-icon"
                   :icon="getSortIcon(column)"
                   size="x-small"
                 />
               </div>
             </template>
           </v-tooltip>
-          <template v-else> <!-- No Tooltip -->
+          <template v-else>
+            <!-- No Tooltip -->
             <div class="v-data-table-header__content">
               <!-- HACK To properly center column header with the sort icon
                         just add another span to other side -->
-              <span v-if="column.align !== 'left'" style="width:14px"></span>
+              <span v-if="column.align !== 'left'" style="width: 14px" />
               <span @click="() => toggleSort(column)">{{ column.title }}</span>
-              <v-icon v-if="column.sortable" 
-                class="v-data-table-header__sort-icon" 
+              <v-icon
+                v-if="column.sortable"
+                class="v-data-table-header__sort-icon"
                 :icon="getSortIcon(column)"
                 size="x-small"
               />
@@ -207,88 +195,101 @@
 </template>
 
 <script setup>
-import { usePlayerStore } from '@/stores/players.store';
-import { useTeamsStore } from '@/stores/teams.store'
-import { headerAllPlayersTemplate } from '@/stores/headers';
-import { mergeProps } from 'vue';
+  import { usePlayerStore } from '@/stores/players.store';
+  import { useTeamsStore } from '@/stores/teams.store';
+  import { headerAllPlayersTemplate } from '@/stores/headers';
+  import { mergeProps } from 'vue';
 
-const teamStore = useTeamsStore();
-const playerStore = usePlayerStore();
+  const teamStore = useTeamsStore();
+  const playerStore = usePlayerStore();
 
-playerStore.getPlayers();
-playerStore.aggregationSetting = 1;
-teamStore.getTeams();
+  playerStore.getPlayers();
+  playerStore.aggregationSetting = 1;
+  teamStore.getTeams();
 
-// Setting sortBy stops the resetting after filtering is applied
-const sortBy = ref([{key: 'rounds_total', order:'desc'}]);
-const tableHeaders = ref(headerAllPlayersTemplate);
-const search = ref('');
+  // Setting sortBy stops the resetting after filtering is applied
+  const sortBy = ref([{ key: 'rounds_total', order: 'desc' }]);
+  const tableHeaders = ref(headerAllPlayersTemplate);
+  const search = ref('');
 
-// Filter options
-const showMenu = ref(false);
-const clearenceOption = ref(false);
-const settingsActive = ref(false);
-const percentOption = ref("H%");
+  // Filter options
+  const showMenu = ref(false);
+  const clearenceOption = ref(false);
+  const settingsActive = ref(false);
+  const percentOption = ref('H%');
 
-function handleRedirect (value, row) {
-  location.href = '/pelaajat/' + row.item.player_id;
-}
+  function handleRedirect(value, row) {
+    location.href = '/pelaajat/' + row.item.player_id;
+  }
 
-function updateHeaders() {
-  // Filter headers from template: first by season settings
-  const seasonFilteredHeaders = headerAllPlayersTemplate.filter(header => {
-    if (playerStore.aggregationSetting === 1) {
-      return header.key !== 'season_count';
-    } else if (playerStore.aggregationSetting === 2) {
-      return header.key !== 'season' && header.key !== 'team_name';
-    }
-    return true;
-  });
-  // Then by percent option
-  const precentFilteredHeaders = seasonFilteredHeaders.filter(header => {
-    if (percentOption.value === "H%") {
-      return header.key !== 'zero_percentage' && header.key !== 'combined_percentage' && header.key !== 'combined_total';
-    } else if (percentOption.value === "VM%") {
-      return header.key !== 'pike_percentage' && header.key !== 'combined_percentage' && header.key !== 'combined_total';
-    } else if (percentOption.value === "H+VM%") {
-      return header.key !== 'pike_percentage' && header.key !== 'zero_percentage' && header.key !== 'pikes_total' && header.key !== 'zeros_total';
-    }
-    return true;
-  });
-  // Finally by clearence option
-  const headerAllPlayersPerSeason = precentFilteredHeaders.filter(header => {
-    if (clearenceOption.value) {
-      return header.key !== 'clearence_count';
-    } else {
-      return header.key !== 'clearence_throws_total';
-    }
-  });
-  
-  tableHeaders.value = headerAllPlayersPerSeason;
-}
+  function updateHeaders() {
+    // Filter headers from template: first by season settings
+    const seasonFilteredHeaders = headerAllPlayersTemplate.filter((header) => {
+      if (playerStore.aggregationSetting === 1) {
+        return header.key !== 'season_count';
+      } else if (playerStore.aggregationSetting === 2) {
+        return header.key !== 'season' && header.key !== 'team_name';
+      }
+      return true;
+    });
+    // Then by percent option
+    const precentFilteredHeaders = seasonFilteredHeaders.filter((header) => {
+      if (percentOption.value === 'H%') {
+        return (
+          header.key !== 'zero_percentage' &&
+          header.key !== 'combined_percentage' &&
+          header.key !== 'combined_total'
+        );
+      } else if (percentOption.value === 'VM%') {
+        return (
+          header.key !== 'pike_percentage' &&
+          header.key !== 'combined_percentage' &&
+          header.key !== 'combined_total'
+        );
+      } else if (percentOption.value === 'H+VM%') {
+        return (
+          header.key !== 'pike_percentage' &&
+          header.key !== 'zero_percentage' &&
+          header.key !== 'pikes_total' &&
+          header.key !== 'zeros_total'
+        );
+      }
+      return true;
+    });
+    // Finally by clearence option
+    const headerAllPlayersPerSeason = precentFilteredHeaders.filter((header) => {
+      if (clearenceOption.value) {
+        return header.key !== 'clearence_count';
+      } else {
+        return header.key !== 'clearence_throws_total';
+      }
+    });
 
-function checkActive() {
-  settingsActive.value = (clearenceOption.value || percentOption.value !== "H%" || playerStore.emptyFiltter);
-}
+    tableHeaders.value = headerAllPlayersPerSeason;
+  }
 
+  function checkActive() {
+    settingsActive.value =
+      clearenceOption.value || percentOption.value !== 'H%' || playerStore.emptyFiltter;
+  }
 
-updateHeaders();
+  updateHeaders();
 </script>
 <style scoped>
-tbody tr :hover {
-  cursor: unset;
-}
+  tbody tr :hover {
+    cursor: unset;
+  }
 
-.square-btn {
-  min-width: 48px;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border-color: #e5e7eb;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
+  .square-btn {
+    min-width: 48px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-color: #e5e7eb;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
 </style>

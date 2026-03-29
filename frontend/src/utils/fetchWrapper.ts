@@ -3,62 +3,61 @@ import { getCookie, fetchNewToken } from './cookies';
 type PayLoad = Record<string, any> | null;
 
 export async function fetchWrapper(
-    url: string,
-    postData?: Record<string, any>,
-    method?: string,
-    getOnlyPayload?: false,
-): Promise<Response | undefined>
+  url: string,
+  postData?: Record<string, any>,
+  method?: string,
+  getOnlyPayload?: false,
+): Promise<Response | undefined>;
 
 export async function fetchWrapper(
-    url: string,
-    postData: Record<string, any>,
-    method: string,
-    getOnlyPayload: true,
-): Promise<PayLoad | undefined>
-
+  url: string,
+  postData: Record<string, any>,
+  method: string,
+  getOnlyPayload: true,
+): Promise<PayLoad | undefined>;
 
 export async function fetchWrapper(
-    url: string,
-    postData: Record<string, any> = {},
-    method: string = 'GET',
-    getOnlyPayload: boolean = false,
+  url: string,
+  postData: Record<string, any> = {},
+  method: string = 'GET',
+  getOnlyPayload: boolean = false,
 ): Promise<PayLoad | Response | undefined> {
-    const headers: Record<string, string> = {
-        'X-CSRFToken': getCookie('csrftoken'),
-        'content-type': 'application/json',
-    };
-    const requestOpt: RequestInit = {
-        method: method,
-        headers: headers,
-        credentials: 'include',
-    }
-    if (method === 'GET') {
-        requestOpt.body = JSON.stringify(postData);
-    }
-    try {
-        const response = await fetch(url, requestOpt);
+  const headers: Record<string, string> = {
+    'X-CSRFToken': getCookie('csrftoken'),
+    'content-type': 'application/json',
+  };
+  const requestOpt: RequestInit = {
+    method: method,
+    headers: headers,
+    credentials: 'include',
+  };
+  if (method === 'GET') {
+    requestOpt.body = JSON.stringify(postData);
+  }
+  try {
+    const response = await fetch(url, requestOpt);
 
-        if (!response.ok && [401, 403].includes(response.status)) {
-            await fetchNewToken();
-            headers['X-CSRFToken'] = getCookie('csrftoken');
-            requestOpt.headers = headers;
-            const secondResponse = await fetch(url, requestOpt);
-            if (!secondResponse.ok) {
-                console.log("Request of type " + method + " was denied: " + secondResponse);
-            }
-            return getOnlyPayload ? await getPayload(secondResponse) : secondResponse;
-        }
-        return getOnlyPayload ? await getPayload(response) : response;
-    } catch (error) {
-        console.log(error)
-        return undefined;
+    if (!response.ok && [401, 403].includes(response.status)) {
+      await fetchNewToken();
+      headers['X-CSRFToken'] = getCookie('csrftoken');
+      requestOpt.headers = headers;
+      const secondResponse = await fetch(url, requestOpt);
+      if (!secondResponse.ok) {
+        console.log('Request of type ' + method + ' was denied: ' + secondResponse);
+      }
+      return getOnlyPayload ? await getPayload(secondResponse) : secondResponse;
     }
+    return getOnlyPayload ? await getPayload(response) : response;
+  } catch (error) {
+    console.log(error);
+    return undefined;
+  }
 }
 
 export async function getPayload(res: Response): Promise<Record<string, any> | null> {
-    const isJson = res.headers?.get('content-type')?.includes('application/json');
-    const data = (isJson ? await res.json() : null) as Record<string, any> | null;
-    return data || null;
+  const isJson = res.headers?.get('content-type')?.includes('application/json');
+  const data = (isJson ? await res.json() : null) as Record<string, any> | null;
+  return data || null;
 }
 
 /** Utility function to wrap an async function with a loading state. */

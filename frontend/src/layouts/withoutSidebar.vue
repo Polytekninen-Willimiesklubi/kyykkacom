@@ -2,7 +2,7 @@
   these pages and shoud be rendered in the "page"- file -->
 <template>
   <v-app class="pt-10">
-    <NavBar/>
+    <NavBar />
     <v-main class="content">
       <v-layout class="pa-10 centered">
         <router-view />
@@ -14,9 +14,7 @@
 </template>
 
 <style scoped>
-
-.centered {
-  justify-content: center;
-}
-
+  .centered {
+    justify-content: center;
+  }
 </style>

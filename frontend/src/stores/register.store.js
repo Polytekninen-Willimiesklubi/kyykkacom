@@ -15,12 +15,12 @@ export const useRegisterStore = defineStore('register', () => {
     fetchNewToken();
     try {
       const requestOpt = {
-        'method': 'POST',
-        'headers': {
+        method: 'POST',
+        headers: {
           'X-CSRFToken': getCookie('csrftoken'),
           'Content-Type': 'application/json',
         },
-        'body': JSON.stringify(credentials.value),
+        body: JSON.stringify(credentials.value),
         credentials: 'include',
       };
 
@@ -35,16 +35,15 @@ export const useRegisterStore = defineStore('register', () => {
       const isJson = response.headers?.get('Content-Type')?.includes('application/json');
       const data = isJson ? await response.json() : null;
 
-
       if (data) {
-        console.log(data)
+        console.log(data);
         const authStore = useAuthStore();
         authStore.changeLogin(data.user.id, data.role, null, data.user.player_name);
       }
       loading.value = false;
       return true;
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       loading.value = false;
       return false;
@@ -52,7 +51,8 @@ export const useRegisterStore = defineStore('register', () => {
   }
 
   function validEmail(email) {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
   }
 
@@ -64,5 +64,5 @@ export const useRegisterStore = defineStore('register', () => {
     loading,
     register,
     validEmail,
-  }
-})
+  };
+});

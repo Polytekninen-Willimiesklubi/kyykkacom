@@ -1,179 +1,192 @@
-import { useNavBarStore } from "@/stores/navbar.store";
-import { useTeamsStore } from "@/stores/teams.store";
+import { useNavBarStore } from '@/stores/navbar.store';
+import { useTeamsStore } from '@/stores/teams.store';
 // @ts-ignore TODO meta.env is vite/client special and should be in config file setup somehow
 const baseUrl = `${import.meta.env.VITE_API_URL}/matches/`;
 
 export default defineStore('matches', () => {
-    const matches = ref([]);
-    const selection = ref('Kaikki ottelut');
-    const loaded = ref(false);
-    const loading = ref(false);
-    const selectedBrackets = ref([]);
-    const timeFilterMode = ref(0);
-    const selectedTeamsFilter = shallowRef([]);
+  const matches = ref([]);
+  const selection = ref('Kaikki ottelut');
+  const loaded = ref(false);
+  const loading = ref(false);
+  const selectedBrackets = ref([]);
+  const timeFilterMode = ref(0);
+  const selectedTeamsFilter = shallowRef([]);
 
-    const superWeekendMatches = computed(() => {
-        return matches.value.filter(match => match.match_type >= 31);
-    });
+  const superWeekendMatches = computed(() => {
+    return matches.value.filter((match) => match.match_type >= 31);
+  });
 
-    const regularSeasonMatches = computed(() => {
-        return matches.value.filter(match => !match.post_season && match.match_type < 31);
-    });
+  const regularSeasonMatches = computed(() => {
+    return matches.value.filter((match) => !match.post_season && match.match_type < 31);
+  });
 
-    const excludingSuperMatches = computed(() => {
-        return matches.value.filter(match => match.match_type < 31);
-    });
+  const excludingSuperMatches = computed(() => {
+    return matches.value.filter((match) => match.match_type < 31);
+  });
 
-    const postSeasonMatches = computed(() => {
-        return matches.value.filter(match => match.post_season);
-    });
+  const postSeasonMatches = computed(() => {
+    return matches.value.filter((match) => match.post_season);
+  });
 
-    const selectedMatches = computed(() => {
-        if (selection.value === 'Runkosarja') {
-            return teamFilter(selectionFilttering(regularSeasonMatches.value));
-        } else if (selection.value === 'Pudotuspelit') {
-            return teamFilter(timeFilter(postSeasonMatches.value));
-        } else if (selection.value === 'Jatkosarja') {
-            return teamFilter(timeFilter(regularSeasonMatches.value.filter(match => match.match_type === 11)));
-        } else if (selection.value === 'SuperWeekend') {
-            return teamFilter(timeFilter(superWeekendMatches.value));
-        } else if (selection.value === 'Videot') {
-            return teamFilter(timeFilter(matches.value.filter(match => match.video_link != null)));
-        } else if (selection.value === 'Striimit') {
-            return teamFilter(timeFilter(matches.value.filter(match => match.stream_link != null)))
-        } else {
-            return teamFilter(selectionFilttering(matches.value));
-        }
-    });
+  const selectedMatches = computed(() => {
+    if (selection.value === 'Runkosarja') {
+      return teamFilter(selectionFilttering(regularSeasonMatches.value));
+    } else if (selection.value === 'Pudotuspelit') {
+      return teamFilter(timeFilter(postSeasonMatches.value));
+    } else if (selection.value === 'Jatkosarja') {
+      return teamFilter(
+        timeFilter(regularSeasonMatches.value.filter((match) => match.match_type === 11)),
+      );
+    } else if (selection.value === 'SuperWeekend') {
+      return teamFilter(timeFilter(superWeekendMatches.value));
+    } else if (selection.value === 'Videot') {
+      return teamFilter(timeFilter(matches.value.filter((match) => match.video_link != null)));
+    } else if (selection.value === 'Striimit') {
+      return teamFilter(timeFilter(matches.value.filter((match) => match.stream_link != null)));
+    } else {
+      return teamFilter(selectionFilttering(matches.value));
+    }
+  });
 
-    async function getMatches() {
-        loading.value = true;
-        const navStore = useNavBarStore();
+  async function getMatches() {
+    loading.value = true;
+    const navStore = useNavBarStore();
 
-        // TODO Move this away
-        const pelit = {
-            1: "Runkosarja",
-            2: "Finaali",
-            3: "Pronssi",
-            4: "Välierä",
-            5: "Puolivälierä",
-            6: "Neljännesvälierä",
-            7: "Kahdeksannesvälierä",
-            8: "2. Kierros",
-            9: "1. Kierros",
-            10: "Runkosarjafinaali",
-            11: "Jatkosarja",
-            20: "Putoamiskarsinta",
-            31: "SuperWeekend: Alkulohko",
-            32: "SuperWeekend: Finaali",
-            33: "SuperWeekend: Pronssi",
-            34: "SuperWeekend: Välierä",
-            35: "SuperWeekend: Puolivälierä",
-            36: "SuperWeekend: Neljännesvälierä",
-            37: "SuperWeekend: Kahdeksannesvälierä",
-        };
-        const question = '?season=' + navStore.seasonId;
-        const response = await fetch(baseUrl + question, { method: "GET" });
-        const payload = await response.json();
-
-        payload.forEach(ele => {
-            ele.type_name = pelit[ele.match_type];
-            ele.dash = '-';
-        });
-        matches.value = payload;
-        loaded.value = true;
-        loading.value = false;
+    // TODO Move this away
+    const pelit = {
+      1: 'Runkosarja',
+      2: 'Finaali',
+      3: 'Pronssi',
+      4: 'Välierä',
+      5: 'Puolivälierä',
+      6: 'Neljännesvälierä',
+      7: 'Kahdeksannesvälierä',
+      8: '2. Kierros',
+      9: '1. Kierros',
+      10: 'Runkosarjafinaali',
+      11: 'Jatkosarja',
+      20: 'Putoamiskarsinta',
+      31: 'SuperWeekend: Alkulohko',
+      32: 'SuperWeekend: Finaali',
+      33: 'SuperWeekend: Pronssi',
+      34: 'SuperWeekend: Välierä',
+      35: 'SuperWeekend: Puolivälierä',
+      36: 'SuperWeekend: Neljännesvälierä',
+      37: 'SuperWeekend: Kahdeksannesvälierä',
     };
+    const question = '?season=' + navStore.seasonId;
+    const response = await fetch(baseUrl + question, { method: 'GET' });
+    const payload = await response.json();
 
-    function setSelectedBracket(bracket) {
-        if (selectedBrackets.value.includes(bracket)) {
-            selectedBrackets.value = selectedBrackets.value.filter(b => b !== bracket);
-        } else {
-            selectedBrackets.value.push(bracket);
-        }
-    };
+    payload.forEach((ele) => {
+      ele.type_name = pelit[ele.match_type];
+      ele.dash = '-';
+    });
+    matches.value = payload;
+    loaded.value = true;
+    loading.value = false;
+  }
 
-    // Internal function. No need to export
-    function teamFilter(matches) {
-        if (!selectedTeamsFilter.value.length) {
-            return matches;
-        }
+  function setSelectedBracket(bracket) {
+    if (selectedBrackets.value.includes(bracket)) {
+      selectedBrackets.value = selectedBrackets.value.filter((b) => b !== bracket);
+    } else {
+      selectedBrackets.value.push(bracket);
+    }
+  }
 
-        return matches.filter((match) =>
-            selectedTeamsFilter.value.includes(match.home_team.id)
-            || selectedTeamsFilter.value.includes(match.away_team.id)
-        );
+  // Internal function. No need to export
+  function teamFilter(matches) {
+    if (!selectedTeamsFilter.value.length) {
+      return matches;
     }
 
-    // Internal function. No need to export
-    function timeFilter(matches) {
-        const today = new Date();
-        let startTime;
-        let endTime;
-        if (!timeFilterMode.value) {
-            return matches;
-        } else if (timeFilterMode.value === 1) { // yesterday
-            endTime = today.getDate();
-            startTime = endTime - 1;
-        } else if (timeFilterMode.value === 2) { // today
-            startTime = today.getDate();
-            endTime = startTime + 1;
-        } else if (timeFilterMode.value === 3) { // tomorrow
-            startTime = today.getDate() + 1;
-            endTime = startTime + 1;
-        } else if (timeFilterMode.value === 4 || timeFilterMode.value === 5 || timeFilterMode.value === 6) { // last week, this week, next week
-            // Find out what day is monday relative to this day
-            const dayOfWeek = today.getDay();
-            const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; // Move to monday
-            startTime = today.getDate() + diffToMonday;
-            if (timeFilterMode.value === 4) { // last week
-                startTime -= 7;
-            } else if (timeFilterMode.value === 6) { // next week
-                startTime += 7;
-            }
-            endTime = startTime + 7;
-        } else {
-            throw new Error("Unrecognized time filter mode");
-        }
-        const timeStart = new Date(today.getFullYear(), today.getMonth(), startTime);
-        const timeEnd = new Date(today.getFullYear(), today.getMonth(), endTime);
-        return matches.filter(match => {
-            const timestampDate = new Date(match.match_time);
-            return timestampDate >= timeStart && timestampDate < timeEnd;
-        });
+    return matches.filter(
+      (match) =>
+        selectedTeamsFilter.value.includes(match.home_team.id) ||
+        selectedTeamsFilter.value.includes(match.away_team.id),
+    );
+  }
+
+  // Internal function. No need to export
+  function timeFilter(matches) {
+    const today = new Date();
+    let startTime;
+    let endTime;
+    if (!timeFilterMode.value) {
+      return matches;
+    } else if (timeFilterMode.value === 1) {
+      // yesterday
+      endTime = today.getDate();
+      startTime = endTime - 1;
+    } else if (timeFilterMode.value === 2) {
+      // today
+      startTime = today.getDate();
+      endTime = startTime + 1;
+    } else if (timeFilterMode.value === 3) {
+      // tomorrow
+      startTime = today.getDate() + 1;
+      endTime = startTime + 1;
+    } else if (
+      timeFilterMode.value === 4 ||
+      timeFilterMode.value === 5 ||
+      timeFilterMode.value === 6
+    ) {
+      // last week, this week, next week
+      // Find out what day is monday relative to this day
+      const dayOfWeek = today.getDay();
+      const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; // Move to monday
+      startTime = today.getDate() + diffToMonday;
+      if (timeFilterMode.value === 4) {
+        // last week
+        startTime -= 7;
+      } else if (timeFilterMode.value === 6) {
+        // next week
+        startTime += 7;
+      }
+      endTime = startTime + 7;
+    } else {
+      throw new Error('Unrecognized time filter mode');
     }
+    const timeStart = new Date(today.getFullYear(), today.getMonth(), startTime);
+    const timeEnd = new Date(today.getFullYear(), today.getMonth(), endTime);
+    return matches.filter((match) => {
+      const timestampDate = new Date(match.match_time);
+      return timestampDate >= timeStart && timestampDate < timeEnd;
+    });
+  }
 
-    // Internal function. No need to export
-    function selectionFilttering(matches) {
-        if (!selectedBrackets.value.length && !timeFilterMode.value) {
-            return matches;
-        }
-        const teamStore = useTeamsStore();
-        const accetableTeamIds = teamStore.bracketedTeams
-            .filter((_, i) => selectedBrackets.value.includes(i) || !selectedBrackets.value.length)
-            .flatMap(innerList => innerList.map(obj => obj.id));
-        const filtteredTeamsByBracket = matches
-            .filter((match) =>
-                accetableTeamIds.includes(match.home_team.id) || accetableTeamIds.includes(match.away_team.id)
-            );
-        return timeFilter(filtteredTeamsByBracket);
+  // Internal function. No need to export
+  function selectionFilttering(matches) {
+    if (!selectedBrackets.value.length && !timeFilterMode.value) {
+      return matches;
     }
+    const teamStore = useTeamsStore();
+    const accetableTeamIds = teamStore.bracketedTeams
+      .filter((_, i) => selectedBrackets.value.includes(i) || !selectedBrackets.value.length)
+      .flatMap((innerList) => innerList.map((obj) => obj.id));
+    const filtteredTeamsByBracket = matches.filter(
+      (match) =>
+        accetableTeamIds.includes(match.home_team.id) ||
+        accetableTeamIds.includes(match.away_team.id),
+    );
+    return timeFilter(filtteredTeamsByBracket);
+  }
 
-    return {
-        matches,
-        selection,
-        loading,
-        loaded,
-        superWeekendMatches,
-        postSeasonMatches,
-        excludingSuperMatches,
-        regularSeasonMatches,
-        selectedTeamsFilter,
-        selectedMatches,
-        selectedBrackets,
-        timeFilterMode,
-        getMatches,
-        setSelectedBracket,
-    };
-
+  return {
+    matches,
+    selection,
+    loading,
+    loaded,
+    superWeekendMatches,
+    postSeasonMatches,
+    excludingSuperMatches,
+    regularSeasonMatches,
+    selectedTeamsFilter,
+    selectedMatches,
+    selectedBrackets,
+    timeFilterMode,
+    getMatches,
+    setSelectedBracket,
+  };
 });

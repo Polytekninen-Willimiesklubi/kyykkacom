@@ -1,45 +1,45 @@
-import { useHofStore } from "./hof.store";
-import { useNavBarStore } from "./navbar.store";
+import { useHofStore } from './hof.store';
+import { useNavBarStore } from './navbar.store';
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/players/`;
 
 // TODO doc
 function divide_round(value, divider) {
-  return divider ? Math.round(value / divider * 100) / 100 : Number.NaN
+  return divider ? Math.round((value / divider) * 100) / 100 : Number.NaN;
 }
 // NOTE this must kept upto date with the API return values
 const fields = [
-  "score_total",
-  "pikes_total",
-  "zeros_total",
-  "gte_six_total",
-  "match_count",
-  "rounds_total",
-  "throws_total",
-  "clearence_count",
-  "clearence_throws_total",
-  "scaled_points",
-  "weighted_throw_total",
-]
+  'score_total',
+  'pikes_total',
+  'zeros_total',
+  'gte_six_total',
+  'match_count',
+  'rounds_total',
+  'throws_total',
+  'clearence_count',
+  'clearence_throws_total',
+  'scaled_points',
+  'weighted_throw_total',
+];
 
 const placement_registery = {
-  1: "🏆",
-  2: "🥈",
-  3: "🥉",
-  4: "4. sija",
-  5: "5. sija",
-  6: "6. sija",
-  7: "7. sija",
-  8: "Top8",
-  16: "Top16",
-}
+  1: '🏆',
+  2: '🥈',
+  3: '🥉',
+  4: '4. sija',
+  5: '5. sija',
+  6: '6. sija',
+  7: '7. sija',
+  8: 'Top8',
+  16: 'Top16',
+};
 export const usePlayerStore = defineStore('players', () => {
-  const _ids = ref({})
+  const _ids = ref({});
   const loading = ref(false);
   const loadingPlayer = ref(false);
   const loadedData = ref(false);
   const players = ref([]);
-  const player = ref({})
+  const player = ref({});
   const playerHasAccolades = ref(false);
   const playerMatchesPerPeriod = ref([]);
   const playerMatchesPerMatch = ref([]);
@@ -53,20 +53,20 @@ export const usePlayerStore = defineStore('players', () => {
   // and should lead better performance
   const stageFilter = computed(() => {
     if (players.value.length === 0) {
-      return []
+      return [];
     }
     if (playoffFilter.value === 0) {
       return players.value;
     } else if (playoffFilter.value === 1) {
-      return players.value.filter(obj => !obj.playoff)
+      return players.value.filter((obj) => !obj.playoff);
     } else {
-      return players.value.filter(obj => obj.playoff)
+      return players.value.filter((obj) => obj.playoff);
     }
-  })
+  });
 
   const playersPostionFilttered = computed(() => {
     if (stageFilter.value.length === 0) {
-      return []
+      return [];
     }
     let positionsFilter;
     if (!playersPositionsToggle.value.length) {
@@ -74,47 +74,49 @@ export const usePlayerStore = defineStore('players', () => {
     } else {
       positionsFilter = playersPositionsToggle.value;
     }
-    const positionFiltered = stageFilter.value.filter(
-      obj => positionsFilter.includes(obj["throw_turn"])
+    const positionFiltered = stageFilter.value.filter((obj) =>
+      positionsFilter.includes(obj['throw_turn']),
     );
-    let jotain = Object.groupBy(positionFiltered, ({ player }) => player)
+    let jotain = Object.groupBy(positionFiltered, ({ player }) => player);
 
     // Add back the players that haven't thrown yet
     if (!emptyFilter.value) {
-      const ids_included = [...Object.keys(jotain)]
-      const ids_not_included = Object.keys(_ids.value).filter(key => !ids_included.includes(key))
+      const ids_included = [...Object.keys(jotain)];
+      const ids_not_included = Object.keys(_ids.value).filter((key) => !ids_included.includes(key));
       for (const player_id of ids_not_included) {
-        jotain[player_id] = [{
-          score_total: 0,
-          pikes_total: 0,
-          zeros_total: 0,
-          gte_six_total: 0,
-          match_count: 0,
-          rounds_total: 0,
-          throws_total: 0,
-          scaled_points: 0,
-          weighted_throw_total: 0,
-          clearence_count: 0,
-          clearence_throws_total: 0,
-          player: _ids.value[player_id][0]["player"],
-          player_name: _ids.value[player_id][0]["player_name"],
-          team_name: _ids.value[player_id][0]["team_name"],
-          season: _ids.value[player_id][0]["season"],
-        }]
+        jotain[player_id] = [
+          {
+            score_total: 0,
+            pikes_total: 0,
+            zeros_total: 0,
+            gte_six_total: 0,
+            match_count: 0,
+            rounds_total: 0,
+            throws_total: 0,
+            scaled_points: 0,
+            weighted_throw_total: 0,
+            clearence_count: 0,
+            clearence_throws_total: 0,
+            player: _ids.value[player_id][0]['player'],
+            player_name: _ids.value[player_id][0]['player_name'],
+            team_name: _ids.value[player_id][0]['team_name'],
+            season: _ids.value[player_id][0]['season'],
+          },
+        ];
       }
     }
     if (aggregationSetting.value === 1) {
-      let listId = 0
+      let listId = 0;
       const filteredData = Object.values(jotain).reduce((acc, playerStats) => {
-        const yearStats = Object.groupBy(playerStats, ({ season }) => season)
+        const yearStats = Object.groupBy(playerStats, ({ season }) => season);
         for (const yearStat of Object.values(yearStats)) {
           const extractedData = {
             id: listId++,
-            player_id: yearStat[0]["player"],
-            player_name: yearStat[0]["player_name"],
-            team_name: yearStat[0]["team_name"],
-            season: yearStat[0]["season"],
-            accolades: yearStat[0]["accolades"] ?? [],
+            player_id: yearStat[0]['player'],
+            player_name: yearStat[0]['player_name'],
+            team_name: yearStat[0]['team_name'],
+            season: yearStat[0]['season'],
+            accolades: yearStat[0]['accolades'] ?? [],
             score_total: 0,
             pikes_total: 0,
             zeros_total: 0,
@@ -140,46 +142,52 @@ export const usePlayerStore = defineStore('players', () => {
             }
           }
           extractedData.pike_percentage = divide_round(
-            extractedData.pikes_total * 100, extractedData.throws_total
+            extractedData.pikes_total * 100,
+            extractedData.throws_total,
           );
           extractedData.zero_percentage = divide_round(
-            extractedData.zeros_total * 100, extractedData.throws_total
+            extractedData.zeros_total * 100,
+            extractedData.throws_total,
           );
           extractedData.combined_total = extractedData.pikes_total + extractedData.zeros_total;
           extractedData.combined_percentage = divide_round(
             extractedData.combined_total * 100,
-            extractedData.throws_total
+            extractedData.throws_total,
           );
           extractedData.avg_throw_turn = divide_round(
-            extractedData.weighted_throw_total, extractedData.throws_total
+            extractedData.weighted_throw_total,
+            extractedData.throws_total,
           );
           extractedData.score_per_throw = divide_round(
-            extractedData.score_total, extractedData.throws_total
+            extractedData.score_total,
+            extractedData.throws_total,
           );
           extractedData.scaled_points_per_throw = divide_round(
-            extractedData.scaled_points, extractedData.throws_total
+            extractedData.scaled_points,
+            extractedData.throws_total,
           );
           acc.push(extractedData);
         }
         return acc;
-      }, [])
+      }, []);
       if (emptyFilter.value) {
-        const roundReducedData = filteredData.filter(obj => obj.rounds_total > emptyFilterThreshold.value)
+        const roundReducedData = filteredData.filter(
+          (obj) => obj.rounds_total > emptyFilterThreshold.value,
+        );
         return roundReducedData;
       }
       return filteredData;
-
     } else if (aggregationSetting.value === 0 || aggregationSetting.value === 2) {
-      let listId = 0
+      let listId = 0;
       const filteredData = Object.values(jotain).reduce((acc, playerStats) => {
         const extractedData = {
           id: listId++,
-          player_id: playerStats[0]["player"],
-          player_name: playerStats[0]["player_name"],
-          team_name: playerStats[0]["team_name"],
-          season: playerStats[0]["season"],
-          accolades: playerStats[0]["accolades"] ?? [],
-          season_count: new Set(playerStats.map(obj => obj.season)).size,
+          player_id: playerStats[0]['player'],
+          player_name: playerStats[0]['player_name'],
+          team_name: playerStats[0]['team_name'],
+          season: playerStats[0]['season'],
+          accolades: playerStats[0]['accolades'] ?? [],
+          season_count: new Set(playerStats.map((obj) => obj.season)).size,
           score_total: 0,
           pikes_total: 0,
           zeros_total: 0,
@@ -205,43 +213,49 @@ export const usePlayerStore = defineStore('players', () => {
           }
         }
         extractedData.pike_percentage = divide_round(
-          extractedData.pikes_total * 100, extractedData.throws_total
+          extractedData.pikes_total * 100,
+          extractedData.throws_total,
         );
         extractedData.zero_percentage = divide_round(
-          extractedData.zeros_total * 100, extractedData.throws_total
+          extractedData.zeros_total * 100,
+          extractedData.throws_total,
         );
         extractedData.combined_total = extractedData.pikes_total + extractedData.zeros_total;
         extractedData.combined_percentage = divide_round(
           extractedData.combined_total * 100,
-          extractedData.throws_total
+          extractedData.throws_total,
         );
         extractedData.avg_throw_turn = divide_round(
-          extractedData.weighted_throw_total, extractedData.throws_total
+          extractedData.weighted_throw_total,
+          extractedData.throws_total,
         );
         extractedData.score_per_throw = divide_round(
-          extractedData.score_total, extractedData.throws_total
+          extractedData.score_total,
+          extractedData.throws_total,
         );
         extractedData.scaled_points_per_throw = divide_round(
-          extractedData.scaled_points, extractedData.throws_total
+          extractedData.scaled_points,
+          extractedData.throws_total,
         );
         acc.push(extractedData);
-        return acc
+        return acc;
       }, []);
 
       if (emptyFilter.value) {
-        const roundReducedData = filteredData.filter(obj => obj.rounds_total > emptyFilterThreshold.value)
+        const roundReducedData = filteredData.filter(
+          (obj) => obj.rounds_total > emptyFilterThreshold.value,
+        );
         return roundReducedData;
       }
       return filteredData;
     }
-  })
-
+  });
 
   /**
-   * Get all player statistics from: 
+   * Get all player statistics from:
    *    - Season if `season_id` is given
    *    - All season if `season_id` **not** given
-   * 
+   *
    * When this function runs: `loading` is set to `true`
    * @async
    * @param {Number | null} [season_id=null] Specifies season, from which data is calculated
@@ -249,11 +263,11 @@ export const usePlayerStore = defineStore('players', () => {
    */
   async function getPlayers(season_id = null) {
     loading.value = true;
-    let apiCall = baseUrl
-    apiCall += season_id !== null ? '?season=' + season_id : ''
+    let apiCall = baseUrl;
+    apiCall += season_id !== null ? '?season=' + season_id : '';
     const response = await fetch(apiCall, { method: 'GET' });
     players.value = await response.json();
-    _ids.value = Object.groupBy(players.value, ({ player }) => player)
+    _ids.value = Object.groupBy(players.value, ({ player }) => player);
     loading.value = false;
   }
 
@@ -269,24 +283,23 @@ export const usePlayerStore = defineStore('players', () => {
       await hofStore.getPlayerAccolades(playerIndex);
 
       player.value = payload;
-      player.value.all_time_stats["season"] = "All Time"
+      player.value.all_time_stats['season'] = 'All Time';
 
-      if (hofStore.playerAccolades["team_accolades"].length > 0) {
+      if (hofStore.playerAccolades['team_accolades'].length > 0) {
         playerHasAccolades.value = true;
       }
 
       const liigemestaruusAccolades = Object.fromEntries(
-        hofStore.playerAccolades["team_accolades"]
-          .filter(accolade => accolade.accolade.name === "Liigamestaruus")
-          .map(accolade => [accolade.season_year, accolade.placement])
+        hofStore.playerAccolades['team_accolades']
+          .filter((accolade) => accolade.accolade.name === 'Liigamestaruus')
+          .map((accolade) => [accolade.season_year, accolade.placement]),
       );
 
-      player.value.stats_per_seasons.forEach(season => {
+      player.value.stats_per_seasons.forEach((season) => {
         season.ranking = placement_registery[liigemestaruusAccolades[season.season]] || '-';
       });
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
     loadingPlayer.value = false;
     loadedData.value = true;
@@ -309,5 +322,5 @@ export const usePlayerStore = defineStore('players', () => {
     aggregationSetting,
     getPlayers,
     getPlayer,
-  }
-})
+  };
+});

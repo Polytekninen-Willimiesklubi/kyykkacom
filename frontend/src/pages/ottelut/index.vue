@@ -7,27 +7,21 @@
         </v-row>
         <v-row>
           <v-col cols="2">
-            <v-select 
+            <v-select
               v-model="matchStore.selection"
-              color="red" 
-              :items="selectionOptions" 
+              color="red"
+              :items="selectionOptions"
               @update:model-value="updateFilter"
             >
               <template #append-item>
-                <v-divider class="mt-2" color="red" opacity="100" thickness="2"/>
-                <v-list-item
-                  title="Videot"
-                  @click="matchStore.selection = 'Videot'"
-                >
-                  <template v-slot:prepend>
+                <v-divider class="mt-2" color="red" opacity="100" thickness="2" />
+                <v-list-item title="Videot" @click="matchStore.selection = 'Videot'">
+                  <template #prepend>
                     <v-icon color="red" icon="mdi-youtube" />
                   </template>
                 </v-list-item>
-                <v-list-item
-                  title="Striimit"
-                  @click="matchStore.selection = 'Striimit'"
-                >
-                  <template v-slot:prepend>
+                <v-list-item title="Striimit" @click="matchStore.selection = 'Striimit'">
+                  <template #prepend>
                     <v-icon color="red" icon="mdi-access-point" />
                   </template>
                 </v-list-item>
@@ -35,32 +29,29 @@
             </v-select>
           </v-col>
           <v-spacer />
-          <v-col cols="2" align="center" v-if="(
-              matchStore.selection === 'Runkosarja' || matchStore.selection === 'Kaikki ottelut'
-            ) && navStore.noBrackets >= 2"
-          > 
-            <v-btn-toggle
-              v-model="toggleMultiple"
-              variant="outlined"
-              divided
-              multiple
-            >
+          <v-col
+            v-if="
+              (matchStore.selection === 'Runkosarja' ||
+                matchStore.selection === 'Kaikki ottelut') &&
+              navStore.noBrackets >= 2
+            "
+            cols="2"
+            align="center"
+          >
+            <v-btn-toggle v-model="toggleMultiple" variant="outlined" divided multiple>
               <template v-for="(num, index) in navStore.noBrackets">
                 <v-btn
                   size="small"
-                  :text="`Lohko ${String.fromCharCode(65+index)}`"
-                  @click="matchStore.setSelectedBracket(index);"
+                  :text="`Lohko ${String.fromCharCode(65 + index)}`"
+                  @click="matchStore.setSelectedBracket(index)"
                 />
               </template>
             </v-btn-toggle>
           </v-col>
-          <v-spacer v-else/>
-          <v-col cols=1>
+          <v-spacer v-else />
+          <v-col cols="1">
             <v-btn-toggle>
-              <v-tooltip
-                location="top"
-                text="Näytä ensimmäisen erän tulos"
-              >
+              <v-tooltip location="top" text="Näytä ensimmäisen erän tulos">
                 <template #activator="{ props }">
                   <v-btn
                     size="small"
@@ -76,8 +67,8 @@
           </v-col>
           <v-col cols="3">
             <v-autocomplete
-              prepend-inner-icon="mdi-filter"
               v-model="matchStore.selectedTeamsFilter"
+              prepend-inner-icon="mdi-filter"
               :items="sortedTeams"
               item-title="current_abbreviation"
               item-value="id"
@@ -87,31 +78,29 @@
               multiple
               clearable
             >
-              <template #prepend-item v-if="
-                authStore.teamSeasonId != null
-                && teamStore.allTeams.map(obj => obj.id).includes(authStore.teamSeasonId)
-              ">
-                <v-list-item
-                  title="Oma joukkue"
-                  @click="selectOwnTeam"
-                >
-                  <template v-slot:prepend>
+              <template
+                v-if="
+                  authStore.teamSeasonId != null &&
+                  teamStore.allTeams.map((obj) => obj.id).includes(authStore.teamSeasonId)
+                "
+                #prepend-item
+              >
+                <v-list-item title="Oma joukkue" @click="selectOwnTeam">
+                  <template #prepend>
                     <v-checkbox-btn
                       :color="ownTeamSelected ? 'red' : undefined"
                       :model-value="ownTeamSelected"
                     />
                   </template>
                 </v-list-item>
-                <v-divider class="mt-2" color="red" opacity="100" thickness="2"/>
+                <v-divider class="mt-2" color="red" opacity="100" thickness="2" />
               </template>
               <template #selection="{ item, index }">
-                <v-chip text-color="red" v-if="index < 2">
+                <v-chip v-if="index < 2" text-color="red">
                   {{ item.title }}
                 </v-chip>
 
-                <span v-if="index === 2"
-                  class="text-red text-caption align-self-center"
-                >
+                <span v-if="index === 2" class="text-red text-caption align-self-center">
                   (+{{ matchStore.selectedTeamsFilter.length - 2 }} muuta)
                 </span>
               </template>
@@ -119,22 +108,22 @@
           </v-col>
           <v-col cols="2" align="end">
             <v-select
-              prepend-inner-icon="mdi-calendar-filter"
               v-model="matchStore.timeFilterMode"
+              prepend-inner-icon="mdi-calendar-filter"
               color="red"
-              :items="dateFilterOptions" 
+              :items="dateFilterOptions"
               item-title="text"
               label="Aikasuodatin"
             />
           </v-col>
           <v-col cols="2">
-            <v-text-field 
+            <v-text-field
+              v-model="search"
               prepend-inner-icon="mdi-magnify"
-              color="red" 
-              v-model="search" 
-              label="Search" 
-              single-line 
-              hide-details 
+              color="red"
+              label="Search"
+              single-line
+              hide-details
             />
           </v-col>
         </v-row>
@@ -144,304 +133,292 @@
         :headers="matchHeaders"
         :items="matchStore.selectedMatches"
         :search="search"
-        @click:row="handleRedirect"
         :loading="matchStore.loading"
         loading-text="Ladataan otteluita..."
-        :no-data-text="!search || !matchStore.selectedMatches ? 'Ei dataa :(' : 'Ei hakutuloksia :('"
-        :sort-by="[{key: 'match_time', order:'asc'}]"
+        :no-data-text="
+          !search || !matchStore.selectedMatches ? 'Ei dataa :(' : 'Ei hakutuloksia :('
+        "
+        :sort-by="[{ key: 'match_time', order: 'asc' }]"
         :group-by="groupBy"
         :row-props="itemRowBackground"
         density="compact"
         items-per-page="20"
         class="match-datatable"
+        @click:row="handleRedirect"
       >
-      <template #item.match_link = "{item}">
-        <span>
-          <v-btn
-            size="30px"
-            icon="mdi-link-variant"
-            :href="'/ottelut/'+item.id"
-            class="link-btn"
-          />
-        </span>
-      </template>
-      <template #item.match_time = "{item}">
-        <v-row>
-          <v-col>
-            <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span> 
-          </v-col>
-          <v-col cols="1" v-if="item.stream_link">
-            <v-tooltip
-              activator='parent'
-              text="Striimin linkki"
-              location="left"
-            />
+        <template #item.match_link="{ item }">
+          <span>
             <v-btn
-              :href="item.stream_link"
-              icon="mdi-access-point"
-              size="xs-small"
-              variant="plain"
+              size="30px"
+              icon="mdi-link-variant"
+              :href="'/ottelut/' + item.id"
+              class="link-btn"
             />
-          </v-col>
-          <v-col cols="1" v-if="item.video_link">
-            <v-tooltip
-              activator='parent'
-              text="Video linkki"
-              location="left"
-            />
-            <v-btn
-              :href="item.video_link"
-              icon="mdi-youtube"
-              size="xs-small"
-              variant="plain"
-            />
-          </v-col>
-          <v-col cols="2">
-            <template v-if="!item.is_validated 
-              && item.away_score_total !== null 
-              && item.home_score_total !== null"
-            >
-              <v-tooltip
-                activator='parent'
-                text="Ottelu on validoimatta"
-                location="right"
-              />
-              <v-icon
-                color="grey"
-                icon="mdi-information"
-              />
-            </template>
-            <template v-else-if="(authStore.isCaptain || authStore.isSuperUser)
-              && item.home_team.id === authStore.teamId 
-              && (item.away_score_total === null || item.home_score_total === null)"
-            >
-              <v-tooltip
-                activator='parent'
-                text="Syötä ottelun tulos"
-                location="right"
-              />
-              <v-icon
-                color="grey"
-                icon="mdi-alert"
-              />
-            </template>
-            <template v-else-if="(authStore.isCaptain || authStore.isSuperUser)
-              && new Date() > new Date(item.match_time)
-              && item.away_team.id === authStore.teamId
-              && (item.away_score_total === null || item.home_score_total === null)"
-            >
-              <v-tooltip
-                activator='parent'
-                text="Kotijoukkue ei ole syöttänyt lopputulosta"
-                location="right"
-              />
-              <v-icon
-                color="grey"
-                icon="mdi-timer-sand"
-              />
-            </template>
-          </v-col>
-        </v-row>
-
-      </template>
-      <template #item.home_score_total = "{item}">
-        <div class="score-container">
-          <span class="score-main">
-            {{ item.home_score_total }}
           </span>
-          <span class="score-round" v-if="item.home_first_round_score !== null && firstRoundToggle">
-            ({{ item.home_first_round_score }})
-          </span>
-        </div>
-      </template>
-      <template #item.away_score_total = "{item}">
-        <div class="score-container">
-          <span class="score-main">
-            {{ item.away_score_total }}
-          </span>
-          <span class="score-round" v-if="item.away_first_round_score !== null && firstRoundToggle">
-            ({{ item.away_first_round_score }})
-          </span>
-        </div>
-      </template>
-      <template #group-header="{item, columns, toggleGroup, isGroupOpen }">
-        <tr>
-          <td :colspan="columns.length">
-            <v-row align="center" justify="center">
-              <v-col cols="3" >
-                <v-btn
-                  :icon="isGroupOpen(item) ? '$expand' : '$next'"
-                  size="small"
-                  variant="text"
-                  @click="toggleGroup(item)"
+        </template>
+        <template #item.match_time="{ item }">
+          <v-row>
+            <v-col>
+              <span>{{ date.formatByString(date.date(item.match_time), 'yyyy-MM-dd HH:mm') }}</span>
+            </v-col>
+            <v-col v-if="item.stream_link" cols="1">
+              <v-tooltip activator="parent" text="Striimin linkki" location="left" />
+              <v-btn
+                :href="item.stream_link"
+                icon="mdi-access-point"
+                size="xs-small"
+                variant="plain"
+              />
+            </v-col>
+            <v-col v-if="item.video_link" cols="1">
+              <v-tooltip activator="parent" text="Video linkki" location="left" />
+              <v-btn :href="item.video_link" icon="mdi-youtube" size="xs-small" variant="plain" />
+            </v-col>
+            <v-col cols="2">
+              <template
+                v-if="
+                  !item.is_validated &&
+                  item.away_score_total !== null &&
+                  item.home_score_total !== null
+                "
+              >
+                <v-tooltip activator="parent" text="Ottelu on validoimatta" location="right" />
+                <v-icon color="grey" icon="mdi-information" />
+              </template>
+              <template
+                v-else-if="
+                  (authStore.isCaptain || authStore.isSuperUser) &&
+                  item.home_team.id === authStore.teamId &&
+                  (item.away_score_total === null || item.home_score_total === null)
+                "
+              >
+                <v-tooltip activator="parent" text="Syötä ottelun tulos" location="right" />
+                <v-icon color="grey" icon="mdi-alert" />
+              </template>
+              <template
+                v-else-if="
+                  (authStore.isCaptain || authStore.isSuperUser) &&
+                  new Date() > new Date(item.match_time) &&
+                  item.away_team.id === authStore.teamId &&
+                  (item.away_score_total === null || item.home_score_total === null)
+                "
+              >
+                <v-tooltip
+                  activator="parent"
+                  text="Kotijoukkue ei ole syöttänyt lopputulosta"
+                  location="right"
                 />
-                {{ item.items[0].raw.type_name }}
-              </v-col>
-              <v-spacer />
-              <v-col cols="2" align="center">
-                {{ item.items[0].raw.home_team.current_abbreviation }}
-              </v-col>
-              <v-col cols="1" align="center">
-                vs.
-              </v-col>
-              <v-col cols="2" align="center">
-                {{ item.items[0].raw.away_team.current_abbreviation }}
-              </v-col>
-              <v-spacer />
-            </v-row>
-          </td>
-        </tr>
-      </template>
+                <v-icon color="grey" icon="mdi-timer-sand" />
+              </template>
+            </v-col>
+          </v-row>
+        </template>
+        <template #item.home_score_total="{ item }">
+          <div class="score-container">
+            <span class="score-main">
+              {{ item.home_score_total }}
+            </span>
+            <span
+              v-if="item.home_first_round_score !== null && firstRoundToggle"
+              class="score-round"
+            >
+              ({{ item.home_first_round_score }})
+            </span>
+          </div>
+        </template>
+        <template #item.away_score_total="{ item }">
+          <div class="score-container">
+            <span class="score-main">
+              {{ item.away_score_total }}
+            </span>
+            <span
+              v-if="item.away_first_round_score !== null && firstRoundToggle"
+              class="score-round"
+            >
+              ({{ item.away_first_round_score }})
+            </span>
+          </div>
+        </template>
+        <template #group-header="{ item, columns, toggleGroup, isGroupOpen }">
+          <tr>
+            <td :colspan="columns.length">
+              <v-row align="center" justify="center">
+                <v-col cols="3">
+                  <v-btn
+                    :icon="isGroupOpen(item) ? '$expand' : '$next'"
+                    size="small"
+                    variant="text"
+                    @click="toggleGroup(item)"
+                  />
+                  {{ item.items[0].raw.type_name }}
+                </v-col>
+                <v-spacer />
+                <v-col cols="2" align="center">
+                  {{ item.items[0].raw.home_team.current_abbreviation }}
+                </v-col>
+                <v-col cols="1" align="center"> vs. </v-col>
+                <v-col cols="2" align="center">
+                  {{ item.items[0].raw.away_team.current_abbreviation }}
+                </v-col>
+                <v-spacer />
+              </v-row>
+            </td>
+          </tr>
+        </template>
       </v-data-table>
     </v-card>
   </div>
 </template>
 
 <script setup>
-import { useAuthStore } from '@/stores/auth.store';
-import useMatchesStore from '@/stores/matches.store';
-import { useNavBarStore } from '@/stores/navbar.store';
-import { useDate } from 'vuetify';
-import {
-  headersMatches,
-  headersMatchesPostSeason,
-} from '@/stores/headers';
-import { watch } from 'vue';
-import { useTeamsStore } from '@/stores/teams.store';
+  import { useAuthStore } from '@/stores/auth.store';
+  import useMatchesStore from '@/stores/matches.store';
+  import { useNavBarStore } from '@/stores/navbar.store';
+  import { useDate } from 'vuetify';
+  import { headersMatches, headersMatchesPostSeason } from '@/stores/headers';
+  import { watch } from 'vue';
+  import { useTeamsStore } from '@/stores/teams.store';
 
-const search = ref('');
-const matchHeaders = ref(null);
-const groupBy = ref(null);
-const toggleMultiple = ref([]);
-const firstRoundToggle = ref(false);
+  const search = ref('');
+  const matchHeaders = ref(null);
+  const groupBy = ref(null);
+  const toggleMultiple = ref([]);
+  const firstRoundToggle = ref(false);
 
-const authStore = useAuthStore();
-const matchStore = useMatchesStore();
-const navStore = useNavBarStore();
-const teamStore = useTeamsStore();
-const date = useDate();
+  const authStore = useAuthStore();
+  const matchStore = useMatchesStore();
+  const navStore = useNavBarStore();
+  const teamStore = useTeamsStore();
+  const date = useDate();
 
-const selectionOptions = ['Kaikki ottelut', 'Runkosarja', 'Jatkosarja', 'Pudotuspelit', 'SuperWeekend'];
+  const selectionOptions = [
+    'Kaikki ottelut',
+    'Runkosarja',
+    'Jatkosarja',
+    'Pudotuspelit',
+    'SuperWeekend',
+  ];
 
-function selectOwnTeam() {
-  const teamId = authStore.teamSeasonId;
-  if (matchStore.selectedTeamsFilter.includes(teamId)) {
-    // Remove own team from filter
-    matchStore.selectedTeamsFilter = matchStore.selectedTeamsFilter.filter(id => id !== teamId);
-  } else {
-    // Add own team to filter
-    matchStore.selectedTeamsFilter = [...matchStore.selectedTeamsFilter, teamId]
+  function selectOwnTeam() {
+    const teamId = authStore.teamSeasonId;
+    if (matchStore.selectedTeamsFilter.includes(teamId)) {
+      // Remove own team from filter
+      matchStore.selectedTeamsFilter = matchStore.selectedTeamsFilter.filter((id) => id !== teamId);
+    } else {
+      // Add own team to filter
+      matchStore.selectedTeamsFilter = [...matchStore.selectedTeamsFilter, teamId];
+    }
   }
-}
 
-const ownTeamSelected = computed(() => {
-  return matchStore.selectedTeamsFilter.includes(authStore.teamSeasonId);
-});
+  const ownTeamSelected = computed(() => {
+    return matchStore.selectedTeamsFilter.includes(authStore.teamSeasonId);
+  });
 
-const sortedTeams = computed(() =>
-  [...teamStore.allTeams].sort((a, b) =>
-    a.current_abbreviation.localeCompare(b.current_abbreviation)
-  )
-)
+  const sortedTeams = computed(() =>
+    [...teamStore.allTeams].sort((a, b) =>
+      a.current_abbreviation.localeCompare(b.current_abbreviation),
+    ),
+  );
 
-const dateFilterOptions = [
-  { text: 'Kaikki', value: 0 },
-  { text: 'Eilen', value: 1 },
-  { text: 'Tänään', value: 2 },
-  { text: 'Huomenna', value: 3 },
-  { text: 'Viime viikolla', value: 4 },
-  { text: 'Tällä viikolla', value: 5 },
-  { text: 'Ensi viikolla', value: 6 },
-];
+  const dateFilterOptions = [
+    { text: 'Kaikki', value: 0 },
+    { text: 'Eilen', value: 1 },
+    { text: 'Tänään', value: 2 },
+    { text: 'Huomenna', value: 3 },
+    { text: 'Viime viikolla', value: 4 },
+    { text: 'Tällä viikolla', value: 5 },
+    { text: 'Ensi viikolla', value: 6 },
+  ];
 
-/**
- * @description Checks match list rows if background needs to change to alert captain.
- * @param row Single row from datatable, should contain `match_time`, `home_team.id` and `away_team.id` attribute.
- * @returns {object} Object with class string. Should point scoped style in this file
- */
-function itemRowBackground(row) {
-  if (!authStore.teamId || !(authStore.isCaptain || authStore.isSuperUser)) {
-    return {class: 'actions_not_needed'};
+  /**
+   * @description Checks match list rows if background needs to change to alert captain.
+   * @param row Single row from datatable, should contain `match_time`, `home_team.id` and `away_team.id` attribute.
+   * @returns {object} Object with class string. Should point scoped style in this file
+   */
+  function itemRowBackground(row) {
+    if (!authStore.teamId || !(authStore.isCaptain || authStore.isSuperUser)) {
+      return { class: 'actions_not_needed' };
+    }
+    if (row.item.is_validated || new Date(row.item.match_time) > new Date()) {
+      return { class: 'actions_not_needed' };
+    }
+    return row.item.home_team.id === authStore.teamId || row.item.away_team.id === authStore.teamId
+      ? { class: 'captain_actions_needed' }
+      : { class: 'actions_not_needed' };
   }
-  if (row.item.is_validated || new Date(row.item.match_time) > new Date()) {
-    return {class: 'actions_not_needed'};
+
+  function handleRedirect(value, row) {
+    location.href = '/ottelut/' + row.item.id;
   }
-  return row.item.home_team.id === authStore.teamId || row.item.away_team.id === authStore.teamId
-    ? {class: 'captain_actions_needed'} : {class: 'actions_not_needed'};
-}
 
-function handleRedirect (value, row) {
-  location.href = '/ottelut/' + row.item.id;
-}
+  function updateFilter() {
+    matchHeaders.value =
+      matchStore.selection === 'Pudotuspelit' ? headersMatchesPostSeason : headersMatches;
 
-function updateFilter() {
-  matchHeaders.value = matchStore.selection === 'Pudotuspelit'
-    ? headersMatchesPostSeason : headersMatches;
+    groupBy.value = matchStore.selection === 'Pudotuspelit' ? [{ key: 'seriers' }] : [];
+  }
 
-  groupBy.value = matchStore.selection === 'Pudotuspelit'
-    ? [{key: 'seriers'}] : [];
-}
-
-matchStore.getMatches();
-updateFilter();
-
-watch(() => navStore.seasonId, (newId) => {
   matchStore.getMatches();
-})
+  updateFilter();
 
+  watch(
+    () => navStore.seasonId,
+    (newId) => {
+      matchStore.getMatches();
+    },
+  );
 </script>
 
 <style>
-.captain_actions_needed {
-  background-color: #EF9A9A !important;
-}
+  .captain_actions_needed {
+    background-color: #ef9a9a !important;
+  }
 
-.actions_not_needed {
-  background-color: white;
-}
+  .actions_not_needed {
+    background-color: white;
+  }
 
-.link-btn {
-  border: 1px solid;
-  border-color: #e5e7eb;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
+  .link-btn {
+    border: 1px solid;
+    border-color: #e5e7eb;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
 
-tbody tr :hover {
-  cursor: unset;
-}
+  tbody tr :hover {
+    cursor: unset;
+  }
 
-.match-datatable tr > td:first-child {
-  padding-left: 4px !important;
-  padding-right: 4px !important
-}
+  .match-datatable tr > td:first-child {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
 
-td:has(.score-container) {
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-}
+  td:has(.score-container) {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
 
-.score-round {
-  position: absolute;
-  bottom: 2px;
-  right: 1px;
-  font-size: 0.5rem;
-  opacity: 0.7;
-  line-height: 1;
-}
+  .score-round {
+    position: absolute;
+    bottom: 2px;
+    right: 1px;
+    font-size: 0.5rem;
+    opacity: 0.7;
+    line-height: 1;
+  }
 
-.score-container {
-  padding-left: 0.7em;
-  padding-right: 0.7em;
-  padding-top: 0.7em;
-  padding-bottom: 5px;
-  position: relative;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-}
-
+  .score-container {
+    padding-left: 0.7em;
+    padding-right: 0.7em;
+    padding-top: 0.7em;
+    padding-bottom: 5px;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
 </style>

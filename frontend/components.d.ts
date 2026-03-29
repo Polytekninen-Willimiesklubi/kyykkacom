@@ -7,18 +7,18 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    AccoladeIcon: typeof import('./src/components/AccoladeIcon.vue')['default']
-    Graph: typeof import('./src/components/Graph.vue')['default']
-    LogIn: typeof import('./src/components/LogIn.vue')['default']
-    NavBar: typeof import('./src/components/NavBar.vue')['default']
-    NewsBox: typeof import('./src/components/NewsBox.vue')['default']
-    Register: typeof import('./src/components/Register.vue')['default']
-    Round: typeof import('./src/components/Round.vue')['default']
-    RouterLink: typeof import('vue-router')['RouterLink']
-    RouterView: typeof import('vue-router')['RouterView']
-    SideBar: typeof import('./src/components/SideBar.vue')['default']
-    SimpleTable: typeof import('./src/components/SimpleTable.vue')['default']
-    Sorting_algorithm_for_bracket_stage: typeof import('./src/components/sorting_algorithm_for_bracket_stage.vue')['default']
-    Tournament: typeof import('./src/components/Tournament.vue')['default']
+    AccoladeIcon: (typeof import('./src/components/AccoladeIcon.vue'))['default'];
+    Graph: (typeof import('./src/components/Graph.vue'))['default'];
+    LogIn: (typeof import('./src/components/LogIn.vue'))['default'];
+    NavBar: (typeof import('./src/components/NavBar.vue'))['default'];
+    NewsBox: (typeof import('./src/components/NewsBox.vue'))['default'];
+    Register: (typeof import('./src/components/Register.vue'))['default'];
+    Round: (typeof import('./src/components/MatchRound.vue'))['default'];
+    RouterLink: (typeof import('vue-router'))['RouterLink'];
+    RouterView: (typeof import('vue-router'))['RouterView'];
+    SideBar: (typeof import('./src/components/SideBar.vue'))['default'];
+    SimpleTable: (typeof import('./src/components/SimpleTable.vue'))['default'];
+    Sorting_algorithm_for_bracket_stage: (typeof import('./src/components/sorting_algorithm_for_bracket_stage.vue'))['default'];
+    Tournament: (typeof import('./src/components/Tournament.vue'))['default'];
   }
 }

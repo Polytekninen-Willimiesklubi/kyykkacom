@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column" style="width: 100%;">
+  <div class="d-flex flex-column" style="width: 100%">
     <v-btn
       v-if="authStore.isSuperUser && !newsButton"
       text="Uusi uutinen"
@@ -7,50 +7,22 @@
       class="mb-2"
       @click="newsButton = true"
     />
-    <div 
-      class="d-flex flex-column"
-      v-if="authStore.isSuperUser && newsButton"
-    >
+    <div v-if="authStore.isSuperUser && newsButton" class="d-flex flex-column">
       <QuillEditor
         v-model:content="newsStore.newsText"
-        contentType="html" 
-        theme="snow" 
-        class="mb-1" 
-        style="max-width:1140px;"
+        content-type="html"
+        theme="snow"
+        class="mb-1"
+        style="max-width: 1140px"
         toolbar="full"
       />
-      <v-text-field 
-        label="Otsikko" 
-        v-model="newsStore.headline" 
-        class="mb-1" 
-        width="500px"
-      />
-      <v-text-field 
-        label="Kirjoittaja" 
-        v-model="newsStore.writer"
-        class="mb-1"
-        width="300px"
-      />
+      <v-text-field v-model="newsStore.headline" label="Otsikko" class="mb-1" width="500px" />
+      <v-text-field v-model="newsStore.writer" label="Kirjoittaja" class="mb-1" width="300px" />
       <div class="d-flex">
-        <v-btn
-          text="Peruuta"
-          width="100px"
-          color="red"
-          class="mr-2"
-          @click="newsButton = false"
-        />
-        <v-btn
-          text="Julkaise"
-          width="100px"
-          class="mb-2"
-          @click="newsStore.saveNews()"
-        />
-        <div class="success" v-if="newsStore.saved">
-          <v-icon
-            size="35px"
-            icon="mdi-check-box-outline"
-            color="green"
-          />
+        <v-btn text="Peruuta" width="100px" color="red" class="mr-2" @click="newsButton = false" />
+        <v-btn text="Julkaise" width="100px" class="mb-2" @click="newsStore.saveNews()" />
+        <div v-if="newsStore.saved" class="success">
+          <v-icon size="35px" icon="mdi-check-box-outline" color="green" />
           Onnistunut julkaisu!
         </div>
       </div>
@@ -58,7 +30,7 @@
     <!-- <h1>Nationaali Kyykkä Liiga</h1> -->
     <div v-for="news in newsStore.currentPageContent">
       <NewsBox
-        style="width: 100%;"
+        style="width: 100%"
         class="mb-5"
         :writer="news.writer"
         :title="news.header"
@@ -67,11 +39,11 @@
       />
     </div>
     <v-card>
-      <v-pagination 
-        v-if="newsStore.totalPages" 
-        variant="outlined" 
-        :length="newsStore.totalPages" 
+      <v-pagination
+        v-if="newsStore.totalPages"
         v-model="newsStore.currentPageNro"
+        variant="outlined"
+        :length="newsStore.totalPages"
         :total-visible="7"
       />
     </v-card>
@@ -79,35 +51,34 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/stores/auth.store';
-import { useNewsStore } from '@/stores/news.store';
+  import { useAuthStore } from '@/stores/auth.store';
+  import { useNewsStore } from '@/stores/news.store';
 
-const authStore = useAuthStore();
-const newsStore = useNewsStore();
-const newsButton = ref(false);
+  const authStore = useAuthStore();
+  const newsStore = useNewsStore();
+  const newsButton = ref(false);
 
-newsStore.getNews();
-
+  newsStore.getNews();
 </script>
 <style scoped>
-.success {
-  animation: fadeIn 5s;
-  visibility: hidden;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    visibility: visible;
-  }
-
-  10% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
+  .success {
+    animation: fadeIn 5s;
     visibility: hidden;
   }
-}
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      visibility: visible;
+    }
+
+    10% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
 </style>
