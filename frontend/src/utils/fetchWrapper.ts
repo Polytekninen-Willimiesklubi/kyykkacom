@@ -60,3 +60,14 @@ export async function getPayload(res: Response): Promise<Record<string, any> | n
     const data = (isJson ? await res.json() : null) as Record<string, any> | null;
     return data || null;
 }
+
+/** Utility function to wrap an async function with a loading state. */
+export async function withLoading<T>(flag: { value: boolean }, fn: () => Promise<T>): Promise<T> {
+  flag.value = true;
+  try {
+    const result = await fn();
+    return result;
+  } finally {
+    flag.value = false;
+  }
+}
