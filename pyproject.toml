@@ -30,6 +30,23 @@ dev = [
     "pyright>=1.1.397",
 ]
 
+[tool.ruff.lint]
+select = [
+    # Pyflakes error codes
+    "F",
+    # Function/Method input/output type annotations
+    "ANN001",
+    "ANN201",
+    "ANN202",
+    "ANN204",
+    "ANN205",
+    "ANN206",
+    # Import ordering and formatting
+    "I",
+    # Django model __str__ method should return a string
+    "DJ008",
+]
+
 
 [build-system]
 requires = ["hatchling"]

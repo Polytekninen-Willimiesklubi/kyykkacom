@@ -1,0 +1,69 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<p>This tool creates regular-season matches. It does not modify existing matches.</p>
+
+{% if errors %}
+<div class="errornote">
+    <p>Import cannot continue until these issues are resolved:</p>
+    <ul>
+        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if preview %}
+<div class="module">
+    <h2>Preview for season {{ preview.season }}</h2>
+    <p>Year check passed: every match date is in {{ preview.season }}. No database changes have been made.</p>
+    <p>{{ preview.rows|length }} matches will be created.</p>
+    <h3>Matches per team</h3>
+    <ul>
+        {% for abbreviation, count in preview.team_counts %}
+        <li>{{ abbreviation }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+    <div class="results">
+        <table>
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Date/time</th>
+                    <th>Home</th>
+                    <th>Away</th>
+                    <th>Field</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in preview.rows %}
+                <tr>
+                    <td>{{ row.line }}</td>
+                    <td>{{ row.display_time }}</td>
+                    <td>{{ row.home_abbreviation }}</td>
+                    <td>{{ row.away_abbreviation }}</td>
+                    <td>{{ row.field|default_if_none:"" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="commit" class="default">Create these matches</button>
+        <button type="submit" name="action" value="cancel">Cancel import</button>
+    </form>
+</div>
+{% else %}
+<div class="module">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="submit-row">
+            <button type="submit" name="action" value="preview" class="default">Preview import</button>
+            <a href="{% url 'admin:index' %}">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

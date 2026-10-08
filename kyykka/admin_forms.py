@@ -1,3 +1,5 @@
+import typing as t
+
 from django import forms
 
 from kyykka.models import (
@@ -6,6 +8,52 @@ from kyykka.models import (
     TeamsInSeason,
     UserProxy,
 )
+
+
+class MatchImportForm(forms.Form):
+    file = forms.FileField(label="CSV or TXT file")
+    season = forms.ModelChoiceField(
+        queryset=Season.objects.order_by("-year"), label="Season"
+    )
+    delimiter = forms.CharField(
+        initial=",",
+        max_length=1,
+        label="Column delimiter",
+        help_text="A single character, for example a comma or semicolon.",
+    )
+    datetime_format = forms.CharField(
+        initial="%Y-%m-%d %H:%M:%S",
+        label="Date/time format",
+        help_text="Python strptime format, for example %Y-%m-%d %H:%M:%S.",
+    )
+    date_column = forms.IntegerField(min_value=0, initial=0, label="Date/time column")
+    home_column = forms.IntegerField(min_value=0, initial=1, label="Home team column")
+    away_column = forms.IntegerField(min_value=0, initial=2, label="Away team column")
+    field_column = forms.IntegerField(
+        min_value=0,
+        initial=3,
+        required=False,
+        label="Field column",
+        help_text="Leave blank if the file has no field number.",
+    )
+    has_header = forms.BooleanField(required=False, label="Skip first row as header")
+
+    def clean(self) -> dict[str, t.Any]:
+        cleaned_data = super().clean()
+        columns = [
+            cleaned_data.get("date_column"),
+            cleaned_data.get("home_column"),
+            cleaned_data.get("away_column"),
+            cleaned_data.get("field_column"),
+        ]
+        selected_columns = [column for column in columns if column is not None]
+        if len(selected_columns) != len(set(selected_columns)):
+            raise forms.ValidationError(
+                "Each mapped value must use a different column."
+            )
+        if cleaned_data.get("delimiter") in {"\r", "\n"}:
+            self.add_error("delimiter", "The delimiter cannot be a line break.")
+        return cleaned_data
 
 
 class TeamModelChoiceField(forms.ModelChoiceField):

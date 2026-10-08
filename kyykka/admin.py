@@ -1,10 +1,15 @@
+import typing as t
+from datetime import datetime
+
 from django.contrib import admin, messages
 from django.db import transaction
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import path
 
-import kyykka.models as models
-from kyykka.admin_forms import SeasonAccoladeForm
+from kyykka import models
+from kyykka.admin_forms import MatchImportForm, SeasonAccoladeForm
+from kyykka.match_import import find_existing_match_lines, parse_match_file
 
 # Register your models here.
 
@@ -30,7 +35,7 @@ class ThrowsInMatchInline(admin.TabularInline):
     can_delete = False
     extra = 0
 
-    def has_add_permission(self, request, obj):
+    def has_add_permission(self, request, obj) -> t.Literal[False]:
         return False
 
 
@@ -112,7 +117,7 @@ def season_end_accolades(request, season_id: int | None = None):
                 initial["individual_tournament_winner"] = player_accolade.player.pk
             elif player_accolade.placement == 2:
                 initial["individual_tournament_finalist"] = player_accolade.player.pk
-        elif player_accolade.accolade.name in label_to_field.keys():
+        elif player_accolade.accolade.name in label_to_field:
             initial[label_to_field[player_accolade.accolade.name]] = (
                 player_accolade.player.pk
             )
@@ -307,6 +312,122 @@ def season_end_accolades(request, season_id: int | None = None):
     return render(request, "admin/season_accolades_form.html", context)
 
 
+MATCH_IMPORT_SESSION_KEY = "match_import_preview"
+
+
+def match_bulk_import(request: HttpRequest) -> HttpResponse:
+    form = MatchImportForm(request.POST or None, request.FILES or None)
+    preview = None
+    errors = []
+
+    if request.method == "POST":
+        action = request.POST.get("action", "preview")
+        if action == "cancel":
+            request.session.pop(MATCH_IMPORT_SESSION_KEY, None)
+            messages.info(request, "Match import cancelled.")
+            return redirect("admin:index")
+
+        if action == "commit":
+            staged = request.session.get(MATCH_IMPORT_SESSION_KEY)
+            if not staged:
+                messages.error(
+                    request, "The preview expired. Please upload the file again."
+                )
+                return redirect("admin:match-bulk-import")
+
+            try:
+                season = models.Season.objects.get(pk=staged["season_id"])
+            except models.Season.DoesNotExist:
+                request.session.pop(MATCH_IMPORT_SESSION_KEY, None)
+                messages.error(request, "The selected season no longer exists.")
+                return redirect("admin:match-bulk-import")
+
+            with transaction.atomic():
+                existing_lines = find_existing_match_lines(staged["rows"], season)
+                season_teams = {
+                    team.pk: team
+                    for team in models.TeamsInSeason.objects.filter(season=season)
+                }
+                invalid_team_rows = [
+                    row["line"]
+                    for row in staged["rows"]
+                    if row["home_team_id"] not in season_teams
+                    or row["away_team_id"] not in season_teams
+                ]
+                if existing_lines or invalid_team_rows:
+                    errors.extend(
+                        f"Row {line}: this match already exists in the selected season."
+                        for line in existing_lines
+                    )
+                    errors.extend(
+                        f"Row {line}: a team no longer belongs to the selected season."
+                        for line in invalid_team_rows
+                    )
+                    preview = staged
+                else:
+                    models.Match.objects.bulk_create(
+                        [
+                            models.Match(
+                                season=season,
+                                match_time=datetime.fromisoformat(row["match_time"]),
+                                field=row["field"],
+                                home_team=season_teams[row["home_team_id"]],
+                                away_team=season_teams[row["away_team_id"]],
+                                match_type=models.MatchTypes.REGULAR_SEASON,
+                            )
+                            for row in staged["rows"]
+                        ]
+                    )
+                    request.session.pop(MATCH_IMPORT_SESSION_KEY, None)
+                    messages.success(
+                        request, f"Imported {len(staged['rows'])} matches successfully."
+                    )
+                    return redirect("admin:index")
+        elif form.is_valid():
+            rows, errors = parse_match_file(
+                request.FILES["file"],
+                season=form.cleaned_data["season"],
+                delimiter=form.cleaned_data["delimiter"],
+                datetime_format=form.cleaned_data["datetime_format"],
+                date_column=form.cleaned_data["date_column"],
+                home_column=form.cleaned_data["home_column"],
+                away_column=form.cleaned_data["away_column"],
+                field_column=form.cleaned_data["field_column"],
+                has_header=form.cleaned_data["has_header"],
+            )
+            if not errors:
+                season = form.cleaned_data["season"]
+                team_counts = {}
+                for row in rows:
+                    team_counts[row["home_abbreviation"]] = (
+                        team_counts.get(row["home_abbreviation"], 0) + 1
+                    )
+                    team_counts[row["away_abbreviation"]] = (
+                        team_counts.get(row["away_abbreviation"], 0) + 1
+                    )
+                    row["display_time"] = datetime.fromisoformat(
+                        row["match_time"]
+                    ).strftime("%Y-%m-%d %H:%M:%S %Z")
+                preview = {
+                    "season": season.year,
+                    "rows": rows,
+                    "team_counts": sorted(team_counts.items()),
+                }
+                request.session[MATCH_IMPORT_SESSION_KEY] = {
+                    "season_id": season.pk,
+                    **preview,
+                }
+
+    context = dict(
+        admin.site.each_context(request),
+        form=form,
+        title="Bulk import matches",
+        preview=preview,
+        errors=errors,
+    )
+    return render(request, "admin/match_bulk_import.html", context)
+
+
 admin.site.register(models.TeamsInSeason, PlayersInTeamAdmin)
 admin.site.register(models.Team)
 admin.site.register(models.Season, TeamsInSeasonAdmin)
@@ -329,6 +450,11 @@ get_urls = admin.site.get_urls
 def custom_get_urls():
     urls = get_urls()
     custom_urls = [
+        path(
+            "match-bulk-import/",
+            admin.site.admin_view(match_bulk_import),
+            name="match-bulk-import",
+        ),
         path(
             "season-end-accolades/",
             admin.site.admin_view(season_end_accolades),

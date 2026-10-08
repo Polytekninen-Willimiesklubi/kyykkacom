@@ -74,7 +74,13 @@ JAZZMIN_SETTINGS = {
                 "url": "/admin/season-end-accolades/",
                 "icon": "fa fa-trophy",
                 "permissions": ["auth.view_user"],
-            }
+            },
+            {
+                "name": "Otteluohjelman tuonti",
+                "url": "/admin/match-bulk-import/",
+                "icon": "fa fa-upload",
+                "permissions": ["auth.view_user"],
+            },
         ]
     },
 }
