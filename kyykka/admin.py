@@ -1,4 +1,6 @@
 from django.contrib import admin, messages
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import path
@@ -7,6 +9,21 @@ import kyykka.models as models
 from kyykka.admin_forms import SeasonAccoladeForm
 
 # Register your models here.
+
+
+class RegistrationDateFilter(admin.DateFieldListFilter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title = "When registered"
+
+
+class CustomUserAdmin(UserAdmin):
+    list_display = (*UserAdmin.list_display, "date_joined")
+    list_filter = (*UserAdmin.list_filter, ("date_joined", RegistrationDateFilter))
+
+
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
 
 
 class PlayersInTeamInline(admin.TabularInline):

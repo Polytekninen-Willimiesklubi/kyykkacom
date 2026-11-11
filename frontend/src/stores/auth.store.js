@@ -129,16 +129,16 @@ export const useAuthStore = defineStore('auth', () => {
      * @param {string} name
      * @param {boolean} loginStatus
      */
-    function changeLogin(userIndex, role = 0, teamIndex = null, name, loginStatus = true, teamSeasonId = null) {
+    function changeLogin(userIndex, role = 0, teamIndex = null, name, loginStatus = true, teamSeasonId_ = null) {
         userId.value = userIndex;
         roleId.value = role;
         teamId.value = teamIndex;
-        teamSeasonId.value = teamSeasonId;
+        teamSeasonId.value = teamSeasonId_;
         playerName.value = name;
         loggedIn.value = loginStatus;
         localStorage.setItem('userId', JSON.stringify(userIndex));
         localStorage.setItem('teamId', JSON.stringify(teamIndex));
-        localStorage.setItem('teamSeasonId', JSON.stringify(teamSeasonId));
+        localStorage.setItem('teamSeasonId', JSON.stringify(teamSeasonId_));
         localStorage.setItem('roleId', JSON.stringify(role));
         localStorage.setItem('playerName', JSON.stringify(name));
         localStorage.setItem('loggedIn', JSON.stringify(loginStatus));
